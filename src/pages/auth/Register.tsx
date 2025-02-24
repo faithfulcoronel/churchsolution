@@ -1,0 +1,405 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
+import { useMessageStore } from '../../components/MessageHandler';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { Container } from '../../components/ui/Container';
+import { InputGroup, InputAddon } from '../../components/ui/InputGroup';
+import {
+  Building2,
+  Mail,
+  Lock,
+  User,
+  Phone,
+  MapPin,
+  Globe,
+  AlertCircle,
+} from 'lucide-react';
+
+type RegistrationData = {
+  // User Info
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  
+  // Church Info
+  churchName: string;
+  subdomain: string;
+  address: string;
+  contactNumber: string;
+  churchEmail: string;
+  website: string;
+};
+
+function Register() {
+  const navigate = useNavigate();
+  const { addMessage } = useMessageStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<RegistrationData>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    churchName: '',
+    subdomain: '',
+    address: '',
+    contactNumber: '',
+    churchEmail: '',
+    website: '',
+  });
+
+  const validateForm = () => {
+    // Email validation
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+
+    // Password validation
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return false;
+    }
+
+    if (!/[A-Z]/.test(formData.password)) {
+      setError('Password must contain at least one uppercase letter');
+      return false;
+    }
+
+    if (!/[a-z]/.test(formData.password)) {
+      setError('Password must contain at least one lowercase letter');
+      return false;
+    }
+
+    if (!/[0-9]/.test(formData.password)) {
+      setError('Password must contain at least one number');
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+
+    // Name validation
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      setError('Please enter your full name');
+      return false;
+    }
+
+    // Church validation
+    if (!formData.churchName.trim()) {
+      setError('Please enter your church name');
+      return false;
+    }
+
+    if (!formData.subdomain.trim()) {
+      setError('Please enter a subdomain');
+      return false;
+    }
+
+    const subdomainRegex = /^[a-z0-9-]+$/;
+    if (!subdomainRegex.test(formData.subdomain)) {
+      setError('Subdomain can only contain lowercase letters, numbers, and hyphens');
+      return false;
+    }
+
+    if (!formData.address.trim()) {
+      setError('Please enter your church address');
+      return false;
+    }
+
+    if (!formData.contactNumber.trim()) {
+      setError('Please enter a contact number');
+      return false;
+    }
+
+    if (!formData.churchEmail.trim()) {
+      setError('Please enter a church email');
+      return false;
+    }
+
+    if (!emailRegex.test(formData.churchEmail)) {
+      setError('Please enter a valid church email address');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Create user account
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+          },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+      if (!user) throw new Error('Failed to create user account');
+
+      // Store registration data and navigate to onboarding
+      sessionStorage.setItem('registrationData', JSON.stringify({
+        userId: user.id,
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        churchName: formData.churchName,
+        subdomain: formData.subdomain,
+        address: formData.address,
+        contactNumber: formData.contactNumber,
+        churchEmail: formData.churchEmail,
+        website: formData.website,
+      }));
+
+      // Navigate to onboarding progress screen
+      navigate('/onboarding');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError(error instanceof Error ? error.message : 'An error occurred during registration');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 bg-white">
+        <Container>
+          <Card className="max-w-2xl w-full mx-auto">
+            <div className="text-center">
+              <div className="flex justify-center">
+                <Building2 className="h-12 w-12 text-primary-600" />
+              </div>
+              <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                Register Your Church
+              </h2>
+              <p className="mt-2 text-sm text-gray-600">
+                Or{' '}
+                <a
+                  href="/login"
+                  className="font-medium text-primary-600 hover:text-primary-500"
+                >
+                  sign in to your account
+                </a>
+              </p>
+            </div>
+
+            {error && (
+              <div className="mt-4 rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <AlertCircle className="h-5 w-5 text-red-400" />
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="mt-8 space-y-8">
+              {/* Admin Account Section */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Admin Account</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Input
+                      name="firstName"
+                      label="First Name"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                      required
+                      icon={<User />}
+                    />
+
+                    <Input
+                      name="lastName"
+                      label="Last Name"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                      required
+                      icon={<User />}
+                    />
+                  </div>
+
+                  <Input
+                    type="email"
+                    name="email"
+                    label="Email Address"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    required
+                    icon={<Mail />}
+                  />
+
+                  <Input
+                    type="password"
+                    name="password"
+                    label="Password"
+                    value={formData.password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    required
+                    icon={<Lock />}
+                    showPasswordToggle
+                    helperText="Must be at least 8 characters with uppercase, lowercase, and numbers"
+                  />
+
+                  <Input
+                    type="password"
+                    name="confirmPassword"
+                    label="Confirm Password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    required
+                    icon={<Lock />}
+                    showPasswordToggle
+                  />
+                </div>
+              </div>
+
+              {/* Church Information Section */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Church Information</h3>
+                <div className="space-y-4">
+                  <Input
+                    name="churchName"
+                    label="Church Name"
+                    value={formData.churchName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, churchName: e.target.value }))}
+                    required
+                    icon={<Building2 />}
+                  />
+
+                  <Input
+                    name="subdomain"
+                    label="Subdomain"
+                    value={formData.subdomain}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))}
+                    required
+                    pattern="[a-z0-9-]+"
+                    icon={<Globe />}
+                    containerClassName="flex-1"
+                    inputClassName="rounded-r-none"
+                    rightElement={
+                      <InputAddon position="right">
+                        .stewardtrack.com
+                      </InputAddon>
+                    }
+                    helperText="Only lowercase letters, numbers, and hyphens allowed"
+                  />
+
+                  <Input
+                    name="address"
+                    label="Church Address"
+                    value={formData.address}
+                    onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                    required
+                    icon={<MapPin />}
+                  />
+
+                  <Input
+                    name="contactNumber"
+                    label="Contact Number"
+                    value={formData.contactNumber}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contactNumber: e.target.value }))}
+                    required
+                    icon={<Phone />}
+                  />
+
+                  <Input
+                    type="email"
+                    name="churchEmail"
+                    label="Church Email"
+                    value={formData.churchEmail}
+                    onChange={(e) => setFormData(prev => ({ ...prev, churchEmail: e.target.value }))}
+                    required
+                    icon={<Mail />}
+                  />
+
+                  <Input
+                    type="url"
+                    name="website"
+                    label="Church Website"
+                    value={formData.website}
+                    onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                    icon={<Globe />}
+                    placeholder="https://example.com"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                loading={loading}
+                className="w-full"
+              >
+                Register Church
+              </Button>
+            </form>
+          </Card>
+        </Container>
+      </div>
+
+      {/* Right side - Background Image */}
+      <div className="hidden lg:block relative w-0 flex-1">
+        <img
+          className="absolute inset-0 h-full w-full object-cover"
+          src="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
+          alt="Church interior"
+        />
+        <div className="absolute inset-0 bg-primary-900 bg-opacity-50 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="max-w-2xl mx-auto text-center text-white">
+            <h1 className="text-4xl font-bold mb-4">Welcome to Steward Track</h1>
+            <p className="text-xl">
+              Streamline your church administration with our comprehensive management solution
+            </p>
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-3xl mx-auto">
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">Member Management</h3>
+                <p className="text-sm text-gray-100">
+                  Efficiently manage your church members, track attendance, and maintain detailed profiles.
+                </p>
+              </div>
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">Financial Tools</h3>
+                <p className="text-sm text-gray-100">
+                  Track tithes, offerings, and expenses with our comprehensive financial management system.
+                </p>
+              </div>
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">Reporting & Analytics</h3>
+                <p className="text-sm text-gray-100">
+                  Generate detailed reports and gain insights into your church's growth and activities.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Register;
