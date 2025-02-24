@@ -1,10 +1,22 @@
-import { defineConfig } from 'vite';
+import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import tailwindcss from 'tailwindcss';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    exclude: ['lucide-react'],
+  css: {
+    postcss: {
+      plugins: [tailwindcss()]
+    }
   },
+  base: '/app',
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  build: {
+    chunkSizeWarningLimit: 3000
+  }
 });
