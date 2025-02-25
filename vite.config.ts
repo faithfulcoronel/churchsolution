@@ -10,7 +10,6 @@ export default defineConfig({
       plugins: [tailwindcss()]
     }
   },
-  base: '/app',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
