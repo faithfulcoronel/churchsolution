@@ -429,7 +429,7 @@ function MemberList() {
 
                   {/* Visual Indicator for Card Clickability */}
                   <div className="absolute -right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                    <div className="bg-primary-500 dark:bg-primary-400 text-white dark:text-gray-900 rounded-full p-1 shadow-lg">
+                    <div className="bg-primary dark:bg-primary-400 text-white dark:text-gray-900 rounded-full p-1 shadow-lg">
                       <ChevronRight className="h-4 w-4" />
                     </div>
                   </div>
