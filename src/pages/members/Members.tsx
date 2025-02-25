@@ -351,8 +351,8 @@ function MemberList() {
                         className="h-16 w-16 rounded-full object-cover bg-gray-100 dark:bg-gray-800 ring-4 ring-white dark:ring-gray-900 group-hover:ring-primary-50 dark:group-hover:ring-primary-900"
                       />
                     ) : (
-                      <div className="h-16 w-16 rounded-full bg-primary-50 dark:bg-primary-900 flex items-center justify-center ring-4 ring-white dark:ring-gray-900 group-hover:ring-primary-50 dark:group-hover:ring-primary-900">
-                        <span className="text-primary-600 dark:text-primary-400 font-semibold text-xl">
+                      <div className="h-16 w-16 rounded-full bg-primary dark:bg-primary-900 flex items-center justify-center ring-4 ring-white dark:ring-gray-900 group-hover:ring-primary dark:group-hover:ring-primary-900">
+                        <span className="text-secondary dark:text-primary-400 font-semibold text-xl">
                           {member.first_name[0]}
                         </span>
                       </div>
