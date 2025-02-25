@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import './Scrollable.css';
 
 interface ScrollableProps {
   children: React.ReactNode;
@@ -68,25 +69,7 @@ export function Scrollable({
         ${className}
       `}
     >
-      {/* CSS for WebKit Browsers */}
-      <style jsx>{`
-        /* For WebKit browsers */
-        .scrollable::-webkit-scrollbar {
-          width: 8px;
-          height: ${horizontal ? '8px' : '0'};
-        }
-        .scrollable::-webkit-scrollbar-thumb {
-          background-color: ${isScrolling ? '#888' : 'transparent'};
-        }
-        /* For other browsers */
-        .scrollbar-visible {
-          scrollbar-width: thin;
-          scrollbar-color: #888 transparent;
-        }
-        .scrollbar-hidden {
-          scrollbar-width: none;
-        }
-      `}</style>
+    
       {children}
     </div>
   );
