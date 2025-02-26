@@ -362,7 +362,7 @@ function Layout() {
         <div className="sticky top-0 z-40 flex h-16 flex-shrink-0 bg-white dark:bg-gray-800 shadow dark:shadow-none border-b border-gray-200 dark:border-gray-700">
           <Button
             variant="ghost"
-            className="border-r border-gray-200 dark:border-gray-700 px-4 text-gray-500 dark:text-gray-400 lg:hidden"
+            className="border-r border-gray-200 dark:border-gray-700 px-6 py-8 text-gray-500 dark:text-gray-400 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
