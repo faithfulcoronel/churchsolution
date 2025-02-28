@@ -1,13 +1,17 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
 import { useAuthStore } from '../../stores/authStore';
-import { Card } from '../../components/ui/Card';
-import { Progress } from '../../components/ui/Progress';
-import { Badge } from '../../components/ui/Badge';
+import { Card, CardHeader, CardContent } from '../../components/ui2/card';
+import { Progress } from '../../components/ui2/progress';
+import { Badge } from '../../components/ui2/badge';
+import { Charts } from '../../components/ui2/charts';
+import { ScrollArea } from '../../components/ui2/scroll-area';
+import { Separator } from '../../components/ui2/separator';
+import WelcomeGreeting from '../../components/WelcomeGreeting';
 import {
   TrendingUp,
   TrendingDown,
@@ -18,9 +22,6 @@ import {
   PieChart,
   BarChart3,
   LineChart,
-  CreditCard,
-  Layers,
-  Calendar,
   Target,
   Award,
 } from 'lucide-react';
@@ -68,10 +69,17 @@ function PersonalDashboard() {
         months.map(async ({ start, end, month }) => {
           const { data: transactions, error } = await supabase
             .from('financial_transactions')
-            .select('type, amount, category')
+            .select(`
+              type,
+              amount,
+              category:category_id (
+                name,
+                type
+              )
+            `)
             .eq('member_id', memberData.id)
-            .gte('date', start.toISOString())
-            .lte('date', end.toISOString());
+            .gte('date', format(startOfDay(start), 'yyyy-MM-dd'))
+            .lte('date', format(endOfDay(end), 'yyyy-MM-dd'));
 
           if (error) throw error;
 
@@ -84,8 +92,8 @@ function PersonalDashboard() {
             .from('financial_transactions')
             .select('type, amount')
             .eq('member_id', memberData.id)
-            .gte('date', startOfMonth(previousMonth).toISOString())
-            .lte('date', endOfMonth(previousMonth).toISOString())
+            .gte('date', format(startOfDay(startOfMonth(previousMonth)), 'yyyy-MM-dd'))
+            .lte('date', format(endOfDay(endOfMonth(previousMonth)), 'yyyy-MM-dd'))
             .eq('type', 'income');
 
           const previousContributions = prevTransactions
@@ -115,36 +123,51 @@ function PersonalDashboard() {
       if (!memberData?.id) throw new Error('Member not found');
 
       const today = new Date();
-      const startOfYear = new Date(today.getFullYear(), 0, 1);
-      const endOfYear = new Date(today.getFullYear(), 11, 31);
-      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      const startOfYear = startOfMonth(new Date(today.getFullYear(), 0, 1));
+      const endOfYear = endOfMonth(new Date(today.getFullYear(), 11, 31));
+      const firstDayOfMonth = startOfMonth(today);
+      const lastDayOfMonth = endOfMonth(today);
 
       // Get yearly contributions
       const { data: yearlyTransactions, error: yearlyError } = await supabase
         .from('financial_transactions')
-        .select('type, amount, category')
+        .select(`
+          type,
+          amount,
+          category:category_id (
+            name,
+            type
+          )
+        `)
         .eq('member_id', memberData.id)
         .eq('type', 'income')
-        .gte('date', startOfYear.toISOString())
-        .lte('date', endOfYear.toISOString());
+        .gte('date', format(startOfDay(startOfYear), 'yyyy-MM-dd'))
+        .lte('date', format(endOfDay(endOfYear), 'yyyy-MM-dd'));
 
       if (yearlyError) throw yearlyError;
 
       // Get monthly contributions
       const { data: monthlyTransactions, error: monthlyError } = await supabase
         .from('financial_transactions')
-        .select('type, amount, category')
+        .select(`
+          type,
+          amount,
+          category:category_id (
+            name,
+            type
+          )
+        `)
         .eq('member_id', memberData.id)
         .eq('type', 'income')
-        .gte('date', firstDayOfMonth.toISOString())
-        .lte('date', lastDayOfMonth.toISOString());
+        .gte('date', format(startOfDay(firstDayOfMonth), 'yyyy-MM-dd'))
+        .lte('date', format(endOfDay(lastDayOfMonth), 'yyyy-MM-dd'));
 
       if (monthlyError) throw monthlyError;
 
       // Calculate category breakdowns
       const categoryTotals = yearlyTransactions?.reduce((acc, t) => {
-        acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
+        const categoryName = t.category?.name || 'Uncategorized';
+        acc[categoryName] = (acc[categoryName] || 0) + Number(t.amount);
         return acc;
       }, {} as Record<string, number>);
 
@@ -173,10 +196,8 @@ function PersonalDashboard() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse h-24" />
-        ))}
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -184,10 +205,10 @@ function PersonalDashboard() {
   if (!memberData) {
     return (
       <Card className="text-center py-8">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-medium text-foreground">
           No Member Account Found
         </h3>
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Your user account is not associated with any member profile.
           Please contact an administrator to link your account to your member profile.
         </p>
@@ -199,28 +220,120 @@ function PersonalDashboard() {
     {
       name: 'Monthly Contributions',
       value: formatCurrency(contributionStats?.monthlyTotal || 0, currency),
-      icon: <TrendingUp className="text-emerald-500 dark:text-emerald-400" />,
+      icon: <TrendingUp className="text-emerald-500" />,
       color: 'bg-emerald-100 dark:bg-emerald-900/50',
       trend: monthlyTrends?.[monthlyTrends.length - 1]?.percentageChange
     },
     {
       name: 'Yearly Contributions',
       value: formatCurrency(contributionStats?.yearlyTotal || 0, currency),
-      icon: <Target className="text-blue-500 dark:text-blue-400" />,
+      icon: <Target className="text-blue-500" />,
       color: 'bg-blue-100 dark:bg-blue-900/50',
       description: "Total contributions this year"
     },
     {
       name: 'Average Contribution',
       value: formatCurrency(contributionStats?.averageContribution || 0, currency),
-      icon: <Award className="text-violet-500 dark:text-violet-400" />,
+      icon: <Award className="text-violet-500" />,
       color: 'bg-violet-100 dark:bg-violet-900/50',
       description: "Average per contribution"
     }
   ];
 
+  // Prepare chart data
+  const contributionChartData = {
+    series: [{
+      name: 'Contributions',
+      data: monthlyTrends?.map(m => m.contributions) || []
+    }],
+    options: {
+      chart: {
+        type: 'area',
+        height: 350,
+        toolbar: {
+          show: false
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth',
+        width: 2
+      },
+      xaxis: {
+        categories: monthlyTrends?.map(m => m.month) || [],
+        labels: {
+          style: {
+            colors: 'hsl(var(--muted-foreground))'
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          formatter: (value: number) => formatCurrency(value, currency),
+          style: {
+            colors: 'hsl(var(--muted-foreground))'
+          }
+        }
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.7,
+          opacityTo: 0.2,
+          stops: [0, 90, 100]
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: (value: number) => formatCurrency(value, currency)
+        }
+      }
+    }
+  };
+
+  // Calculate total for percentages
+  const totalContributions = contributionStats?.categoryBreakdown.reduce((sum, [, amount]) => sum + amount, 0) || 0;
+
+  const categoryChartData = {
+    series: contributionStats?.categoryBreakdown.map(([, amount]) => amount) || [],
+    options: {
+      chart: {
+        type: 'donut',
+      },
+      labels: contributionStats?.categoryBreakdown.map(([category]) => category) || [],
+      legend: {
+        position: 'bottom',
+        labels: {
+          colors: 'hsl(var(--foreground))'
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (value: number) => {
+          const percentage = ((value / totalContributions) * 100).toFixed(1);
+          return `${percentage}%`;
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: (value: number) => {
+            const percentage = ((value / totalContributions) * 100).toFixed(1);
+            return `${formatCurrency(value, currency)} (${percentage}%)`;
+          }
+        }
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
+
+      {/* Welcome Greeting */}
+      <WelcomeGreeting />
+      
       {/* Stats Overview */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => (
@@ -228,15 +341,14 @@ function PersonalDashboard() {
             key={card.name} 
             className="overflow-hidden hover:shadow-lg transition-shadow duration-200"
           >
-            <div className="p-4">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className={`${card.color} p-2 rounded-lg`}>
                   {card.icon}
                 </div>
                 {card.trend !== undefined && (
                   <Badge
-                    variant={card.trend >= 0 ? 'success' : 'danger'}
-                    size="sm"
+                    variant={card.trend >= 0 ? 'success' : 'destructive'}
                     className="flex items-center space-x-1"
                   >
                     {card.trend >= 0 ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -245,14 +357,14 @@ function PersonalDashboard() {
                 )}
               </div>
               <div className="mt-2">
-                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <p className="text-2xl font-semibold text-foreground">
                   {card.value}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   {card.name}
                 </p>
               </div>
-            </div>
+            </CardContent>
           </Card>
         ))}
       </div>
@@ -261,102 +373,52 @@ function PersonalDashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Monthly Contribution Trends */}
         <Card>
-          <div className="p-4">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <LineChart className="h-5 w-5 text-indigo-500 dark:text-indigo-400 mr-2" />
-                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">
+                <LineChart className="h-5 w-5 text-muted-foreground mr-2" />
+                <h3 className="text-base font-medium text-foreground">
                   Monthly Contribution Trends
                 </h3>
               </div>
-              <Badge variant="secondary" size="sm">Last 12 Months</Badge>
+              <Badge variant="secondary">Last 12 Months</Badge>
             </div>
-            <div className="space-y-3">
-              {monthlyTrends?.map((month) => (
-                <div key={month.month} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-300">{month.month}</span>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {formatCurrency(month.contributions, currency)}
-                      </span>
-                      <span className={`
-                        flex items-center text-xs
-                        ${month.percentageChange >= 0 
-                          ? 'text-emerald-600 dark:text-emerald-400' 
-                          : 'text-rose-600 dark:text-rose-400'
-                        }
-                      `}>
-                        {month.percentageChange >= 0 ? (
-                          <ChevronUp className="h-3 w-3" />
-                        ) : (
-                          <ChevronDown className="h-3 w-3" />
-                        )}
-                        {Math.abs(month.percentageChange).toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                  <Progress
-                    value={(month.contributions / Math.max(...monthlyTrends.map(m => m.contributions))) * 100}
-                    size="sm"
-                    variant={month.percentageChange >= 0 ? 'success' : 'danger'}
-                    className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+            <Charts
+              type="area"
+              series={contributionChartData.series}
+              options={contributionChartData.options}
+              height={350}
+            />
+          </CardContent>
         </Card>
 
         {/* Category Distribution */}
         <Card>
-          <div className="p-4">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <PieChart className="h-5 w-5 text-amber-500 dark:text-amber-400 mr-2" />
-                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">
+                <PieChart className="h-5 w-5 text-muted-foreground mr-2" />
+                <h3 className="text-base font-medium text-foreground">
                   Contribution Categories
                 </h3>
               </div>
             </div>
-            <div className="space-y-4">
-              {contributionStats?.categoryBreakdown.map(([category, amount]) => {
-                const percentage = (amount / contributionStats.yearlyTotal) * 100;
-                return (
-                  <div key={category} className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-300">
-                        {category.split('_').map(word => 
-                          word.charAt(0).toUpperCase() + word.slice(1)
-                        ).join(' ')}
-                      </span>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {formatCurrency(amount, currency)}
-                      </span>
-                    </div>
-                    <Progress
-                      value={percentage}
-                      size="sm"
-                      variant="primary"
-                      className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700"
-                    />
-                    <div className="text-right text-xs text-gray-500 dark:text-gray-400">
-                      {percentage.toFixed(1)}%
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+            <Charts
+              type="donut"
+              series={categoryChartData.series}
+              options={categoryChartData.options}
+              height={350}
+            />
+          </CardContent>
         </Card>
       </div>
 
       {/* Contribution Summary */}
       <Card>
-        <div className="p-4">
+        <CardContent className="p-4">
           <div className="flex items-center mb-4">
-            <BarChart3 className="h-5 w-5 text-amber-500 dark:text-amber-400 mr-2" />
-            <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">
+            <BarChart3 className="h-5 w-5 text-muted-foreground mr-2" />
+            <h3 className="text-base font-medium text-foreground">
               Contribution Summary
             </h3>
           </div>
@@ -365,16 +427,15 @@ function PersonalDashboard() {
             {/* Year-to-Date Progress */}
             <div>
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600 dark:text-gray-300">
+                <span className="text-muted-foreground">
                   Year-to-Date Progress
                 </span>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
+                <span className="font-medium text-foreground">
                   {formatCurrency(contributionStats?.yearlyTotal || 0, currency)}
                 </span>
               </div>
               <Progress
                 value={100}
-                size="md"
                 variant="success"
                 className="bg-gradient-to-r from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30"
               />
@@ -383,31 +444,31 @@ function PersonalDashboard() {
             {/* Monthly Stats */}
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10 rounded-xl p-4">
-                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <h4 className="text-sm font-medium text-muted-foreground">
                   Current Month
                 </h4>
-                <p className="mt-2 text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
+                <p className="mt-2 text-2xl font-semibold text-success">
                   {formatCurrency(contributionStats?.monthlyTotal || 0, currency)}
                 </p>
-                <p className="mt-1 text-sm text-emerald-600/70 dark:text-emerald-400/70">
+                <p className="mt-1 text-sm text-success/70">
                   Total contributions this month
                 </p>
               </div>
 
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-xl p-4">
-                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <h4 className="text-sm font-medium text-muted-foreground">
                   Average Per Contribution
                 </h4>
-                <p className="mt-2 text-2xl font-semibold text-blue-600 dark:text-blue-400">
+                <p className="mt-2 text-2xl font-semibold text-primary">
                   {formatCurrency(contributionStats?.averageContribution || 0, currency)}
                 </p>
-                <p className="mt-1 text-sm text-blue-600/70 dark:text-blue-400/70">
+                <p className="mt-1 text-sm text-primary/70">
                   Average contribution amount
                 </p>
               </div>
             </div>
           </div>
-        </div>
+        </CardContent>
       </Card>
     </div>
   );

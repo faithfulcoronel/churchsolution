@@ -7,6 +7,7 @@ import Roles from './Roles';
 import RoleForm from './RoleForm';
 import DatabaseManagement from './DatabaseManagement';
 import ChurchSettings from './ChurchSettings';
+import Categories from './Categories';
 
 function Admin() {
   const { hasPermission, isAdmin } = usePermissions();
@@ -37,6 +38,7 @@ function Admin() {
       <Route path="roles/:id/edit" element={<RoleForm />} />
       <Route path="databases" element={<DatabaseManagement />} />
       <Route path="settings" element={<ChurchSettings />} />
+      <Route path="categories" element={<Categories />} />
       <Route path="*" element={<Navigate to="/admin/users" replace />} />
     </Routes>
   );

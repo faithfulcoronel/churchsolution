@@ -1,3 +1,4 @@
+// src/providers/SnackbarProvider.tsx
 import { SolidSnackbar } from '@/components/snackbar';
 import { SnackbarProvider as CustomSnackbarProvider } from 'notistack';
 import { type PropsWithChildren } from 'react';
@@ -9,7 +10,11 @@ const SnackbarProvider = ({ children }: PropsWithChildren) => {
       maxSnack={3}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       Components={{
-        solid: SolidSnackbar
+        default: SolidSnackbar,
+        success: SolidSnackbar,
+        error: SolidSnackbar,
+        warning: SolidSnackbar,
+        info: SolidSnackbar
       }}
     >
       {children}

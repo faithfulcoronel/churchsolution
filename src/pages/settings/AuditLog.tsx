@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
+import { Card } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { Button } from '../../components/ui/Button';
+import { Table, TableHeader, TableBody, TableRow, TableCell } from '../../components/ui/Table';
+import { Badge } from '../../components/ui/Badge';
 import {
   Calendar,
   Filter,
   Search,
+  FileText,
+  Settings,
   Loader2,
   History,
-  FileText,
   Users,
-  Settings,
-  Database,
-  DollarSign,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
+  CheckCircle2,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
+
+type DateRange = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
 
 type AuditLogEntry = {
   id: string;
@@ -23,53 +35,87 @@ type AuditLogEntry = {
   changes: Record<string, any>;
   created_at: string;
   performed_by: string;
-  user: {
-    email: string;
-    raw_user_meta_data: {
-      first_name?: string;
-      last_name?: string;
-    };
+  user_email: string;
+  user_metadata: {
+    first_name?: string;
+    last_name?: string;
   };
 };
 
 function AuditLog() {
-  const [dateRange, setDateRange] = useState({
-    start: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
-    end: format(new Date(), 'yyyy-MM-dd'),
-  });
+  const [dateRange, setDateRange] = useState<DateRange>('monthly');
+  const [startDate, setStartDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
   const [actionFilter, setActionFilter] = useState('all');
   const [entityFilter, setEntityFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: auditLogs, isLoading } = useQuery({
-    queryKey: ['audit-logs', dateRange, actionFilter, entityFilter],
+  // Get current tenant
+  const { data: tenant } = useQuery({
+    queryKey: ['current-tenant'],
     queryFn: async () => {
-      let query = supabase
-        .from('audit_logs')
-        .select(`
-          *,
-          user:performed_by (
-            email,
-            raw_user_meta_data
-          )
-        `)
-        .gte('created_at', dateRange.start)
-        .lte('created_at', dateRange.end)
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.rpc('get_current_tenant');
+      if (error) throw error;
+      return data?.[0];
+    },
+  });
 
-      if (actionFilter !== 'all') {
-        query = query.eq('action', actionFilter);
-      }
+  const getDateRange = (range: DateRange) => {
+    const today = new Date();
+    switch (range) {
+      case 'daily':
+        return {
+          start: startOfDay(today),
+          end: endOfDay(today),
+        };
+      case 'weekly':
+        return {
+          start: startOfWeek(today, { weekStartsOn: 1 }),
+          end: endOfWeek(today, { weekStartsOn: 1 }),
+        };
+      case 'monthly':
+        return {
+          start: startOfMonth(today),
+          end: endOfMonth(today),
+        };
+      case 'yearly':
+        return {
+          start: startOfYear(today),
+          end: endOfYear(today),
+        };
+      case 'custom':
+        return {
+          start: new Date(startDate),
+          end: new Date(endDate),
+        };
+      default:
+        return {
+          start: startOfMonth(today),
+          end: endOfMonth(today),
+        };
+    }
+  };
 
-      if (entityFilter !== 'all') {
-        query = query.eq('entity_type', entityFilter);
-      }
+  const { data: auditLogs, isLoading } = useQuery({
+    queryKey: ['audit-logs', dateRange, startDate, endDate, actionFilter, entityFilter, tenant?.id],
+    queryFn: async () => {
+      if (!tenant?.id) return [];
 
-      const { data, error } = await query;
+      const { start, end } = getDateRange(dateRange);
+      const startDateStr = format(start, 'yyyy-MM-dd');
+      const endDateStr = format(end, 'yyyy-MM-dd');
+
+      const { data, error } = await supabase.rpc('get_audit_logs', {
+        p_start_date: startDateStr,
+        p_end_date: endDateStr,
+        p_action: actionFilter === 'all' ? null : actionFilter,
+        p_entity_type: entityFilter === 'all' ? null : entityFilter
+      });
 
       if (error) throw error;
       return data as AuditLogEntry[];
     },
+    enabled: !!tenant?.id,
   });
 
   const filteredLogs = auditLogs?.filter(log => {
@@ -80,52 +126,57 @@ function AuditLog() {
       log.action.toLowerCase().includes(searchLower) ||
       log.entity_type.toLowerCase().includes(searchLower) ||
       log.entity_id.toLowerCase().includes(searchLower) ||
-      log.user?.email.toLowerCase().includes(searchLower) ||
+      log.user_email.toLowerCase().includes(searchLower) ||
       JSON.stringify(log.changes).toLowerCase().includes(searchLower)
     );
   });
 
+  const handleDateRangeChange = (range: DateRange) => {
+    setDateRange(range);
+    if (range !== 'custom') {
+      const { start, end } = getDateRange(range);
+      setStartDate(format(start, 'yyyy-MM-dd'));
+      setEndDate(format(end, 'yyyy-MM-dd'));
+    }
+  };
+
   const getActionIcon = (action: string) => {
     switch (action) {
       case 'create':
-        return <FileText className="h-4 w-4 text-green-500" />;
+        return <FileText className="h-4 w-4 text-success" />;
       case 'update':
-        return <Settings className="h-4 w-4 text-blue-500" />;
+        return <Pencil className="h-4 w-4 text-info" />;
       case 'delete':
-        return <History className="h-4 w-4 text-red-500" />;
+        return <Trash2 className="h-4 w-4 text-danger" />;
       default:
         return <History className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getActionBadgeVariant = (action: string) => {
+    switch (action) {
+      case 'create':
+        return 'success';
+      case 'update':
+        return 'info';
+      case 'delete':
+        return 'danger';
+      default:
+        return 'secondary';
     }
   };
 
   const getEntityIcon = (entityType: string) => {
     switch (entityType) {
       case 'member':
-        return <Users className="h-4 w-4 text-primary-500" />;
+        return <Users className="h-4 w-4 text-primary" />;
       case 'transaction':
-        return <DollarSign className="h-4 w-4 text-green-500" />;
+        return <FileText className="h-4 w-4 text-success" />;
       case 'budget':
-        return <Database className="h-4 w-4 text-blue-500" />;
+        return <FileText className="h-4 w-4 text-info" />;
       default:
         return <FileText className="h-4 w-4 text-gray-500" />;
     }
-  };
-
-  const formatEntityType = (type: string) => {
-    return type.charAt(0).toUpperCase() + type.slice(1);
-  };
-
-  const formatChanges = (changes: Record<string, any>) => {
-    return (
-      <div className="space-y-1">
-        {Object.entries(changes).map(([key, value]) => (
-          <div key={key} className="text-sm">
-            <span className="font-medium">{key}:</span>{' '}
-            <span className="text-gray-600">{JSON.stringify(value)}</span>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   return (
@@ -137,173 +188,163 @@ function AuditLog() {
         </p>
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <Card>
         {/* Filters */}
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
+        <div className="p-4 border-b border-gray-200">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Date Range</label>
-              <div className="mt-1 flex space-x-2">
-                <div className="relative rounded-md shadow-sm flex-1">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input
+              <Select
+                label="Date Range"
+                value={dateRange}
+                onChange={(e) => handleDateRangeChange(e.target.value as DateRange)}
+                icon={<Calendar />}
+                options={[
+                  { value: 'daily', label: 'Today' },
+                  { value: 'weekly', label: 'This Week' },
+                  { value: 'monthly', label: 'This Month' },
+                  { value: 'yearly', label: 'This Year' },
+                  { value: 'custom', label: 'Custom Range' },
+                ]}
+              />
+            </div>
+
+            {dateRange === 'custom' && (
+              <div className="sm:col-span-2">
+                <div className="flex space-x-4">
+                  <Input
                     type="date"
-                    value={dateRange.start}
-                    onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                    className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                    label="Start Date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    icon={<Calendar />}
+                  />
+                  <Input
+                    type="date"
+                    label="End Date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    icon={<Calendar />}
                   />
                 </div>
-                <div className="relative rounded-md shadow-sm flex-1">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                    className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
               </div>
+            )}
+
+            <div>
+              <Select
+                label="Action"
+                value={actionFilter}
+                onChange={(e) => setActionFilter(e.target.value)}
+                icon={<Filter />}
+                options={[
+                  { value: 'all', label: 'All Actions' },
+                  { value: 'create', label: 'Create' },
+                  { value: 'update', label: 'Update' },
+                  { value: 'delete', label: 'Delete' },
+                ]}
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Action</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <Filter className="h-4 w-4 text-gray-400" />
-                </div>
-                <select
-                  value={actionFilter}
-                  onChange={(e) => setActionFilter(e.target.value)}
-                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                >
-                  <option value="all">All Actions</option>
-                  <option value="create">Create</option>
-                  <option value="update">Update</option>
-                  <option value="delete">Delete</option>
-                </select>
-              </div>
+              <Select
+                label="Entity Type"
+                value={entityFilter}
+                onChange={(e) => setEntityFilter(e.target.value)}
+                icon={<Filter />}
+                options={[
+                  { value: 'all', label: 'All Entities' },
+                  { value: 'member', label: 'Members' },
+                  { value: 'transaction', label: 'Transactions' },
+                  { value: 'budget', label: 'Budgets' },
+                ]}
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Entity Type</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <Filter className="h-4 w-4 text-gray-400" />
-                </div>
-                <select
-                  value={entityFilter}
-                  onChange={(e) => setEntityFilter(e.target.value)}
-                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                >
-                  <option value="all">All Entities</option>
-                  <option value="member">Members</option>
-                  <option value="transaction">Transactions</option>
-                  <option value="budget">Budgets</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Search</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search logs..."
-                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                />
-              </div>
+              <Input
+                label="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                icon={<Search />}
+                placeholder="Search logs..."
+                clearable
+                onClear={() => setSearchTerm('')}
+              />
             </div>
           </div>
         </div>
 
         {/* Audit Log List */}
-        <div className="overflow-x-auto">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
-            </div>
-          ) : filteredLogs && filteredLogs.length > 0 ? (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Timestamp
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Entity
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Changes
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Performed By
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {format(new Date(log.created_at), 'MMM d, yyyy HH:mm:ss')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {getActionIcon(log.action)}
-                        <span className="ml-2 text-sm text-gray-900">
-                          {log.action.charAt(0).toUpperCase() + log.action.slice(1)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {getEntityIcon(log.entity_type)}
-                        <span className="ml-2 text-sm text-gray-900">
-                          {formatEntityType(log.entity_type)}
-                        </span>
-                        <span className="ml-2 text-sm text-gray-500">
-                          {log.entity_id}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">
-                        {formatChanges(log.changes)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {log.user?.raw_user_meta_data?.first_name
-                        ? `${log.user.raw_user_meta_data.first_name} ${log.user.raw_user_meta_data.last_name}`
-                        : log.user?.email}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-12">
-              <History className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No audit logs found</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {searchTerm || actionFilter !== 'all' || entityFilter !== 'all'
-                  ? 'Try adjusting your filters'
-                  : 'No activities have been logged yet'}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : filteredLogs && filteredLogs.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell>Timestamp</TableCell>
+                <TableCell>Action</TableCell>
+                <TableCell>Entity</TableCell>
+                <TableCell>Changes</TableCell>
+                <TableCell>Performed By</TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredLogs.map((log) => (
+                <TableRow key={log.id}>
+                  <TableCell>
+                    {format(new Date(log.created_at), 'MMM d, yyyy HH:mm:ss')}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      {getActionIcon(log.action)}
+                      <Badge variant={getActionBadgeVariant(log.action)}>
+                        {log.action.charAt(0).toUpperCase() + log.action.slice(1)}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      {getEntityIcon(log.entity_type)}
+                      <span className="font-medium">
+                        {log.entity_type.charAt(0).toUpperCase() + log.entity_type.slice(1)}
+                      </span>
+                      <span className="text-gray-500 text-sm">{log.entity_id}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="max-w-md">
+                      {Object.entries(log.changes).map(([key, value]) => (
+                        <div key={key} className="text-sm">
+                          <span className="font-medium">{key}:</span>{' '}
+                          <span className="text-gray-600">
+                            {JSON.stringify(value, null, 2)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {log.user_metadata?.first_name
+                      ? `${log.user_metadata.first_name} ${log.user_metadata.last_name}`
+                      : log.user_email}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="text-center py-12">
+            <History className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No audit logs found</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {searchTerm || actionFilter !== 'all' || entityFilter !== 'all'
+                ? 'Try adjusting your filters'
+                : 'No activities have been logged yet'}
+            </p>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

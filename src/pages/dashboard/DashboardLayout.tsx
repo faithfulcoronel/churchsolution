@@ -4,7 +4,9 @@ import { Building2, User } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
-import { Tabs } from '../../components/ui/Tabs';
+import { Tabs } from '../../components/ui2/tabs';
+import { Card, CardContent } from '../../components/ui2/card';
+import { ScrollArea } from '../../components/ui2/scroll-area';
 
 function DashboardLayout() {
   const location = useLocation();
@@ -61,15 +63,23 @@ function DashboardLayout() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-x-auto">
-      <Tabs
-        tabs={tabs}
-        activeTab={activeTab}
-        onChange={handleTabChange}
-        variant="enclosed"
-        size="sm"
-      />
-    </div>
+      <Card>
+        <CardContent className="p-4">
+          <ScrollArea orientation="horizontal">
+            <Tabs
+              tabs={tabs}
+              activeTab={activeTab}
+              onChange={handleTabChange}
+              variant="enclosed"
+              size="sm"
+            />
+          </ScrollArea>
+        </CardContent>
+      </Card>
+
+      <div className="mt-6">
+        <Outlet />
+      </div>
     </div>
   );
 }

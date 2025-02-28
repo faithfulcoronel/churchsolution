@@ -1,3 +1,4 @@
+// src/components/ui2/switch.tsx
 import * as React from 'react';
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 

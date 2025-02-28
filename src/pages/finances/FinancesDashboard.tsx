@@ -1,15 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
+import { format, subMonths, startOfMonth, endOfMonth, endOfDay, startOfDay } from 'date-fns';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { Progress } from '../../components/ui/Progress';
+import { Card, CardHeader, CardContent } from '../../components/ui2/card';
+import { Button } from '../../components/ui2/button';
+import { Badge } from '../../components/ui2/badge';
+import { Progress } from '../../components/ui2/progress';
+import { Charts } from '../../components/ui2/charts';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
+import { DropdownButton } from '../../components/ui2/dropdown-button';
 import {
   Plus,
   Upload,
@@ -20,37 +22,36 @@ import {
   DollarSign,
   Calendar,
   Loader2,
-  ChevronDown,
   ChevronUp,
-  ChevronRight,
+  ChevronDown,
   PieChart,
   BarChart3,
   LineChart,
+  Target,
+  Award,
   Users2,
   CreditCard,
   Layers,
-  Cake,
+  ChevronRight,
 } from 'lucide-react';
 
 function FinancesDashboard() {
+  const navigate = useNavigate();
   const { currency } = useCurrencyStore();
-  const [showBulkDropdown, setShowBulkDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowBulkDropdown(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Get current tenant
+  const { data: currentTenant } = useQuery({
+    queryKey: ['current-tenant'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_current_tenant');
+      if (error) throw error;
+      return data?.[0];
+    },
+  });
 
   // Get monthly trends data
   const { data: monthlyTrends, isLoading: trendsLoading } = useQuery({
-    queryKey: ['monthly-trends'],
+    queryKey: ['monthly-trends', currentTenant?.id],
     queryFn: async () => {
       const today = new Date();
       const months = Array.from({ length: 12 }, (_, i) => {
@@ -66,9 +67,17 @@ function FinancesDashboard() {
         months.map(async ({ start, end, month }) => {
           const { data: transactions, error } = await supabase
             .from('financial_transactions')
-            .select('type, amount, category')
-            .gte('date', start.toISOString())
-            .lte('date', end.toISOString());
+            .select(`
+              type,
+              amount,
+              category:category_id (
+                name,
+                type
+              )
+            `)
+            .eq('tenant_id', currentTenant?.id)
+            .gte('date', format(startOfDay(start), 'yyyy-MM-dd'))
+            .lte('date', format(endOfDay(end), 'yyyy-MM-dd'));
 
           if (error) throw error;
 
@@ -76,13 +85,18 @@ function FinancesDashboard() {
             ?.filter(t => t.type === 'income')
             .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
+          const expenses = transactions
+            ?.filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+
           const previousMonth = subMonths(start, 1);
           const { data: prevTransactions } = await supabase
             .from('financial_transactions')
-            .select('type, amount')
-            .gte('date', startOfMonth(previousMonth).toISOString())
-            .lte('date', endOfMonth(previousMonth).toISOString())
-            .eq('type', 'income');
+            .select('amount')
+            .eq('tenant_id', currentTenant?.id)
+            .eq('type', 'income')
+            .gte('date', format(startOfDay(startOfMonth(previousMonth)), 'yyyy-MM-dd'))
+            .lte('date', format(endOfDay(endOfMonth(previousMonth)), 'yyyy-MM-dd'));
 
           const previousIncome = prevTransactions
             ?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
@@ -94,6 +108,7 @@ function FinancesDashboard() {
           return {
             month,
             income,
+            expenses,
             percentageChange,
           };
         })
@@ -101,140 +116,31 @@ function FinancesDashboard() {
 
       return monthlyData;
     },
+    enabled: !!currentTenant?.id,
   });
 
-  // Get overall statistics
-  const { data: overallStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['overall-stats'],
-    queryFn: async () => {
-      // Get all income transactions
-      const { data: transactions, error } = await supabase
-        .from('financial_transactions')
-        .select(`
-          amount,
-          category,
-          member:members (
-            id,
-            first_name,
-            last_name
-          )
-        `)
-        .eq('type', 'income')
-        .is('members.deleted_at', null);
-
-      if (error) throw error;
-
-      // Calculate total number of unique givers
-      const uniqueGivers = new Set(
-        transactions
-          ?.filter(t => t.member)
-          .map(t => t.member.id)
-      ).size;
-
-      // Calculate average gift amount
-      const totalAmount = transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-      const averageGift = transactions?.length ? totalAmount / transactions.length : 0;
-
-      // Calculate top giving categories
-      const categoryTotals = transactions?.reduce((acc, t) => {
-        acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
-        return acc;
-      }, {} as Record<string, number>);
-
-      const sortedCategories = Object.entries(categoryTotals || {})
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5);
-
-      return {
-        uniqueGivers,
-        averageGift,
-        topCategories: sortedCategories,
-      };
-    },
-  });
-
-  // Get current year's data
-  const { data: yearlyStats, isLoading: yearlyLoading } = useQuery({
-    queryKey: ['yearly-stats'],
+  // Get current month's data
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['finance-stats', currentTenant?.id],
     queryFn: async () => {
       const today = new Date();
-      const startOfYear = new Date(today.getFullYear(), 0, 1);
-      const endOfYear = new Date(today.getFullYear(), 11, 31);
+      const firstDayOfMonth = startOfMonth(today);
+      const lastDayOfMonth = endOfMonth(today);
 
       const { data: transactions, error: transactionsError } = await supabase
         .from('financial_transactions')
         .select(`
           type,
           amount,
-          category,
-          date,
-          member:members (
+          category:category_id (
             id,
-            first_name,
-            last_name
+            name,
+            type
           )
         `)
-        .gte('date', startOfYear.toISOString())
-        .lte('date', endOfYear.toISOString())
-        .is('members.deleted_at', null);
-
-      if (transactionsError) throw transactionsError;
-
-      const yearlyIncome = transactions
-        ?.filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-      const yearlyExpenses = transactions
-        ?.filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-      // Calculate member contributions
-      const memberContributions = transactions
-        ?.filter(t => t.type === 'income' && t.member)
-        .reduce((acc, t) => {
-          const memberId = t.member.id;
-          if (!acc[memberId]) {
-            acc[memberId] = {
-              name: `${t.member.first_name} ${t.member.last_name}`,
-              total: 0,
-            };
-          }
-          acc[memberId].total += Number(t.amount);
-          return acc;
-        }, {} as Record<string, { name: string; total: number }>);
-
-      return {
-        yearlyIncome,
-        yearlyExpenses,
-        memberContributions: Object.values(memberContributions || {})
-          .sort((a, b) => b.total - a.total)
-          .slice(0, 5), // Top 5 contributors
-      };
-    },
-  });
-
-  // Get current month's data
-  const { data: stats, isLoading: monthlyLoading } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: async () => {
-      // Get total members count
-      const { count: membersCount, error: membersError } = await supabase
-        .from('members')
-        .select('*', { count: 'exact', head: true })
-        .is('deleted_at', null);
-
-      if (membersError) throw membersError;
-
-      // Get current month's transactions
-      const today = new Date();
-      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-      const { data: transactions, error: transactionsError } = await supabase
-        .from('financial_transactions')
-        .select('type, amount')
-        .gte('date', firstDayOfMonth.toISOString())
-        .lte('date', lastDayOfMonth.toISOString());
+        .eq('tenant_id', currentTenant?.id)
+        .gte('date', format(startOfDay(firstDayOfMonth), 'yyyy-MM-dd'))
+        .lte('date', format(endOfDay(lastDayOfMonth), 'yyyy-MM-dd'));
 
       if (transactionsError) throw transactionsError;
 
@@ -246,74 +152,202 @@ function FinancesDashboard() {
         ?.filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
+      // Calculate category breakdowns
+      const incomeByCategory = transactions
+        ?.filter(t => t.type === 'income')
+        .reduce((acc, t) => {
+          const categoryName = t.category?.name || 'Uncategorized';
+          acc[categoryName] = (acc[categoryName] || 0) + Number(t.amount);
+          return acc;
+        }, {} as Record<string, number>);
+
+      const expensesByCategory = transactions
+        ?.filter(t => t.type === 'expense')
+        .reduce((acc, t) => {
+          const categoryName = t.category?.name || 'Uncategorized';
+          acc[categoryName] = (acc[categoryName] || 0) + Number(t.amount);
+          return acc;
+        }, {} as Record<string, number>);
+
       // Get active budgets count
       const { data: activeBudgets, error: budgetsError } = await supabase
         .from('budgets')
         .select('id')
-        .gte('end_date', today.toISOString())
-        .lte('start_date', today.toISOString());
+        .eq('tenant_id', currentTenant?.id)
+        .gte('end_date', format(today, 'yyyy-MM-dd'))
+        .lte('start_date', format(today, 'yyyy-MM-dd'));
 
       if (budgetsError) throw budgetsError;
 
       return {
-        totalMembers: membersCount || 0,
         monthlyIncome,
         monthlyExpenses,
         activeBudgets: activeBudgets?.length || 0,
+        incomeByCategory,
+        expensesByCategory,
       };
     },
+    enabled: !!currentTenant?.id,
   });
 
-  const isLoading = monthlyLoading || yearlyLoading || trendsLoading || statsLoading;
+  const isLoading = trendsLoading || statsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const cards = [
     {
       name: 'Monthly Income',
-      value: stats?.monthlyIncome
-        ? formatCurrency(stats.monthlyIncome, currency)
-        : '-',
-      icon: TrendingUp,
-      color: 'bg-green-500',
-      trend: monthlyTrends?.[monthlyTrends.length - 1]?.percentageChange,
+      value: formatCurrency(stats?.monthlyIncome || 0, currency),
+      icon: <TrendingUp className="text-emerald-500" />,
+      color: 'bg-emerald-100 dark:bg-emerald-900/50',
+      trend: monthlyTrends?.[monthlyTrends.length - 1]?.percentageChange
     },
     {
       name: 'Monthly Expenses',
-      value: stats?.monthlyExpenses
-        ? formatCurrency(stats.monthlyExpenses, currency)
-        : '-',
-      icon: TrendingDown,
-      color: 'bg-red-500',
+      value: formatCurrency(stats?.monthlyExpenses || 0, currency),
+      icon: <TrendingDown className="text-rose-500" />,
+      color: 'bg-rose-100 dark:bg-rose-900/50',
+      description: "Total expenses this month"
     },
     {
       name: 'Net Balance',
-      value: stats
-        ? formatCurrency(stats.monthlyIncome - stats.monthlyExpenses, currency)
-        : '-',
-      icon: DollarSign,
-      color: 'bg-blue-500',
+      value: formatCurrency((stats?.monthlyIncome || 0) - (stats?.monthlyExpenses || 0), currency),
+      icon: <DollarSign className="text-blue-500" />,
+      color: 'bg-blue-100 dark:bg-blue-900/50',
+      description: "Net balance this month"
     },
     {
       name: 'Active Budgets',
-      value: stats?.activeBudgets ?? '-',
-      icon: Calendar,
-      color: 'bg-purple-500',
-    },
+      value: stats?.activeBudgets || 0,
+      icon: <PiggyBank className="text-violet-500" />,
+      color: 'bg-violet-100 dark:bg-violet-900/50',
+      description: "Currently active budgets"
+    }
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
-      </div>
-    );
-  }
+  // Prepare chart data
+  const monthlyTrendsChartData = {
+    series: [
+      {
+        name: 'Income',
+        data: monthlyTrends?.map(m => m.income) || []
+      },
+      {
+        name: 'Expenses',
+        data: monthlyTrends?.map(m => m.expenses) || []
+      }
+    ],
+    options: {
+      chart: {
+        type: 'area',
+        stacked: false,
+        height: 350,
+        toolbar: {
+          show: false
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth',
+        width: [2, 2]
+      },
+      xaxis: {
+        categories: monthlyTrends?.map(m => m.month) || [],
+        labels: {
+          style: {
+            colors: 'hsl(var(--muted-foreground))'
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          formatter: (value: number) => formatCurrency(value, currency),
+          style: {
+            colors: 'hsl(var(--muted-foreground))'
+          }
+        }
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.7,
+          opacityTo: 0.2,
+          stops: [0, 90, 100]
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: (value: number) => formatCurrency(value, currency)
+        }
+      }
+    }
+  };
+
+  const incomeCategoryChartData = {
+    series: Object.values(stats?.incomeByCategory || {}),
+    options: {
+      chart: {
+        type: 'donut',
+      },
+      labels: Object.keys(stats?.incomeByCategory || {}),
+      legend: {
+        position: 'bottom',
+        labels: {
+          colors: 'hsl(var(--foreground))'
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (value: number) => formatCurrency(value, currency)
+      },
+      tooltip: {
+        y: {
+          formatter: (value: number) => formatCurrency(value, currency)
+        }
+      }
+    }
+  };
+
+  const expenseCategoryChartData = {
+    series: Object.values(stats?.expensesByCategory || {}),
+    options: {
+      chart: {
+        type: 'donut',
+      },
+      labels: Object.keys(stats?.expensesByCategory || {}),
+      legend: {
+        position: 'bottom',
+        labels: {
+          colors: 'hsl(var(--foreground))'
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (value: number) => formatCurrency(value, currency)
+      },
+      tooltip: {
+        y: {
+          formatter: (value: number) => formatCurrency(value, currency)
+        }
+      }
+    }
+  };
 
   return (
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Finances</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-2xl font-semibold text-foreground">Finances</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Manage church finances, track income and expenses, and monitor budgets.
           </p>
         </div>
@@ -321,70 +355,55 @@ function FinancesDashboard() {
           <SubscriptionGate type="transaction">
             <Link to="/finances/transactions/add">
               <Button
-                variant="primary"
-                icon={<Plus />}
+                variant="default"
+                className="flex items-center"
               >
+                <Plus className="h-4 w-4 mr-2" />
                 Add Transaction
               </Button>
             </Link>
           </SubscriptionGate>
 
-          <div className="relative" ref={dropdownRef}>
-            <Button
-              variant="primary"
-              onClick={() => setShowBulkDropdown(!showBulkDropdown)}
-              icon={<Upload />}
-            >
-              Bulk Entry
-              <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-200 ${showBulkDropdown ? 'rotate-180' : ''}`} />
-            </Button>
-
-            {showBulkDropdown && (
-              <Card className="absolute right-0 mt-2 w-56 z-10">
-                <div className="py-1">
-                  <Link
-                    to="/finances/transactions/bulk"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    onClick={() => setShowBulkDropdown(false)}
-                  >
-                    <Layers className="h-4 w-4 mr-3 text-gray-400" />
-                    <span>Bulk Transaction Entry</span>
-                  </Link>
-                  <Link
-                    to="/finances/transactions/bulk-income"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    onClick={() => setShowBulkDropdown(false)}
-                  >
-                    <TrendingUp className="h-4 w-4 mr-3 text-gray-400" />
-                    <span>Bulk Income Entry</span>
-                  </Link>
-                  <Link
-                    to="/finances/transactions/bulk-expense"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    onClick={() => setShowBulkDropdown(false)}
-                  >
-                    <TrendingDown className="h-4 w-4 mr-3 text-gray-400" />
-                    <span>Bulk Expense Entry</span>
-                  </Link>
-                </div>
-              </Card>
-            )}
-          </div>
+          <DropdownButton
+            variant="default"
+            icon={<Upload className="h-4 w-4" />}
+            items={[
+              {
+                label: 'Bulk Transaction Entry',
+                icon: <Layers className="h-4 w-4" />,
+                onClick: () => navigate('/finances/transactions/bulk')
+              },
+              {
+                label: 'Bulk Income Entry',
+                icon: <TrendingUp className="h-4 w-4" />,
+                onClick: () => navigate('/finances/transactions/bulk-income')
+              },
+              {
+                label: 'Bulk Expense Entry',
+                icon: <TrendingDown className="h-4 w-4" />,
+                onClick: () => navigate('/finances/transactions/bulk-expense')
+              }
+            ]}
+          >
+            Bulk Entry
+          </DropdownButton>
 
           <div className="flex gap-3">
             <Link to="/finances/budgets/add">
               <Button
                 variant="outline"
-                icon={<PiggyBank />}
+                className="flex items-center"
               >
+                <PiggyBank className="h-4 w-4 mr-2" />
                 Add Budget
               </Button>
             </Link>
             <Link to="/finances/reports">
               <Button
                 variant="outline"
-                icon={<FileText />}
+                className="flex items-center"
               >
+                <FileText className="h-4 w-4 mr-2" />
                 Reports
               </Button>
             </Link>
@@ -392,248 +411,281 @@ function FinancesDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Card key={card.name} hoverable>
-              <div className="p-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex-shrink-0">
-                    <Icon className={`h-6 w-6 text-white p-1 rounded ${card.color}`} />
-                  </div>
-                  {typeof card.trend === 'number' && (
-                    <div className={`flex items-center text-sm ${
-                      card.trend >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {card.trend >= 0 ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                      <span>{Math.abs(card.trend).toFixed(1)}%</span>
-                    </div>
-                  )}
+      {/* Stats Overview */}
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {cards.map((card) => (
+          <Card 
+            key={card.name} 
+            className="overflow-hidden hover:shadow-lg transition-shadow duration-200"
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className={`${card.color} p-2 rounded-lg`}>
+                  {card.icon}
                 </div>
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium text-gray-500">{card.name}</h3>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900">{card.value}</p>
-                </div>
+                {card.trend !== undefined && (
+                  <Badge
+                    variant={card.trend >= 0 ? 'success' : 'destructive'}
+                    className="flex items-center space-x-1"
+                  >
+                    {card.trend >= 0 ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    <span>{Math.abs(card.trend).toFixed(1)}%</span>
+                  </Badge>
+                )}
               </div>
-            </Card>
-          );
-        })}
+              <div className="mt-2">
+                <p className="text-2xl font-semibold text-foreground">
+                  {card.value}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {card.name}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Charts and Analysis */}
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {/* Monthly Trends */}
-        <Card>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <LineChart className="h-5 w-5 text-gray-400 mr-2" />
-                <h3 className="text-lg font-medium text-gray-900">Monthly Trends</h3>
-              </div>
-              <Badge variant="primary">Last 12 Months</Badge>
+      {/* Monthly Trends Chart */}
+      <Card className="mt-6">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <LineChart className="h-5 w-5 text-muted-foreground mr-2" />
+              <h3 className="text-base font-medium text-foreground">
+                Monthly Income vs Expenses
+              </h3>
             </div>
-            <div className="space-y-4">
-              {monthlyTrends?.map((month) => (
-                <div key={month.month}>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">{month.month}</span>
-                    <div className="flex items-center">
-                      <span className="font-medium text-gray-900">
-                        {formatCurrency(month.income, currency)}
-                      </span>
-                      <span className={`ml-2 flex items-center text-xs ${
-                        month.percentageChange >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {month.percentageChange >= 0 ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                        {Math.abs(month.percentageChange).toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                  <Progress
-                    value={(month.income / Math.max(...monthlyTrends.map(m => m.income))) * 100}
-                    max={100}
-                    size="sm"
-                    className="mt-1"
-                  />
-                </div>
-              ))}
-            </div>
+            <Badge variant="secondary">Last 12 Months</Badge>
           </div>
+          <Charts
+            type="area"
+            series={monthlyTrendsChartData.series}
+            options={monthlyTrendsChartData.options}
+            height={350}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Category Distribution Charts */}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Income Categories */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <PieChart className="h-5 w-5 text-emerald-500 mr-2" />
+                <h3 className="text-base font-medium text-foreground">
+                  Income Distribution
+                </h3>
+              </div>
+            </div>
+            <Charts
+              type="donut"
+              series={incomeCategoryChartData.series}
+              options={incomeCategoryChartData.options}
+              height={350}
+            />
+          </CardContent>
         </Card>
 
-        {/* Category Distribution */}
+        {/* Expense Categories */}
         <Card>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <PieChart className="h-5 w-5 text-gray-400 mr-2" />
-                <h3 className="text-lg font-medium text-gray-900">Category Distribution</h3>
+                <PieChart className="h-5 w-5 text-rose-500 mr-2" />
+                <h3 className="text-base font-medium text-foreground">
+                  Expense Distribution
+                </h3>
               </div>
-              <Badge variant="secondary">Current Month</Badge>
             </div>
-            <div className="space-y-4">
-              {overallStats?.topCategories.map(([category, amount]) => {
-                const percentage = (amount / overallStats.topCategories[0][1]) * 100;
-                return (
-                  <div key={category}>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">
-                        {category.split('_').map(word => 
-                          word.charAt(0).toUpperCase() + word.slice(1)
-                        ).join(' ')}
-                      </span>
-                      <span className="font-medium text-gray-900">
-                        {formatCurrency(amount, currency)}
-                      </span>
-                    </div>
-                    <Progress
-                      value={percentage}
-                      max={100}
-                      size="sm"
-                      className="mt-1"
-                      variant={
-                        percentage > 66 ? 'success' :
-                        percentage > 33 ? 'warning' :
-                        'danger'
-                      }
-                    />
-                    <div className="mt-1 text-right text-xs text-gray-500">
-                      {percentage.toFixed(1)}%
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+            <Charts
+              type="donut"
+              series={expenseCategoryChartData.series}
+              options={expenseCategoryChartData.options}
+              height={350}
+            />
+          </CardContent>
         </Card>
       </div>
 
-      {/* Quick Links and Actions */}
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+      {/* Financial Summary */}
+      <Card className="mt-6">
+        <CardContent className="p-4">
+          <div className="flex items-center mb-4">
+            <BarChart3 className="h-5 w-5 text-muted-foreground mr-2" />
+            <h3 className="text-base font-medium text-foreground">
+              Financial Summary
+            </h3>
+          </div>
+          
+          <div className="space-y-4">
+            {/* Monthly Balance */}
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-muted-foreground">Monthly Balance</span>
+                <span className={stats?.monthlyIncome - stats?.monthlyExpenses >= 0 
+                  ? 'text-success' 
+                  : 'text-destructive'
+                }>
+                  {formatCurrency(Math.abs(stats?.monthlyIncome - stats?.monthlyExpenses), currency)}
+                  {stats?.monthlyIncome - stats?.monthlyExpenses < 0 && ' (Deficit)'}
+                </span>
+              </div>
+              <Progress
+                value={(stats?.monthlyIncome / (stats?.monthlyExpenses || 1)) * 100}
+                variant={stats?.monthlyIncome >= stats?.monthlyExpenses ? 'success' : 'destructive'}
+                className="bg-gradient-to-r from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30"
+              />
+            </div>
+
+            {/* Monthly Stats */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10 rounded-xl p-4">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Monthly Income
+                </h4>
+                <p className="mt-2 text-2xl font-semibold text-success">
+                  {formatCurrency(stats?.monthlyIncome || 0, currency)}
+                </p>
+                <p className="mt-1 text-sm text-success/70">
+                  Total income this month
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/10 dark:to-red-900/10 rounded-xl p-4">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Monthly Expenses
+                </h4>
+                <p className="mt-2 text-2xl font-semibold text-destructive">
+                  {formatCurrency(stats?.monthlyExpenses || 0, currency)}
+                </p>
+                <p className="mt-1 text-sm text-destructive/70">
+                  Total expenses this month
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Links */}
+      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
         <Card>
-          <div className="p-6">
-            <div className="flex items-center mb-6">
-              <Calendar className="h-5 w-5 text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">Quick Links</h3>
+          <CardContent className="p-4">
+            <div className="flex items-center mb-4">
+              <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
+              <h3 className="text-base font-medium text-foreground">Quick Links</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link to="/finances/transactions">
-                <Card hoverable className="h-full">
-                  <div className="p-4 flex items-center space-x-3">
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4 flex items-center space-x-3">
                     <div className="flex-shrink-0">
-                      <DollarSign className="h-6 w-6 text-primary-500" />
+                      <DollarSign className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900">Transactions</h4>
-                      <p className="text-xs text-gray-500">View all financial records</p>
+                      <h4 className="text-sm font-medium text-foreground">Transactions</h4>
+                      <p className="text-xs text-muted-foreground">View all financial records</p>
                     </div>
-                  </div>
+                  </CardContent>
                 </Card>
               </Link>
               <Link to="/finances/budgets">
-                <Card hoverable className="h-full">
-                  <div className="p-4 flex items-center space-x-3">
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4 flex items-center space-x-3">
                     <div className="flex-shrink-0">
-                      <PiggyBank className="h-6 w-6 text-primary-500" />
+                      <PiggyBank className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900">Budgets</h4>
-                      <p className="text-xs text-gray-500">Manage budget allocations</p>
+                      <h4 className="text-sm font-medium text-foreground">Budgets</h4>
+                      <p className="text-xs text-muted-foreground">Manage budget allocations</p>
                     </div>
-                  </div>
+                  </CardContent>
                 </Card>
               </Link>
               <Link to="/finances/reports">
-                <Card hoverable className="h-full">
-                  <div className="p-4 flex items-center space-x-3">
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4 flex items-center space-x-3">
                     <div className="flex-shrink-0">
-                      <FileText className="h-6 w-6 text-primary-500" />
+                      <FileText className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900">Reports</h4>
-                      <p className="text-xs text-gray-500">Generate financial reports</p>
+                      <h4 className="text-sm font-medium text-foreground">Reports</h4>
+                      <p className="text-xs text-muted-foreground">Generate financial reports</p>
                     </div>
-                  </div>
+                  </CardContent>
                 </Card>
               </Link>
               <Link to="/finances/transactions/bulk">
-                <Card hoverable className="h-full">
-                  <div className="p-4 flex items-center space-x-3">
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4 flex items-center space-x-3">
                     <div className="flex-shrink-0">
-                      <Layers className="h-6 w-6 text-primary-500" />
+                      <Layers className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900">Bulk Entry</h4>
-                      <p className="text-xs text-gray-500">Enter multiple transactions</p>
+                      <h4 className="text-sm font-medium text-foreground">Bulk Entry</h4>
+                      <p className="text-xs text-muted-foreground">Enter multiple transactions</p>
                     </div>
-                  </div>
+                  </CardContent>
                 </Card>
               </Link>
             </div>
-          </div>
+          </CardContent>
         </Card>
 
         <Card>
-          <div className="p-6">
-            <div className="flex items-center mb-6">
-              <DollarSign className="h-5 w-5 text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">Bulk Operations</h3>
+          <CardContent className="p-4">
+            <div className="flex items-center mb-4">
+              <DollarSign className="h-5 w-5 text-muted-foreground mr-2" />
+              <h3 className="text-base font-medium text-foreground">Bulk Operations</h3>
             </div>
             <div className="space-y-4">
               <Link to="/finances/transactions/bulk">
-                <Card hoverable>
-                  <div className="p-4 flex items-center justify-between">
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Layers className="h-6 w-6 text-primary-500" />
+                      <Layers className="h-6 w-6 text-primary" />
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">Bulk Transaction Entry</h4>
-                        <p className="text-xs text-gray-500">Enter multiple transactions at once</p>
+                        <h4 className="text-sm font-medium text-foreground">Bulk Transaction Entry</h4>
+                        <p className="text-xs text-muted-foreground">Enter multiple transactions at once</p>
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400" />
-                  </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </CardContent>
                 </Card>
               </Link>
               <Link to="/finances/transactions/bulk-income">
-                <Card hoverable>
-                  <div className="p-4 flex items-center justify-between">
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <TrendingUp className="h-6 w-6 text-green-500" />
+                      <TrendingUp className="h-6 w-6 text-success" />
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">Bulk Income Entry</h4>
-                        <p className="text-xs text-gray-500">Record multiple income transactions</p>
+                        <h4 className="text-sm font-medium text-foreground">Bulk Income Entry</h4>
+                        <p className="text-xs text-muted-foreground">Record multiple income transactions</p>
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400" />
-                  </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </CardContent>
                 </Card>
               </Link>
               <Link to="/finances/transactions/bulk-expense">
-                <Card hoverable>
-                  <div className="p-4 flex items-center justify-between">
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <TrendingDown className="h-6 w-6 text-red-500" />
+                      <TrendingDown className="h-6 w-6 text-destructive" />
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">Bulk Expense Entry</h4>
-                        <p className="text-xs text-gray-500">Record multiple expense transactions</p>
+                        <h4 className="text-sm font-medium text-foreground">Bulk Expense Entry</h4>
+                        <p className="text-xs text-muted-foreground">Record multiple expense transactions</p>
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400" />
-                  </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </CardContent>
                 </Card>
               </Link>
             </div>
-          </div>
+          </CardContent>
         </Card>
       </div>
     </div>

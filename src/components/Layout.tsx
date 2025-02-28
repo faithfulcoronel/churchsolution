@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useLocation, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
@@ -6,48 +6,50 @@ import { useAuthStore } from '../stores/authStore';
 import { usePermissions } from '../hooks/usePermissions';
 import PermissionGate from './PermissionGate';
 import ChurchBranding from './ChurchBranding';
-import Footer from './Footer';
-import { Container } from './ui/Container';
-import { Button } from './ui/Button';
-import { Menu, MenuItem, MenuHeader, MenuDivider } from './ui/Menu';
-import { Dropdown } from './ui/Dropdown';
-import { Badge } from './ui/Badge';
+import { Button } from './ui2/button';
+import { Input } from './ui2/input';
+import { Separator } from './ui2/separator';
+import { 
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from './ui2/dropdown-menu';
+import { Avatar } from './ui2/avatar';
+import { Badge } from './ui2/badge';
 import {
   Home,
   Users,
   DollarSign,
   Settings as SettingsIcon,
   LogOut,
-  Menu as MenuIcon,
-  ChevronDown,
-  Shield,
-  UserCog,
-  Database,
+  Menu as MenuIcon2,
   Building2,
   Crown,
   Sparkles,
+  ChevronDown,
+  ChevronRight,
+  UserCog,
+  Shield,
+  Database,
+  FileText,
+  Bell,
+  User,
+  Key,
+  CreditCard,
+  HelpCircle,
+  Search,
+  Church,
 } from 'lucide-react';
 
 function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { hasPermission } = usePermissions();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const { hasPermission, isAdmin } = usePermissions();
-
-  // Get current tenant subscription
-  const { data: tenant } = useQuery({
-    queryKey: ['tenant-settings'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_current_tenant');
-
-      if (error) throw error;
-      return data?.[0];
-    },
-  });
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Get associated member data
   const { data: memberData } = useQuery({
@@ -72,28 +74,33 @@ function Layout() {
     enabled: !!user?.email,
   });
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setProfileOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Redirect to login if not authenticated
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  // Get current tenant subscription
+  const { data: tenant } = useQuery({
+    queryKey: ['tenant-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_current_tenant');
+      if (error) throw error;
+      return data?.[0];
+    },
+  });
 
   const navigation = [
     { 
       name: 'Dashboard', 
-      href: '/dashboard', 
       icon: Home,
-      permission: null 
+      permission: null,
+      submenu: [
+        {
+          name: 'Church Overview',
+          href: '/dashboard/church',
+          icon: Building2,
+        },
+        {
+          name: 'Personal Overview',
+          href: '/dashboard/personal',
+          icon: User,
+        }
+      ]
     },
     { 
       name: 'Members', 
@@ -105,345 +112,363 @@ function Layout() {
       name: 'Finances', 
       href: '/finances', 
       icon: DollarSign,
-      permission: 'finance.view' 
+      permission: 'finance.view',
+      submenu: [
+        {
+          name: 'Overview',
+          href: '/finances',
+          icon: FileText,
+        },
+        {
+          name: 'Transactions',
+          href: '/finances/transactions',
+          icon: DollarSign,
+        },
+        {
+          name: 'Budgets',
+          href: '/finances/budgets',
+          icon: FileText,
+        },
+        {
+          name: 'Reports',
+          href: '/finances/reports',
+          icon: FileText,
+        },
+      ]
     },
   ];
 
-  const adminNavigation = [
-    {
-      name: 'Users',
-      href: '/admin/users',
-      icon: UserCog,
-      permission: 'user.view'
-    },
-    {
-      name: 'Roles',
-      href: '/admin/roles',
-      icon: Shield,
-      permission: 'role.view'
-    },
-    {
-      name: 'Church Settings',
-      href: '/admin/settings',
-      icon: Building2,
-      permission: null
-    }
-  ];
+  // Filter navigation items based on search term
+  const filteredNavigation = useMemo(() => {
+    if (!searchTerm) return navigation;
 
-  // Check if any admin menu items are accessible
-  const hasAdminAccess = adminNavigation.some(item => 
-    !item.permission || hasPermission(item.permission) || isAdmin()
-  );
+    const searchLower = searchTerm.toLowerCase();
+    
+    return navigation.filter(item => {
+      // Check if main item matches
+      const mainItemMatches = item.name.toLowerCase().includes(searchLower);
+      
+      // Check if any submenu items match
+      const submenuMatches = item.submenu?.some(
+        subitem => subitem.name.toLowerCase().includes(searchLower)
+      );
 
-  const renderNavLink = (item: typeof navigation[0]) => (
-    <PermissionGate
-      key={item.name}
-      permission={item.permission}
-    >
-      <Link
-        to={item.href}
-        onClick={() => setSidebarOpen(false)}
-        className={`
-          group flex items-center rounded-lg px-3 py-2 text-sm font-medium
-          transition-colors duration-200
-          ${location.pathname.startsWith(item.href)
-            ? 'bg-primary text-white dark:bg-primary dark:text-white'
-            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-          }
-        `}
-      >
-        {React.createElement(item.icon, {
-          className: `mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
-            location.pathname.startsWith(item.href)
-              ? 'text-white'
-              : 'text-gray-400 group-hover:text-white'
-          }`,
-        })}
-        {item.name}
-      </Link>
-    </PermissionGate>
-  );
+      // Show item if either main item or any submenu items match
+      return mainItemMatches || submenuMatches;
+    }).map(item => {
+      // If item has submenu, filter submenu items too
+      if (item.submenu) {
+        return {
+          ...item,
+          submenu: item.submenu.filter(
+            subitem => subitem.name.toLowerCase().includes(searchLower)
+          )
+        };
+      }
+      return item;
+    });
+  }, [navigation, searchTerm]);
 
-  const renderSubscribeButton = () => (
-    <Link to="/settings/subscription" className="px-4">
-      <div className={`
-        relative overflow-hidden
-        rounded-xl
-        ${tenant?.subscription_tier === 'free'
-          ? 'bg-gradient-to-r from-primary-600 to-primary-400'
-          : 'bg-gradient-to-r from-primary-700 to-primary-500'
-        }
-        group
-        transition-all duration-300
-        hover:shadow-lg
-        transform hover:-translate-y-1
-      `}>
-        <div className="absolute inset-0 bg-white dark:bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-        
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Crown className={`
-              h-5 w-5 text-white
-              ${tenant?.subscription_tier === 'free' ? 'animate-bounce' : ''}
-            `} />
-            <div>
-              <p className="text-white font-medium">
-                {tenant?.subscription_tier === 'free' ? 'Subscribe Now' : 'Upgrade Plan'}
-              </p>
-              <p className="text-xs text-white/80">
-                {tenant?.subscription_tier === 'free'
-                  ? 'Unlock premium features'
-                  : 'Explore more features'
-                }
-              </p>
-            </div>
-          </div>
-          <Sparkles className="h-5 w-5 text-white opacity-75 group-hover:opacity-100" />
-        </div>
+  const handleLogout = async () => {
+    await useAuthStore.getState().signOut();
+    navigate('/login');
+  };
 
-        {/* Animated border */}
-        <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
-        
-        {tenant?.subscription_tier === 'free' && (
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-white to-yellow-400 animate-shimmer" />
-        )}
-      </div>
-    </Link>
-  );
+  // Check if current route is a settings page
+  const isSettingsPage = location.pathname.startsWith('/settings');
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-40 lg:hidden" 
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Mobile sidebar */}
-      <div
-        className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 transform transition-transform duration-300 ease-in-out lg:hidden
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
-        <div className="flex h-full flex-col">
-          <div className="flex h-16 flex-shrink-0 items-center px-4 bg-gray-800">
-            <ChurchBranding />
-          </div>
-          <div className="flex flex-1 flex-col overflow-y-auto">
-            <nav className="flex-1 space-y-1 px-2 py-4">
-              {navigation.map(renderNavLink)}
-
-              {/* Admin Section */}
-              {hasAdminAccess && (
-                <div className="relative">
-                  <div
-                    className="relative mt-6 flex items-center px-2"
-                    aria-hidden="true"
-                  >
-                    <div className="flex-grow border-t border-gray-800" />
-                    <span className="mx-2 flex items-center text-sm font-medium text-gray-400">
-                      Admin
-                    </span>
-                    <div className="flex-grow border-t border-gray-800" />
-                  </div>
-
-                  {adminNavigation.map(renderNavLink)}
-                </div>
-              )}
-            </nav>
-
-            {/* Bottom Section */}
-            <div className="flex-shrink-0 border-t border-gray-800 p-4 space-y-4">
-              {/* Subscribe Button */}
-              {renderSubscribeButton()}
-
-              {/* Settings Link */}
-              <Link
-                to="/settings"
-                className={`
-                  group flex items-center rounded-lg px-4 py-2.5 text-sm font-medium
-                  transition-all duration-200 ease-in-out
-                  ${location.pathname.startsWith('/settings')
-                    ? 'bg-gray-800 text-white'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                  }
-                `}
-              >
-                <SettingsIcon className={`
-                  mr-3 h-5 w-5 flex-shrink-0 transition-transform duration-200
-                  ${location.pathname.startsWith('/settings')
-                    ? 'text-white rotate-90'
-                    : 'text-gray-400 group-hover:text-white group-hover:rotate-90'
-                  }
-                `} />
-                <span className="flex-1">Settings</span>
-                {tenant?.subscription_tier === 'free' && (
-                  <Badge variant="primary" size="sm">
-                    Free
-                  </Badge>
-                )}
-              </Link>
-            </div>
+    <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900">
+      {/* Sidebar */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 flex flex-col
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0
+      `}>
+        {/* StewardTrack Logo */}
+        <div className="flex-shrink-0 h-16 flex items-center justify-center px-4 bg-gray-900">
+          <div className="flex items-center space-x-2">
+            <Church className="h-8 w-8 text-primary" />
+            <span className="text-xl font-bold text-white">StewardTrack</span>
           </div>
         </div>
-      </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col bg-gray-900">
-          <div className="flex h-16 items-center px-4 bg-gray-800">
-            <ChurchBranding />
-          </div>
-          <div className="flex flex-1 flex-col overflow-y-auto">
-            <nav className="flex-1 space-y-1 px-2 py-4">
-              {navigation.map(renderNavLink)}
+        {/* Search Bar */}
+        <div className="px-4 py-4">
+          <Input
+            placeholder="Search menu..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon={<Search className="h-4 w-4" />}
+            className="bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500 focus:border-primary focus:ring-primary"
+          />
+        </div>
 
-              {/* Admin Section */}
-              {hasAdminAccess && (
-                <div className="relative">
-                  <div
-                    className="relative mt-6 flex items-center px-2"
-                    aria-hidden="true"
+        <Separator className="bg-gray-800" />
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-2 py-4">
+          {filteredNavigation.map((item) => (
+            <PermissionGate
+              key={item.name}
+              permission={item.permission}
+            >
+              {item.submenu ? (
+                <div>
+                  <button
+                    onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
+                    className={`
+                      w-full group flex items-center rounded-lg px-3 py-2 text-sm font-medium
+                      transition-colors duration-200
+                      ${location.pathname.startsWith(item.href)
+                        ? 'bg-primary text-white'
+                        : openSubmenu === item.name
+                        ? 'bg-gray-800 text-gray-300'
+                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      }
+                    `}
                   >
-                    <div className="flex-grow border-t border-gray-800" />
-                    <span className="mx-2 flex items-center text-sm font-medium text-gray-400">
-                      Admin
-                    </span>
-                    <div className="flex-grow border-t border-gray-800" />
-                  </div>
-
-                  {adminNavigation.map(renderNavLink)}
+                    <div className="flex items-center flex-1">
+                      <item.icon className={`
+                        h-5 w-5 flex-shrink-0 transition-colors
+                        ${location.pathname.startsWith(item.href)
+                          ? 'text-white'
+                          : 'text-gray-400 group-hover:text-white'
+                        }
+                      `} />
+                      <span className="ml-3">{item.name}</span>
+                    </div>
+                    <ChevronRight className={`
+                      h-4 w-4 transition-transform duration-200
+                      ${openSubmenu === item.name ? 'rotate-90' : ''}
+                      ${location.pathname.startsWith(item.href)
+                        ? 'text-white'
+                        : 'text-gray-400 group-hover:text-white'
+                      }
+                    `} />
+                  </button>
+                  {openSubmenu === item.name && item.submenu.length > 0 && (
+                    <div className="ml-8 mt-2 space-y-1">
+                      {item.submenu.map((subitem) => (
+                        <Link
+                          key={subitem.name}
+                          to={subitem.href}
+                          className={`
+                            group flex items-center rounded-lg px-3 py-2 text-sm font-medium
+                            transition-colors duration-200
+                            ${location.pathname === subitem.href
+                              ? 'bg-primary text-white'
+                              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                            }
+                          `}
+                        >
+                          <subitem.icon className={`
+                            mr-3 h-4 w-4 flex-shrink-0 transition-colors
+                            ${location.pathname === subitem.href
+                              ? 'text-white'
+                              : 'text-gray-400 group-hover:text-white'
+                            }
+                          `} />
+                          {subitem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <Link
+                  to={item.href}
+                  className={`
+                    group flex items-center rounded-lg px-3 py-2 text-sm font-medium
+                    transition-colors duration-200
+                    ${location.pathname.startsWith(item.href)
+                      ? 'bg-primary text-white'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }
+                  `}
+                >
+                  <item.icon className={`
+                    mr-3 h-5 w-5 flex-shrink-0 transition-colors
+                    ${location.pathname.startsWith(item.href)
+                      ? 'text-white'
+                      : 'text-gray-400 group-hover:text-white'
+                    }
+                  `} />
+                  {item.name}
+                </Link>
               )}
-            </nav>
+            </PermissionGate>
+          ))}
 
-            {/* Bottom Section */}
-            <div className="flex-shrink-0 border-t border-gray-800 p-4 space-y-4">
-              {/* Subscribe Button */}
-              {renderSubscribeButton()}
-
-              {/* Settings Link */}
-              <Link
-                to="/settings"
-                className={`
-                  group flex items-center rounded-lg px-4 py-2.5 text-sm font-medium
-                  transition-all duration-200 ease-in-out
-                  ${location.pathname.startsWith('/settings')
-                    ? 'bg-gray-800 text-white'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                  }
-                `}
-              >
-                <SettingsIcon className={`
-                  mr-3 h-5 w-5 flex-shrink-0 transition-transform duration-200
-                  ${location.pathname.startsWith('/settings')
-                    ? 'text-white rotate-90'
-                    : 'text-gray-400 group-hover:text-white group-hover:rotate-90'
-                  }
-                `} />
-                <span className="flex-1">Settings</span>
-                {tenant?.subscription_tier === 'free' && (
-                  <Badge variant="primary" size="sm">
-                    Free
-                  </Badge>
-                )}
-              </Link>
+          {/* No results message */}
+          {filteredNavigation.length === 0 && (
+            <div className="px-3 py-2 text-sm text-gray-500">
+              No menu items found
             </div>
-          </div>
+          )}
+        </nav>
+
+        {/* Bottom Section - Fixed */}
+        <div className="flex-shrink-0 border-t border-gray-800 p-4 space-y-4">
+          {/* Subscribe Button */}
+          <Link to="/settings/subscription">
+            <div className={`
+              relative overflow-hidden
+              rounded-xl
+              ${tenant?.subscription_tier === 'free'
+                ? 'bg-gradient-to-r from-primary-600 to-primary-400'
+                : 'bg-gradient-to-r from-primary-700 to-primary-500'
+              }
+              group
+              transition-all duration-300
+              hover:shadow-lg
+              transform hover:-translate-y-1
+            `}>
+              <div className="absolute inset-0 bg-white dark:bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+              
+              <div className="px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Crown className={`
+                    h-5 w-5 text-white
+                    ${tenant?.subscription_tier === 'free' ? 'animate-bounce' : ''}
+                  `} />
+                  <div>
+                    <p className="text-white font-medium">
+                      {tenant?.subscription_tier === 'free' ? 'Subscribe Now' : 'Upgrade Plan'}
+                    </p>
+                    <p className="text-xs text-white/80">
+                      {tenant?.subscription_tier === 'free'
+                        ? 'Unlock premium features'
+                        : 'Explore more features'
+                      }
+                    </p>
+                  </div>
+                </div>
+                <Sparkles className="h-5 w-5 text-white opacity-75 group-hover:opacity-100" />
+              </div>
+
+              {tenant?.subscription_tier === 'free' && (
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-white to-yellow-400 animate-shimmer" />
+              )}
+            </div>
+          </Link>
+
+          {/* Settings Button - Updated with active state */}
+          <Button
+            variant="ghost"
+            className={`
+              w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800
+              ${isSettingsPage ? 'bg-primary text-white' : ''}
+            `}
+            onClick={() => navigate('/settings')}
+          >
+            <SettingsIcon className={`h-5 w-5 mr-2 ${isSettingsPage ? 'text-white' : ''}`} />
+            Settings
+            {tenant?.subscription_tier === 'free' && (
+              <Badge variant="primary" size="sm" className="ml-auto">
+                Free
+              </Badge>
+            )}
+          </Button>
         </div>
       </div>
 
       {/* Main content wrapper */}
-      <div className="flex flex-1 flex-col lg:pl-64">
+      <div className="flex-1 flex flex-col min-h-screen lg:pl-64">
         {/* Top navigation */}
-        <div className="sticky top-0 z-40 flex h-16 flex-shrink-0 bg-white dark:bg-gray-800 shadow dark:shadow-none border-b border-gray-200 dark:border-gray-700">
+        <div className="sticky top-0 z-40 flex h-16 flex-shrink-0 bg-white border-b shadow-sm">
           <Button
             variant="ghost"
-            className="border-r border-gray-200 dark:border-gray-700 px-6 py-8 text-gray-500 dark:text-gray-400 lg:hidden"
+            className="border-r px-4 text-gray-500 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
-            <MenuIcon className="h-6 w-6" />
+            <MenuIcon2 className="h-6 w-6" />
           </Button>
-          <div className="flex flex-1 justify-end px-4">
+
+          {/* Tenant Branding - Added pl-6 for spacing */}
+          <div className="flex-1 pl-6 flex items-center">
+            <ChurchBranding />
+          </div>
+
+          <div className="flex items-center px-4">
             <div className="ml-4 flex items-center md:ml-6">
               {/* Profile dropdown */}
-              <Dropdown
-                trigger={
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="flex max-w-xs items-center rounded-full bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                    className="flex max-w-xs items-center rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   >
                     <span className="sr-only">Open user menu</span>
                     <div className="flex items-center gap-2">
                       {memberData?.profile_picture_url ? (
-                        <img
+                        <Avatar
                           src={memberData.profile_picture_url}
                           alt={`${memberData.first_name} ${memberData.last_name}`}
-                          className="h-8 w-8 rounded-full object-cover bg-gray-100 dark:bg-gray-700"
+                          className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="h-8 w-8 rounded-full bg-primary-light dark:bg-primary-light flex items-center justify-center">
-                          <span className="text-primary dark:text-primary font-medium">
+                        <div className="h-8 w-8 rounded-full bg-primary-light flex items-center justify-center">
+                          <span className="text-primary font-medium">
                             {memberData ? memberData.first_name[0] : user.email[0].toUpperCase()}
                           </span>
                         </div>
                       )}
                       <div className="hidden md:flex md:items-center">
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <span className="text-sm font-medium text-gray-900">
                           {memberData ? `${memberData.first_name} ${memberData.last_name}` : user.email}
                         </span>
-                        <ChevronDown className="ml-2 h-4 w-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
+                        <ChevronDown className="ml-2 h-4 w-4 text-gray-500" aria-hidden="true" />
                       </div>
                     </div>
                   </button>
-                }
-                align="right"
-                width="sm"
-              >
-                <Menu>
-                  <MenuHeader>Account</MenuHeader>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
                   {memberData && (
-                    <MenuItem
-                      icon={<Users />}
-                      onClick={() => navigate(`/members/${memberData.id}`)}
-                    >
-                      View Profile
-                    </MenuItem>
+                    <DropdownMenuItem onClick={() => navigate(`/members/${memberData.id}`)}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>View Profile</span>
+                    </DropdownMenuItem>
                   )}
-                  <MenuItem
-                    icon={<SettingsIcon />}
-                    onClick={() => navigate('/settings')}
-                    description="Account preferences and settings"
-                  >
-                    Settings
-                  </MenuItem>
-                  <MenuDivider />
-                  <MenuItem
-                    icon={<LogOut />}
-                    onClick={() => useAuthStore.getState().signOut()}
-                    destructive
-                  >
-                    Sign out
-                  </MenuItem>
-                </Menu>
-              </Dropdown>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <SettingsIcon className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
 
         {/* Main content */}
-        <main className="flex-1">
-          <Container className="py-6">
+        <main className="flex-1 bg-white">
+          <div className="px-8 py-6">
             <Outlet />
-          </Container>
+          </div>
         </main>
 
-        {/* Footer */}
-        <Footer />
+        {/* Footer - Fixed */}
+        <footer className="bg-white border-t py-4 px-6 lg:pl-64">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between">
+            <div className="text-sm text-gray-500">
+              © {new Date().getFullYear()} Steward Track. All rights reserved.
+            </div>
+            <div className="flex items-center space-x-4 mt-2 sm:mt-0">
+              <Link to="/settings/privacy" className="text-sm text-gray-500 hover:text-gray-700">
+                Privacy Policy
+              </Link>
+              <Link to="/settings/terms" className="text-sm text-gray-500 hover:text-gray-700">
+                Terms of Service
+              </Link>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

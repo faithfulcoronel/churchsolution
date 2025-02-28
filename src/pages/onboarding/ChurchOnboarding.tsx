@@ -1,16 +1,53 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useMessageStore } from '../../components/MessageHandler';
-import { RegistrationProgress } from '../../components/RegistrationProgress';
-import { Building2 } from 'lucide-react';
+import { Card, CardContent } from '../../components/ui2/card';
+import { Progress } from '../../components/ui2/progress';
+import { Badge } from '../../components/ui2/badge';
+import {
+  Building2,
+  UserPlus,
+  Database,
+  CheckCircle2,
+  Loader2,
+  Tag,
+} from 'lucide-react';
 
 function ChurchOnboarding() {
   const navigate = useNavigate();
   const { addMessage } = useMessageStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [registrationData, setRegistrationData] = useState<any>(null);
-  const registrationAttempted = useRef(false);
+  const [isComplete, setIsComplete] = useState(false);
+
+  const steps = [
+    {
+      title: 'Creating Church Account',
+      description: 'Setting up your church profile and configuration',
+      icon: Building2,
+    },
+    {
+      title: 'Setting Up Admin User',
+      description: 'Creating your administrator account with proper permissions',
+      icon: UserPlus,
+    },
+    {
+      title: 'Initializing Database',
+      description: 'Preparing your database and initial settings',
+      icon: Database,
+    },
+    {
+      title: 'Setting Up Categories',
+      description: 'Configuring membership types, transaction categories, and more',
+      icon: Tag,
+    },
+    {
+      title: 'Completing Setup',
+      description: 'Finalizing your church administration system',
+      icon: CheckCircle2,
+    },
+  ];
 
   useEffect(() => {
     // Get registration data from session storage
@@ -22,12 +59,7 @@ function ChurchOnboarding() {
 
     const parsedData = JSON.parse(data);
     setRegistrationData(parsedData);
-
-    // Only start registration if not already attempted
-    if (!registrationAttempted.current) {
-      registrationAttempted.current = true;
-      handleRegistration(parsedData);
-    }
+    handleRegistration(parsedData);
   }, [navigate]);
 
   const handleRegistration = async (data: any) => {
@@ -43,7 +75,7 @@ function ChurchOnboarding() {
       // Step 3: Initializing Database
       setCurrentStep(2);
       
-      // Create tenant
+      // Create tenant with categories
       const { error: tenantError } = await supabase.rpc('handle_new_tenant_registration', {
         p_user_id: data.userId,
         p_tenant_name: data.churchName,
@@ -62,8 +94,12 @@ function ChurchOnboarding() {
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Step 4: Completing Setup
+      // Step 4: Setting Up Categories
       setCurrentStep(3);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Step 5: Completing Setup
+      setCurrentStep(4);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Clear registration data
@@ -75,6 +111,8 @@ function ChurchOnboarding() {
         text: 'Church setup completed successfully! Please check your email to verify your account.',
         duration: 5000,
       });
+
+      setIsComplete(true);
 
       // Redirect to login
       setTimeout(() => {
@@ -111,11 +149,116 @@ function ChurchOnboarding() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <RegistrationProgress
-        isOpen={true}
-        currentStep={currentStep}
-      />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-2xl">
+        <CardContent className="p-6">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="relative mx-auto h-12 w-12">
+              <Building2 className={`
+                absolute inset-0 h-12 w-12 text-primary
+                transition-all duration-500 transform
+                ${isComplete ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}
+              `} />
+              <CheckCircle2 className={`
+                absolute inset-0 h-12 w-12 text-success
+                transition-all duration-500 transform
+                ${isComplete ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}
+              `} />
+            </div>
+            <h2 className="mt-4 text-2xl font-bold text-gray-900">
+              {isComplete ? 'Setup Complete!' : 'Setting Up Your Church'}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {isComplete
+                ? 'Your church administration system is ready to use'
+                : 'Please wait while we prepare your church administration system'}
+            </p>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="space-y-8">
+            {steps.map((step, index) => {
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep || isComplete;
+
+              return (
+                <div key={index} className="relative">
+                  {/* Step content */}
+                  <div className="flex items-start">
+                    <div className={`
+                      relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full
+                      ${isCompleted 
+                        ? 'bg-success text-success-foreground'
+                        : isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground'
+                      }
+                    `}>
+                      {isCompleted ? (
+                        <CheckCircle2 className="h-5 w-5" />
+                      ) : isActive ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <step.icon className="h-5 w-5" />
+                      )}
+                    </div>
+                    <div className="ml-4 min-w-0 flex-1">
+                      <div className="flex items-center">
+                        <p className={`
+                          text-sm font-medium
+                          ${isCompleted 
+                            ? 'text-success' 
+                            : isActive
+                            ? 'text-primary'
+                            : 'text-muted-foreground'
+                          }
+                        `}>
+                          {step.title}
+                        </p>
+                        {isActive && (
+                          <Badge variant="secondary" className="ml-2">
+                            In Progress
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  {index < steps.length - 1 && (
+                    <div className="absolute left-4 top-9 -ml-px h-full w-0.5">
+                      <div className={`h-full w-0.5 ${
+                        isCompleted ? 'bg-success' : 'bg-muted'
+                      }`} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Overall Progress */}
+          <div className="mt-8">
+            <Progress 
+              value={(currentStep / (steps.length - 1)) * 100}
+              className="h-2"
+            />
+          </div>
+
+          {/* Completion Message */}
+          {isComplete && (
+            <div className="mt-8 text-center animate-fade-in">
+              <p className="text-sm text-muted-foreground">
+                You will be redirected to the login page in a moment...
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

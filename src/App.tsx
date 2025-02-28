@@ -110,7 +110,7 @@ function App() {
           <React.Suspense
             fallback={
               <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
               </div>
             }
           >
@@ -136,7 +136,6 @@ function App() {
                   <Route path="/dashboard/*" element={<Dashboard />} />
                   <Route path="/members/*" element={<Members />} />
                   <Route path="/finances/*" element={<Finances />} />
-                  <Route path="/admin/*" element={<Admin />} />
                   <Route path="/settings/*" element={<Settings />} />
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />

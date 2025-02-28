@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Card, CardHeader, CardContent } from '../../components/ui2/card';
+import { Input } from '../../components/ui2/input';
+import { Button } from '../../components/ui2/button';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '../../components/ui2/alert-dialog';
+import { Lock, Loader2, Building2 } from 'lucide-react';
 
 function ResetPassword() {
   const navigate = useNavigate();
@@ -42,104 +54,96 @@ function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center space-y-2">
+          <div className="flex justify-center">
+            <Building2 className="h-12 w-12 text-primary" />
+          </div>
+          <h2 className="text-3xl font-bold">
             Reset your password
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Please enter your new password
           </p>
-        </div>
+        </CardHeader>
 
-        {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="flex">
-              <AlertCircle className="h-5 w-5 text-red-400" />
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">{error}</h3>
-              </div>
-            </div>
-          </div>
-        )}
+        <CardContent>
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <Input
+              type="password"
+              id="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="New password"
+              icon={<Lock className="h-5 w-5" />}
+              required
+              minLength={6}
+              showPasswordToggle
+            />
 
-        {success && (
-          <div className="rounded-md bg-green-50 p-4">
-            <div className="flex">
-              <CheckCircle2 className="h-5 w-5 text-green-400" />
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-green-800">
-                  Password updated successfully! Redirecting to login...
-                </h3>
-              </div>
-            </div>
-          </div>
-        )}
+            <Input
+              type="password"
+              id="confirm-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
+              icon={<Lock className="h-5 w-5" />}
+              required
+              minLength={6}
+              showPasswordToggle
+            />
 
-        <form className="mt-8 space-y-6" onSubmit={handleResetPassword}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="new-password" className="sr-only">
-                New Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="new-password"
-                  name="new- password"
-                  type="password"
-                  required
-                  className="appearance-none rounded-t-md relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                  placeholder="New password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={6}
-                />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="confirm-password" className="sr-only">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirm-password"
-                  name="confirm-password"
-                  type="password"
-                  required
-                  className="appearance-none rounded-b-md relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                  placeholder="Confirm new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  minLength={6}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <button
+            <Button
               type="submit"
+              className="w-full"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
             >
               {loading ? (
-                <Loader2 className="animate-spin h-5 w-5" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <>
                   <Lock className="h-5 w-5 mr-2" />
                   Reset Password
                 </>
               )}
-            </button>
-          </div>
-        </form>
-      </div>
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Error Dialog */}
+      <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="danger">
+              Password Reset Error
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {error}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogAction onClick={() => setError(null)}>
+            Try Again
+          </AlertDialogAction>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Success Dialog */}
+      <AlertDialog open={success} onOpenChange={() => setSuccess(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="success">
+              Password Reset Successful
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Your password has been updated successfully. Redirecting to login...
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogAction onClick={() => setSuccess(false)}>
+            Close
+          </AlertDialogAction>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

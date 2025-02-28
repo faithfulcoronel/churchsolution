@@ -3,10 +3,10 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.cortanatechsolutions.stewardtrack',
   appName: 'StewardTrack',
-  webDir: 'dist',
+  webDir: 'build',
   server: {
     url: "https://stewardtrack.com",  
-    cleartext: false
+    cleartext: true
   },
   android: {
     allowMixedContent: true

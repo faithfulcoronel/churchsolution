@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useMessageStore } from '../../components/MessageHandler';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
-import { Container } from '../../components/ui/Container';
-import { InputGroup, InputAddon } from '../../components/ui/InputGroup';
+import { Card, CardHeader, CardContent } from '../../components/ui2/card';
+import { Input } from '../../components/ui2/input';
+import { Button } from '../../components/ui2/button';
+import { Separator } from '../../components/ui2/separator';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '../../components/ui2/alert-dialog';
 import {
   Building2,
   Mail,
@@ -15,7 +23,7 @@ import {
   Phone,
   MapPin,
   Globe,
-  AlertCircle,
+  Loader2,
 } from 'lucide-react';
 
 type RegistrationData = {
@@ -187,41 +195,30 @@ function Register() {
   return (
     <div className="min-h-screen flex">
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 bg-white">
-        <Container>
-          <Card className="max-w-2xl w-full mx-auto">
-            <div className="text-center">
-              <div className="flex justify-center">
-                <Building2 className="h-12 w-12 text-primary-600" />
-              </div>
-              <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                Register Your Church
-              </h2>
-              <p className="mt-2 text-sm text-gray-600">
-                Or{' '}
-                <a
-                  href="/login"
-                  className="font-medium text-primary-600 hover:text-primary-500"
-                >
-                  sign in to your account
-                </a>
-              </p>
+        <Card className="w-full max-w-2xl mx-auto">
+          <CardHeader className="text-center space-y-2">
+            <div className="flex justify-center">
+              <Building2 className="h-12 w-12 text-primary" />
             </div>
+            <h2 className="text-3xl font-bold">
+              Register Your Church
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Or{' '}
+              <Link
+                to="/login"
+                className="font-medium text-primary hover:text-primary/90"
+              >
+                sign in to your account
+              </Link>
+            </p>
+          </CardHeader>
 
-            {error && (
-              <div className="mt-4 rounded-md bg-red-50 p-4">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">{error}</h3>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="mt-8 space-y-8">
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-8">
               {/* Admin Account Section */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Admin Account</h3>
+                <h3 className="text-lg font-medium mb-4">Admin Account</h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Input
@@ -278,9 +275,11 @@ function Register() {
                 </div>
               </div>
 
+              <Separator />
+
               {/* Church Information Section */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Church Information</h3>
+                <h3 className="text-lg font-medium mb-4">Church Information</h3>
                 <div className="space-y-4">
                   <Input
                     name="churchName"
@@ -291,23 +290,35 @@ function Register() {
                     icon={<Building2 />}
                   />
 
-                  <Input
-                    name="subdomain"
-                    label="Subdomain"
-                    value={formData.subdomain}
-                    onChange={(e) => setFormData(prev => ({ ...prev, subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))}
-                    required
-                    pattern="[a-z0-9-]+"
-                    icon={<Globe />}
-                    containerClassName="flex-1"
-                    inputClassName="rounded-r-none"
-                    rightElement={
-                      <InputAddon position="right">
-                        .stewardtrack.com
-                      </InputAddon>
-                    }
-                    helperText="Only lowercase letters, numbers, and hyphens allowed"
-                  />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Input
+                      name="subdomain"
+                      label="Subdomain"
+                      value={formData.subdomain}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') 
+                      }))}
+                      required
+                      pattern="[a-z0-9-]+"
+                      icon={<Globe />}
+                      rightElement={
+                        <div className="px-3 py-2 bg-muted text-muted-foreground text-sm">
+                          .stewardtrack.com
+                        </div>
+                      }
+                      helperText="Only lowercase letters, numbers, and hyphens allowed"
+                    />
+
+                    <Input
+                      name="website"
+                      label="Church Website"
+                      value={formData.website}
+                      onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                      icon={<Globe />}
+                      placeholder="https://example.com"
+                    />
+                  </div>
 
                   <Input
                     name="address"
@@ -318,47 +329,43 @@ function Register() {
                     icon={<MapPin />}
                   />
 
-                  <Input
-                    name="contactNumber"
-                    label="Contact Number"
-                    value={formData.contactNumber}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contactNumber: e.target.value }))}
-                    required
-                    icon={<Phone />}
-                  />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Input
+                      name="contactNumber"
+                      label="Contact Number"
+                      value={formData.contactNumber}
+                      onChange={(e) => setFormData(prev => ({ ...prev, contactNumber: e.target.value }))}
+                      required
+                      icon={<Phone />}
+                    />
 
-                  <Input
-                    type="email"
-                    name="churchEmail"
-                    label="Church Email"
-                    value={formData.churchEmail}
-                    onChange={(e) => setFormData(prev => ({ ...prev, churchEmail: e.target.value }))}
-                    required
-                    icon={<Mail />}
-                  />
-
-                  <Input
-                    type="url"
-                    name="website"
-                    label="Church Website"
-                    value={formData.website}
-                    onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                    icon={<Globe />}
-                    placeholder="https://example.com"
-                  />
+                    <Input
+                      type="email"
+                      name="churchEmail"
+                      label="Church Email"
+                      value={formData.churchEmail}
+                      onChange={(e) => setFormData(prev => ({ ...prev, churchEmail: e.target.value }))}
+                      required
+                      icon={<Mail />}
+                    />
+                  </div>
                 </div>
               </div>
 
               <Button
                 type="submit"
-                loading={loading}
                 className="w-full"
+                disabled={loading}
               >
-                Register Church
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  'Register Church'
+                )}
               </Button>
             </form>
-          </Card>
-        </Container>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Right side - Background Image */}
@@ -398,6 +405,23 @@ function Register() {
           </div>
         </div>
       </div>
+
+      {/* Error Dialog */}
+      <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="danger">
+              Registration Error
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {error}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogAction onClick={() => setError(null)}>
+            Try Again
+          </AlertDialogAction>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -53,7 +53,7 @@ function ChurchBranding() {
       <div className="ml-2 min-w-0">
         <h1 
           ref={nameRef}
-          className="text-lg font-semibold text-white truncate group relative"
+          className="text-lg font-semibold text-gray-900 truncate group relative"
           title={isNameTruncated ? tenant?.name : undefined}
         >
           {tenant?.name || 'Church Admin'}
@@ -63,11 +63,6 @@ function ChurchBranding() {
             </div>
           )}
         </h1>
-        {tenant?.subdomain && (
-          <p className="text-xs text-gray-400 truncate">
-            {tenant.subdomain}.stewardtrack.com
-          </p>
-        )}
       </div>
     </div>
   );

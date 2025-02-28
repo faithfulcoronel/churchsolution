@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useWelcomeStore } from '../stores/welcomeStore';
 import { WelcomeModal } from '../components/WelcomeModal';
 import ChurchDashboard from './dashboard/ChurchDashboard';
 import PersonalDashboard from './dashboard/PersonalDashboard';
-import DashboardLayout from './dashboard/DashboardLayout';
 
 function Dashboard() {
-  const location = useLocation();
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcome, setShowWelcome] = React.useState(false);
   const { hasSeenWelcome, setHasSeenWelcome } = useWelcomeStore();
 
   // Get current tenant
@@ -23,7 +21,7 @@ function Dashboard() {
     },
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (currentTenant && !hasSeenWelcome) {
       setShowWelcome(true);
     }
@@ -34,18 +32,12 @@ function Dashboard() {
     setHasSeenWelcome(true);
   };
 
-  // Only redirect if we're at exactly /dashboard
-  if (location.pathname === '/dashboard') {
-    return <Navigate to="/dashboard/church" replace />;
-  }
-
   return (
     <>
       <Routes>
-        <Route element={<DashboardLayout />}>
-          <Route path="church" element={<ChurchDashboard />} />
-          <Route path="personal" element={<PersonalDashboard />} />
-        </Route>
+        <Route index element={<Navigate to="/dashboard/church" replace />} />
+        <Route path="church" element={<ChurchDashboard />} />
+        <Route path="personal" element={<PersonalDashboard />} />
       </Routes>
 
       {/* Welcome Modal */}

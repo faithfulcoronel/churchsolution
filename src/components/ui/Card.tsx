@@ -1,4 +1,5 @@
 import React from 'react';
+import {Scrollable} from '../ui/Scrollable';
 
 interface CardProps {
   children: React.ReactNode;
@@ -82,6 +83,7 @@ export function Card({
         }
       } : undefined}
     >
+      <Scrollable height="10">
       {/* Gradient overlay for hover effect */}
       {hoverable && (
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/0 to-primary-500/0 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-200" />
@@ -120,6 +122,7 @@ export function Card({
           <div className="absolute inset-0 transform translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </div>
       )}
+      </Scrollable>
     </div>
   );
 }

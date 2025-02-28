@@ -1,3 +1,4 @@
+// src/components/ui2/slider.tsx
 import * as React from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 

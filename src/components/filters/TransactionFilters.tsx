@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
-import { Card } from '../ui/Card';
-import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
-import { Drawer } from '../ui/Drawer';
-import { DateRangeFilter } from './DateRangeFilter';
+import React from 'react';
+import { Card, CardContent } from '../ui2/card';
+import { Input } from '../ui2/input';
+import { Button } from '../ui2/button';
+import { Badge } from '../ui2/badge';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui2/select';
+import { DatePickerInput } from '../ui2/date-picker';
 import { AmountRangeFilter } from './AmountRangeFilter';
-import { TransactionTypeFilter } from './TransactionTypeFilter';
-import { CategoryFilter } from './CategoryFilter';
-import { Search, X, Filter, SlidersHorizontal } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+  X,
+  Calendar,
+} from 'lucide-react';
 
 export interface TransactionFilter {
   searchTerm: string;
@@ -43,183 +48,151 @@ export function TransactionFilters({
   onResetFilters,
   activeFilters,
 }: TransactionFiltersProps) {
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-
   return (
-    <>
-      <Card className="mt-6">
-        <div className="p-4 space-y-4">
-          {/* Mobile View */}
-          <div className="flex flex-col space-y-4 lg:hidden">
-            <div className="flex space-x-2">
-              <Input
-                placeholder="Search transactions..."
-                value={filters.searchTerm}
-                onChange={(e) => onFilterChange({ searchTerm: e.target.value })}
-                icon={<Search />}
-                clearable
-                onClear={() => onFilterChange({ searchTerm: '' })}
-                className="flex-1"
-              />
-              <Button
-                variant="outline"
-                onClick={() => setShowAdvancedFilters(true)}
-                icon={<SlidersHorizontal />}
-                className="whitespace-nowrap"
-              >
-                Filters
-                {activeFilters.length > 0 && (
-                  <Badge
-                    variant="primary"
-                    className="ml-2 !px-2 !py-0.5"
-                  >
-                    {activeFilters.length}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+    <Card className="mt-6">
+      <CardContent className="p-4 space-y-4">
+        {/* Search and Quick Filters */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <Input
+              placeholder="Search transactions..."
+              value={filters.searchTerm}
+              onChange={(e) => onFilterChange({ searchTerm: e.target.value })}
+              icon={<Search className="h-4 w-4" />}
+              clearable
+              onClear={() => onFilterChange({ searchTerm: '' })}
+            />
+          </div>
 
-            <TransactionTypeFilter
+          <div>
+            <Select
               value={filters.typeFilter}
-              onChange={(value) => onFilterChange({ typeFilter: value })}
-            />
+              onValueChange={(value) => onFilterChange({ typeFilter: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="income">
+                  <div className="flex items-center">
+                    <TrendingUp className="h-4 w-4 mr-2 text-success" />
+                    Income
+                  </div>
+                </SelectItem>
+                <SelectItem value="expense">
+                  <div className="flex items-center">
+                    <TrendingDown className="h-4 w-4 mr-2 text-destructive" />
+                    Expense
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Desktop View */}
-          <div className="hidden lg:block space-y-4">
-            {/* Search and Quick Filters */}
-            <div className="grid grid-cols-4 gap-4">
-              <div className="col-span-1">
-                <Input
-                  placeholder="Search transactions..."
-                  value={filters.searchTerm}
-                  onChange={(e) => onFilterChange({ searchTerm: e.target.value })}
-                  icon={<Search />}
-                  clearable
-                  onClear={() => onFilterChange({ searchTerm: '' })}
-                />
-              </div>
-
-              <TransactionTypeFilter
-                value={filters.typeFilter}
-                onChange={(value) => onFilterChange({ typeFilter: value })}
-              />
-
-              <CategoryFilter
-                value={filters.categoryFilter}
-                onChange={(value) => onFilterChange({ categoryFilter: value })}
-                transactionType={filters.typeFilter === 'all' ? undefined : filters.typeFilter}
-              />
-
-              <Input
-                placeholder="Search by member/budget..."
-                value={filters.entityFilter}
-                onChange={(e) => onFilterChange({ entityFilter: e.target.value })}
-                clearable
-                onClear={() => onFilterChange({ entityFilter: '' })}
-              />
-            </div>
-
-            {/* Date and Amount Range Filters */}
-            <div className="flex gap-4">
-              <DateRangeFilter
-                value={filters.dateRange}
-                onChange={(value) => onFilterChange({ dateRange: value })}
-              />
-
-              <AmountRangeFilter
-                value={filters.amountRange}
-                onChange={(value) => onFilterChange({ amountRange: value })}
-              />
-            </div>
-          </div>
-
-          {/* Active Filters */}
-          {activeFilters.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200">
-              {activeFilters.map(filter => (
-                <Badge
-                  key={filter.id}
-                  variant="secondary"
-                  className="flex items-center space-x-1 px-2 py-1"
-                >
-                  {filter.icon}
-                  <span>{filter.label}</span>
-                  <button
-                    onClick={filter.onRemove}
-                    className="ml-1 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onResetFilters}
-                icon={<X />}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                Clear All
-              </Button>
-            </div>
-          )}
-        </div>
-      </Card>
-
-      {/* Mobile Filter Drawer */}
-      <Drawer
-        isOpen={showAdvancedFilters}
-        onClose={() => setShowAdvancedFilters(false)}
-        title="Filters"
-        size="lg"
-      >
-        <div className="space-y-6 p-4">
-          <div className="space-y-4">
-            <CategoryFilter
+          <div>
+            <Select
               value={filters.categoryFilter}
-              onChange={(value) => onFilterChange({ categoryFilter: value })}
-              transactionType={filters.typeFilter === 'all' ? undefined : filters.typeFilter}
-            />
+              onValueChange={(value) => onFilterChange({ categoryFilter: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {/* Categories will be populated from the parent component */}
+              </SelectContent>
+            </Select>
+          </div>
 
+          <div>
             <Input
               placeholder="Search by member/budget..."
               value={filters.entityFilter}
               onChange={(e) => onFilterChange({ entityFilter: e.target.value })}
               clearable
               onClear={() => onFilterChange({ entityFilter: '' })}
-              label="Member/Budget"
             />
+          </div>
+        </div>
 
-            <DateRangeFilter
-              value={filters.dateRange}
-              onChange={(value) => onFilterChange({ dateRange: value })}
-            />
+        {/* Date and Amount Range */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">
+              Date Range
+            </label>
+            <div className="flex items-center space-x-2">
+              <div className="flex-1">
+                <DatePickerInput
+                  value={filters.dateRange.start ? new Date(filters.dateRange.start) : undefined}
+                  onChange={(date) => onFilterChange({
+                    dateRange: {
+                      ...filters.dateRange,
+                      start: date?.toISOString().split('T')[0] || '',
+                    }
+                  })}
+                  placeholder="Start Date"
+                  icon={<Calendar className="h-4 w-4" />}
+                />
+              </div>
+              <div className="flex-1">
+                <DatePickerInput
+                  value={filters.dateRange.end ? new Date(filters.dateRange.end) : undefined}
+                  onChange={(date) => onFilterChange({
+                    dateRange: {
+                      ...filters.dateRange,
+                      end: date?.toISOString().split('T')[0] || '',
+                    }
+                  })}
+                  placeholder="End Date"
+                  icon={<Calendar className="h-4 w-4" />}
+                />
+              </div>
+            </div>
+          </div>
 
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">
+              Amount Range
+            </label>
             <AmountRangeFilter
               value={filters.amountRange}
               onChange={(value) => onFilterChange({ amountRange: value })}
             />
           </div>
+        </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+        {/* Active Filters */}
+        {activeFilters.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border">
+            {activeFilters.map(filter => (
+              <Badge
+                key={filter.id}
+                variant="secondary"
+                className="flex items-center space-x-1 px-2 py-1"
+              >
+                {filter.icon}
+                <span>{filter.label}</span>
+                <button
+                  onClick={filter.onRemove}
+                  className="ml-1 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
             <Button
-              variant="outline"
-              onClick={() => setShowAdvancedFilters(false)}
+              variant="ghost"
+              size="sm"
+              onClick={onResetFilters}
+              className="text-muted-foreground hover:text-foreground"
             >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                setShowAdvancedFilters(false);
-              }}
-            >
-              Apply Filters
+              Clear All
             </Button>
           </div>
-        </div>
-      </Drawer>
-    </>
+        )}
+      </CardContent>
+    </Card>
   );
 }

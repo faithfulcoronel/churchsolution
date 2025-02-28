@@ -12,6 +12,7 @@ const BulkIncomeEntry = React.lazy(() => import('./BulkIncomeEntry'));
 const BulkExpenseEntry = React.lazy(() => import('./BulkExpenseEntry'));
 const BudgetList = React.lazy(() => import('./BudgetList'));
 const BudgetAdd = React.lazy(() => import('./BudgetAdd'));
+const BudgetEdit = React.lazy(() => import('./BudgetEdit'));
 const BudgetProfile = React.lazy(() => import('./BudgetProfile'));
 const Reports = React.lazy(() => import('./Reports'));
 
@@ -51,6 +52,7 @@ function Finances() {
         } />
         <Route path="budgets" element={<BudgetList />} />
         <Route path="budgets/add" element={<BudgetAdd />} />
+        <Route path="budgets/:id/edit" element={<BudgetEdit />} />
         <Route path="budgets/:id" element={<BudgetProfile />} />
         <Route path="reports" element={<Reports />} />
       </Routes>
