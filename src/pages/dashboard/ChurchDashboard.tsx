@@ -34,9 +34,19 @@ import {
 function ChurchDashboard() {
   const { currency } = useCurrencyStore();
 
+    // Get current tenant
+    const { data: currentTenant } = useQuery({
+      queryKey: ['current-tenant'],
+      queryFn: async () => {
+        const { data, error } = await supabase.rpc('get_current_tenant');
+        if (error) throw error;
+        return data?.[0];
+      },
+    });
+
   // Get monthly trends data
   const { data: monthlyTrends, isLoading: trendsLoading } = useQuery({
-    queryKey: ['monthly-trends'],
+    queryKey: ['monthly-trends',currentTenant?.id],
     queryFn: async () => {
       const today = new Date();
       const months = Array.from({ length: 12 }, (_, i) => {
@@ -60,6 +70,7 @@ function ChurchDashboard() {
                 type
               )
             `)
+            .eq('tenant_id', currentTenant?.id)
             .gte('date', format(startOfDay(start), 'yyyy-MM-dd'))
             .lte('date', format(endOfDay(end), 'yyyy-MM-dd'));
 
@@ -78,6 +89,7 @@ function ChurchDashboard() {
             .from('financial_transactions')
             .select('type, amount')
             .eq('type', 'income')
+            .eq('tenant_id', currentTenant?.id)
             .gte('date', format(startOfDay(startOfMonth(previousMonth)), 'yyyy-MM-dd'))
             .lte('date', format(endOfDay(endOfMonth(previousMonth)), 'yyyy-MM-dd'));
 
@@ -103,12 +115,13 @@ function ChurchDashboard() {
 
   // Get current month's data with matching date handling
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats',currentTenant?.id],
     queryFn: async () => {
       // Get total members count
       const { count: membersCount, error: membersError } = await supabase
         .from('members')
         .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', currentTenant?.id)
         .is('deleted_at', null);
 
       if (membersError) throw membersError;
@@ -128,6 +141,7 @@ function ChurchDashboard() {
             type
           )
         `)
+        .eq('tenant_id', currentTenant?.id)
         .gte('date', format(startOfDay(firstDayOfMonth), 'yyyy-MM-dd'))
         .lte('date', format(endOfDay(lastDayOfMonth), 'yyyy-MM-dd'));
 
@@ -162,6 +176,7 @@ function ChurchDashboard() {
       const { data: activeBudgets, error: budgetsError } = await supabase
         .from('budgets')
         .select('id')
+        .eq('tenant_id', currentTenant?.id)
         .gte('end_date', format(today, 'yyyy-MM-dd'))
         .lte('start_date', format(today, 'yyyy-MM-dd'));
 
