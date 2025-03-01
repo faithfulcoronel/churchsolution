@@ -8,3 +8,6 @@
 
 /* Shadcn UI */
 @import 'shadcn.ui';
+
+@import '@fontsource/urbanist';
+@import '@fontsource/inter';

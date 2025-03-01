@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+
+const defaultTheme = require('tailwindcss/defaultTheme');
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   darkMode: 'class',
@@ -187,7 +190,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif']
+        sans: ['Urbanist', ...defaultTheme.fontFamily.sans],
+        secondary: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         //begin: Shadcn UI Colors
