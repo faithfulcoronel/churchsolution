@@ -372,7 +372,7 @@ function Register() {
       <div className="hidden lg:block relative w-0 flex-1">
         <img
           className="absolute inset-0 h-full w-full object-cover"
-          src="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
+          src="\landing_bg.svg"
           alt="Church interior"
         />
         <div className="absolute inset-0 bg-primary-900 bg-opacity-50 backdrop-blur-sm"></div>
