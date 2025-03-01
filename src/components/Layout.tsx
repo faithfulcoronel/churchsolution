@@ -189,8 +189,7 @@ function Layout() {
         {/* StewardTrack Logo */}
         <div className="flex-shrink-0 h-16 flex items-center justify-center px-4 bg-gray-900">
           <div className="flex items-center space-x-2">
-            <Church className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-white">StewardTrack</span>
+            <img src="/logo_long.svg" alt="StewardTrack Logo with anme" />
           </div>
         </div>
 
