@@ -67,9 +67,6 @@ function Login() {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md mx-auto">
           <CardHeader className="text-center space-y-2">
-            <div className="flex justify-center">
-              <Building2 className="h-12 w-12 text-primary" />
-            </div>
             <h2 className="text-3xl font-bold">
               {resetMode ? 'Reset your password' : 'Sign in to your account'}
             </h2>
@@ -97,11 +94,12 @@ function Login() {
                   id="email-address"
                   name="email"
                   type="email"
+                  label="Email"
                   autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email address"
+                  placeholder="email@email.com"
                   icon={<Mail className="h-5 w-5" />}
                 />
 
@@ -110,11 +108,12 @@ function Login() {
                     id="password"
                     name="password"
                     type="password"
+                    label="Password"
                     autoComplete="current-password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder="Enter Password"
                     icon={<Lock className="h-5 w-5" />}
                     showPasswordToggle
                   />
@@ -150,8 +149,7 @@ function Login() {
                   </>
                 ) : (
                   <>
-                    <LogIn className="h-5 w-5 mr-2" />
-                    Sign in
+                    Sign In
                   </>
                 )}
               </Button>
@@ -172,7 +170,7 @@ function Login() {
           <div className="max-w-2xl mx-auto text-left text-white">
             <img className="h-12" src="/logo_long.svg" alt="Logo" />
             <br />
-            <h1 className="text-7xl font-bold mb-4">Making Church</h1>
+            <h1 className="text-7xl font-bold mb-4">Making church</h1>
             <h1 className="text-7xl font-bold mb-4">management</h1>
             <h1 className="text-7xl font-bold mb-4">much easier.</h1>
           </div>
