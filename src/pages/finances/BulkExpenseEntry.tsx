@@ -90,6 +90,7 @@ function BulkExpenseEntry() {
           const { data: transactions, error: transactionsError } = await supabase
             .from('financial_transactions')
             .select('amount')
+            .eq('tenant_id', currentTenant?.id)
             .eq('budget_id', budget.id)
             .eq('type', 'expense');
 
@@ -117,6 +118,7 @@ function BulkExpenseEntry() {
         .from('categories')
         .select('*')
         .eq('tenant_id', currentTenant?.id)
+        .eq('is_active', true)
         .eq('type', 'expense_transaction')
         .is('deleted_at', null)
         .order('sort_order');

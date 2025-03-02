@@ -88,6 +88,7 @@ function MemberEdit() {
         .select('*')
         .eq('type', 'membership')
         .eq('tenant_id', currentTenant?.id)
+        .eq('is_active', true)
         .is('deleted_at', null)
         .order('sort_order');
 
@@ -106,6 +107,7 @@ function MemberEdit() {
         .select('*')
         .eq('type', 'member_status')
         .eq('tenant_id', currentTenant?.id)
+        .eq('is_active', true)
         .is('deleted_at', null)
         .order('sort_order');
 
