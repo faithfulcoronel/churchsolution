@@ -24,7 +24,8 @@ import {
   Briefcase,
   Save,
   ArrowLeft,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
 
 type Member = {
@@ -165,6 +166,24 @@ function MemberAdd() {
     
     if (!formData.first_name || !formData.last_name || !formData.contact_number || !formData.address) {
       setError('Please fill in all required fields');
+      return;
+    }
+   
+    // Check if a member with the same first and last name already exists under the current tenant
+    const { data: existingMembers, error: memberCheckError } = await supabase
+      .from('members')
+      .select('id')
+      .eq('first_name', formData.first_name)
+      .eq('last_name', formData.last_name)
+      .eq('tenant_id', currentTenant?.id);
+
+    if (memberCheckError) {
+      setError('Error checking for duplicate member: ' + memberCheckError.message);
+      return;
+    }
+
+    if (existingMembers && existingMembers.length > 0) {
+      setError('A member with this first and last name already exists.');
       return;
     }
 
@@ -555,7 +574,8 @@ function MemberAdd() {
               <div className="rounded-md bg-destructive/15 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <span className="h-5 w-5 text-destructive" aria-hidden="true">⚠</span>
+                    {/* Use the lucide AlertTriangle icon */}
+                    <AlertTriangle className="h-5 w-5 text-destructive" aria-hidden="true" />
                   </div>
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-destructive">{error}</h3>

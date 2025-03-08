@@ -24,7 +24,8 @@ import {
   Briefcase,
   Save,
   ArrowLeft,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
 
 type Member = {
@@ -605,7 +606,8 @@ function MemberEdit() {
               <div className="rounded-md bg-destructive/15 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <span className="h-5 w-5 text-destructive" aria-hidden="true">⚠</span>
+                    {/* Use the lucide AlertTriangle icon */}
+                    <AlertTriangle className="h-5 w-5 text-destructive" aria-hidden="true" />
                   </div>
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-destructive">{error}</h3>
