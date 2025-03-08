@@ -2,7 +2,7 @@
 
 const defaultTheme = require('tailwindcss/defaultTheme');
 
-export default {
+module.exports = {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   darkMode: 'class',
   theme: {
@@ -247,14 +247,6 @@ export default {
           800: 'var(--tw-gray-800)',
           900: 'var(--tw-gray-900)'
         },
-        primary: {
-          DEFAULT: 'var(--tw-primary)',
-          active: 'var(--tw-primary-active)',
-          light: 'var(--tw-primary-light)',
-          clarity: 'var(--tw-primary-clarity)',
-          inverse: 'var(--tw-primary-inverse)',
-          foreground: 'hsl(var(--primary-foreground))'
-        },
         success: {
           DEFAULT: 'var(--tw-success)',
           active: 'var(--tw-success-active)',
@@ -289,14 +281,6 @@ export default {
           light: 'var(--tw-dark-light)',
           clarity: 'var(--tw-dark-clarity)',
           inverse: 'var(--tw-dark-inverse)'
-        },
-        secondary: {
-          DEFAULT: 'var(--tw-secondary)',
-          active: 'var(--tw-secondary-active)',
-          light: 'var(--tw-secondary-light)',
-          clarity: 'var(--tw-secondary-clarity)',
-          inverse: 'var(--tw-secondary-inverse)',
-          foreground: 'hsl(var(--secondary-foreground))'
         },
         light: {
           DEFAULT: 'var(--tw-light)',
