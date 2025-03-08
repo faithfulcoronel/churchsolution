@@ -196,7 +196,7 @@ function Layout() {
         {/* Search Bar */}
         <div className="px-4 py-4">
           <Input
-            placeholder="Search menu..."
+            placeholder="Search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             icon={<Search className="h-4 w-4" />}
@@ -311,47 +311,54 @@ function Layout() {
         {/* Bottom Section - Fixed */}
         <div className="flex-shrink-0 border-t border-gray-800 p-4 space-y-4">
           {/* Subscribe Button */}
-          <Link to="/settings/subscription">
-            <div className={`
-              relative overflow-hidden
-              rounded-xl
-              ${tenant?.subscription_tier === 'free'
-                ? 'bg-gradient-to-r from-primary-600 to-primary-400'
-                : 'bg-gradient-to-r from-primary-700 to-primary-500'
-              }
-              group
-              transition-all duration-300
-              hover:shadow-lg
-              transform hover:-translate-y-1
-            `}>
+          <Link to="/settings/subscription" aria-label="Manage Subscription">
+            <div
+              className={`
+                relative overflow-hidden rounded-xl group transition-all duration-300
+                hover:shadow-2xl hover:-translate-y-1 hover:scale-105
+                ${tenant?.subscription_tier === 'free'
+                  ? 'bg-gradient-to-r from-primary-600 to-primary-400'
+                  : 'bg-gradient-to-r from-primary-700 to-primary-500'
+                }
+              `}
+            >
+              {/* Animated Background Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-30 blur-lg animate-pulse" />
+
+              {/* Subtle Hover Glow */}
               <div className="absolute inset-0 bg-white dark:bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-              
-              <div className="px-4 py-3 flex items-center justify-between">
+
+              {/* Button Content */}
+              <div className="relative px-5 py-3 flex items-center justify-between z-10">
+                {/* Left Side: Icon + Text */}
                 <div className="flex items-center space-x-3">
-                  <Crown className={`
-                    h-5 w-5 text-white
-                    ${tenant?.subscription_tier === 'free' ? 'animate-bounce' : ''}
-                  `} />
+                  <Crown
+                    className={`
+                      h-5 w-5 text-white transition-all
+                      ${tenant?.subscription_tier === 'free' ? 'animate-pulse' : ''}
+                    `}
+                  />
                   <div>
-                    <p className="text-white font-medium">
+                    <p className="text-white font-semibold tracking-wide">
                       {tenant?.subscription_tier === 'free' ? 'Subscribe Now' : 'Upgrade Plan'}
                     </p>
                     <p className="text-xs text-white/80">
-                      {tenant?.subscription_tier === 'free'
-                        ? 'Unlock premium features'
-                        : 'Explore more features'
-                      }
+                      {tenant?.subscription_tier === 'free' ? 'Unlock premium features' : 'Explore more features'}
                     </p>
                   </div>
                 </div>
-                <Sparkles className="h-5 w-5 text-white opacity-75 group-hover:opacity-100" />
+
+                {/* Right Side: Sparkles Icon */}
+                <Sparkles className="h-5 w-5 text-white opacity-75 group-hover:opacity-100 transition-opacity" />
               </div>
 
+              {/* Animated Top Glow for Free Plan */}
               {tenant?.subscription_tier === 'free' && (
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-white to-yellow-400 animate-shimmer" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-white to-yellow-400 animate-[shimmer_2s_infinite_linear]" />
               )}
             </div>
           </Link>
+
 
           {/* Settings Button - Updated with active state */}
           <Button
@@ -452,22 +459,28 @@ function Layout() {
           </div>
         </main>
 
-        {/* Footer - Fixed */}
         <footer className="bg-white border-t py-4 px-6 lg:pl-64">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between">
-            <div className="text-sm text-gray-500">
-              © {new Date().getFullYear()} Steward Track. All rights reserved.
-            </div>
-            <div className="flex items-center space-x-4 mt-2 sm:mt-0">
+            {/* Copyright & Developer Info */}
+            <p className="text-sm text-gray-500">
+              © {new Date().getFullYear()} Steward Track. All rights reserved. Developed by{" "}
+              <a href="https://cortanatechsolutions.com" className="hover:text-gray-700" target="_blank" rel="noopener noreferrer">
+                Cortanatech Solutions, Inc.
+              </a>
+            </p>
+
+            {/* Legal Links */}
+            <nav className="flex items-center gap-x-4 mt-2 sm:mt-0" aria-label="Footer Navigation">
               <Link to="/settings/privacy" className="text-sm text-gray-500 hover:text-gray-700">
                 Privacy Policy
               </Link>
               <Link to="/settings/terms" className="text-sm text-gray-500 hover:text-gray-700">
                 Terms of Service
               </Link>
-            </div>
+            </nav>
           </div>
         </footer>
+
       </div>
     </div>
   );

@@ -320,7 +320,7 @@ function ChurchDashboard() {
       },
       dataLabels: {
         enabled: true,
-        formatter: (value: number) => formatCurrency(value, currency)
+        formatter: (value: number) => `${value.toFixed(2)}%`
       },
       tooltip: {
         y: {
@@ -345,7 +345,7 @@ function ChurchDashboard() {
       },
       dataLabels: {
         enabled: true,
-        formatter: (value: number) => formatCurrency(value, currency)
+        formatter: (value: number) => `${value.toFixed(2)}%`
       },
       tooltip: {
         y: {

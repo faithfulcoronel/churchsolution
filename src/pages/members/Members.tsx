@@ -311,7 +311,10 @@ function MemberList() {
                     )}
                     <div className="min-w-0 flex-1">
                       <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-                        {member.preferred_name || `${member.first_name} ${member.middle_name ? `${member.middle_name} ` : ''}${member.last_name}`}
+                        {member.preferred_name 
+                          ? member.preferred_name 
+                          : `${member.last_name}, ${member.first_name}`
+                        }
                       </h3>
                       <p className="text-sm text-muted-foreground truncate">
                         {member.contact_number}

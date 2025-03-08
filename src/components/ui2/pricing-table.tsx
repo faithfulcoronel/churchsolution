@@ -48,7 +48,6 @@ const pricingTiers: PricingTier[] = [
     features: [
       'Standard reports',
       '3 admin users',
-      'Priority email support',
       'Enhanced member profiles',
       'Advanced financial tracking',
       'Bulk data import/export'
@@ -64,11 +63,9 @@ const pricingTiers: PricingTier[] = [
     features: [
       'Advanced reports',
       '5 admin users',
-      'Priority support',
       'Custom branding',
       'Complete member profiles',
       'Financial forecasting',
-      'Attendance tracking',
       'Ministry management'
     ],
     isPopular: true,
@@ -83,12 +80,9 @@ const pricingTiers: PricingTier[] = [
     features: [
       'Full reporting suite',
       '10 admin users',
-      'Dedicated support',
       'Role-based access control',
       'Advanced analytics',
       'Custom dashboards',
-      'API access',
-      'Data backup',
       'Audit logs'
     ],
     icon: <DollarSign className="h-6 w-6 text-info" />
@@ -103,12 +97,6 @@ const pricingTiers: PricingTier[] = [
       'Everything in Premium',
       'Unlimited members',
       'Unlimited transactions',
-      'Custom features',
-      'Custom integrations',
-      'White-label solution',
-      'On-premise deployment',
-      'SLA guarantees',
-      'Dedicated account manager'
     ],
     icon: <Headphones className="h-6 w-6 text-primary" />,
     isCustom: true
@@ -289,15 +277,16 @@ function PricingCard({ tier, currentTier, billingCycle, onUpgrade }: PricingCard
         ${tier.isPopular ? 'ring-2 ring-primary dark:ring-primary' : ''}
       `}
     >
-      {tier.isPopular && (
-        <div className="absolute -top-3 left-0 right-0 mx-auto w-32">
-          <Badge variant="primary" className="w-full justify-center">
-            Most Popular
-          </Badge>
-        </div>
-      )}
+      
 
       <div className="p-6">
+        {tier.isPopular && (
+          <div className="absolute mt-1 left-0 right-0 mx-auto w-32">
+            <Badge variant="success" className="w-full justify-center">
+              Most Popular
+            </Badge>
+          </div>
+        )}
         {/* Plan Header */}
         <div className="flex items-center justify-between">
           <div>
