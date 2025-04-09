@@ -1,4 +1,3 @@
-// src/components/ui2/alert-dialog.tsx
 import * as React from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 import { cn } from '@/lib/utils';
@@ -6,7 +5,15 @@ import { Button } from './button';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 
 const AlertDialog = AlertDialogPrimitive.Root;
-const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
+const AlertDialogTrigger = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+  <AlertDialogPrimitive.Trigger ref={ref} className={cn(className)} {...props}>
+    {children}
+  </AlertDialogPrimitive.Trigger>
+));
+AlertDialogTrigger.displayName = AlertDialogPrimitive.Trigger.displayName;
 
 const AlertDialogPortal = AlertDialogPrimitive.Portal;
 

@@ -641,7 +641,7 @@ function FinancesDashboard() {
               <DollarSign className="h-5 w-5 text-muted-foreground mr-2" />
               <h3 className="text-base font-medium text-foreground">Bulk Operations</h3>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 grid grid-cols-1 gap-2">
               <Link to="/finances/transactions/bulk">
                 <Card className="hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-4 flex items-center justify-between">

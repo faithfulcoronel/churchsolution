@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useMessageStore } from '../../components/MessageHandler';
@@ -20,6 +20,7 @@ function ChurchOnboarding() {
   const [currentStep, setCurrentStep] = useState(0);
   const [registrationData, setRegistrationData] = useState<any>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const hasRun = useRef(false);
 
   const steps = [
     {
@@ -50,6 +51,12 @@ function ChurchOnboarding() {
   ];
 
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
+    const alreadyStarted = sessionStorage.getItem('onboardingStarted');
+    if (alreadyStarted) return;
+
     // Get registration data from session storage
     const data = sessionStorage.getItem('registrationData');
     if (!data) {
@@ -57,6 +64,7 @@ function ChurchOnboarding() {
       return;
     }
 
+    sessionStorage.setItem('onboardingStarted', 'true');
     const parsedData = JSON.parse(data);
     setRegistrationData(parsedData);
     handleRegistration(parsedData);
@@ -87,6 +95,7 @@ function ChurchOnboarding() {
       });
 
       if (tenantError) {
+        sessionStorage.removeItem('onboardingStarted');
         // If tenant creation fails, delete the user
         await supabase.auth.signOut();
         throw tenantError;
@@ -113,6 +122,7 @@ function ChurchOnboarding() {
       });
 
       setIsComplete(true);
+      sessionStorage.removeItem('onboardingStarted');
 
       // Redirect to login
       setTimeout(() => {
@@ -120,7 +130,8 @@ function ChurchOnboarding() {
       }, 3000);
     } catch (error) {
       console.error('Registration error:', error);
-      
+      sessionStorage.removeItem('onboardingStarted');
+
       // Show error message
       addMessage({
         type: 'error',

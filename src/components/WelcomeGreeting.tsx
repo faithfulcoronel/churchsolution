@@ -1,32 +1,31 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { format } from 'date-fns';
 import { Cake, Book } from 'lucide-react';
 import { Card } from './ui2/card';
 
 function WelcomeGreeting() {
-  // Get current user's member data
   const { data: member } = useQuery({
     queryKey: ['current-user-member'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) return null;
 
-      const { data, error } = await supabase
+      // Then get the member details
+      const { data: member, error: memberError } = await supabase
         .from('members')
         .select('id, first_name, last_name, birthday')
         .eq('email', user.email)
         .is('deleted_at', null)
         .single();
 
-      if (error) {
-        console.error('Error fetching member data:', error);
+      if (memberError) {
+        console.error('Error fetching member data:', memberError);
         return null;
       }
 
-      return data;
-    }
+      return member;
+    },
   });
 
   // Get time-based greeting
@@ -47,18 +46,18 @@ function WelcomeGreeting() {
   };
 
   // Get verse of the day
-const { data: verse } = useQuery({
-  queryKey: ['verse-of-the-day'],
-  queryFn: async () => {
-    const response = await fetch('https://beta.ourmanna.com/api/v1/get/?format=json');
-    const data = await response.json();
-    return {
-      text: data.verse.details.text,
-      reference: data.verse.details.reference,
-    };
-  },
-  staleTime: 24 * 60 * 60 * 1000, // Cache for 24 hours
-});
+  const { data: verse } = useQuery({
+    queryKey: ['verse-of-the-day'],
+    queryFn: async () => {
+      const response = await fetch('https://beta.ourmanna.com/api/v1/get/?format=json');
+      const data = await response.json();
+      return {
+        text: data.verse.details.text,
+        reference: data.verse.details.reference,
+      };
+    },
+    staleTime: 24 * 60 * 60 * 1000, // Cache for 24 hours
+  });
 
   if (!member) return null;
 

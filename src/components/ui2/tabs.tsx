@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Scrollable } from './scrollable';
+import { Badge } from './badge';
 
 interface TabsProps {
   tabs: {
@@ -73,6 +74,16 @@ export function Tabs({
     }
   }, [activeTab]);
 
+  const handleTabClick = (tabId: string, e: React.MouseEvent) => {
+    // Prevent form submission
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (tabId !== activeTab) {
+      onChange(tabId);
+    }
+  };
+
   return (
     <div className={className}>
       <Scrollable orientation="horizontal" className={cn(
@@ -90,7 +101,7 @@ export function Tabs({
               <button
                 key={tab.id}
                 ref={isActive ? activeTabRef : null}
-                onClick={() => !isDisabled && onChange(tab.id)}
+                onClick={(e) => handleTabClick(tab.id, e)}
                 disabled={isDisabled}
                 className={cn(
                   'group inline-flex items-center py-3 px-4',
@@ -109,6 +120,7 @@ export function Tabs({
                 role="tab"
                 aria-selected={isActive}
                 aria-disabled={isDisabled}
+                type="button" // Explicitly set type to prevent form submission
               >
                 {tab.icon && (
                   <span className={cn(
@@ -122,14 +134,12 @@ export function Tabs({
                 )}
                 {tab.label}
                 {typeof tab.badge === 'number' && (
-                  <span className={cn(
-                    'ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium',
-                    isActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground'
-                  )}>
+                  <Badge
+                    variant={isActive ? 'destructive' : 'secondary'}
+                    className="ml-2"
+                  >
                     {tab.badge}
-                  </span>
+                  </Badge>
                 )}
               </button>
             );

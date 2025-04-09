@@ -30,26 +30,15 @@ function PersonalDashboard() {
   const { currency } = useCurrencyStore();
   const { user } = useAuthStore();
 
-  // Get current tenant
-  const { data: currentTenant } = useQuery({
-    queryKey: ['current-tenant'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_current_tenant');
-      if (error) throw error;
-      return data?.[0];
-    },
-  });
-  
   // Get associated member data
   const { data: memberData } = useQuery({
-    queryKey: ['current-user-member', user?.email, currentTenant?.id],
+    queryKey: ['current-user-member', user?.email],
     queryFn: async () => {
       if (!user?.email) return null;
 
       const { data, error } = await supabase
         .from('members')
         .select('id, first_name, last_name')
-        .eq('tenant_id', currentTenant?.id)
         .eq('email', user.email)
         .is('deleted_at', null)
         .single();
@@ -62,7 +51,7 @@ function PersonalDashboard() {
 
   // Get personal monthly trends
   const { data: monthlyTrends, isLoading: trendsLoading } = useQuery({
-    queryKey: ['personal-monthly-trends', memberData?.id, currentTenant?.id],
+    queryKey: ['personal-monthly-trends', memberData?.id],
     queryFn: async () => {
       if (!memberData?.id) throw new Error('Member not found');
 
@@ -88,7 +77,6 @@ function PersonalDashboard() {
                 type
               )
             `)
-            .eq('tenant_id', currentTenant?.id)
             .eq('member_id', memberData.id)
             .gte('date', format(startOfDay(start), 'yyyy-MM-dd'))
             .lte('date', format(endOfDay(end), 'yyyy-MM-dd'));
@@ -103,7 +91,6 @@ function PersonalDashboard() {
           const { data: prevTransactions } = await supabase
             .from('financial_transactions')
             .select('type, amount')
-            .eq('tenant_id', currentTenant?.id)
             .eq('member_id', memberData.id)
             .gte('date', format(startOfDay(startOfMonth(previousMonth)), 'yyyy-MM-dd'))
             .lte('date', format(endOfDay(endOfMonth(previousMonth)), 'yyyy-MM-dd'))
@@ -131,7 +118,7 @@ function PersonalDashboard() {
 
   // Get personal contribution statistics
   const { data: contributionStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['personal-contribution-stats', memberData?.id,  currentTenant?.id],
+    queryKey: ['personal-contribution-stats', memberData?.id],
     queryFn: async () => {
       if (!memberData?.id) throw new Error('Member not found');
 
@@ -152,7 +139,6 @@ function PersonalDashboard() {
             type
           )
         `)
-        .eq('tenant_id', currentTenant?.id)
         .eq('member_id', memberData.id)
         .eq('type', 'income')
         .gte('date', format(startOfDay(startOfYear), 'yyyy-MM-dd'))
@@ -171,7 +157,6 @@ function PersonalDashboard() {
             type
           )
         `)
-        .eq('tenant_id', currentTenant?.id)
         .eq('member_id', memberData.id)
         .eq('type', 'income')
         .gte('date', format(startOfDay(firstDayOfMonth), 'yyyy-MM-dd'))

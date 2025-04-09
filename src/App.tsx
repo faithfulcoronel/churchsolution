@@ -14,7 +14,6 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const Members = React.lazy(() => import('./pages/members/Members'));
 const Finances = React.lazy(() => import('./pages/finances/Finances'));
-const Admin = React.lazy(() => import('./pages/admin/Admin'));
 const Layout = React.lazy(() => import('./components/Layout'));
 
 // Configure React Query client with error handling

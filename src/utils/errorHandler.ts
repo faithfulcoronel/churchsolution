@@ -1,5 +1,4 @@
-import { PostgrestError } from '@supabase/supabase-js';
-import { useMessageStore } from '../components/MessageHandler';
+import { useNotifications } from '../hooks/useNotifications';
 
 // Error types
 type ErrorType = 'auth' | 'database' | 'network' | 'validation' | 'unknown';
@@ -13,32 +12,21 @@ const USER_FRIENDLY_MESSAGES: Record<ErrorType, string> = {
   unknown: 'An unexpected error occurred. Please try again later.',
 };
 
-// Function to check if error is from Supabase
-function isSupabaseError(error: any): error is PostgrestError {
-  return (
-    error &&
-    typeof error === 'object' &&
-    'code' in error &&
-    'details' in error &&
-    'hint' in error &&
-    'message' in error
-  );
-}
-
 // Function to determine error type
 function getErrorType(error: any): ErrorType {
-  if (isSupabaseError(error)) {
-    if (error.code === 'PGRST301' || error.code === 'PGRST302') {
-      return 'auth';
-    }
+  if (error.code?.startsWith('PGRST') || error.code?.match(/^[0-9]{5}$/)) {
     return 'database';
   }
 
-  if (error instanceof TypeError || error.name === 'NetworkError') {
+  if (error.name === 'AuthError' || error.message?.toLowerCase().includes('auth')) {
+    return 'auth';
+  }
+
+  if (error instanceof TypeError || error.name === 'NetworkError' || !navigator.onLine) {
     return 'network';
   }
 
-  if (error.name === 'ValidationError') {
+  if (error.name === 'ValidationError' || error.message?.toLowerCase().includes('validation')) {
     return 'validation';
   }
 
@@ -59,21 +47,15 @@ function logError(error: any, context?: Record<string, any>) {
     message: error.message,
     stack: error.stack,
     context,
-    // Include additional details for Supabase errors
-    ...(isSupabaseError(error) && {
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
-    }),
+    code: error.code,
+    details: error.details,
+    hint: error.hint,
   };
 
   // Log to console in development
   if (import.meta.env.DEV) {
     console.error('Error Details:', errorDetails);
   }
-
-  // TODO: In production, send to error tracking service
-  // This could be Sentry, LogRocket, etc.
 }
 
 // Main error handler function
@@ -84,12 +66,11 @@ export function handleError(error: any, context?: Record<string, any>) {
   // Get user-friendly message
   const userMessage = getUserFriendlyMessage(error);
 
-  // Show message to user
-  const { addMessage } = useMessageStore.getState();
-  addMessage({
-    type: 'error',
-    text: userMessage,
-    duration: 5000,
+  // Show notification
+  const { notifyError } = useNotifications();
+  notifyError(new Error(userMessage), {
+    originalError: error,
+    ...context
   });
 
   // Return the error details for optional handling

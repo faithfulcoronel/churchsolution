@@ -109,7 +109,6 @@ function TransactionList() {
         .from('categories')
         .select('*')
         .eq('tenant_id', currentTenant?.id)
-        .eq('is_active', true)
         .in('type', ['income_transaction', 'expense_transaction'])
         .is('deleted_at', null)
         .order('sort_order');

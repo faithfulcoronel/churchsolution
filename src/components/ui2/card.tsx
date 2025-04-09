@@ -1,48 +1,118 @@
-// src/components/ui2/card.tsx
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Container } from './container';
 import { BaseProps } from './types';
 
 interface CardProps extends BaseProps {
   hoverable?: boolean;
   loading?: boolean;
   onClick?: () => void;
+  variant?: 'default' | 'primary' | 'secondary' | 'gradient';
+  size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
 }
 
+const variantClasses = {
+  default: `
+    bg-white dark:bg-gray-800 
+    border-gray-200 dark:border-gray-700
+  `,
+  primary: `
+    bg-primary-50 dark:bg-primary-900/10
+    border-primary-100 dark:border-primary-800
+    shadow-primary/5
+  `,
+  secondary: `
+    bg-gray-50 dark:bg-gray-900/50
+    border-gray-100 dark:border-gray-800
+  `,
+  gradient: `
+    bg-gradient-to-br from-white to-gray-50
+    dark:from-gray-800 dark:to-gray-900
+    border-gray-200/50 dark:border-gray-700/50
+    backdrop-blur-sm
+  `
+};
+
+const sizeClasses = {
+  sm: 'p-4',
+  md: 'p-6',
+  lg: 'p-8'
+};
+
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, children, hoverable, loading, onClick }, ref) => {
+  ({ 
+    className, 
+    children, 
+    hoverable = false,
+    loading = false,
+    onClick,
+    variant = 'default',
+    size = 'md',
+    fullWidth = false,
+    ...props 
+  }, ref) => {
     const isInteractive = !!onClick;
 
     return (
-      <div
-        ref={ref}
-        className={cn(
-          'rounded-lg border bg-card text-card-foreground shadow-sm',
-          hoverable && 'transition-shadow hover:shadow-md',
-          loading && 'animate-pulse',
-          isInteractive && 'cursor-pointer',
-          className
-        )}
-        onClick={onClick}
-        role={isInteractive ? 'button' : undefined}
-        tabIndex={isInteractive ? 0 : undefined}
-        onKeyDown={
-          isInteractive
-            ? (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onClick();
+      <Container fluid={fullWidth}>
+        <div
+          ref={ref}
+          className={cn(
+            // Base styles
+            'relative rounded-xl border shadow-sm transition-all duration-200',
+            // Variant styles
+            variantClasses[variant],
+            // Size styles
+            sizeClasses[size],
+            // Interactive styles
+            hoverable && 'hover:shadow-lg dark:hover:shadow-none hover:-translate-y-0.5 hover:border-primary-200 dark:hover:border-primary-700',
+            isInteractive && 'cursor-pointer',
+            // Loading state
+            loading && 'animate-pulse',
+            className
+          )}
+          onClick={onClick}
+          role={isInteractive ? 'button' : undefined}
+          tabIndex={isInteractive ? 0 : undefined}
+          onKeyDown={
+            isInteractive
+              ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onClick();
+                  }
                 }
-              }
-            : undefined
-        }
-        aria-busy={loading}
-      >
-        {children}
-      </div>
+              : undefined
+          }
+          aria-busy={loading}
+          {...props}
+        >
+          {/* Gradient overlay for hover effect */}
+          {hoverable && (
+            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/0 to-primary-500/0 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-200 rounded-xl" />
+          )}
+
+          {/* Loading overlay */}
+          {loading && (
+            <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl" />
+          )}
+
+          {/* Content */}
+          {children}
+
+          {/* Shimmer effect for loading state */}
+          {loading && (
+            <div className="absolute inset-0 overflow-hidden rounded-xl">
+              <div className="absolute inset-0 transform translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            </div>
+          )}
+        </div>
+      </Container>
     );
   }
 );
+
 Card.displayName = 'Card';
 
 interface CardHeaderProps extends BaseProps {
@@ -63,6 +133,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
     </div>
   )
 );
+
 CardHeader.displayName = 'CardHeader';
 
 interface CardContentProps extends BaseProps {}
@@ -74,6 +145,7 @@ const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
     </div>
   )
 );
+
 CardContent.displayName = 'CardContent';
 
 interface CardFooterProps extends BaseProps {}
@@ -85,6 +157,7 @@ const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
     </div>
   )
 );
+
 CardFooter.displayName = 'CardFooter';
 
 export { Card, CardHeader, CardContent, CardFooter };

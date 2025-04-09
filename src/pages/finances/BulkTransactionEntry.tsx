@@ -103,7 +103,6 @@ function BulkTransactionEntry() {
         .from('categories')
         .select('*')
         .eq('tenant_id', currentTenant?.id)
-        .eq('is_active', true)
         .eq('type', transactionType === 'income' ? 'income_transaction' : 'expense_transaction')
         .is('deleted_at', null)
         .order('sort_order', { ascending: true });
@@ -273,7 +272,7 @@ function BulkTransactionEntry() {
   }, [transactions, transactionType]);
 
   return (
-    <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
         <Button
           variant="ghost"
@@ -504,12 +503,11 @@ function BulkTransactionEntry() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Input
                           type="number"
-                          value={transaction.amount || ''}
+                          value={Number(transaction.amount || 0).toFixed(2)}
                           onChange={(e) => handleInputChange(index, 'amount', e.target.value)}
                           icon={<DollarSign className="h-4 w-4" />}
                           min={0}
                           step="0.01"
-                          className='min-w-32'
                           onKeyDown={(e) => handleKeyDown(e, index, 'amount')}
                           onBlur={(e) => {
                             const value = Number(e.target.value);
@@ -522,7 +520,6 @@ function BulkTransactionEntry() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Input
                           value={transaction.description || ''}
-                          className='min-w-32'
                           onChange={(e) => handleInputChange(index, 'description', e.target.value)}
                           onKeyDown={(e) => handleKeyDown(e, index, 'description')}
                         />

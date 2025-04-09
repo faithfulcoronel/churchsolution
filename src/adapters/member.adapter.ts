@@ -1,0 +1,168 @@
+import 'reflect-metadata';
+import { injectable } from 'inversify';
+import { BaseAdapter, QueryOptions } from './base.adapter';
+import { Member } from '../models/member.model';
+import { logAuditEvent } from '../utils/auditLogger';
+import { supabase } from '../lib/supabase';
+
+@injectable()
+export class MemberAdapter extends BaseAdapter<Member> {
+  protected tableName = 'members';
+  
+  protected defaultSelect = `
+    id,
+    first_name,
+    last_name,
+    middle_name,
+    preferred_name,
+    email,
+    contact_number,
+    address,
+    membership_date,
+    birthday,
+    profile_picture_url,
+    gender,
+    marital_status,
+    baptism_date,
+    spiritual_gifts,
+    ministry_interests,
+    emergency_contact_name,
+    emergency_contact_phone,
+    leadership_position,
+    small_groups,
+    ministries,
+    volunteer_roles,
+    attendance_rate,
+    last_attendance_date,
+    pastoral_notes,
+    prayer_requests,
+    created_at,
+    updated_at,
+    membership_category_id,
+    status_category_id
+  `;
+
+  protected defaultRelationships: QueryOptions['relationships'] = [
+    {
+      table: 'membership_categories',
+      foreignKey: 'membership_category_id',
+      select: ['id', 'name', 'code']
+    },
+    {
+      table: 'status_categories',
+      foreignKey: 'status_category_id',
+      select: ['id', 'name', 'code']
+    }
+  ];
+
+  protected override async onBeforeDelete(id: string): Promise<void> {
+    // Check for family relationships
+    const { data: familyRelationships, error: relationshipsError } = await supabase
+      .from('family_relationships')
+      .select('id')
+      .or(`member_id.eq.${id},related_member_id.eq.${id}`)
+      .limit(1);
+
+    if (relationshipsError) throw relationshipsError;
+    if (familyRelationships?.length) {
+      throw new Error('Cannot delete member with existing family relationships');
+    }
+
+    // Check for financial transactions
+    const { data: transactions, error: transactionsError } = await supabase
+      .from('financial_transactions')
+      .select('id')
+      .eq('member_id', id)
+      .limit(1);
+
+    if (transactionsError) throw transactionsError;
+    if (transactions?.length) {
+      throw new Error('Cannot delete member with existing financial transactions');
+    }
+  }
+
+  protected override async onAfterDelete(id: string): Promise<void> {
+    // Log audit event
+    await logAuditEvent('delete', 'member', id, { id });
+  }
+
+  protected async validateMember(data: Partial<Member>): Promise<void> {
+    if (!data.first_name?.trim()) {
+      throw new Error('First name is required');
+    }
+    if (!data.last_name?.trim()) {
+      throw new Error('Last name is required');
+    }
+    if (!data.contact_number?.trim()) {
+      throw new Error('Contact number is required');
+    }
+    if (!data.address?.trim()) {
+      throw new Error('Address is required');
+    }
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      throw new Error('Invalid email format');
+    }
+  }
+
+  protected override async onBeforeCreate(data: Partial<Member>): Promise<Partial<Member>> {
+    // Validate member data
+    await this.validateMember(data);
+
+    // Check for duplicate email if provided
+    if (data.email) {
+      const { data: existingMember } = await this.fetch({
+        filters: {
+          email: {
+            operator: 'eq',
+            value: data.email
+          }
+        }
+      });
+
+      if (existingMember?.length) {
+        throw new Error('A member with this email already exists');
+      }
+    }
+
+    return data;
+  }
+
+  protected override async onAfterCreate(data: Member): Promise<void> {
+    // Log audit event
+    await logAuditEvent('create', 'member', data.id, data);
+  }
+
+  protected override async onBeforeUpdate(id: string, data: Partial<Member>): Promise<Partial<Member>> {
+    // Validate email if being updated
+    if (data.email) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        throw new Error('Invalid email format');
+      }
+
+      // Check for duplicate email
+      const { data: existingMember } = await this.fetch({
+        filters: {
+          email: {
+            operator: 'eq',
+            value: data.email
+          },
+          id: {
+            operator: 'neq',
+            value: id
+          }
+        }
+      });
+
+      if (existingMember?.length) {
+        throw new Error('A member with this email already exists');
+      }
+    }
+
+    return data;
+  }
+
+  protected override async onAfterUpdate(data: Member): Promise<void> {
+    // Log audit event
+    await logAuditEvent('update', 'member', data.id, data);
+  }
+}

@@ -49,7 +49,6 @@ function BudgetAdd() {
         .from('categories')
         .select('*')
         .eq('tenant_id', currentTenant?.id)
-        .eq('is_active', true)
         .eq('type', 'budget')
         .is('deleted_at', null)
         .order('sort_order');

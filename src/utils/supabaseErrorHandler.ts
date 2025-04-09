@@ -1,5 +1,5 @@
 import { PostgrestError } from '@supabase/supabase-js';
-import { handleError } from './errorHandler';
+import { useNotifications } from '../hooks/useNotifications';
 
 // Map of database error codes to user-friendly messages
 const DB_ERROR_MESSAGES: Record<string, string> = {
@@ -8,6 +8,10 @@ const DB_ERROR_MESSAGES: Record<string, string> = {
   '23502': 'Required information is missing.',
   '42P01': 'System configuration error.',
   '42501': 'You don\'t have permission to perform this action.',
+  '42703': 'Database schema error. Please contact support.',
+  'PGRST116': 'Multiple records found where only one was expected.',
+  'PGRST301': 'Your session has expired. Please sign in again.',
+  'PGRST302': 'You don\'t have permission to perform this action.',
 };
 
 export function handleSupabaseError(
@@ -15,7 +19,7 @@ export function handleSupabaseError(
   context?: Record<string, any>
 ) {
   // Get user-friendly message based on error code
-  const userMessage = DB_ERROR_MESSAGES[error.code] || 'Database operation failed.';
+  const userMessage = DB_ERROR_MESSAGES[error.code] || 'An unexpected database error occurred.';
 
   // Log the detailed error
   const errorDetails = {
@@ -26,12 +30,9 @@ export function handleSupabaseError(
     context,
   };
 
-  // Use the main error handler
-  handleError(
-    {
-      ...error,
-      userMessage,
-    },
-    errorDetails
-  );
+  console.error('Database Error:', errorDetails);
+
+  // Show notification
+  const { notifyError } = useNotifications();
+  notifyError(new Error(userMessage), errorDetails);
 }

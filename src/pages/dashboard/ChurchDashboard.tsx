@@ -4,19 +4,16 @@ import { supabase } from '../../lib/supabase';
 import { format, subMonths, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
+import { Card, CardContent } from '../../components/ui2/card';
 import { Badge } from '../../components/ui2/badge';
 import { Progress } from '../../components/ui2/progress';
 import { Charts } from '../../components/ui2/charts';
 import { ScrollArea } from '../../components/ui2/scroll-area';
-import { Separator } from '../../components/ui2/separator';
 import WelcomeGreeting from '../../components/WelcomeGreeting';
 import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  Calendar,
   Loader2,
   ChevronUp,
   ChevronDown,
@@ -24,29 +21,25 @@ import {
   BarChart3,
   LineChart,
   Target,
-  Award,
-  Users2,
-  CreditCard,
-  Layers,
   Cake,
 } from 'lucide-react';
 
 function ChurchDashboard() {
   const { currency } = useCurrencyStore();
 
-    // Get current tenant
-    const { data: currentTenant } = useQuery({
-      queryKey: ['current-tenant'],
-      queryFn: async () => {
-        const { data, error } = await supabase.rpc('get_current_tenant');
-        if (error) throw error;
-        return data?.[0];
-      },
-    });
+  // Get current tenant
+  const { data: currentTenant } = useQuery({
+    queryKey: ['current-tenant'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_current_tenant');
+      if (error) throw error;
+      return data?.[0];
+    },
+  });
 
   // Get monthly trends data
   const { data: monthlyTrends, isLoading: trendsLoading } = useQuery({
-    queryKey: ['monthly-trends',currentTenant?.id],
+    queryKey: ['monthly-trends', currentTenant?.id],
     queryFn: async () => {
       const today = new Date();
       const months = Array.from({ length: 12 }, (_, i) => {
@@ -63,7 +56,7 @@ function ChurchDashboard() {
           const { data: transactions, error } = await supabase
             .from('financial_transactions')
             .select(`
-              type, 
+              type,
               amount,
               category:category_id (
                 name,
@@ -87,9 +80,9 @@ function ChurchDashboard() {
           const previousMonth = subMonths(start, 1);
           const { data: prevTransactions } = await supabase
             .from('financial_transactions')
-            .select('type, amount')
-            .eq('type', 'income')
+            .select('amount')
             .eq('tenant_id', currentTenant?.id)
+            .eq('type', 'income')
             .gte('date', format(startOfDay(startOfMonth(previousMonth)), 'yyyy-MM-dd'))
             .lte('date', format(endOfDay(endOfMonth(previousMonth)), 'yyyy-MM-dd'));
 
@@ -111,22 +104,13 @@ function ChurchDashboard() {
 
       return monthlyData;
     },
+    enabled: !!currentTenant?.id,
   });
 
-  // Get current month's data with matching date handling
+  // Get current month's data
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['dashboard-stats',currentTenant?.id],
+    queryKey: ['finance-stats', currentTenant?.id],
     queryFn: async () => {
-      // Get total members count
-      const { count: membersCount, error: membersError } = await supabase
-        .from('members')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', currentTenant?.id)
-        .is('deleted_at', null);
-
-      if (membersError) throw membersError;
-
-      // Get current month's transactions with matching date handling
       const today = new Date();
       const firstDayOfMonth = startOfMonth(today);
       const lastDayOfMonth = endOfMonth(today);
@@ -137,9 +121,9 @@ function ChurchDashboard() {
           type,
           amount,
           category:category_id (
-            name,
-            type
-          )
+                name,
+                type
+              )
         `)
         .eq('tenant_id', currentTenant?.id)
         .gte('date', format(startOfDay(firstDayOfMonth), 'yyyy-MM-dd'))
@@ -172,7 +156,7 @@ function ChurchDashboard() {
           return acc;
         }, {} as Record<string, number>);
 
-      // Get active budgets count with proper date handling
+      // Get active budgets count
       const { data: activeBudgets, error: budgetsError } = await supabase
         .from('budgets')
         .select('id')
@@ -183,7 +167,6 @@ function ChurchDashboard() {
       if (budgetsError) throw budgetsError;
 
       return {
-        totalMembers: membersCount || 0,
         monthlyIncome,
         monthlyExpenses,
         activeBudgets: activeBudgets?.length || 0,
@@ -191,6 +174,7 @@ function ChurchDashboard() {
         expensesByCategory,
       };
     },
+    enabled: !!currentTenant?.id,
   });
 
   // Get birthdays for current month
@@ -203,7 +187,7 @@ function ChurchDashboard() {
     },
   });
 
-  const isLoading = statsLoading || trendsLoading || birthdaysLoading;
+  const isLoading = trendsLoading || statsLoading || birthdaysLoading;
 
   if (isLoading) {
     return (
@@ -214,13 +198,6 @@ function ChurchDashboard() {
   }
 
   const cards = [
-    {
-      name: 'Total Members',
-      value: stats?.totalMembers || 0,
-      icon: <Users2 className="text-blue-500" />,
-      color: 'bg-blue-100 dark:bg-blue-900/50',
-      description: "Active church members"
-    },
     {
       name: 'Monthly Income',
       value: formatCurrency(stats?.monthlyIncome || 0, currency),
@@ -234,6 +211,13 @@ function ChurchDashboard() {
       icon: <TrendingDown className="text-rose-500" />,
       color: 'bg-rose-100 dark:bg-rose-900/50',
       description: "Total expenses this month"
+    },
+    {
+      name: 'Net Balance',
+      value: formatCurrency((stats?.monthlyIncome || 0) - (stats?.monthlyExpenses || 0), currency),
+      icon: <DollarSign className="text-blue-500" />,
+      color: 'bg-blue-100 dark:bg-blue-900/50',
+      description: "Net balance this month"
     },
     {
       name: 'Active Budgets',
@@ -356,10 +340,10 @@ function ChurchDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Welcome Greeting */}
       <WelcomeGreeting />
-
+      
       {/* Stats Overview */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => (
@@ -396,7 +380,7 @@ function ChurchDashboard() {
       </div>
 
       {/* Monthly Trends Chart */}
-      <Card>
+      <Card className="mt-6">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
@@ -417,7 +401,7 @@ function ChurchDashboard() {
       </Card>
 
       {/* Category Distribution Charts */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Income Categories */}
         <Card>
           <CardContent className="p-4">
@@ -460,7 +444,7 @@ function ChurchDashboard() {
       </div>
 
       {/* Financial Summary */}
-      <Card>
+      <Card className="mt-6">
         <CardContent className="p-4">
           <div className="flex items-center mb-4">
             <BarChart3 className="h-5 w-5 text-muted-foreground mr-2" />
@@ -520,7 +504,7 @@ function ChurchDashboard() {
       </Card>
 
       {/* Birthdays Card */}
-      <Card>
+      <Card className="mt-6">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">

@@ -26,12 +26,16 @@ import {
   TableFooter,
 } from './table';
 import { Button } from './button';
+import { Container } from './container';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
 } from './dropdown-menu';
+import { Input } from './input';
 import { cn } from '@/lib/utils';
 import {
   Settings2,
@@ -41,6 +45,9 @@ import {
   Loader2,
   FileText,
   FileSpreadsheet,
+  Filter,
+  X,
+  Check,
 } from 'lucide-react';
 
 export interface DataTableProps<TData, TValue> {
@@ -90,6 +97,8 @@ export function DataGrid<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [openFilterMenus, setOpenFilterMenus] = React.useState<Record<string, boolean>>({});
+  const [tempFilters, setTempFilters] = React.useState<Record<string, string>>({});
 
   const table = useReactTable({
     data,
@@ -113,6 +122,24 @@ export function DataGrid<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const handleApplyFilter = (columnId: string) => {
+    const filterValue = tempFilters[columnId];
+    const column = table.getColumn(columnId);
+    if (column) {
+      column.setFilterValue(filterValue);
+    }
+    setOpenFilterMenus((prev) => ({ ...prev, [columnId]: false }));
+  };
+
+  const handleClearFilter = (columnId: string) => {
+    const column = table.getColumn(columnId);
+    if (column) {
+      column.setFilterValue(null);
+      setTempFilters((prev) => ({ ...prev, [columnId]: '' }));
+    }
+    setOpenFilterMenus((prev) => ({ ...prev, [columnId]: false }));
+  };
+
   const handleExportPDF = () => {
     const doc = new jsPDF();
     
@@ -126,9 +153,14 @@ export function DataGrid<TData, TValue>({
     const visibleColumns = table.getAllColumns().filter(col => col.getIsVisible());
 
     // Get headers
-    const headers = visibleColumns.map(column => 
-      column.columnDef.header?.toString() || ''
-    );
+    const headers = visibleColumns.map(column => {
+      const headerContext = column.getContext();
+      const headerContent = column.columnDef.header;
+      if (typeof headerContent === 'function') {
+        return headerContent(headerContext).toString();
+      }
+      return headerContent?.toString() || '';
+    });
 
     // Get table data
     const tableData = table.getRowModel().rows.map(row =>
@@ -182,9 +214,14 @@ export function DataGrid<TData, TValue>({
     const visibleColumns = table.getAllColumns().filter(col => col.getIsVisible());
 
     // Get headers
-    const headers = visibleColumns.map(column => 
-      column.columnDef.header?.toString() || ''
-    );
+    const headers = visibleColumns.map(column => {
+      const headerContext = column.getContext();
+      const headerContent = column.columnDef.header;
+      if (typeof headerContent === 'function') {
+        return headerContent(headerContext).toString();
+      }
+      return headerContent?.toString() || '';
+    });
 
     // Get data rows
     const dataRows = table.getRowModel().rows.map(row =>
@@ -231,15 +268,15 @@ export function DataGrid<TData, TValue>({
   };
 
   return (
-    <div className={cn('w-full space-y-4', className)}>
+    <Container className={cn("space-y-4", className)}>
       {/* Header */}
       {(title || description || toolbar || exportOptions.enabled) && (
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {(title || description) && (
             <div>
               {title && <h2 className="text-lg font-semibold">{title}</h2>}
               {description && (
-                <p className="text-sm text-muted-foreground">{description}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{description}</p>
               )}
             </div>
           )}
@@ -313,29 +350,92 @@ export function DataGrid<TData, TValue>({
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder ? null : (
-                        <div
-                          {...{
-                            className: cn(
-                              'flex items-center space-x-2',
-                              header.column.getCanSort() &&
-                                'cursor-pointer select-none'
-                            ),
-                            onClick: header.column.getToggleSortingHandler(),
-                          }}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {header.column.getCanSort() && (
-                            <span>
-                              {{
-                                asc: <ArrowUp className="h-4 w-4" />,
-                                desc: <ArrowDown className="h-4 w-4" />,
-                              }[header.column.getIsSorted() as string] ?? (
-                                <ArrowUpDown className="h-4 w-4" />
-                              )}
-                            </span>
+                        <div className="flex items-center space-x-2">
+                          <div
+                            {...{
+                              className: cn(
+                                'flex items-center space-x-2',
+                                header.column.getCanSort() &&
+                                  'cursor-pointer select-none'
+                              ),
+                              onClick: header.column.getToggleSortingHandler(),
+                            }}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                            {header.column.getCanSort() && (
+                              <span>
+                                {{
+                                  asc: <ArrowUp className="h-4 w-4" />,
+                                  desc: <ArrowDown className="h-4 w-4" />,
+                                }[header.column.getIsSorted() as string] ?? (
+                                  <ArrowUpDown className="h-4 w-4" />
+                                )}
+                              </span>
+                            )}
+                          </div>
+                          {header.column.getCanFilter() && (
+                            <DropdownMenu
+                              open={openFilterMenus[header.id]}
+                              onOpenChange={(open) => {
+                                setOpenFilterMenus(prev => ({ ...prev, [header.id]: open }));
+                                if (open) {
+                                  // Initialize temp filter with current value
+                                  setTempFilters(prev => ({
+                                    ...prev,
+                                    [header.column.id]: (header.column.getFilterValue() as string) ?? ''
+                                  }));
+                                }
+                              }}
+                            >
+                              <DropdownMenuTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className={cn(
+                                    "h-8 w-8 p-0",
+                                    header.column.getIsFiltered() && "text-primary"
+                                  )}
+                                >
+                                  <Filter className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start" className="w-[200px] p-2">
+                                <div className="space-y-2">
+                                  <Input
+                                    placeholder={`Filter ${header.column.id}...`}
+                                    value={tempFilters[header.column.id] ?? ''}
+                                    onChange={(e) => {
+                                      setTempFilters(prev => ({
+                                        ...prev,
+                                        [header.column.id]: e.target.value
+                                      }));
+                                    }}
+                                    className="h-8"
+                                  />
+                                  <div className="flex items-center justify-between space-x-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleClearFilter(header.column.id)}
+                                      className="flex-1"
+                                    >
+                                      Clear
+                                    </Button>
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      onClick={() => handleApplyFilter(header.column.id)}
+                                      className="flex-1"
+                                    >
+                                      Apply
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         </div>
                       )}
@@ -364,7 +464,10 @@ export function DataGrid<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
                   onClick={() => onRowClick?.(row.original)}
-                  className={cn(onRowClick && 'cursor-pointer')}
+                  className={cn(
+                    onRowClick && 'cursor-pointer hover:bg-muted/50 transition-colors duration-200',
+                    'group'
+                  )}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -372,7 +475,11 @@ export function DataGrid<TData, TValue>({
                     </TableCell>
                   ))}
                   {rowActions && (
-                    <TableCell>{rowActions(row.original)}</TableCell>
+                    <TableCell>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {rowActions(row.original)}
+                      </div>
+                    </TableCell>
                   )}
                 </TableRow>
               ))
@@ -387,7 +494,6 @@ export function DataGrid<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
-          {/* Add TableFooter */}
           {table.getFooterGroups().length > 0 && (
             <TableFooter>
               {table.getFooterGroups().map((footerGroup) => (
@@ -409,6 +515,6 @@ export function DataGrid<TData, TValue>({
           )}
         </Table>
       </div>
-    </div>
+    </Container>
   );
 }
