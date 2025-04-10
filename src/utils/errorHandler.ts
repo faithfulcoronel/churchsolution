@@ -1,4 +1,4 @@
-import { useNotifications } from '../hooks/useNotifications';
+import { type NotifyErrorOptions } from '../hooks/useNotifications';
 
 // Error types
 type ErrorType = 'auth' | 'database' | 'network' | 'validation' | 'unknown';
@@ -58,7 +58,7 @@ function logError(error: any, context?: Record<string, any>) {
   }
 }
 
-// Main error handler function
+// Main error handler function - now returns error info instead of showing notification
 export function handleError(error: any, context?: Record<string, any>) {
   // Log the error
   logError(error, context);
@@ -66,18 +66,12 @@ export function handleError(error: any, context?: Record<string, any>) {
   // Get user-friendly message
   const userMessage = getUserFriendlyMessage(error);
 
-  // Show notification
-  const { notifyError } = useNotifications();
-  notifyError(new Error(userMessage), {
-    originalError: error,
-    ...context
-  });
-
-  // Return the error details for optional handling
+  // Return the error details for handling by the component
   return {
     type: getErrorType(error),
     message: userMessage,
     originalError: error,
+    context
   };
 }
 
@@ -90,7 +84,7 @@ export class ValidationError extends Error {
 }
 
 // Hook for try/catch blocks
-export function useTryCatch() {
+export function useTryCatch(notifyError: (error: Error, options?: NotifyErrorOptions) => void) {
   return async <T>(
     operation: () => Promise<T>,
     context?: Record<string, any>
@@ -98,7 +92,11 @@ export function useTryCatch() {
     try {
       return await operation();
     } catch (error) {
-      handleError(error, context);
+      const errorInfo = handleError(error, context);
+      notifyError(new Error(errorInfo.message), {
+        originalError: errorInfo.originalError,
+        ...errorInfo.context
+      });
       return undefined;
     }
   };

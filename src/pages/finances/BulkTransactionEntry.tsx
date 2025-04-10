@@ -4,13 +4,14 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
-import { groupBy } from 'lodash-es';
-import { Card } from '../../components/ui2/card';
+import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
 import { DatePickerInput } from '../../components/ui2/date-picker';
 import { Combobox } from '../../components/ui2/combobox';
 import { Badge } from '../../components/ui2/badge';
+import { ScrollArea } from '../../components/ui2/scroll-area';
+import { Progress } from '../../components/ui2/progress';
 import {
   ArrowLeft,
   Save,
@@ -271,8 +272,50 @@ function BulkTransactionEntry() {
     };
   }, [transactions, transactionType]);
 
+  // Get category names for display
+  const categoryNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    categories?.forEach(cat => {
+      map[cat.id] = cat.name;
+    });
+    return map;
+  }, [categories]);
+
+  // Get person names for display
+  const personNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (transactionType === 'income') {
+      members?.forEach(member => {
+        map[member.id] = `${member.first_name} ${member.last_name}`;
+      });
+    } else {
+      budgets?.forEach(budget => {
+        map[budget.id] = budget.name;
+      });
+    }
+    return map;
+  }, [transactionType, members, budgets]);
+
+  // Calculate percentage for each category and person
+  const percentages = useMemo(() => {
+    const categoryPercentages: Record<string, number> = {};
+    const personPercentages: Record<string, number> = {};
+    
+    if (runningTotals.total > 0) {
+      Object.entries(runningTotals.categoryTotals).forEach(([id, amount]) => {
+        categoryPercentages[id] = (amount / runningTotals.total) * 100;
+      });
+      
+      Object.entries(runningTotals.personTotals).forEach(([id, amount]) => {
+        personPercentages[id] = (amount / runningTotals.total) * 100;
+      });
+    }
+    
+    return { categoryPercentages, personPercentages };
+  }, [runningTotals]);
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div>
       <div className="mb-6">
         <Button
           variant="ghost"
@@ -332,7 +375,7 @@ function BulkTransactionEntry() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-8">
         {/* Overall Total */}
         <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="p-6">
+          <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <Calculator className="h-5 w-5 text-primary mr-2" />
@@ -342,77 +385,111 @@ function BulkTransactionEntry() {
                 {transactionType === 'income' ? 'Income' : 'Expense'}
               </Badge>
             </div>
+          </CardHeader>
+          <CardContent className="pt-0">
             <p className="mt-2 text-2xl font-semibold text-gray-900">
               {formatCurrency(runningTotals.total || 0, currency)}
             </p>
-          </div>
+            <p className="text-sm text-muted-foreground">
+              {transactions.length} transaction{transactions.length !== 1 ? 's' : ''} total
+            </p>
+          </CardContent>
         </Card>
 
         {/* Category Breakdown */}
         <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="p-6">
-            <div className="flex items-center mb-4">
+          <CardHeader className="pb-2">
+            <div className="flex items-center">
               <PieChart className="h-5 w-5 text-primary mr-2" />
               <h3 className="text-sm font-medium text-gray-900">By Category</h3>
             </div>
-            <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
-              {Object.entries(runningTotals.categoryTotals).map(([categoryId, amount]) => {
-                const category = categories?.find(c => c.id === categoryId);
-                return (
-                  <div key={categoryId} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
-                    <span className="text-sm text-gray-600 truncate mr-2">
-                      {category?.name || 'Unknown'}
-                    </span>
-                    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                      {formatCurrency(amount || 0, currency)}
-                    </span>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <ScrollArea className="h-[180px] pr-4">
+              <div className="space-y-3">
+                {Object.entries(runningTotals.categoryTotals).length > 0 ? (
+                  Object.entries(runningTotals.categoryTotals)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([categoryId, amount]) => (
+                      <div key={categoryId} className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-gray-700 truncate max-w-[70%]">
+                            {categoryNames[categoryId] || 'Unknown'}
+                          </span>
+                          <span className="text-sm font-semibold text-gray-900">
+                            {formatCurrency(amount, currency)}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div 
+                            className="bg-primary h-2 rounded-full" 
+                            style={{ width: `${percentages.categoryPercentages[categoryId]}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>{percentages.categoryPercentages[categoryId].toFixed(1)}%</span>
+                          <span>{transactions.filter(t => t.category_id === categoryId).length} entries</span>
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-sm text-gray-500 text-center py-6">
+                    No categories yet
                   </div>
-                );
-              })}
-              {Object.keys(runningTotals.categoryTotals).length === 0 && (
-                <div className="text-sm text-gray-500 text-center py-2">
-                  No categories yet
-                </div>
-              )}
-            </div>
-          </div>
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
         </Card>
 
         {/* Person Breakdown */}
         <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="p-6">
-            <div className="flex items-center mb-4">
+          <CardHeader className="pb-2">
+            <div className="flex items-center">
               <Users className="h-5 w-5 text-primary mr-2" />
               <h3 className="text-sm font-medium text-gray-900">
                 By {transactionType === 'income' ? 'Member' : 'Budget'}
               </h3>
             </div>
-            <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
-              {Object.entries(runningTotals.personTotals).map(([personId, amount]) => {
-                const person = transactionType === 'income'
-                  ? members?.find(m => m.id === personId)
-                  : budgets?.find(b => b.id === personId);
-                const label = transactionType === 'income'
-                  ? person ? `${person.first_name} ${person.last_name}` : 'Unknown'
-                  : person?.name || 'Unknown';
-                return (
-                  <div key={personId} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
-                    <span className="text-sm text-gray-600 truncate mr-2">
-                      {label}
-                    </span>
-                    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                      {formatCurrency(amount || 0, currency)}
-                    </span>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <ScrollArea className="h-[180px] pr-4">
+              <div className="space-y-3">
+                {Object.entries(runningTotals.personTotals).length > 0 ? (
+                  Object.entries(runningTotals.personTotals)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([personId, amount]) => (
+                      <div key={personId} className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-gray-700 truncate max-w-[70%]">
+                            {personNames[personId] || 'Unknown'}
+                          </span>
+                          <span className="text-sm font-semibold text-gray-900">
+                            {formatCurrency(amount, currency)}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full ${transactionType === 'income' ? 'bg-success' : 'bg-primary'}`}
+                            style={{ width: `${percentages.personPercentages[personId]}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>{percentages.personPercentages[personId].toFixed(1)}%</span>
+                          <span>{transactions.filter(t => 
+                            (transactionType === 'income' ? t.member_id : t.budget_id) === personId
+                          ).length} entries</span>
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-sm text-gray-500 text-center py-6">
+                    No {transactionType === 'income' ? 'members' : 'budgets'} yet
                   </div>
-                );
-              })}
-              {Object.keys(runningTotals.personTotals).length === 0 && (
-                <div className="text-sm text-gray-500 text-center py-2">
-                  No {transactionType === 'income' ? 'members' : 'budgets'} yet
-                </div>
-              )}
-            </div>
-          </div>
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
         </Card>
       </div>
 
@@ -441,103 +518,109 @@ function BulkTransactionEntry() {
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {transactionType === 'income' ? 'Member' : 'Budget'}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="relative px-6 py-3">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {transactions.map((transaction, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <DatePickerInput
-                          value={transaction.date ? new Date(transaction.date) : undefined}
-                          onChange={(date) => handleInputChange(
-                            index,
-                            'date',
-                            date?.toISOString().split('T')[0]
-                          )}
-                          onKeyDown={(e) => handleKeyDown(e, index, 'date')}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Combobox
-                          options={transactionType === 'income' ? memberOptions : budgetOptions}
-                          value={transactionType === 'income' ? transaction.member_id : transaction.budget_id}
-                          onChange={(value) => handleInputChange(
-                            index,
-                            transactionType === 'income' ? 'member_id' : 'budget_id',
-                            value
-                          )}
-                          placeholder={transactionType === 'income' ? 'Select Member' : 'Select Budget'}
-                          onKeyDown={(e) => handleKeyDown(e, index, transactionType === 'income' ? 'member_id' : 'budget_id')}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Combobox
-                          options={categoryOptions}
-                          value={transaction.category_id}
-                          onChange={(value) => handleInputChange(index, 'category_id', value)}
-                          placeholder="Select Category"
-                          onKeyDown={(e) => handleKeyDown(e, index, 'category_id')}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Input
-                          type="number"
-                          value={Number(transaction.amount || 0).toFixed(2)}
-                          onChange={(e) => handleInputChange(index, 'amount', e.target.value)}
-                          icon={<DollarSign className="h-4 w-4" />}
-                          min={0}
-                          step="0.01"
-                          onKeyDown={(e) => handleKeyDown(e, index, 'amount')}
-                          onBlur={(e) => {
-                            const value = Number(e.target.value);
-                            if (!isNaN(value)) {
-                              handleInputChange(index, 'amount', value);
-                            }
-                          }}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Input
-                          value={transaction.description || ''}
-                          onChange={(e) => handleInputChange(index, 'description', e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(e, index, 'description')}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveRow(index)}
-                          disabled={transactions.length === 1}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="inline-block min-w-full align-middle">
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {transactionType === 'income' ? 'Member' : 'Budget'}
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Category
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Amount
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description
+                        </th>
+                        <th scope="col" className="relative px-6 py-3">
+                          <span className="sr-only">Actions</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {transactions.map((transaction, index) => (
+                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <DatePickerInput
+                              value={transaction.date ? new Date(transaction.date) : undefined}
+                              onChange={(date) => handleInputChange(
+                                index,
+                                'date',
+                                date?.toISOString().split('T')[0]
+                              )}
+                              onKeyDown={(e) => handleKeyDown(e, index, 'date')}
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Combobox
+                              options={transactionType === 'income' ? memberOptions : budgetOptions}
+                              value={transactionType === 'income' ? transaction.member_id : transaction.budget_id}
+                              onChange={(value) => handleInputChange(
+                                index,
+                                transactionType === 'income' ? 'member_id' : 'budget_id',
+                                value
+                              )}
+                              placeholder={transactionType === 'income' ? 'Select Member' : 'Select Budget'}
+                              onKeyDown={(e) => handleKeyDown(e, index, transactionType === 'income' ? 'member_id' : 'budget_id')}
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Combobox
+                              options={categoryOptions}
+                              value={transaction.category_id}
+                              onChange={(value) => handleInputChange(index, 'category_id', value)}
+                              placeholder="Select Category"
+                              onKeyDown={(e) => handleKeyDown(e, index, 'category_id')}
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Input
+                              type="number"
+                              value={Number(transaction.amount || 0).toFixed(2)}
+                              onChange={(e) => handleInputChange(index, 'amount', e.target.value)}
+                              icon={<DollarSign className="h-4 w-4" />}
+                              min={0}
+                              step="0.01"
+                              onKeyDown={(e) => handleKeyDown(e, index, 'amount')}
+                              onBlur={(e) => {
+                                const value = Number(e.target.value);
+                                if (!isNaN(value)) {
+                                  handleInputChange(index, 'amount', value);
+                                }
+                              }}
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <Input
+                              value={transaction.description || ''}
+                              onChange={(e) => handleInputChange(index, 'description', e.target.value)}
+                              onKeyDown={(e) => handleKeyDown(e, index, 'description')}
+                              placeholder="Description"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveRow(index)}
+                              disabled={transactions.length === 1}
+                              className="text-gray-500 hover:text-red-500"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
 
             <div className="mt-6 flex justify-between">

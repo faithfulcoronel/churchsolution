@@ -49,13 +49,11 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     onClick,
     variant = 'default',
     size = 'md',
-    fullWidth = false,
     ...props 
   }, ref) => {
     const isInteractive = !!onClick;
 
     return (
-      <Container fluid={fullWidth}>
         <div
           ref={ref}
           className={cn(
@@ -108,7 +106,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             </div>
           )}
         </div>
-      </Container>
     );
   }
 );

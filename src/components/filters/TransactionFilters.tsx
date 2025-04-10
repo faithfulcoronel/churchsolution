@@ -5,7 +5,10 @@ import { Button } from '../ui2/button';
 import { Badge } from '../ui2/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui2/select';
 import { DatePickerInput } from '../ui2/date-picker';
+import { DateRangePickerField } from '../ui2/date-range-picker-field';
+import { DateRange } from '../ui2/date-range-picker';
 import { AmountRangeFilter } from './AmountRangeFilter';
+import { MultiSelect } from '../ui2/multi-select';
 import {
   Search,
   Filter,
@@ -13,12 +16,14 @@ import {
   TrendingDown,
   X,
   Calendar,
+  Tag,
 } from 'lucide-react';
 
 export interface TransactionFilter {
   searchTerm: string;
   typeFilter: string;
   categoryFilter: string;
+  categoryFilters: string[];
   dateRange: {
     start: string;
     end: string;
@@ -40,6 +45,11 @@ interface TransactionFiltersProps {
     icon: React.ReactNode;
     onRemove: () => void;
   }>;
+  categories?: Array<{
+    id: string;
+    name: string;
+    type?: string;
+  }>;
 }
 
 export function TransactionFilters({
@@ -47,7 +57,79 @@ export function TransactionFilters({
   onFilterChange,
   onResetFilters,
   activeFilters,
+  categories = [],
 }: TransactionFiltersProps) {
+  // Convert string dates to DateRange object for the DateRangePicker
+  const dateRange: DateRange = {
+    from: filters.dateRange.start ? new Date(filters.dateRange.start) : undefined,
+    to: filters.dateRange.end ? new Date(filters.dateRange.end) : undefined
+  };
+
+  // Handle date range changes
+  const handleDateRangeChange = (range: DateRange) => {
+    onFilterChange({
+      dateRange: {
+        start: range.from ? range.from.toISOString().split('T')[0] : '',
+        end: range.to ? range.to.toISOString().split('T')[0] : ''
+      }
+    });
+  };
+
+  // Convert categories to options for MultiSelect
+  const categoryOptions = React.useMemo(() => {
+    const options = [{ value: 'all', label: 'All Categories' }];
+    
+    // Group categories by type if type is available
+    const incomeCategories = categories
+      .filter(cat => cat.type === 'income_transaction')
+      .map(cat => ({
+        value: cat.id,
+        label: cat.name,
+        icon: <TrendingUp className="h-3 w-3 text-success" />
+      }));
+    
+    const expenseCategories = categories
+      .filter(cat => cat.type === 'expense_transaction')
+      .map(cat => ({
+        value: cat.id,
+        label: cat.name,
+        icon: <TrendingDown className="h-3 w-3 text-destructive" />
+      }));
+    
+    // If no type information, just map all categories
+    const otherCategories = categories
+      .filter(cat => !cat.type)
+      .map(cat => ({
+        value: cat.id,
+        label: cat.name,
+        icon: <Tag className="h-3 w-3" />
+      }));
+    
+    return [
+      ...options,
+      ...incomeCategories,
+      ...expenseCategories,
+      ...otherCategories
+    ];
+  }, [categories]);
+
+  // Handle multi-select category changes
+  const handleCategoryMultiSelectChange = (selectedValues: string[]) => {
+    // If "all" is selected, clear other selections
+    if (selectedValues.includes('all')) {
+      onFilterChange({ categoryFilters: ['all'] });
+      return;
+    }
+    
+    // If no values are selected, default to "all"
+    if (selectedValues.length === 0) {
+      onFilterChange({ categoryFilters: ['all'] });
+      return;
+    }
+    
+    onFilterChange({ categoryFilters: selectedValues });
+  };
+
   return (
     <Card className="mt-6">
       <CardContent className="p-4 space-y-4">
@@ -91,18 +173,14 @@ export function TransactionFilters({
           </div>
 
           <div>
-            <Select
-              value={filters.categoryFilter}
-              onValueChange={(value) => onFilterChange({ categoryFilter: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {/* Categories will be populated from the parent component */}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              value={filters.categoryFilters || ['all']}
+              onChange={handleCategoryMultiSelectChange}
+              options={categoryOptions}
+              placeholder="Select Categories"
+              icon={<Tag className="h-4 w-4" />}
+              maxDisplay={2}
+            />
           </div>
 
           <div>
@@ -122,34 +200,11 @@ export function TransactionFilters({
             <label className="text-sm font-medium text-muted-foreground">
               Date Range
             </label>
-            <div className="flex items-center space-x-2">
-              <div className="flex-1">
-                <DatePickerInput
-                  value={filters.dateRange.start ? new Date(filters.dateRange.start) : undefined}
-                  onChange={(date) => onFilterChange({
-                    dateRange: {
-                      ...filters.dateRange,
-                      start: date?.toISOString().split('T')[0] || '',
-                    }
-                  })}
-                  placeholder="Start Date"
-                  icon={<Calendar className="h-4 w-4" />}
-                />
-              </div>
-              <div className="flex-1">
-                <DatePickerInput
-                  value={filters.dateRange.end ? new Date(filters.dateRange.end) : undefined}
-                  onChange={(date) => onFilterChange({
-                    dateRange: {
-                      ...filters.dateRange,
-                      end: date?.toISOString().split('T')[0] || '',
-                    }
-                  })}
-                  placeholder="End Date"
-                  icon={<Calendar className="h-4 w-4" />}
-                />
-              </div>
-            </div>
+            <DateRangePickerField
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              placeholder="Select date range"
+            />
           </div>
 
           <div className="flex flex-col space-y-2">
