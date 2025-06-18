@@ -264,7 +264,9 @@ export class BaseAdapter<T extends BaseModel> {
           ...processedData,
           tenant_id: tenantId,
           created_by: (await supabase.auth.getUser()).data.user?.id,
+          updated_by: (await supabase.auth.getUser()).data.user?.id,
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         }])
         .select()
         .single();

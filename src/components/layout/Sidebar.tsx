@@ -3,12 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { usePermissions } from '../../hooks/usePermissions';
-import { Container } from '../ui2/container';
+import { Scrollable } from '../ui2/scrollable';
+import { Input } from '../ui2/input';
 import { Button } from '../ui2/button';
 import { Badge } from '../ui2/badge';
 import { Separator } from '../ui2/separator';
-import { Scrollable } from '../ui2/scrollable';
-import { Input } from '../ui2/input';
 import {
   Home,
   Users,
@@ -21,6 +20,12 @@ import {
   ChevronDown,
   Search,
   Heart,
+  BarChart3,
+  FileText,
+  CreditCard,
+  History,
+  Shield,
+  Menu,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -90,22 +95,45 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
         {
           name: 'Overview',
           href: '/finances',
-          icon: DollarSign,
+          icon: BarChart3,
         },
         {
           name: 'Transactions',
           href: '/finances/transactions',
-          icon: DollarSign,
+          icon: History,
         },
         {
           name: 'Budgets',
           href: '/finances/budgets',
-          icon: DollarSign,
+          icon: CreditCard,
         },
         {
           name: 'Reports',
           href: '/finances/reports',
-          icon: DollarSign,
+          icon: FileText,
+        },
+      ]
+    },
+    { 
+      name: 'Accounts', 
+      href: '/accounts', 
+      icon: Building2,
+      permission: 'finance.view',
+      submenu: [
+        {
+          name: 'Accounts',
+          href: '/accounts',
+          icon: Building2,
+        },
+        {
+          name: 'Financial Sources',
+          href: '/accounts/sources',
+          icon: CreditCard,
+        },
+        {
+          name: 'Chart of Accounts',
+          href: '/accounts/chart-of-accounts',
+          icon: FileText,
         },
       ]
     },
@@ -134,7 +162,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
         return {
           ...item,
           submenu: item.submenu.filter(
-            subitem => subitem.name.toLowerCase().includes(searchLower)
+            subitem => subitem.name.toLowerCase().includes(searchLower) || item.name.toLowerCase().includes(searchLower)
           )
         };
       }
@@ -171,6 +199,27 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   const isSubmenuOpen = (itemName: string) => {
     return openSubmenus.has(itemName);
   };
+
+  // Auto-expand submenu based on current path
+  React.useEffect(() => {
+    const currentPath = location.pathname;
+    
+    navigation.forEach(item => {
+      if (item.submenu) {
+        const hasActiveChild = item.submenu.some(subitem => 
+          currentPath.startsWith(subitem.href)
+        );
+        
+        if (hasActiveChild) {
+          setOpenSubmenus(prev => {
+            const newOpenSubmenus = new Set(prev);
+            newOpenSubmenus.add(item.name);
+            return newOpenSubmenus;
+          });
+        }
+      }
+    });
+  }, [location.pathname]);
 
   return (
     <>
@@ -224,7 +273,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                         className={`
                           w-full group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium
                           transition-colors duration-200
-                          ${location.pathname.startsWith(item.href)
+                          ${location.pathname.startsWith(item.href || '')
                             ? 'bg-primary text-white'
                             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                             ? 'bg-primary/20 text-white'
@@ -235,7 +284,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                         <div className="flex items-center">
                           <item.icon className={`
                             h-5 w-5 flex-shrink-0 transition-colors
-                            ${location.pathname.startsWith(item.href)
+                            ${location.pathname.startsWith(item.href || '')
                               ? 'text-white'
                               : 'text-gray-400 group-hover:text-white'
                             }
@@ -281,11 +330,11 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                     </div>
                   ) : (
                     <Link
-                      to={item.href}
+                      to={item.href || ''}
                       className={`
                         group flex items-center rounded-lg px-3 py-2 text-sm font-medium
                         transition-colors duration-200
-                        ${location.pathname.startsWith(item.href)
+                        ${location.pathname.startsWith(item.href || '')
                           ? 'bg-primary text-white'
                           : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                           ? 'bg-primary/20 text-white'
@@ -295,7 +344,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                     >
                       <item.icon className={`
                         mr-3 h-5 w-5 flex-shrink-0 transition-colors
-                        ${location.pathname.startsWith(item.href)
+                        ${location.pathname.startsWith(item.href || '')
                           ? 'text-white'
                           : 'text-gray-400 group-hover:text-white'
                         }
@@ -373,7 +422,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
               <SettingsIcon className={`h-5 w-5 mr-2 ${location.pathname.startsWith('/settings') ? 'text-white' : ''}`} />
               Settings
               {tenant?.subscription_tier === 'free' && (
-                <Badge variant="primary" size="sm" className="ml-auto">
+                <Badge variant="primary" className="ml-auto">
                   Free
                 </Badge>
               )}

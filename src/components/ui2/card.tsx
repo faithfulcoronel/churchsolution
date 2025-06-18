@@ -49,6 +49,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     onClick,
     variant = 'default',
     size = 'md',
+    fullWidth = false,
     ...props 
   }, ref) => {
     const isInteractive = !!onClick;

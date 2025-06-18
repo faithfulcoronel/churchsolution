@@ -82,6 +82,3 @@ END $$;
 -- Add helpful comments
 COMMENT ON FUNCTION handle_new_user_role() IS 
   'Automatically assigns roles to new users. First user gets admin role, all users get member role.';
-
-COMMENT ON TRIGGER assign_user_roles ON auth.users IS
-  'Trigger to automatically assign roles when new users are created.';

@@ -1,0 +1,38 @@
+import { BaseModel } from './base.model';
+import { Member } from './member.model';
+import { ChartOfAccount } from './chartOfAccount.model';
+import { FinancialTransactionHeader } from './financialTransactionHeader.model';
+
+export type TransactionType = 'income' | 'expense';
+
+export interface FinancialTransaction extends BaseModel {
+  id: string;
+  type: TransactionType;
+  amount: number;
+  description: string;
+  date: string;
+  budget_id: string | null;
+  member_id: string | null;
+  member?: Member;
+  category_id: string | null;
+  category?: {
+    id: string;
+    name: string;
+    code: string;
+  };
+  account_id: string | null;
+  account?: ChartOfAccount;
+  header_id: string | null;
+  header?: FinancialTransactionHeader;
+  debit: number;
+  credit: number;
+  is_reconciled: boolean;
+  reconciled_at: string | null;
+  reconciled_by: string | null;
+  source_id: string | null;
+  source?: {
+    id: string;
+    name: string;
+    source_type: string;
+  };
+}

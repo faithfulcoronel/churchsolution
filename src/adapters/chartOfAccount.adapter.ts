@@ -1,0 +1,120 @@
+import 'reflect-metadata';
+import { injectable } from 'inversify';
+import { BaseAdapter, QueryOptions } from './base.adapter';
+import { ChartOfAccount } from '../models/chartOfAccount.model';
+import { logAuditEvent } from '../utils/auditLogger';
+import { supabase } from '../lib/supabase';
+
+@injectable()
+export class ChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {
+  protected tableName = 'chart_of_accounts';
+  
+  protected defaultSelect = `
+    id,
+    code,
+    name,
+    description,
+    account_type,
+    account_subtype,
+    is_active,
+    parent_id,
+    created_by,
+    updated_by,
+    created_at,
+    updated_at
+  `;
+
+  protected defaultRelationships: QueryOptions['relationships'] = [
+    {
+      table: 'chart_of_accounts',
+      foreignKey: 'parent_id',
+      select: ['id', 'code', 'name', 'account_type']
+    }
+  ];
+
+  protected override async onBeforeCreate(data: Partial<ChartOfAccount>): Promise<Partial<ChartOfAccount>> {
+    // Validate account data
+    this.validateAccountData(data);
+    
+    // Set default values
+    if (data.is_active === undefined) {
+      data.is_active = true;
+    }
+    
+    return data;
+  }
+
+  protected override async onAfterCreate(data: ChartOfAccount): Promise<void> {
+    // Log audit event
+    await logAuditEvent('create', 'chart_of_account', data.id, data);
+  }
+
+  protected override async onBeforeUpdate(id: string, data: Partial<ChartOfAccount>): Promise<Partial<ChartOfAccount>> {
+    // Validate account data if fields are being updated
+    if (data.code || data.name || data.account_type) {
+      this.validateAccountData(data);
+    }
+    
+    return data;
+  }
+
+  protected override async onAfterUpdate(data: ChartOfAccount): Promise<void> {
+    // Log audit event
+    await logAuditEvent('update', 'chart_of_account', data.id, data);
+  }
+
+  protected override async onBeforeDelete(id: string): Promise<void> {
+    // Check for financial transactions
+    const { data: transactions, error: transactionsError } = await supabase
+      .from('financial_transactions')
+      .select('id')
+      .eq('account_id', id)
+      .limit(1);
+
+    if (transactionsError) throw transactionsError;
+    if (transactions?.length) {
+      throw new Error('Cannot delete account with existing financial transactions');
+    }
+    
+    // Check for child accounts
+    const { data: children, error: childrenError } = await supabase
+      .from('chart_of_accounts')
+      .select('id')
+      .eq('parent_id', id)
+      .limit(1);
+
+    if (childrenError) throw childrenError;
+    if (children?.length) {
+      throw new Error('Cannot delete account with child accounts');
+    }
+  }
+
+  protected override async onAfterDelete(id: string): Promise<void> {
+    // Log audit event
+    await logAuditEvent('delete', 'chart_of_account', id, { id });
+  }
+
+  private validateAccountData(data: Partial<ChartOfAccount>): void {
+    if (data.code !== undefined && !data.code.trim()) {
+      throw new Error('Account code is required');
+    }
+    
+    if (data.name !== undefined && !data.name.trim()) {
+      throw new Error('Account name is required');
+    }
+    
+    if (data.account_type !== undefined) {
+      const validTypes = ['asset', 'liability', 'equity', 'revenue', 'expense'];
+      if (!validTypes.includes(data.account_type)) {
+        throw new Error('Invalid account type. Must be one of: asset, liability, equity, revenue, expense');
+      }
+    }
+  }
+
+  public async getHierarchy(): Promise<ChartOfAccount[]> {
+    const { data, error } = await supabase.rpc('get_chart_of_accounts_hierarchy');
+    
+    if (error) throw error;
+    return data || [];
+  }
+}
