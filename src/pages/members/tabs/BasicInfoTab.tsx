@@ -1,19 +1,31 @@
 import React from 'react';
 import { Card, CardContent } from '../../../components/ui2/card';
+import { Input } from '../../../components/ui2/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '../../../components/ui2/select';
+import { Member } from '../../../models/member.model';
 
 interface BasicInfoTabProps {
-  member: any;
+  member: Partial<Member>;
+  onChange: (field: string, value: any) => void;
+  mode?: 'view' | 'edit' | 'add';
 }
 
-function BasicInfoTab({ member }: BasicInfoTabProps) {
+function BasicInfoTab({ member, onChange, mode = 'view' }: BasicInfoTabProps) {
   if (!member) return null;
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-medium mb-4">Personal Information</h3>
-            <dl className="space-y-4">
+  if (mode === 'view') {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Personal Information</h3>
+              <dl className="space-y-4">
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Full Name</dt>
                 <dd className="mt-1">
@@ -85,7 +97,102 @@ function BasicInfoTab({ member }: BasicInfoTabProps) {
         </div>
       </CardContent>
     </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <Input
+              label="First Name"
+              value={member.first_name || ''}
+              onChange={e => onChange('first_name', e.target.value)}
+            />
+            <Input
+              label="Middle Name"
+              value={member.middle_name || ''}
+              onChange={e => onChange('middle_name', e.target.value)}
+            />
+            <Input
+              label="Last Name"
+              value={member.last_name || ''}
+              onChange={e => onChange('last_name', e.target.value)}
+            />
+            <Input
+              label="Preferred Name"
+              value={member.preferred_name || ''}
+              onChange={e => onChange('preferred_name', e.target.value)}
+            />
+            <Select
+              value={member.gender || ''}
+              onValueChange={value => onChange('gender', value)}
+            >
+              <SelectTrigger label="Gender">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={member.marital_status || ''}
+              onValueChange={value => onChange('marital_status', value)}
+            >
+              <SelectTrigger label="Marital Status">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">Single</SelectItem>
+                <SelectItem value="married">Married</SelectItem>
+                <SelectItem value="widowed">Widowed</SelectItem>
+                <SelectItem value="divorced">Divorced</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              type="date"
+              label="Birthday"
+              value={member.birthday || ''}
+              onChange={e => onChange('birthday', e.target.value)}
+            />
+          </div>
+          <div className="space-y-4">
+            <Input
+              label="Membership Category"
+              value={member.membership_category_id || ''}
+              onChange={e => onChange('membership_category_id', e.target.value)}
+            />
+            <Input
+              label="Status Category"
+              value={member.status_category_id || ''}
+              onChange={e => onChange('status_category_id', e.target.value)}
+            />
+            <Input
+              type="date"
+              label="Membership Date"
+              value={member.membership_date || ''}
+              onChange={e => onChange('membership_date', e.target.value)}
+            />
+            <Input
+              type="date"
+              label="Baptism Date"
+              value={member.baptism_date || ''}
+              onChange={e => onChange('baptism_date', e.target.value)}
+            />
+            <Input
+              label="Envelope Number"
+              value={member.envelope_number || ''}
+              onChange={e => onChange('envelope_number', e.target.value)}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 export default BasicInfoTab;
+

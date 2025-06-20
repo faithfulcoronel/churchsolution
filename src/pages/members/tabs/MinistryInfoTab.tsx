@@ -1,19 +1,24 @@
 import React from 'react';
 import { Card, CardContent } from '../../../components/ui2/card';
 import { Badge } from '../../../components/ui2/badge';
+import { Input } from '../../../components/ui2/input';
+import { Member } from '../../../models/member.model';
 
 interface MinistryInfoTabProps {
-  member: any;
+  member: Partial<Member>;
+  onChange: (field: string, value: any) => void;
+  mode?: 'view' | 'edit' | 'add';
 }
 
-function MinistryInfoTab({ member }: MinistryInfoTabProps) {
+function MinistryInfoTab({ member, onChange, mode = 'view' }: MinistryInfoTabProps) {
   if (!member) return null;
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-medium mb-4">Ministry Involvement</h3>
+  if (mode === 'view') {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Ministry Involvement</h3>
             
             <div className="space-y-4">
               {member.leadership_position && (
@@ -127,7 +132,73 @@ function MinistryInfoTab({ member }: MinistryInfoTabProps) {
         </div>
       </CardContent>
     </Card>
+    );
+  }
+
+  const listToString = (arr?: string[]) => (arr ? arr.join(', ') : '');
+  const handleListChange = (field: string, value: string) => {
+    const parsed = value
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
+    onChange(field, parsed);
+  };
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <Input
+              label="Leadership Position"
+              value={member.leadership_position || ''}
+              onChange={e => onChange('leadership_position', e.target.value)}
+            />
+            <Input
+              label="Ministries (comma separated)"
+              value={listToString(member.ministries)}
+              onChange={e => handleListChange('ministries', e.target.value)}
+            />
+            <Input
+              label="Small Groups (comma separated)"
+              value={listToString(member.small_groups)}
+              onChange={e => handleListChange('small_groups', e.target.value)}
+            />
+            <Input
+              label="Volunteer Roles (comma separated)"
+              value={listToString(member.volunteer_roles)}
+              onChange={e => handleListChange('volunteer_roles', e.target.value)}
+            />
+          </div>
+          <div className="space-y-4">
+            <Input
+              label="Spiritual Gifts (comma separated)"
+              value={listToString(member.spiritual_gifts)}
+              onChange={e => handleListChange('spiritual_gifts', e.target.value)}
+            />
+            <Input
+              label="Ministry Interests (comma separated)"
+              value={listToString(member.ministry_interests)}
+              onChange={e => handleListChange('ministry_interests', e.target.value)}
+            />
+            <Input
+              type="number"
+              label="Attendance Rate"
+              value={member.attendance_rate ?? ''}
+              onChange={e => onChange('attendance_rate', Number(e.target.value))}
+            />
+            <Input
+              type="date"
+              label="Last Attendance"
+              value={member.last_attendance_date || ''}
+              onChange={e => onChange('last_attendance_date', e.target.value)}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 export default MinistryInfoTab;
+

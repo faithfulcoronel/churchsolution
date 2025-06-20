@@ -129,30 +129,56 @@ function MemberAddEdit() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const mode = id ? 'edit' : 'add';
+
   const tabs = [
     {
       id: 'basic',
       label: 'Basic Info',
       badge: formErrors.basic?.length,
-      content: <BasicInfoTab member={formData} />,
+      content: (
+        <BasicInfoTab
+          mode={mode}
+          member={formData}
+          onChange={handleInputChange}
+        />
+      ),
     },
     {
       id: 'contact',
       label: 'Contact Info',
       badge: formErrors.contact?.length,
-      content: <ContactInfoTab member={formData} />,
+      content: (
+        <ContactInfoTab
+          mode={mode}
+          member={formData}
+          onChange={handleInputChange}
+        />
+      ),
     },
     {
       id: 'ministry',
       label: 'Ministry Info',
       badge: formErrors.ministry?.length,
-      content: <MinistryInfoTab member={formData} />,
+      content: (
+        <MinistryInfoTab
+          mode={mode}
+          member={formData}
+          onChange={handleInputChange}
+        />
+      ),
     },
     {
       id: 'notes',
       label: 'Notes',
       badge: formErrors.notes?.length,
-      content: <NotesTab member={formData} />,
+      content: (
+        <NotesTab
+          mode={mode}
+          member={formData}
+          onChange={handleInputChange}
+        />
+      ),
     },
   ];
 
@@ -322,3 +348,4 @@ function MemberAddEdit() {
 }
 
 export default MemberAddEdit;
+

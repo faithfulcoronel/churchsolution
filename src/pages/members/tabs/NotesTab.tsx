@@ -5,12 +5,15 @@ import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { Textarea } from '../../../components/ui2/textarea';
 import { Loader2, Save } from 'lucide-react';
+import { Member } from '../../../models/member.model';
 
 interface NotesTabProps {
-  member: any;
+  member: Partial<Member>;
+  onChange: (field: string, value: any) => void;
+  mode?: 'view' | 'edit' | 'add';
 }
 
-function NotesTab({ member }: NotesTabProps) {
+function NotesTab({ member, onChange, mode = 'view' }: NotesTabProps) {
   const [notes, setNotes] = useState(member?.pastoral_notes || '');
   const [prayerRequests, setPrayerRequests] = useState<string[]>(member?.prayer_requests || []);
   const [newPrayerRequest, setNewPrayerRequest] = useState('');
@@ -71,6 +74,37 @@ function NotesTab({ member }: NotesTabProps) {
     setPrayerRequests(updatedRequests);
     updatePrayerRequestsMutation.mutate();
   };
+
+  if (mode !== 'view') {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <Textarea
+              value={member.pastoral_notes || ''}
+              onChange={e => onChange('pastoral_notes', e.target.value)}
+              placeholder="Enter pastoral notes here..."
+              className="min-h-[150px]"
+            />
+            <Textarea
+              value={(member.prayer_requests || []).join('\n')}
+              onChange={e =>
+                onChange(
+                  'prayer_requests',
+                  e.target.value
+                    .split('\n')
+                    .map(v => v.trim())
+                    .filter(Boolean)
+                )
+              }
+              placeholder="Prayer requests (one per line)"
+              className="min-h-[150px]"
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -154,3 +188,4 @@ function NotesTab({ member }: NotesTabProps) {
 }
 
 export default NotesTab;
+

@@ -1,20 +1,26 @@
 import React from 'react';
 import { Card, CardContent } from '../../../components/ui2/card';
 import { Mail, Phone, MapPin, User } from 'lucide-react';
+import { Input } from '../../../components/ui2/input';
+import { Textarea } from '../../../components/ui2/textarea';
+import { Member } from '../../../models/member.model';
 
 interface ContactInfoTabProps {
-  member: any;
+  member: Partial<Member>;
+  onChange: (field: string, value: any) => void;
+  mode?: 'view' | 'edit' | 'add';
 }
 
-function ContactInfoTab({ member }: ContactInfoTabProps) {
+function ContactInfoTab({ member, onChange, mode = 'view' }: ContactInfoTabProps) {
   if (!member) return null;
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-medium mb-4">Contact Information</h3>
-            <dl className="space-y-4">
+  if (mode === 'view') {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Contact Information</h3>
+              <dl className="space-y-4">
               {member.email && (
                 <div className="flex items-start">
                   <Mail className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
@@ -90,7 +96,48 @@ function ContactInfoTab({ member }: ContactInfoTabProps) {
         </div>
       </CardContent>
     </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <Input
+              label="Email"
+              value={member.email || ''}
+              onChange={e => onChange('email', e.target.value)}
+            />
+            <Input
+              label="Phone"
+              value={member.contact_number || ''}
+              onChange={e => onChange('contact_number', e.target.value)}
+            />
+            <Textarea
+              value={member.address || ''}
+              onChange={e => onChange('address', e.target.value)}
+              placeholder="Address"
+              className="min-h-[80px]"
+            />
+          </div>
+          <div className="space-y-4">
+            <Input
+              label="Emergency Contact Name"
+              value={member.emergency_contact_name || ''}
+              onChange={e => onChange('emergency_contact_name', e.target.value)}
+            />
+            <Input
+              label="Emergency Contact Phone"
+              value={member.emergency_contact_phone || ''}
+              onChange={e => onChange('emergency_contact_phone', e.target.value)}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 export default ContactInfoTab;
+
