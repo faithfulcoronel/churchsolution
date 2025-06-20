@@ -134,25 +134,25 @@ function MemberAddEdit() {
       id: 'basic',
       label: 'Basic Info',
       badge: formErrors.basic?.length,
-      content: <BasicInfoTab formData={formData} onChange={handleInputChange} />,
+      content: <BasicInfoTab member={formData} />,
     },
     {
       id: 'contact',
       label: 'Contact Info',
       badge: formErrors.contact?.length,
-      content: <ContactInfoTab formData={formData} onChange={handleInputChange} />,
+      content: <ContactInfoTab member={formData} />,
     },
     {
       id: 'ministry',
       label: 'Ministry Info',
       badge: formErrors.ministry?.length,
-      content: <MinistryInfoTab formData={formData} onChange={handleInputChange} />,
+      content: <MinistryInfoTab member={formData} />,
     },
     {
       id: 'notes',
       label: 'Notes',
       badge: formErrors.notes?.length,
-      content: <NotesTab formData={formData} onChange={handleInputChange} />,
+      content: <NotesTab member={formData} />,
     },
   ];
 
