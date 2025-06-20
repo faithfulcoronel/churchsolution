@@ -3,6 +3,7 @@ import { BaseRepository } from './base.repository';
 import { Account } from '../models/account.model';
 import { AccountAdapter } from '../adapters/account.adapter';
 import { NotificationService } from '../services/NotificationService';
+import { AccountValidator } from '../validators/account.validator';
 
 @injectable()
 export class AccountRepository extends BaseRepository<Account> {
@@ -11,8 +12,8 @@ export class AccountRepository extends BaseRepository<Account> {
   }
 
   protected override async beforeCreate(data: Partial<Account>): Promise<Partial<Account>> {
-    // Additional repository-level validation
-    this.validateAccountData(data);
+    // Validate account data
+    AccountValidator.validate(data);
     
     // Format data before creation
     return this.formatAccountData(data);
@@ -24,8 +25,8 @@ export class AccountRepository extends BaseRepository<Account> {
   }
 
   protected override async beforeUpdate(id: string, data: Partial<Account>): Promise<Partial<Account>> {
-    // Additional repository-level validation
-    this.validateAccountData(data);
+    // Validate account data
+    AccountValidator.validate(data);
     
     // Format data before update
     return this.formatAccountData(data);
@@ -50,34 +51,6 @@ export class AccountRepository extends BaseRepository<Account> {
   }
 
   // Private helper methods
-  private validateAccountData(data: Partial<Account>): void {
-    const errors: string[] = [];
-
-    // Basic validation
-    if (data.name !== undefined && !data.name.trim()) {
-      errors.push('Account name is required');
-    }
-    
-    if (data.account_number !== undefined && !data.account_number.trim()) {
-      errors.push('Account number is required');
-    }
-    
-    if (data.account_type !== undefined && 
-        !['organization', 'person'].includes(data.account_type)) {
-      errors.push('Account type must be either "organization" or "person"');
-    }
-
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.push('Invalid email format');
-    }
-
-    if (errors.length > 0) {
-      errors.forEach(error => {
-        NotificationService.showError(error, 5000);
-      });
-      throw new Error('Validation failed: ' + errors.join(', '));
-    }
-  }
 
   private formatAccountData(data: Partial<Account>): Partial<Account> {
     const formattedData = { ...data };
