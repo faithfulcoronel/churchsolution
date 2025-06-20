@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
@@ -20,6 +20,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui2/tabs';
 import { Button } from '../ui2/button';
 import { Badge } from '../ui2/badge';
 import { useNavigate } from 'react-router-dom';
+import { useNotificationListener } from '../../hooks/useNotificationListener';
+import { useAuthStore } from '../../stores/authStore';
 
 type Notification = {
   id: string;
@@ -36,20 +38,25 @@ export default function NotificationDropdown() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+  useNotificationListener();
 
   // Fetch notifications
   const { data: notifications = [], isLoading } = useQuery({
-    queryKey: ['notifications'],
+    queryKey: ['notifications', user?.id],
     queryFn: async () => {
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as Notification[];
     },
-    enabled: open, // Only fetch when dropdown is open
+    enabled: !!user,
   });
 
   // Count unread notifications
@@ -66,7 +73,7 @@ export default function NotificationDropdown() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
     }
   });
 
@@ -81,7 +88,7 @@ export default function NotificationDropdown() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
     }
   });
 
