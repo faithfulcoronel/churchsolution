@@ -224,6 +224,28 @@ function AccountAddEdit() {
                         placeholder="Enter account name"
                       />
                     </div>
+
+                    {formData.account_type === 'person' && (
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium mb-1.5 text-foreground">
+                          Person
+                        </label>
+                        {isMembersLoading ? (
+                          <div className="flex items-center space-x-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            <span className="text-sm text-muted-foreground">Loading members...</span>
+                          </div>
+                        ) : (
+                          <Combobox
+                            options={memberOptions}
+                            value={formData.member_id || ''}
+                            onChange={(value) => handleInputChange('member_id', value)}
+                            placeholder="Select a person"
+                            disabled={isEditMode}
+                          />
+                        )}
+                      </div>
+                    )}
                     
                     <div>
                       <Input
@@ -329,29 +351,6 @@ function AccountAddEdit() {
                       />
                     </div>
                     
-                    {formData.account_type === 'person' && (
-                      <div className="sm:col-span-2">
-                        <label className="block text-sm font-medium mb-1.5 text-foreground">
-                          Link to Member
-                        </label>
-                        {isMembersLoading ? (
-                          <div className="flex items-center space-x-2">
-                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                            <span className="text-sm text-muted-foreground">Loading members...</span>
-                          </div>
-                        ) : (
-                          <Combobox
-                            options={memberOptions}
-                            value={formData.member_id || ''}
-                            onChange={(value) => handleInputChange('member_id', value)}
-                            placeholder="Select a member to link (optional)"
-                          />
-                        )}
-                        <p className="mt-1.5 text-sm text-muted-foreground">
-                          Linking to a member will associate this account with their profile
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
