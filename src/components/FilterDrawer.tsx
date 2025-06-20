@@ -26,15 +26,15 @@ function FilterDrawer({ isOpen, onClose, children, title }: FilterDrawerProps) {
       />
 
       {/* Drawer */}
-      <div className="absolute right-0 h-full w-full max-w-md bg-white shadow-xl">
+      <div className="absolute right-0 h-full w-full max-w-md bg-white dark:bg-gray-800 shadow-xl">
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">{title}</h2>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">{title}</h2>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <X className="h-6 w-6" />
             </button>

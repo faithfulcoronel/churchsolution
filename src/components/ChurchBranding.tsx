@@ -43,7 +43,7 @@ function ChurchBranding() {
         <img
           src={tenant.profile_picture_url}
           alt={tenant.name}
-          className="h-8 w-8 rounded object-cover bg-white"
+          className="h-8 w-8 rounded object-cover bg-white dark:bg-gray-700"
         />
       ) : (
         <div className="h-8 w-8 rounded bg-primary-100 flex items-center justify-center">
@@ -53,12 +53,12 @@ function ChurchBranding() {
       <div className="ml-2 min-w-0">
         <h1 
           ref={nameRef}
-          className="text-lg font-semibold text-gray-900 truncate group relative"
+          className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate group relative"
           title={isNameTruncated ? tenant?.name : undefined}
         >
           {tenant?.name || 'Church Admin'}
           {isNameTruncated && (
-            <div className="absolute left-0 -bottom-1 translate-y-full invisible group-hover:visible bg-gray-900 text-white text-sm py-1 px-2 rounded shadow-lg whitespace-nowrap z-50">
+            <div className="absolute left-0 -bottom-1 translate-y-full invisible group-hover:visible bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-100 text-sm py-1 px-2 rounded shadow-lg whitespace-nowrap z-50">
               {tenant?.name}
             </div>
           )}
