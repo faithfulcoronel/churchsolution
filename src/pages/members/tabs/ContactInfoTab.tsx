@@ -7,6 +7,7 @@ interface ContactInfoTabProps {
 }
 
 function ContactInfoTab({ member }: ContactInfoTabProps) {
+  if (!member) return null;
   return (
     <Card>
       <CardContent className="p-6">

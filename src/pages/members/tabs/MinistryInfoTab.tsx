@@ -7,6 +7,7 @@ interface MinistryInfoTabProps {
 }
 
 function MinistryInfoTab({ member }: MinistryInfoTabProps) {
+  if (!member) return null;
   return (
     <Card>
       <CardContent className="p-6">

@@ -11,10 +11,12 @@ interface NotesTabProps {
 }
 
 function NotesTab({ member }: NotesTabProps) {
-  const [notes, setNotes] = useState(member.pastoral_notes || '');
-  const [prayerRequests, setPrayerRequests] = useState<string[]>(member.prayer_requests || []);
+  const [notes, setNotes] = useState(member?.pastoral_notes || '');
+  const [prayerRequests, setPrayerRequests] = useState<string[]>(member?.prayer_requests || []);
   const [newPrayerRequest, setNewPrayerRequest] = useState('');
   const queryClient = useQueryClient();
+
+  if (!member) return null;
 
   // Update notes mutation
   const updateNotesMutation = useMutation({
