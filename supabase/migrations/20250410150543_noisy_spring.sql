@@ -16,6 +16,7 @@
 ALTER TABLE financial_transactions 
   ADD COLUMN IF NOT EXISTS header_id UUID REFERENCES financial_transaction_headers(id),
   ADD COLUMN IF NOT EXISTS account_id UUID REFERENCES chart_of_accounts(id),
+  ADD COLUMN IF NOT EXISTS accounts_account_id UUID REFERENCES accounts(id);
   ADD COLUMN IF NOT EXISTS debit NUMERIC(10,2) DEFAULT 0,
   ADD COLUMN IF NOT EXISTS credit NUMERIC(10,2) DEFAULT 0,
   ADD COLUMN IF NOT EXISTS is_reconciled BOOLEAN DEFAULT FALSE,
@@ -25,6 +26,7 @@ ALTER TABLE financial_transactions
 -- Add indexes for performance
 CREATE INDEX IF NOT EXISTS financial_transactions_header_id_idx ON financial_transactions(header_id);
 CREATE INDEX IF NOT EXISTS financial_transactions_account_id_idx ON financial_transactions(account_id);
+CREATE INDEX IF NOT EXISTS financial_transactions_accounts_account_id_idx ON financial_transactions(accounts_account_id);
 CREATE INDEX IF NOT EXISTS financial_transactions_is_reconciled_idx ON financial_transactions(is_reconciled);
 
 -- Add constraint to ensure either debit or credit is non-zero, but not both
@@ -51,6 +53,7 @@ ALTER TABLE financial_transactions
 -- Add comment to columns
 COMMENT ON COLUMN financial_transactions.header_id IS 'Reference to the transaction header';
 COMMENT ON COLUMN financial_transactions.account_id IS 'Reference to the chart of accounts';
+COMMENT ON COLUMN financial_transactions.accounts_account_id IS 'Reference to the accounts';
 COMMENT ON COLUMN financial_transactions.debit IS 'Debit amount for double-entry accounting';
 COMMENT ON COLUMN financial_transactions.credit IS 'Credit amount for double-entry accounting';
 COMMENT ON COLUMN financial_transactions.is_reconciled IS 'Flag indicating if the transaction has been reconciled';
