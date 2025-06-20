@@ -153,7 +153,6 @@ function BasicInfoTab({ member, onChange, mode = 'view' }: BasicInfoTabProps) {
               <SelectContent>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
             <Select
