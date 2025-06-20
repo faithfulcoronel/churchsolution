@@ -1,4 +1,5 @@
-import { container, TYPES } from '../lib/container';
+import { container } from '../lib/container';
+import { TYPES } from '../lib/types';
 import type { INotificationRepository } from '../repositories/notification.repository';
 import { useBaseRepository } from './useBaseRepository';
 

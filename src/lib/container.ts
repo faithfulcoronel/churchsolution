@@ -37,24 +37,9 @@ import {
   type IFinancialTransactionHeaderRepository
 } from '../repositories/financialTransactionHeader.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
+import { TYPES } from './types';
 
 const container = new Container();
-
-const TYPES = {
-  IMemberAdapter: 'IMemberAdapter',
-  INotificationAdapter: 'INotificationAdapter',
-  IAccountAdapter: 'IAccountAdapter',
-  IFinancialSourceAdapter: 'IFinancialSourceAdapter',
-  IChartOfAccountAdapter: 'IChartOfAccountAdapter',
-  IFinancialTransactionHeaderAdapter: 'IFinancialTransactionHeaderAdapter',
-  IMemberRepository: 'IMemberRepository',
-  INotificationRepository: 'INotificationRepository',
-  IAccountRepository: 'IAccountRepository',
-  IFinancialSourceRepository: 'IFinancialSourceRepository',
-  IChartOfAccountRepository: 'IChartOfAccountRepository',
-  IFinancialTransactionHeaderRepository: 'IFinancialTransactionHeaderRepository',
-  AuditService: 'AuditService'
-};
 
 // Register adapters
 container
@@ -116,4 +101,4 @@ container
   .to(FinancialTransactionHeaderRepository)
   .inSingletonScope();
 
-export { container, TYPES };
+export { container };

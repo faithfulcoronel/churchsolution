@@ -3,7 +3,7 @@ import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { Account } from '../models/account.model';
 import { AuditService } from '../services/AuditService';
-import { TYPES } from '../lib/container';
+import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 
 export interface IAccountAdapter extends BaseAdapter<Account> {}

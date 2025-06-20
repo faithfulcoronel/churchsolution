@@ -1,4 +1,5 @@
-import { container, TYPES } from '../lib/container';
+import { container } from '../lib/container';
+import { TYPES } from '../lib/types';
 import type { IMemberRepository } from '../repositories/member.repository';
 import { useBaseRepository } from './useBaseRepository';
 
