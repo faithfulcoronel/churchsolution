@@ -19,11 +19,11 @@ const variantClasses = {
   `,
   outline: `
     border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-primary
-    dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700
+    dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700
   `,
   ghost: `
     text-gray-700 hover:bg-gray-50 focus:ring-gray-500
-    dark:text-gray-300 dark:hover:bg-gray-700
+    dark:text-gray-100 dark:hover:bg-gray-700
   `,
   danger: `
     bg-danger text-danger-inverse hover:bg-danger-active focus:ring-danger

@@ -92,7 +92,7 @@ export function MultiSelect({
       {label && (
         <label 
           className={cn(
-            "block text-sm font-medium mb-1.5 dark:text-gray-300",
+            "block text-sm font-medium mb-1.5 dark:text-gray-100",
             error ? 'text-destructive' : 'text-foreground',
             disabled && 'opacity-50'
           )}
@@ -112,7 +112,7 @@ export function MultiSelect({
               "w-full justify-between",
               value.length === 0 && "text-muted-foreground",
               error && "border-destructive",
-              "h-10 px-3 py-2 dark:border-gray-700 dark:bg-gray-800"
+              "h-10 px-3 py-2 dark:border-gray-700 dark:bg-gray-900"
             )}
             disabled={disabled}
           >
@@ -186,7 +186,7 @@ export function MultiSelect({
                       <Badge 
                         key={selectedValue} 
                         variant="secondary"
-                        className="flex items-center gap-1 px-2 py-1 dark:bg-gray-700 dark:text-gray-300"
+                        className="flex items-center gap-1 px-2 py-1 dark:bg-gray-700 dark:text-gray-100"
                       >
                         {option?.icon && <span className="mr-0.5">{option.icon}</span>}
                         <span>{option?.label || selectedValue}</span>
@@ -212,7 +212,7 @@ export function MultiSelect({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-xs dark:text-gray-300 dark:hover:bg-gray-800"
+                    className="h-7 px-2 text-xs dark:text-gray-100 dark:hover:bg-gray-800"
                     onClick={handleClear}
                   >
                     Clear all

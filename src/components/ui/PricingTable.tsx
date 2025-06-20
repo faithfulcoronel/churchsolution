@@ -129,14 +129,14 @@ export function PricingTable({
       {/* Billing Cycle Toggle */}
       {onBillingCycleChange && (
         <div className="flex justify-center">
-          <div className="relative flex rounded-full bg-gray-100 dark:bg-gray-800 p-1">
+          <div className="relative flex rounded-full bg-gray-100 dark:bg-gray-900 p-1">
             <button
               type="button"
               className={`
                 flex items-center rounded-full px-4 py-2 text-sm font-medium
                 ${billingCycle === 'monthly'
                   ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-gray-100'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                  : 'text-gray-700 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100'
                 }
               `}
               onClick={() => onBillingCycleChange('monthly')}
@@ -149,7 +149,7 @@ export function PricingTable({
                 flex items-center rounded-full px-4 py-2 text-sm font-medium
                 ${billingCycle === 'annual'
                   ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-gray-100'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                  : 'text-gray-700 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100'
                 }
               `}
               onClick={() => onBillingCycleChange('annual')}
@@ -171,7 +171,7 @@ export function PricingTable({
             className={`
               relative flex flex-col
               rounded-xl
-              bg-white dark:bg-gray-800
+              bg-white dark:bg-gray-900
               shadow-sm dark:shadow-none
               border border-gray-200 dark:border-gray-700
               overflow-hidden
@@ -218,7 +218,7 @@ export function PricingTable({
 
               {/* Limits */}
               <div className="mt-8 space-y-4">
-                <div className="flex items-center gap-x-3 text-sm text-gray-600 dark:text-gray-300">
+                <div className="flex items-center gap-x-3 text-sm text-gray-600 dark:text-gray-100">
                   <Users className="h-5 w-5 flex-none text-primary dark:text-primary" />
                   {tier.memberLimit === -1 ? (
                     'Unlimited member profiles'
@@ -226,7 +226,7 @@ export function PricingTable({
                     <span>{tier.memberLimit.toLocaleString()} member profiles</span>
                   )}
                 </div>
-                <div className="flex items-center gap-x-3 text-sm text-gray-600 dark:text-gray-300">
+                <div className="flex items-center gap-x-3 text-sm text-gray-600 dark:text-gray-100">
                   <DollarSign className="h-5 w-5 flex-none text-primary dark:text-primary" />
                   {tier.transactionLimit === -1 ? (
                     'Unlimited transactions'
@@ -237,7 +237,7 @@ export function PricingTable({
               </div>
 
               {/* Features */}
-              <ul className="mt-8 space-y-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
+              <ul className="mt-8 space-y-3 text-sm leading-6 text-gray-600 dark:text-gray-100">
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex gap-x-3">
                     <Check className="h-5 w-5 flex-none text-primary dark:text-primary" />

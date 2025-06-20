@@ -80,7 +80,7 @@ export function Combobox({
             'w-full justify-between',
             !value && 'text-muted-foreground',
             className,
-            'dark:border-gray-700 dark:bg-gray-800'
+            'dark:border-gray-700 dark:bg-gray-900'
           )}
           disabled={disabled}
           onClick={() => setOpen(!open)}
@@ -113,7 +113,7 @@ export function Combobox({
                   className={cn(
                     'mr-2 h-4 w-4 shrink-0',
                     value === option.value ? 'opacity-100' : 'opacity-0',
-                    'dark:text-gray-300'
+                    'dark:text-gray-100'
                   )}
                 />
                 {option.label}

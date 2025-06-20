@@ -162,7 +162,7 @@ export function DateRangePicker({
       {label && (
         <label 
           className={cn(
-            "block text-sm font-medium mb-1.5 dark:text-gray-300",
+            "block text-sm font-medium mb-1.5 dark:text-gray-100",
             error ? 'text-destructive' : 'text-foreground',
             disabled && 'opacity-50'
           )}
@@ -182,7 +182,7 @@ export function DateRangePicker({
                 "w-full justify-between text-left font-normal",
                 !value.from && "text-muted-foreground",
                 error && "border-destructive",
-                "dark:border-gray-700 dark:bg-gray-800"
+                "dark:border-gray-700 dark:bg-gray-900"
               )}
             >
               {icon || <CalendarIcon className="h-4 w-4 mr-2" />}
@@ -198,7 +198,7 @@ export function DateRangePicker({
                 className={cn(
                   "cursor-pointer",
                   error && "border-destructive",
-                  "dark:bg-gray-800 dark:border-gray-700"
+                  "dark:bg-gray-900 dark:border-gray-700"
                 )}
                 icon={icon || <CalendarIcon className="h-4 w-4" />}
                 clearable={clearable && !!value.from}
@@ -223,7 +223,7 @@ export function DateRangePicker({
                       key={preset.name}
                       variant="ghost"
                       size="sm"
-                      className="justify-start font-normal w-full dark:text-gray-300 dark:hover:bg-gray-800"
+                      className="justify-start font-normal w-full dark:text-gray-100 dark:hover:bg-gray-800"
                       onClick={() => handlePresetSelect(preset)}
                     >
                       {preset.label}
@@ -261,7 +261,7 @@ export function DateRangePicker({
               <div className="flex items-center justify-between pt-4 border-t mt-4 dark:border-gray-700">
                 <div className="text-sm text-muted-foreground">
                   {value.from && value.to && (
-                    <Badge variant="secondary" className="font-normal dark:bg-gray-700 dark:text-gray-300">
+                    <Badge variant="secondary" className="font-normal dark:bg-gray-700 dark:text-gray-100">
                       {`${format(value.from, 'MMM d, yyyy')} - ${format(value.to, 'MMM d, yyyy')}`}
                     </Badge>
                   )}
@@ -272,7 +272,7 @@ export function DateRangePicker({
                     size="sm"
                     onClick={handleClear}
                     disabled={!value.from}
-                    className="dark:border-gray-700 dark:bg-gray-800"
+                    className="dark:border-gray-700 dark:bg-gray-900"
                   >
                     Clear
                   </Button>

@@ -13,7 +13,7 @@ const TabsList = React.forwardRef<
   }
 >(({ className, variant = 'default', size = 'md', ...props }, ref) => {
   const variantClasses = {
-    default: "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground dark:bg-gray-800 dark:text-gray-300",
+    default: "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground dark:bg-gray-900 dark:text-gray-100",
     enclosed: "inline-flex items-center justify-start border-b border-border dark:border-gray-700",
     pills: "inline-flex items-center justify-start space-x-2"
   };

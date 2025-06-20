@@ -72,7 +72,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
         ref={ref}
         className={cn(
           'flex flex-col sm:flex-row items-center justify-between',
-          'bg-background px-4 py-3 sm:px-6 dark:bg-gray-800',
+          'bg-background px-4 py-3 sm:px-6 dark:bg-gray-900',
           variant !== 'simple' && 'border-t',
           className
         )}
@@ -115,7 +115,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
               className={cn(
                 'rounded-l-md',
                 variant === 'pills' && 'rounded-full',
-                'dark:border-gray-700 dark:bg-gray-800'
+                'dark:border-gray-700 dark:bg-gray-900'
               )}
             >
               <span className="sr-only">First page</span>
@@ -127,7 +127,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
               size={size}
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="dark:border-gray-700 dark:bg-gray-800"
+              className="dark:border-gray-700 dark:bg-gray-900"
             >
               <span className="sr-only">Previous page</span>
               <ChevronLeft className="h-4 w-4 dark:text-gray-400" />
@@ -144,7 +144,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
                     className={cn(
                       variant === 'pills' && 'rounded-full',
                       'dark:border-gray-700',
-                      page !== currentPage && 'dark:bg-gray-800'
+                      page !== currentPage && 'dark:bg-gray-900'
                     )}
                   >
                     {page}
@@ -157,7 +157,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
                     disabled
                     className={cn(
                       variant === 'pills' && 'rounded-full',
-                      'dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500'
+                      'dark:border-gray-700 dark:bg-gray-900 dark:text-gray-500'
                     )}
                   >
                     {page}
@@ -171,7 +171,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
               size={size}
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="dark:border-gray-700 dark:bg-gray-800"
+              className="dark:border-gray-700 dark:bg-gray-900"
             >
               <span className="sr-only">Next page</span>
               <ChevronRight className="h-4 w-4 dark:text-gray-400" />
@@ -185,7 +185,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
               className={cn(
                 'rounded-r-md',
                 variant === 'pills' && 'rounded-full',
-                'dark:border-gray-700 dark:bg-gray-800'
+                'dark:border-gray-700 dark:bg-gray-900'
               )}
             >
               <span className="sr-only">Last page</span>

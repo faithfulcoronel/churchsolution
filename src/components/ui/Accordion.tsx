@@ -42,7 +42,7 @@ export function Accordion({
             key={index} 
             className={`
               ${variant === 'ghost' ? 'border border-gray-200 dark:border-gray-700 rounded-lg' : ''}
-              ${variant === 'ghost' && isOpen ? 'bg-gray-50 dark:bg-gray-800' : ''}
+              ${variant === 'ghost' && isOpen ? 'bg-gray-50 dark:bg-gray-900' : ''}
             `}
           >
             <button
@@ -84,7 +84,7 @@ export function Accordion({
                   ${item.icon ? 'pl-8' : ''}
                   pr-12
                   text-sm
-                  text-gray-600 dark:text-gray-300
+                  text-gray-600 dark:text-gray-100
                   animate-accordion-down
                 `}
               >
