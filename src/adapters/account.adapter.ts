@@ -38,9 +38,6 @@ export class AccountAdapter extends BaseAdapter<Account> {
   ];
 
   protected override async onBeforeCreate(data: Partial<Account>): Promise<Partial<Account>> {
-    // Validate account data
-    this.validateAccountData(data);
-    
     // Set default values
     if (data.is_active === undefined) {
       data.is_active = true;
@@ -55,11 +52,7 @@ export class AccountAdapter extends BaseAdapter<Account> {
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<Account>): Promise<Partial<Account>> {
-    // Validate account data if fields are being updated
-    if (data.name || data.account_number || data.email) {
-      this.validateAccountData(data);
-    }
-    
+    // Repositories perform validation
     return data;
   }
 
@@ -87,17 +80,4 @@ export class AccountAdapter extends BaseAdapter<Account> {
     await logAuditEvent('delete', 'account', id, { id });
   }
 
-  private validateAccountData(data: Partial<Account>): void {
-    if (data.name !== undefined && !data.name.trim()) {
-      throw new Error('Account name is required');
-    }
-    
-    if (data.account_number !== undefined && !data.account_number.trim()) {
-      throw new Error('Account number is required');
-    }
-    
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      throw new Error('Invalid email format');
-    }
-  }
 }

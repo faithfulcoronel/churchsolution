@@ -37,9 +37,6 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
   ];
 
   protected override async onBeforeCreate(data: Partial<FinancialTransactionHeader>): Promise<Partial<FinancialTransactionHeader>> {
-    // Validate header data
-    this.validateHeaderData(data);
-    
     // Set default values
     if (!data.status) {
       data.status = 'draft';
@@ -140,22 +137,6 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
     await logAuditEvent('delete', 'financial_transaction_header', id, { id });
   }
 
-  private validateHeaderData(data: Partial<FinancialTransactionHeader>): void {
-    if (data.transaction_date === undefined) {
-      throw new Error('Transaction date is required');
-    }
-    
-    if (data.description !== undefined && !data.description.trim()) {
-      throw new Error('Description is required');
-    }
-    
-    if (data.status !== undefined) {
-      const validStatuses = ['draft', 'posted', 'voided'];
-      if (!validStatuses.includes(data.status)) {
-        throw new Error('Invalid status. Must be one of: draft, posted, voided');
-      }
-    }
-  }
 
   private async generateTransactionNumber(date: string, prefix: string): Promise<string> {
     // Format: PREFIX-YYYYMM-SEQUENCE

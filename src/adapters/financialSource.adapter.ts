@@ -23,9 +23,6 @@ export class FinancialSourceAdapter extends BaseAdapter<FinancialSource> {
   `;
 
   protected override async onBeforeCreate(data: Partial<FinancialSource>): Promise<Partial<FinancialSource>> {
-    // Validate source data
-    this.validateSourceData(data);
-    
     // Set default values
     if (data.is_active === undefined) {
       data.is_active = true;
@@ -40,11 +37,7 @@ export class FinancialSourceAdapter extends BaseAdapter<FinancialSource> {
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<FinancialSource>): Promise<Partial<FinancialSource>> {
-    // Validate source data if fields are being updated
-    if (data.name || data.source_type) {
-      this.validateSourceData(data);
-    }
-    
+    // Repositories handle validation
     return data;
   }
 
@@ -72,16 +65,4 @@ export class FinancialSourceAdapter extends BaseAdapter<FinancialSource> {
     await logAuditEvent('delete', 'financial_source', id, { id });
   }
 
-  private validateSourceData(data: Partial<FinancialSource>): void {
-    if (data.name !== undefined && !data.name.trim()) {
-      throw new Error('Source name is required');
-    }
-    
-    if (data.source_type !== undefined) {
-      const validTypes = ['bank', 'fund', 'wallet', 'cash', 'online', 'other'];
-      if (!validTypes.includes(data.source_type)) {
-        throw new Error('Invalid source type. Must be one of: bank, fund, wallet, cash, online, other');
-      }
-    }
-  }
 }

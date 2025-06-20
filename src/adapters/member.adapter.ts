@@ -86,27 +86,8 @@ export class MemberAdapter extends BaseAdapter<Member> {
     await logAuditEvent('delete', 'member', id, { id });
   }
 
-  protected async validateMember(data: Partial<Member>): Promise<void> {
-    if (!data.first_name?.trim()) {
-      throw new Error('First name is required');
-    }
-    if (!data.last_name?.trim()) {
-      throw new Error('Last name is required');
-    }
-    if (!data.contact_number?.trim()) {
-      throw new Error('Contact number is required');
-    }
-    if (!data.address?.trim()) {
-      throw new Error('Address is required');
-    }
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      throw new Error('Invalid email format');
-    }
-  }
-
   protected override async onBeforeCreate(data: Partial<Member>): Promise<Partial<Member>> {
-    // Validate member data
-    await this.validateMember(data);
+    // Repositories handle validation
 
     // Check for duplicate email if provided
     if (data.email) {

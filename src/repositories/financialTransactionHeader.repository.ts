@@ -3,6 +3,7 @@ import { BaseRepository } from './base.repository';
 import { FinancialTransactionHeader } from '../models/financialTransactionHeader.model';
 import { FinancialTransactionHeaderAdapter } from '../adapters/financialTransactionHeader.adapter';
 import { NotificationService } from '../services/NotificationService';
+import { FinancialTransactionHeaderValidator } from '../validators/financialTransactionHeader.validator';
 
 @injectable()
 export class FinancialTransactionHeaderRepository extends BaseRepository<FinancialTransactionHeader> {
@@ -11,8 +12,8 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
   }
 
   protected override async beforeCreate(data: Partial<FinancialTransactionHeader>): Promise<Partial<FinancialTransactionHeader>> {
-    // Additional repository-level validation
-    this.validateHeaderData(data);
+    // Validate header data
+    FinancialTransactionHeaderValidator.validate(data);
     
     // Format data before creation
     return this.formatHeaderData(data);
@@ -24,8 +25,8 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
   }
 
   protected override async beforeUpdate(id: string, data: Partial<FinancialTransactionHeader>): Promise<Partial<FinancialTransactionHeader>> {
-    // Additional repository-level validation
-    this.validateHeaderData(data);
+    // Validate header data
+    FinancialTransactionHeaderValidator.validate(data);
     
     // Format data before update
     return this.formatHeaderData(data);
@@ -54,32 +55,6 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
   }
 
   // Private helper methods
-  private validateHeaderData(data: Partial<FinancialTransactionHeader>): void {
-    const errors: string[] = [];
-
-    // Basic validation
-    if (data.transaction_date !== undefined && !data.transaction_date) {
-      errors.push('Transaction date is required');
-    }
-    
-    if (data.description !== undefined && !data.description.trim()) {
-      errors.push('Description is required');
-    }
-    
-    if (data.status !== undefined) {
-      const validStatuses = ['draft', 'posted', 'voided'];
-      if (!validStatuses.includes(data.status)) {
-        errors.push('Invalid status. Must be one of: draft, posted, voided');
-      }
-    }
-
-    if (errors.length > 0) {
-      errors.forEach(error => {
-        NotificationService.showError(error, 5000);
-      });
-      throw new Error('Validation failed: ' + errors.join(', '));
-    }
-  }
 
   private formatHeaderData(data: Partial<FinancialTransactionHeader>): Partial<FinancialTransactionHeader> {
     const formattedData = { ...data };

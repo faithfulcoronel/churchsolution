@@ -3,6 +3,7 @@ import { BaseRepository } from './base.repository';
 import { FinancialSource } from '../models/financialSource.model';
 import { FinancialSourceAdapter } from '../adapters/financialSource.adapter';
 import { NotificationService } from '../services/NotificationService';
+import { FinancialSourceValidator } from '../validators/financialSource.validator';
 
 @injectable()
 export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
@@ -11,8 +12,8 @@ export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
   }
 
   protected override async beforeCreate(data: Partial<FinancialSource>): Promise<Partial<FinancialSource>> {
-    // Additional repository-level validation
-    this.validateSourceData(data);
+    // Validate source data
+    FinancialSourceValidator.validate(data);
     
     // Format data before creation
     return this.formatSourceData(data);
@@ -24,8 +25,8 @@ export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
   }
 
   protected override async beforeUpdate(id: string, data: Partial<FinancialSource>): Promise<Partial<FinancialSource>> {
-    // Additional repository-level validation
-    this.validateSourceData(data);
+    // Validate source data
+    FinancialSourceValidator.validate(data);
     
     // Format data before update
     return this.formatSourceData(data);
@@ -50,28 +51,6 @@ export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
   }
 
   // Private helper methods
-  private validateSourceData(data: Partial<FinancialSource>): void {
-    const errors: string[] = [];
-
-    // Basic validation
-    if (data.name !== undefined && !data.name.trim()) {
-      errors.push('Source name is required');
-    }
-    
-    if (data.source_type !== undefined) {
-      const validTypes = ['bank', 'fund', 'wallet', 'cash', 'online', 'other'];
-      if (!validTypes.includes(data.source_type)) {
-        errors.push('Invalid source type. Must be one of: bank, fund, wallet, cash, online, other');
-      }
-    }
-
-    if (errors.length > 0) {
-      errors.forEach(error => {
-        NotificationService.showError(error, 5000);
-      });
-      throw new Error('Validation failed: ' + errors.join(', '));
-    }
-  }
 
   private formatSourceData(data: Partial<FinancialSource>): Partial<FinancialSource> {
     const formattedData = { ...data };
