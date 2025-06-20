@@ -1,13 +1,18 @@
 import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { Account } from '../models/account.model';
-import { AccountAdapter } from '../adapters/account.adapter';
+import type { IAccountAdapter } from '../adapters/account.adapter';
 import { NotificationService } from '../services/NotificationService';
 import { AccountValidator } from '../validators/account.validator';
 
+export interface IAccountRepository extends BaseRepository<Account> {}
+
 @injectable()
-export class AccountRepository extends BaseRepository<Account> {
-  constructor(@inject(AccountAdapter) adapter: AccountAdapter) {
+export class AccountRepository
+  extends BaseRepository<Account>
+  implements IAccountRepository
+{
+  constructor(@inject('IAccountAdapter') adapter: IAccountAdapter) {
     super(adapter);
   }
 

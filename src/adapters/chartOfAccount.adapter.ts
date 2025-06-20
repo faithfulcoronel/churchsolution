@@ -5,8 +5,13 @@ import { ChartOfAccount } from '../models/chartOfAccount.model';
 import { AuditService, SupabaseAuditService } from '../services/AuditService';
 import { supabase } from '../lib/supabase';
 
+export interface IChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {}
+
 @injectable()
-export class ChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {
+export class ChartOfAccountAdapter
+  extends BaseAdapter<ChartOfAccount>
+  implements IChartOfAccountAdapter
+{
   constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
     super();
   }

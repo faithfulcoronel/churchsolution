@@ -1,8 +1,8 @@
 import { container } from '../lib/container';
-import { AccountRepository } from '../repositories/account.repository';
+import type { IAccountRepository } from '../repositories/account.repository';
 import { useBaseRepository } from './useBaseRepository';
 
 export function useAccountRepository() {
-  const repository = container.get(AccountRepository);
+  const repository = container.get<IAccountRepository>('IAccountRepository');
   return useBaseRepository(repository, 'Account', 'accounts');
 }
