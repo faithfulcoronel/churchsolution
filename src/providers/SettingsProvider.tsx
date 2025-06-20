@@ -1,5 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { createContext, type PropsWithChildren, useContext, useState } from 'react';
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useState,
+  useEffect
+} from 'react';
 
 import { defaultSettings, ISettings, type TSettingsThemeMode } from '@/config/settings.config';
 
@@ -36,8 +42,18 @@ const SettingsProvider = ({ children }: PropsWithChildren) => {
   };
 
   const storeSettings = (newSettings: Partial<ISettings>) => {
+    const updatedSettings = { ...settings, ...newSettings };
+
     setData(SETTINGS_CONFIGS_KEY, { ...getStoredSettings(), ...newSettings });
     updateSettings(newSettings);
+
+    const resolvedTheme =
+      updatedSettings.themeMode === 'system'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+        : updatedSettings.themeMode;
+    localStorage.setItem('theme', resolvedTheme);
   };
 
   const getThemeMode = (): TSettingsThemeMode => {
@@ -52,6 +68,18 @@ const SettingsProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  const applyThemeToRoot = (theme: 'light' | 'dark') => {
+    if (typeof document === 'undefined') return;
+    const { classList } = document.documentElement;
+    classList.remove('light', 'dark');
+    classList.add(theme);
+  };
+
+  useEffect(() => {
+    const resolvedTheme = getThemeMode();
+    applyThemeToRoot(resolvedTheme);
+  }, [settings.themeMode]);
+
   return (
     <LayoutsContext.Provider value={{ settings, updateSettings, storeSettings, getThemeMode }}>
       {children}
@@ -60,4 +88,4 @@ const SettingsProvider = ({ children }: PropsWithChildren) => {
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export { SettingsProvider, useSettings };
+export { SettingsProvider, useSettings, applyThemeToRoot };

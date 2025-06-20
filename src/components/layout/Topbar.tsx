@@ -2,7 +2,8 @@ import React from 'react';
 import { Container } from '../ui2/container';
 import ChurchBranding from '../ChurchBranding';
 import { Button } from '../ui2/button';
-import { Menu as MenuIcon } from 'lucide-react';
+import { Menu as MenuIcon, Sun, Moon } from 'lucide-react';
+import { useSettings } from '@/providers/SettingsProvider';
 import { NotificationDropdown } from './NotificationDropdown';
 import { ProfileDropdown } from './ProfileDropdown';
 
@@ -11,6 +12,14 @@ interface TopbarProps {
 }
 
 function Topbar({ setSidebarOpen }: TopbarProps) {
+  const { settings, storeSettings } = useSettings();
+
+  const toggleTheme = () => {
+    storeSettings({
+      themeMode: settings.themeMode === 'dark' ? 'light' : 'dark'
+    });
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full bg-white border-b shadow-sm">
       <Container size="2xl">
@@ -32,6 +41,18 @@ function Topbar({ setSidebarOpen }: TopbarProps) {
 
           {/* User menu */}
           <div className="flex items-center gap-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label="Toggle dark mode"
+            >
+              {settings.themeMode === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
             <NotificationDropdown />
             <ProfileDropdown />
           </div>
