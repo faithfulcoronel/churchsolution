@@ -26,7 +26,7 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
       className={cn(
         'relative flex shrink-0 overflow-hidden',
         sizeClasses[size],
-        shape === 'circle' ? 'rounded-full' : 'rounded-lg dark:bg-gray-900',
+        shape === 'circle' ? 'rounded-full' : 'rounded-lg dark:bg-gray-800',
         className
       )}
       {...props}

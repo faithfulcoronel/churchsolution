@@ -57,7 +57,7 @@ export function DatePickerInput({
       {label && (
         <label 
           className={cn(
-            "block text-sm font-medium mb-1.5 dark:text-gray-100",
+            "block text-sm font-medium mb-1.5 dark:text-gray-300",
             error ? 'text-destructive' : 'text-foreground',
             disabled && 'opacity-50'
           )}
@@ -75,7 +75,7 @@ export function DatePickerInput({
               value={date ? format(date, 'yyyy-MM-dd') : ''}
               onChange={handleInputChange}
               placeholder={placeholder}
-              className={cn(error && "border-destructive", "dark:bg-gray-900 dark:border-gray-700")}
+              className={cn(error && "border-destructive", "dark:bg-gray-800 dark:border-gray-700")}
               disabled={disabled}
               icon={<CalendarIcon className="h-4 w-4" />}
               clearable={clearable && !!date}

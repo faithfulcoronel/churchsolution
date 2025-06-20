@@ -74,7 +74,7 @@ export function Pagination({
   const renderPageButton = (page: number | string, index: number) => {
     if (typeof page === 'string') {
       return (
-        <span key={`ellipsis-${index}`} className="px-4 py-2 text-gray-700 dark:text-gray-100">
+        <span key={`ellipsis-${index}`} className="px-4 py-2 text-gray-700 dark:text-gray-300">
           {page}
         </span>
       );
@@ -134,7 +134,7 @@ export function Pagination({
       {/* Desktop pagination */}
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
-          <p className="text-gray-700 dark:text-gray-100">
+          <p className="text-gray-700 dark:text-gray-300">
             Showing <span className="font-medium">{startItem}</span> to{' '}
             <span className="font-medium">{endItem}</span> of{' '}
             <span className="font-medium">{totalItems}</span> results
@@ -144,7 +144,7 @@ export function Pagination({
         <div className="flex items-center space-x-4">
           {showItemsPerPage && onItemsPerPageChange && (
             <div className="flex items-center space-x-2">
-              <label htmlFor="itemsPerPage" className="text-gray-700 dark:text-gray-100">
+              <label htmlFor="itemsPerPage" className="text-gray-700 dark:text-gray-300">
                 Show:
               </label>
               <Select

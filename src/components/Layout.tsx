@@ -22,7 +22,7 @@ function Layout() {
         <Topbar setSidebarOpen={setSidebarOpen} />
 
         {/* Main content */}
-        <main className={`flex-1 ${isSettingsPage ? '' : 'bg-white dark:bg-gray-900'}`}>
+        <main className={`flex-1 ${isSettingsPage ? '' : 'bg-white dark:bg-gray-800'}`}>
           {isSettingsPage ? (
             <Outlet />
           ) : (

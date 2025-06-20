@@ -45,12 +45,12 @@ export function Progress({
       {(label || showValue) && (
         <div className="flex justify-between mb-1">
           {label && (
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-100">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {label}
             </span>
           )}
           {showValue && (
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-100">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {percentage.toFixed(0)}%
             </span>
           )}

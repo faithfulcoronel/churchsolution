@@ -11,33 +11,33 @@ function Footer() {
 
   return (
     <>
-      <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-700 py-4 px-6 lg:pl-64">
+      <footer className="bg-white dark:bg-gray-800 border-t dark:border-gray-700 py-4 px-6 lg:pl-64">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between">
             {/* Copyright */}
             <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
               <div className="flex flex-col sm:flex-row justify-between items-center">
                 <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                  <p className="text-gray-600 dark:text-gray-100 text-sm">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">
                     © {currentYear} Steward Track. All rights reserved.
                   </p>
                   <div className="flex items-center space-x-4">
                     <button
                       onClick={() => setShowPrivacyModal(true)}
-                      className="text-gray-600 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white text-sm flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-2 py-1"
+                      className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-2 py-1"
                     >
                       <Shield className="h-4 w-4 mr-1" />
                       Privacy Policy
                     </button>
                     <button
                       onClick={() => setShowTermsModal(true)}
-                      className="text-gray-600 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white text-sm flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-2 py-1"
+                      className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-2 py-1"
                     >
                       <FileText className="h-4 w-4 mr-1" />
                       Terms of Service
                     </button>
                   </div>
                 </div>
-                <p className="text-gray-600 dark:text-gray-100 text-sm flex items-center mt-2 sm:mt-0">
+                <p className="text-gray-600 dark:text-gray-300 text-sm flex items-center mt-2 sm:mt-0">
                   Made with <Heart className="h-4 w-4 mx-1 text-red-500" /> by Cortanatech Solutions, Inc.
                 </p>
               </div>

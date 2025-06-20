@@ -55,7 +55,7 @@ export function Table({
 export function TableHeader({ children, className = '' }: TableHeaderProps) {
   return (
     <thead className={`
-      bg-gray-50 dark:bg-gray-900
+      bg-gray-50 dark:bg-gray-800
       ${className}
     `}>
       {children}

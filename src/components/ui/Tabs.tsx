@@ -32,7 +32,7 @@ const variantClasses = {
     inactive: 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
   },
   enclosed: {
-    nav: 'bg-gray-100/50 dark:bg-gray-900/50 rounded-xl p-1.5',
+    nav: 'bg-gray-100/50 dark:bg-gray-800/50 rounded-xl p-1.5',
     tab: 'rounded-lg',
     active: 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm',
     inactive: 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-gray-800/50'
@@ -195,7 +195,7 @@ export function Tabs({
                     ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium
                     ${isActive
                       ? 'bg-primary-light text-primary dark:bg-primary-light dark:text-primary'
-                      : 'bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                     }
                   `}>
                     {tab.badge}

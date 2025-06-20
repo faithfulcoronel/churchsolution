@@ -15,7 +15,7 @@ interface CardProps {
 
 const variantClasses = {
   default: `
-    bg-white dark:bg-gray-900 
+    bg-white dark:bg-gray-800 
     border-gray-200 dark:border-gray-700
   `,
   primary: `
@@ -96,7 +96,7 @@ export function Card({
 
       {/* Header */}
       {header && (
-        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           {header}
         </div>
       )}
@@ -111,7 +111,7 @@ export function Card({
 
       {/* Footer */}
       {footer && (
-        <div className="px-4 py-4 sm:px-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <div className="px-4 py-4 sm:px-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           {footer}
         </div>
       )}

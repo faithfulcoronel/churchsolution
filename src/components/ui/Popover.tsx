@@ -96,7 +96,7 @@ export function Popover({
           ref={popoverRef}
           className={`
             absolute z-50
-            bg-white dark:bg-gray-900
+            bg-white dark:bg-gray-800
             rounded-popover
             shadow-popover dark:shadow-none
             border border-gray-200 dark:border-gray-700
@@ -115,7 +115,7 @@ export function Popover({
               transform rotate-45
               border-4
               ${arrowClasses[position]}
-              bg-white dark:bg-gray-900
+              bg-white dark:bg-gray-800
             `} />
           )}
           <div className="relative">

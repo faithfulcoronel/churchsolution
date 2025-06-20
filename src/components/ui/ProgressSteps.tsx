@@ -85,7 +85,7 @@ export function ProgressSteps({
                   ? 'bg-primary dark:bg-primary text-white' 
                   : isCurrent
                     ? 'bg-primary-light dark:bg-primary-light border-2 border-primary dark:border-primary text-primary dark:text-primary'
-                    : 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-500'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                 }
                 transition-all duration-200
               `}>
@@ -120,7 +120,7 @@ export function ProgressSteps({
                   mt-1
                   ${size === 'sm' ? 'text-xs' : 'text-sm'}
                   ${isCompleted || isCurrent 
-                    ? 'text-gray-600 dark:text-gray-100' 
+                    ? 'text-gray-600 dark:text-gray-300' 
                     : 'text-gray-400 dark:text-gray-500'
                   }
                 `}>

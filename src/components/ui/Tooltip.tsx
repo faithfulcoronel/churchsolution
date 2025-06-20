@@ -27,7 +27,7 @@ const arrowClasses = {
 
 const variantClasses = {
   light: {
-    background: 'bg-white dark:bg-gray-900',
+    background: 'bg-white dark:bg-gray-800',
     border: 'border border-gray-200 dark:border-gray-700',
     text: 'text-gray-900 dark:text-gray-100',
     arrow: 'border-white dark:border-gray-800'

@@ -365,8 +365,8 @@ export function DataGrid<TData, TValue>({
                             {header.column.getCanSort() && (
                               <span>
                                 {{
-                                  asc: <ArrowUp className="h-4 w-4 dark:text-gray-100" />,
-                                  desc: <ArrowDown className="h-4 w-4 dark:text-gray-100" />,
+                                  asc: <ArrowUp className="h-4 w-4 dark:text-gray-300" />,
+                                  desc: <ArrowDown className="h-4 w-4 dark:text-gray-300" />,
                                 }[header.column.getIsSorted() as string] ?? (
                                   <ArrowUpDown className="h-4 w-4 dark:text-gray-400" />
                                 )}

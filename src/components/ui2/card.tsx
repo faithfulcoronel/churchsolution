@@ -14,7 +14,7 @@ interface CardProps extends BaseProps {
 
 const variantClasses = {
   default: `
-    bg-white dark:bg-gray-900 
+    bg-white dark:bg-gray-800 
     border-gray-200 dark:border-gray-700
   `,
   primary: `

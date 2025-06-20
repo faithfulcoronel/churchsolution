@@ -82,7 +82,7 @@ export function Dropdown({
               ${offset ? `mt-${offset}` : 'mt-2'} 
               ${widthClasses[width]}
               rounded-dropdown
-              bg-white dark:bg-gray-900
+              bg-white dark:bg-gray-800
               shadow-dropdown dark:shadow-none
               border border-gray-200 dark:border-gray-700
               focus:outline-none

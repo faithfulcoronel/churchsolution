@@ -28,12 +28,11 @@
   }
 
   .dark {
-    /* Align dark mode with Tailwind's gray-900 */
-    --background: 222 39% 11%;
+    --background: 222 47% 11%;
     --foreground: 0 0% 100%;
-    --card: 222 39% 11%;
+    --card: 222 47% 11%;
     --card-foreground: 0 0% 100%;
-    --popover: 222 39% 11%;
+    --popover: 222 47% 11%;
     --popover-foreground: 0 0% 100%;
     --primary: 212 88% 51%;
     --primary-foreground: 0 0% 100%;

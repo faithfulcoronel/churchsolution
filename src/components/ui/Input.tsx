@@ -117,7 +117,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 : 'border-gray-300 text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-600 dark:text-gray-100 dark:focus:border-primary dark:focus:ring-primary'
               }
               ${disabled
-                ? 'bg-gray-50 text-gray-500 cursor-not-allowed dark:bg-gray-900 dark:text-gray-400'
+                ? 'bg-gray-50 text-gray-500 cursor-not-allowed dark:bg-gray-800 dark:text-gray-400'
                 : 'bg-white dark:bg-gray-900'
               }
               ${loading ? 'opacity-75' : ''}
