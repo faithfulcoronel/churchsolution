@@ -1,7 +1,15 @@
 import React from 'react';
-import { Modal } from './ui/Modal';
-import { Button } from './ui/Button';
 import { Building2, Users, DollarSign, Settings } from 'lucide-react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from './ui2/dialog';
+import { Button } from './ui2/button';
+import { Card, CardContent } from './ui2/card';
 
 interface WelcomeModalProps {
   isOpen: boolean;
@@ -29,50 +37,44 @@ export function WelcomeModal({ isOpen, onClose, churchName }: WelcomeModalProps)
   ];
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="xl"
-    >
-      <div className="p-6">
-        <div className="text-center">
-          <Building2 className="mx-auto h-12 w-12 text-primary-600" />
-          <h2 className="mt-4 text-2xl font-bold text-gray-900">
-            Welcome to {churchName}!
-          </h2>
-          <p className="mt-2 text-sm text-gray-500">
-            Your church administration system is ready to use. Here's what you can do:
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="relative rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100">
-                <feature.icon className="h-6 w-6 text-primary-600" />
-              </div>
-              <h3 className="mt-4 text-lg font-medium text-gray-900">
-                {feature.title}
-              </h3>
-              <p className="mt-2 text-sm text-gray-500">
-                {feature.description}
-              </p>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md md:max-w-xl">
+        <DialogHeader>
+          <div className="flex flex-col items-center text-center">
+            <div className="h-16 w-16 bg-primary-50 rounded-full flex items-center justify-center mb-4">
+              <Building2 className="h-8 w-8 text-primary" />
             </div>
+            <DialogTitle className="text-2xl font-bold">
+              Welcome to {churchName}!
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-muted-foreground">
+              Your church administration system is ready to use. Here's what you can do:
+            </DialogDescription>
+          </div>
+        </DialogHeader>
+        
+        <div className="grid gap-4 py-4 md:grid-cols-3">
+          {features.map((feature, index) => (
+            <Card key={index} className="overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="h-12 w-12 rounded-full bg-primary-50 flex items-center justify-center">
+                    <feature.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-medium text-foreground">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
-
-        <div className="mt-8 text-center">
-          <Button
-            onClick={onClose}
-            size="lg"
-          >
+        
+        <DialogFooter className="sm:justify-center">
+          <Button onClick={onClose} size="lg">
             Get Started
           </Button>
-        </div>
-      </div>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

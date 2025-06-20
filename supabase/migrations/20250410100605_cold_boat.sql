@@ -95,7 +95,3 @@ CREATE POLICY "Accounts can be deleted by authenticated users"
   FOR DELETE
   TO authenticated
   USING (true);
-
--- Add account_id to financial_transactions table
-ALTER TABLE financial_transactions ADD COLUMN IF NOT EXISTS account_id uuid REFERENCES accounts(id);
-CREATE INDEX IF NOT EXISTS financial_transactions_account_id_idx ON financial_transactions(account_id);

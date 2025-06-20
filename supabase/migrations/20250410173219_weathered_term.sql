@@ -48,7 +48,7 @@ BEGIN
             FROM financial_transactions ft
             WHERE ft.tenant_id = v_tenant_id
             AND ft.member_id IS NOT NULL
-            AND ft.account_id IS NULL
+            AND ft.accounts_account_id IS NULL
         LOOP
             v_transaction_count := v_transaction_count + 1;
             
@@ -63,7 +63,7 @@ BEGIN
             -- If member has an account, link the transaction to it
             IF v_account_id IS NOT NULL THEN
                 UPDATE financial_transactions
-                SET account_id = v_account_id,
+                SET accounts_account_id = v_account_id,
                     updated_at = NOW()
                 WHERE id = v_transaction.id;
                 

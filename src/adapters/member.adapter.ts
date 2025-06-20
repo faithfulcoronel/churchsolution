@@ -1,12 +1,21 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { Member } from '../models/member.model';
-import { logAuditEvent } from '../utils/auditLogger';
+import { AuditService } from '../services/AuditService';
+import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 
+export interface IMemberAdapter extends BaseAdapter<Member> {}
+
 @injectable()
-export class MemberAdapter extends BaseAdapter<Member> {
+export class MemberAdapter
+  extends BaseAdapter<Member>
+  implements IMemberAdapter
+{
+  constructor(@inject(TYPES.AuditService) private auditService: AuditService) {
+    super();
+  }
   protected tableName = 'members';
   
   protected defaultSelect = `
@@ -83,30 +92,11 @@ export class MemberAdapter extends BaseAdapter<Member> {
 
   protected override async onAfterDelete(id: string): Promise<void> {
     // Log audit event
-    await logAuditEvent('delete', 'member', id, { id });
-  }
-
-  protected async validateMember(data: Partial<Member>): Promise<void> {
-    if (!data.first_name?.trim()) {
-      throw new Error('First name is required');
-    }
-    if (!data.last_name?.trim()) {
-      throw new Error('Last name is required');
-    }
-    if (!data.contact_number?.trim()) {
-      throw new Error('Contact number is required');
-    }
-    if (!data.address?.trim()) {
-      throw new Error('Address is required');
-    }
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      throw new Error('Invalid email format');
-    }
+    await this.auditService.logAuditEvent('delete', 'member', id, { id });
   }
 
   protected override async onBeforeCreate(data: Partial<Member>): Promise<Partial<Member>> {
-    // Validate member data
-    await this.validateMember(data);
+    // Repositories handle validation
 
     // Check for duplicate email if provided
     if (data.email) {
@@ -129,7 +119,7 @@ export class MemberAdapter extends BaseAdapter<Member> {
 
   protected override async onAfterCreate(data: Member): Promise<void> {
     // Log audit event
-    await logAuditEvent('create', 'member', data.id, data);
+    await this.auditService.logAuditEvent('create', 'member', data.id, data);
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<Member>): Promise<Partial<Member>> {
@@ -163,6 +153,6 @@ export class MemberAdapter extends BaseAdapter<Member> {
 
   protected override async onAfterUpdate(data: Member): Promise<void> {
     // Log audit event
-    await logAuditEvent('update', 'member', data.id, data);
+    await this.auditService.logAuditEvent('update', 'member', data.id, data);
   }
 }

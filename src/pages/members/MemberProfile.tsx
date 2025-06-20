@@ -1,693 +1,326 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useMemberRepository } from '../../hooks/useMemberRepository';
-import { format } from 'date-fns';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
-import { Container } from '../../components/ui2/container';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '../../lib/supabase';
+import { 
+  User, 
+  Users, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Calendar, 
+  Edit, 
+  Trash2, 
+  ArrowLeft,
+  Cake,
+  Heart,
+  Loader2,
+  AlertTriangle,
+  FileText
+} from 'lucide-react';
+
+// UI Components
+import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import { Badge } from '../../components/ui2/badge';
-import { ImageInput } from '../../components/ui2/image-input';
-import { Tabs } from '../../components/ui2/tabs';
-import { ScrollArea } from '../../components/ui2/scroll-area';
-import { Separator } from '../../components/ui2/separator';
-import { DataGrid } from '../../components/ui2/mui-datagrid';
-import { GridColDef, GridFilterModel, GridSortModel } from '@mui/x-data-grid';
-import {
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
+import { 
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '../../components/ui2/alert-dialog';
-import {
-  User,
-  Phone,
-  MapPin,
-  Mail,
-  Calendar,
-  Heart,
-  Gift,
-  UserPlus,
-  Home,
-  Briefcase,
-  Users,
-  Cake,
-  Loader2,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Edit2,
-  ArrowLeft,
-  Trash2,
-  MoreVertical,
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../../components/ui2/dropdown-menu';
+
+// Tabs
+import BasicInfoTab from './tabs/BasicInfoTab';
+import ContactInfoTab from './tabs/ContactInfoTab';
+import MinistryInfoTab from './tabs/MinistryInfoTab';
+import NotesTab from './tabs/NotesTab';
 
 function MemberProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { currency } = useCurrencyStore();
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortModel, setSortModel] = useState<GridSortModel>([]);
-  const [filterModel, setFilterModel] = useState<GridFilterModel>({});
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState('basic');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Use member repository
-  const { useQuery, useDelete } = useMemberRepository();
+  // Fetch member data
+  const { data: member, isLoading, error } = useQuery({
+    queryKey: ['member', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('members')
+        .select(`
+          *,
+          membership_categories:membership_category_id(id, name, code),
+          status_categories:status_category_id(id, name, code)
+        `)
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id
+  });
 
-  // Get member data
-  const { data: result, isLoading: memberLoading } = useQuery({
-    filters: {
-      id: {
-        operator: 'eq',
-        value: id
-      }
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      setIsDeleting(true);
+      const { error } = await supabase
+        .from('members')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      navigate('/members');
+    },
+    onError: (error) => {
+      console.error('Error deleting member:', error);
+      setIsDeleting(false);
+    },
+    onSettled: () => {
+      setDeleteDialogOpen(false);
     }
   });
 
-  // Get transactions for this member
-  const { data: transactionData, isLoading: transactionsLoading } = useQuery({
-    filters: {
-      member_id: {
-        operator: 'eq',
-        value: id
-      }
-    },
-    pagination: {
-      page: page + 1,
-      pageSize
-    },
-    order: sortModel[0] ? {
-      column: sortModel[0].field,
-      ascending: sortModel[0].sort === 'asc'
-    } : {
-      column: 'date',
-      ascending: false
-    }
-  });
-
-  // Delete member mutation
-  const deleteMemberMutation = useDelete();
-
-  const getStatusColor = (statusCode: string) => {
-    const statusColors: Record<string, string> = {
-      active: 'success',
-      inactive: 'secondary',
-      under_discipline: 'destructive',
-      regular_attender: 'info',
-      visitor: 'warning',
-      withdrawn: 'warning',
-      removed: 'destructive',
-      donor: 'primary'
-    };
-
-    return statusColors[statusCode] || 'secondary';
+  // Get member initials for avatar fallback
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`;
   };
 
-  const tabs = [
-    {
-      id: 'overview',
-      label: 'Overview',
-      icon: <User className="h-5 w-5" />,
-    },
-    {
-      id: 'ministry',
-      label: 'Ministry',
-      icon: <Heart className="h-5 w-5" />,
-    },
-    {
-      id: 'financial',
-      label: 'Financial',
-      icon: <DollarSign className="h-5 w-5" />,
-    },
-  ];
+  // Format date for display
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
 
-  // Transaction grid columns
-  const transactionColumns: GridColDef[] = [
-    {
-      field: 'date',
-      headerName: 'Date',
-      flex: 1,
-      valueFormatter: (params) => format(new Date(params.value), 'MMM d, yyyy'),
-    },
-    {
-      field: 'type',
-      headerName: 'Type',
-      flex: 1,
-      renderCell: (params) => (
-        <Badge
-          variant={params.value === 'income' ? 'success' : 'destructive'}
-          className="flex items-center space-x-1"
-        >
-          {params.value === 'income' ? (
-            <TrendingUp className="h-4 w-4 mr-1" />
-          ) : (
-            <TrendingDown className="h-4 w-4 mr-1" />
-          )}
-          <span>{params.value}</span>
-        </Badge>
-      ),
-    },
-    {
-      field: 'category',
-      headerName: 'Category',
-      flex: 1,
-      valueGetter: (params) => params.row.category?.name,
-    },
-    {
-      field: 'description',
-      headerName: 'Description',
-      flex: 2,
-    },
-    {
-      field: 'amount',
-      headerName: 'Amount',
-      flex: 1,
-      align: 'right',
-      headerAlign: 'right',
-      renderCell: (params) => (
-        <div className={params.row.type === 'income' ? 'text-success' : 'text-destructive'}>
-          {formatCurrency(params.value, currency)}
-        </div>
-      ),
-    },
-  ];
-
-  if (memberLoading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const member = result?.data?.[0];
-  if (!member) {
+  if (error || !member) {
     return (
-      <Card className="text-center py-8">
-        <h3 className="text-lg font-medium text-foreground">Member not found</h3>
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <AlertTriangle className="h-12 w-12 text-warning mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">Member Not Found</h3>
+          <p className="text-muted-foreground mb-6">The member you're looking for doesn't exist or has been removed.</p>
+          <Button onClick={() => navigate('/members')}>
+            Go Back to Members
+          </Button>
+        </CardContent>
       </Card>
     );
   }
 
-  const transactions = transactionData?.data || [];
-
-  // Calculate financial summary
-  const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-  
-  const totalExpenses = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  const averageContribution = transactions
-    .filter(t => t.type === 'income').length
-    ? totalIncome / transactions.filter(t => t.type === 'income').length
-    : 0;
-
   return (
-    <Container>
-      <div className="space-y-6">
-        {/* Back Button */}
-        <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/members')}
+          className="flex items-center"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back to Members
+        </Button>
+        
+        <div className="flex space-x-3">
           <Button
-            variant="ghost"
-            onClick={() => navigate('/members/list')}
+            variant="outline"
+            onClick={() => navigate(`/members/${id}/edit`)}
             className="flex items-center"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Members
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
           </Button>
-
-          {/* Action Buttons - Desktop */}
-          <div className="hidden sm:flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/members/${id}/edit`)}
-              className="flex items-center"
-            >
-              <Edit2 className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Member
-            </Button>
-          </div>
-
-          {/* Action Menu - Mobile */}
-          <div className="sm:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate(`/members/${id}/edit`)}>
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Member
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <Button
+            variant="destructive"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="flex items-center"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
         </div>
+      </div>
 
-        {/* Member Profile Card */}
-        <Card>
-          <CardHeader className="relative">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-              <div className="relative">
-                <ImageInput
-                  value={member.profile_picture_url}
-                  onChange={() => {}}
-                  size="xl"
-                  shape="circle"
-                  className="ring-4 ring-background mx-auto sm:mx-0"
-                />
-              </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-2xl font-bold text-foreground">
-                  {member.preferred_name || `${member.first_name} ${member.middle_name ? `${member.middle_name} ` : ''}${member.last_name}`}
-                </h2>
-                <div className="mt-2 flex flex-wrap gap-2 justify-center sm:justify-start">
-                  <Badge variant={getStatusColor(member.status_categories?.code)}>
-                    {member.status_categories?.name}
-                  </Badge>
-                  <Badge variant="primary">
-                    {member.membership_categories?.name}
-                  </Badge>
-                  {member.leadership_position && (
-                    <Badge variant="info">
-                      {member.leadership_position}
-                    </Badge>
+      {/* Member Header Card */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <Avatar className="h-24 w-24 border-2 border-primary">
+              {member.profile_picture_url ? (
+                <AvatarImage src={member.profile_picture_url} alt={`${member.first_name} ${member.last_name}`} />
+              ) : (
+                <AvatarFallback className="text-xl">
+                  {getInitials(member.first_name, member.last_name)}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            
+            <div className="flex-1">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold">
+                    {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}{member.last_name}
+                    {member.preferred_name && <span className="text-muted-foreground ml-2 text-lg">({member.preferred_name})</span>}
+                  </h1>
+                  
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {member.membership_categories && (
+                      <Badge variant="secondary">{member.membership_categories.name}</Badge>
+                    )}
+                    {member.status_categories && (
+                      <Badge variant="outline">{member.status_categories.name}</Badge>
+                    )}
+                    {member.envelope_number && (
+                      <Badge variant="outline" className="bg-primary-50 text-primary border-primary-200">
+                        Envelope #{member.envelope_number}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  {member.birthday && (
+                    <div className="flex items-center text-sm">
+                      <Cake className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>Birthday: {formatDate(member.birthday)}</span>
+                    </div>
+                  )}
+                  {member.membership_date && (
+                    <div className="flex items-center text-sm">
+                      <Heart className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>Member since: {formatDate(member.membership_date)}</span>
+                    </div>
                   )}
                 </div>
               </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
+                {member.email && (
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <a href={`mailto:${member.email}`} className="text-primary hover:underline">
+                      {member.email}
+                    </a>
+                  </div>
+                )}
+                {member.contact_number && (
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <a href={`tel:${member.contact_number}`} className="text-primary hover:underline">
+                      {member.contact_number}
+                    </a>
+                  </div>
+                )}
+                {member.address && (
+                  <div className="flex items-center md:col-span-2">
+                    <MapPin className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
+                    <span className="truncate">{member.address}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </CardHeader>
+          </div>
+        </CardContent>
+      </Card>
 
-          <CardContent>
-            <Tabs
-              tabs={tabs}
-              activeTab={activeTab}
-              onChange={setActiveTab}
-              variant="enclosed"
-              size="sm"
-            />
+      {/* Member Details Tabs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Member Details</CardTitle>
+          <CardDescription>View and manage member information</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-6">
+              <TabsTrigger value="basic">
+                <User className="h-4 w-4 mr-2" />
+                Basic Info
+              </TabsTrigger>
+              <TabsTrigger value="contact">
+                <Phone className="h-4 w-4 mr-2" />
+                Contact Info
+              </TabsTrigger>
+              <TabsTrigger value="ministry">
+                <Users className="h-4 w-4 mr-2" />
+                Ministry Info
+              </TabsTrigger>
+              <TabsTrigger value="notes">
+                <FileText className="h-4 w-4 mr-2" />
+                Notes
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="basic">
+              <BasicInfoTab member={member} />
+            </TabsContent>
+            
+            <TabsContent value="contact">
+              <ContactInfoTab member={member} />
+            </TabsContent>
+            
+            <TabsContent value="ministry">
+              <MinistryInfoTab member={member} />
+            </TabsContent>
+            
+            <TabsContent value="notes">
+              <NotesTab member={member} />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
-            <div className="mt-6">
-              <ScrollArea className="h-[calc(100vh-24rem)]">
-                {activeTab === 'overview' && (
-                  <div className="space-y-8">
-                    {/* Basic Information */}
-                    <div>
-                      <h4 className="text-lg font-medium text-foreground mb-4">Basic Information</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <User className="h-5 w-5 mr-2" />
-                            Full Name
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.first_name} {member.middle_name && `${member.middle_name} `}{member.last_name}
-                            {member.preferred_name && (
-                              <span className="ml-2 text-muted-foreground">
-                                (Preferred: {member.preferred_name})
-                              </span>
-                            )}
-                          </dd>
-                        </div>
-
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Users className="h-5 w-5 mr-2" />
-                            Gender & Marital Status
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.gender?.charAt(0).toUpperCase() + member.gender?.slice(1) || 'Not specified'}, {' '}
-                            {member.marital_status?.charAt(0).toUpperCase() + member.marital_status?.slice(1) || 'Not specified'}
-                          </dd>
-                        </div>
-
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Cake className="h-5 w-5 mr-2" />
-                            Birthday
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.birthday
-                              ? format(new Date(member.birthday), 'MMMM d, yyyy')
-                              : 'Not specified'}
-                          </dd>
-                        </div>
-
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Calendar className="h-5 w-5 mr-2" />
-                            Baptism Date
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.baptism_date
-                              ? format(new Date(member.baptism_date), 'MMMM d, yyyy')
-                              : 'Not specified'}
-                          </dd>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Contact Information */}
-                    <div>
-                      <h4 className="text-lg font-medium text-foreground mb-4">Contact Information</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Phone className="h-5 w-5 mr-2" />
-                            Contact Number
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">{member.contact_number}</dd>
-                        </div>
-
-                        {member.email && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                              <Mail className="h-5 w-5 mr-2" />
-                              Email Address
-                            </dt>
-                            <dd className="mt-1 text-sm text-foreground">{member.email}</dd>
-                          </div>
-                        )}
-
-                        <div className="sm:col-span-2">
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <MapPin className="h-5 w-5 mr-2" />
-                            Address
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">{member.address}</dd>
-                        </div>
-
-                        {member.emergency_contact_name && (
-                          <div className="sm:col-span-2">
-                            <dt className="text-sm font-medium text-muted-foreground">Emergency Contact</dt>
-                            <dd className="mt-1 text-sm text-foreground">
-                              {member.emergency_contact_name} - {member.emergency_contact_phone}
-                            </dd>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Church Information */}
-                    <div>
-                      <h4 className="text-lg font-medium text-foreground mb-4">Church Information</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Users className="h-5 w-5 mr-2" />
-                            Membership Status
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.status_categories?.name}
-                          </dd>
-                        </div>
-
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Calendar className="h-5 w-5 mr-2" />
-                            Membership Date
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.membership_date
-                              ? format(new Date(member.membership_date), 'MMMM d, yyyy')
-                              : 'Not specified'}
-                          </dd>
-                        </div>
-
-                        {member.leadership_position && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                              <Briefcase className="h-5 w-5 mr-2" />
-                              Leadership Position
-                            </dt>
-                            <dd className="mt-1 text-sm text-foreground">{member.leadership_position}</dd>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'ministry' && (
-                  <div className="space-y-8">
-                    {/* Ministry Information */}
-                    <div>
-                      <h4 className="text-lg font-medium text-foreground mb-4">Ministry Information</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {member.spiritual_gifts && member.spiritual_gifts.length > 0 && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                              <Gift className="h-5 w-5 mr-2" />
-                              Spiritual Gifts
-                            </dt>
-                            <dd className="mt-1 text-sm text-foreground">
-                              {member.spiritual_gifts.join(', ')}
-                            </dd>
-                          </div>
-                        )}
-
-                        {member.ministry_interests && member.ministry_interests.length > 0 && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                              <Heart className="h-5 w-5 mr-2" />
-                              Ministry Interests
-                            </dt>
-                            <dd className="mt-1 text-sm text-foreground">
-                              {member.ministry_interests.join(', ')}
-                            </dd>
-                          </div>
-                        )}
-
-                        {member.volunteer_roles && member.volunteer_roles.length > 0 && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                              <UserPlus className="h-5 w-5 mr-2" />
-                              Volunteer Roles
-                            </dt>
-                            <dd className="mt-1 text-sm text-foreground">
-                              {member.volunteer_roles.join(', ')}
-                            </dd>
-                          </div>
-                        )}
-
-                        {member.small_groups && member.small_groups.length > 0 && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                              <Users className="h-5 w-5 mr-2" />
-                              Small Groups
-                            </dt>
-                            <dd className="mt-1 text-sm text-foreground">
-                              {member.small_groups.join(', ')}
-                            </dd>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Additional Notes */}
-                    {(member.pastoral_notes || (member.prayer_requests && member.prayer_requests.length > 0)) && (
-                      <div>
-                        <h4 className="text-lg font-medium text-foreground mb-4">Additional Notes</h4>
-                        <div className="grid grid-cols-1 gap-4">
-                          {member.pastoral_notes && (
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Pastoral Notes</dt>
-                              <dd className="mt-1 text-sm text-foreground whitespace-pre-line">
-                                {member.pastoral_notes}
-                              </dd>
-                            </div>
-                          )}
-
-                          {member.prayer_requests && member.prayer_requests.length > 0 && (
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Prayer Requests</dt>
-                              <dd className="mt-1 text-sm text-foreground">
-                                <ul className="list-disc pl-5 space-y-1">
-                                  {member.prayer_requests.map((request, index) => (
-                                    <li key={index}>{request}</li>
-                                  ))}
-                                </ul>
-                              </dd>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'financial' && (
-                  <div className="space-y-8">
-                    {/* Financial Summary */}
-                    <div>
-                      <h4 className="text-lg font-medium text-foreground mb-4">Financial Summary</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <Card>
-                          <CardContent className="pt-6">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <TrendingUp className="h-5 w-5 text-success" />
-                                <h3 className="ml-2 text-sm font-medium text-foreground">Total Contributions</h3>
-                              </div>
-                              <Badge variant="success">YTD</Badge>
-                            </div>
-                            <p className="mt-2 text-2xl font-semibold text-foreground">
-                              {formatCurrency(totalIncome, currency)}
-                            </p>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardContent className="pt-6">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <TrendingDown className="h-5 w-5 text-destructive" />
-                                <h3 className="ml-2 text-sm font-medium text-foreground">Total Expenses</h3>
-                              </div>
-                              <Badge variant="destructive">YTD</Badge>
-                            </div>
-                            <p className="mt-2 text-2xl font-semibold text-foreground">
-                              {formatCurrency(totalExpenses, currency)}
-                            </p>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardContent className="pt-6">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <DollarSign className="h-5 w-5 text-primary" />
-                                <h3 className="ml-2 text-sm font-medium text-foreground">Average Contribution</h3>
-                              </div>
-                              <Badge variant="primary">Per Transaction</Badge>
-                            </div>
-                            <p className="mt-2 text-2xl font-semibold text-foreground">
-                              {formatCurrency(averageContribution, currency)}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Transaction History */}
-                    <div>
-                      <h4 className="text-lg font-medium text-foreground mb-4">Transaction History</h4>
-                      <div style={{ height: 400, width: '100%' }}>
-                        <DataGrid
-                          data={transactions}
-                          columns={transactionColumns}
-                          totalRows={transactionData?.count || 0}
-                          loading={transactionsLoading}
-                          onPageChange={setPage}
-                          onPageSizeChange={setPageSize}
-                          onSortChange={setSortModel}
-                          onFilterChange={setFilterModel}
-                          disableRowSelectionOnClick
-                          pagination={{
-                            pageSize: pageSize,
-                            pageSizeOptions: [5, 10, 25, 50],
-                          }}
-                          exportOptions={{
-                            enabled: true,
-                            fileName: `${member.first_name}_${member.last_name}_transactions`,
-                            pdf: true,
-                            excel: true,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </ScrollArea>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog 
-          open={showDeleteConfirm} 
-          onOpenChange={(open) => {
-            if (!open) {
-              setShowDeleteConfirm(false);
-            }
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle variant="danger">Delete Member</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this member? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setShowDeleteConfirm(false)}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
-                onClick={async () => {
-                  if (id) {
-                    await deleteMemberMutation.mutateAsync(id);
-                    navigate('/members');
-                  }
-                  setShowDeleteConfirm(false);
-                }}
-              >
-                {deleteMemberMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  'Delete'
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </Container>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="danger">Delete Member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this member? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                deleteMutation.mutate();
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Member'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
 

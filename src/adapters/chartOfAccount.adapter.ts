@@ -1,12 +1,21 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { ChartOfAccount } from '../models/chartOfAccount.model';
-import { logAuditEvent } from '../utils/auditLogger';
+import { AuditService } from '../services/AuditService';
+import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 
+export interface IChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {}
+
 @injectable()
-export class ChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {
+export class ChartOfAccountAdapter
+  extends BaseAdapter<ChartOfAccount>
+  implements IChartOfAccountAdapter
+{
+  constructor(@inject(TYPES.AuditService) private auditService: AuditService) {
+    super();
+  }
   protected tableName = 'chart_of_accounts';
   
   protected defaultSelect = `
@@ -33,9 +42,6 @@ export class ChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {
   ];
 
   protected override async onBeforeCreate(data: Partial<ChartOfAccount>): Promise<Partial<ChartOfAccount>> {
-    // Validate account data
-    this.validateAccountData(data);
-    
     // Set default values
     if (data.is_active === undefined) {
       data.is_active = true;
@@ -46,21 +52,17 @@ export class ChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {
 
   protected override async onAfterCreate(data: ChartOfAccount): Promise<void> {
     // Log audit event
-    await logAuditEvent('create', 'chart_of_account', data.id, data);
+    await this.auditService.logAuditEvent('create', 'chart_of_account', data.id, data);
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<ChartOfAccount>): Promise<Partial<ChartOfAccount>> {
-    // Validate account data if fields are being updated
-    if (data.code || data.name || data.account_type) {
-      this.validateAccountData(data);
-    }
-    
+    // Repositories handle validation
     return data;
   }
 
   protected override async onAfterUpdate(data: ChartOfAccount): Promise<void> {
     // Log audit event
-    await logAuditEvent('update', 'chart_of_account', data.id, data);
+    await this.auditService.logAuditEvent('update', 'chart_of_account', data.id, data);
   }
 
   protected override async onBeforeDelete(id: string): Promise<void> {
@@ -91,25 +93,9 @@ export class ChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {
 
   protected override async onAfterDelete(id: string): Promise<void> {
     // Log audit event
-    await logAuditEvent('delete', 'chart_of_account', id, { id });
+    await this.auditService.logAuditEvent('delete', 'chart_of_account', id, { id });
   }
 
-  private validateAccountData(data: Partial<ChartOfAccount>): void {
-    if (data.code !== undefined && !data.code.trim()) {
-      throw new Error('Account code is required');
-    }
-    
-    if (data.name !== undefined && !data.name.trim()) {
-      throw new Error('Account name is required');
-    }
-    
-    if (data.account_type !== undefined) {
-      const validTypes = ['asset', 'liability', 'equity', 'revenue', 'expense'];
-      if (!validTypes.includes(data.account_type)) {
-        throw new Error('Invalid account type. Must be one of: asset, liability, equity, revenue, expense');
-      }
-    }
-  }
 
   public async getHierarchy(): Promise<ChartOfAccount[]> {
     const { data, error } = await supabase.rpc('get_chart_of_accounts_hierarchy');

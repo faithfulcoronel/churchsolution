@@ -1,12 +1,22 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { FinancialTransactionHeader } from '../models/financialTransactionHeader.model';
-import { logAuditEvent } from '../utils/auditLogger';
+import { AuditService } from '../services/AuditService';
+import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 
+export interface IFinancialTransactionHeaderAdapter
+  extends BaseAdapter<FinancialTransactionHeader> {}
+
 @injectable()
-export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTransactionHeader> {
+export class FinancialTransactionHeaderAdapter
+  extends BaseAdapter<FinancialTransactionHeader>
+  implements IFinancialTransactionHeaderAdapter
+{
+  constructor(@inject(TYPES.AuditService) private auditService: AuditService) {
+    super();
+  }
   protected tableName = 'financial_transaction_headers';
   
   protected defaultSelect = `
@@ -37,9 +47,6 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
   ];
 
   protected override async onBeforeCreate(data: Partial<FinancialTransactionHeader>): Promise<Partial<FinancialTransactionHeader>> {
-    // Validate header data
-    this.validateHeaderData(data);
-    
     // Set default values
     if (!data.status) {
       data.status = 'draft';
@@ -58,7 +65,7 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
 
   protected override async onAfterCreate(data: FinancialTransactionHeader): Promise<void> {
     // Log audit event
-    await logAuditEvent('create', 'financial_transaction_header', data.id, data);
+    await this.auditService.logAuditEvent('create', 'financial_transaction_header', data.id, data);
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<FinancialTransactionHeader>): Promise<Partial<FinancialTransactionHeader>> {
@@ -106,7 +113,7 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
 
   protected override async onAfterUpdate(data: FinancialTransactionHeader): Promise<void> {
     // Log audit event
-    await logAuditEvent('update', 'financial_transaction_header', data.id, data);
+    await this.auditService.logAuditEvent('update', 'financial_transaction_header', data.id, data);
   }
 
   protected override async onBeforeDelete(id: string): Promise<void> {
@@ -137,25 +144,9 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
 
   protected override async onAfterDelete(id: string): Promise<void> {
     // Log audit event
-    await logAuditEvent('delete', 'financial_transaction_header', id, { id });
+    await this.auditService.logAuditEvent('delete', 'financial_transaction_header', id, { id });
   }
 
-  private validateHeaderData(data: Partial<FinancialTransactionHeader>): void {
-    if (data.transaction_date === undefined) {
-      throw new Error('Transaction date is required');
-    }
-    
-    if (data.description !== undefined && !data.description.trim()) {
-      throw new Error('Description is required');
-    }
-    
-    if (data.status !== undefined) {
-      const validStatuses = ['draft', 'posted', 'voided'];
-      if (!validStatuses.includes(data.status)) {
-        throw new Error('Invalid status. Must be one of: draft, posted, voided');
-      }
-    }
-  }
 
   private async generateTransactionNumber(date: string, prefix: string): Promise<string> {
     // Format: PREFIX-YYYYMM-SEQUENCE

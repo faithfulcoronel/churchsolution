@@ -1,12 +1,21 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { Account } from '../models/account.model';
-import { logAuditEvent } from '../utils/auditLogger';
+import { AuditService } from '../services/AuditService';
+import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 
+export interface IAccountAdapter extends BaseAdapter<Account> {}
+
 @injectable()
-export class AccountAdapter extends BaseAdapter<Account> {
+export class AccountAdapter
+  extends BaseAdapter<Account>
+  implements IAccountAdapter
+{
+  constructor(@inject(TYPES.AuditService) private auditService: AuditService) {
+    super();
+  }
   protected tableName = 'accounts';
   
   protected defaultSelect = `
@@ -38,9 +47,6 @@ export class AccountAdapter extends BaseAdapter<Account> {
   ];
 
   protected override async onBeforeCreate(data: Partial<Account>): Promise<Partial<Account>> {
-    // Validate account data
-    this.validateAccountData(data);
-    
     // Set default values
     if (data.is_active === undefined) {
       data.is_active = true;
@@ -51,21 +57,17 @@ export class AccountAdapter extends BaseAdapter<Account> {
 
   protected override async onAfterCreate(data: Account): Promise<void> {
     // Log audit event
-    await logAuditEvent('create', 'account', data.id, data);
+    await this.auditService.logAuditEvent('create', 'account', data.id, data);
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<Account>): Promise<Partial<Account>> {
-    // Validate account data if fields are being updated
-    if (data.name || data.account_number || data.email) {
-      this.validateAccountData(data);
-    }
-    
+    // Repositories perform validation
     return data;
   }
 
   protected override async onAfterUpdate(data: Account): Promise<void> {
     // Log audit event
-    await logAuditEvent('update', 'account', data.id, data);
+    await this.auditService.logAuditEvent('update', 'account', data.id, data);
   }
 
   protected override async onBeforeDelete(id: string): Promise<void> {
@@ -84,20 +86,7 @@ export class AccountAdapter extends BaseAdapter<Account> {
 
   protected override async onAfterDelete(id: string): Promise<void> {
     // Log audit event
-    await logAuditEvent('delete', 'account', id, { id });
+    await this.auditService.logAuditEvent('delete', 'account', id, { id });
   }
 
-  private validateAccountData(data: Partial<Account>): void {
-    if (data.name !== undefined && !data.name.trim()) {
-      throw new Error('Account name is required');
-    }
-    
-    if (data.account_number !== undefined && !data.account_number.trim()) {
-      throw new Error('Account number is required');
-    }
-    
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      throw new Error('Invalid email format');
-    }
-  }
 }

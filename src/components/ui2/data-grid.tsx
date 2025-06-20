@@ -353,11 +353,8 @@ export function DataGrid<TData, TValue>({
                         <div className="flex items-center space-x-2">
                           <div
                             {...{
-                              className: cn(
-                                'flex items-center space-x-2',
-                                header.column.getCanSort() &&
-                                  'cursor-pointer select-none'
-                              ),
+                              className: cn('flex items-center space-x-2',
+                                header.column.getCanSort() && 'cursor-pointer select-none'),
                               onClick: header.column.getToggleSortingHandler(),
                             }}
                           >
@@ -368,10 +365,10 @@ export function DataGrid<TData, TValue>({
                             {header.column.getCanSort() && (
                               <span>
                                 {{
-                                  asc: <ArrowUp className="h-4 w-4" />,
-                                  desc: <ArrowDown className="h-4 w-4" />,
+                                  asc: <ArrowUp className="h-4 w-4 dark:text-gray-300" />,
+                                  desc: <ArrowDown className="h-4 w-4 dark:text-gray-300" />,
                                 }[header.column.getIsSorted() as string] ?? (
-                                  <ArrowUpDown className="h-4 w-4" />
+                                  <ArrowUpDown className="h-4 w-4 dark:text-gray-400" />
                                 )}
                               </span>
                             )}
@@ -396,10 +393,10 @@ export function DataGrid<TData, TValue>({
                                   size="sm"
                                   className={cn(
                                     "h-8 w-8 p-0",
-                                    header.column.getIsFiltered() && "text-primary"
+                                    header.column.getIsFiltered() && "text-primary dark:text-primary"
                                   )}
                                 >
-                                  <Filter className="h-4 w-4" />
+                                  <Filter className="h-4 w-4 dark:text-gray-400" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="start" className="w-[200px] p-2">

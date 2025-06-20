@@ -59,13 +59,13 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           ref={ref}
           className={cn(
             // Base styles
-            'relative rounded-xl border shadow-sm transition-all duration-200',
+            'relative rounded-xl border shadow-sm transition-all duration-200 dark:border-gray-800',
             // Variant styles
             variantClasses[variant],
             // Size styles
             sizeClasses[size],
             // Interactive styles
-            hoverable && 'hover:shadow-lg dark:hover:shadow-none hover:-translate-y-0.5 hover:border-primary-200 dark:hover:border-primary-700',
+            hoverable && 'hover:shadow-lg dark:hover:shadow-none hover:-translate-y-0.5 hover:border-primary-200 dark:hover:border-primary-800',
             isInteractive && 'cursor-pointer',
             // Loading state
             loading && 'animate-pulse',
@@ -89,12 +89,12 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         >
           {/* Gradient overlay for hover effect */}
           {hoverable && (
-            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/0 to-primary-500/0 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-200 rounded-xl" />
+            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/0 to-primary-500/0 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-5 transition-opacity duration-200 rounded-xl" />
           )}
 
           {/* Loading overlay */}
           {loading && (
-            <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl" />
+            <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/70 backdrop-blur-sm rounded-xl" />
           )}
 
           {/* Content */}
@@ -103,7 +103,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           {/* Shimmer effect for loading state */}
           {loading && (
             <div className="absolute inset-0 overflow-hidden rounded-xl">
-              <div className="absolute inset-0 transform translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <div className="absolute inset-0 transform translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 dark:via-gray-700/10 to-transparent" />
             </div>
           )}
         </div>
@@ -134,6 +134,30 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
 
 CardHeader.displayName = 'CardHeader';
 
+interface CardTitleProps extends BaseProps {}
+
+const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
+  ({ className, children }, ref) => (
+    <h3 ref={ref} className={cn('text-2xl font-semibold leading-none tracking-tight', className)}>
+      {children}
+    </h3>
+  )
+);
+
+CardTitle.displayName = 'CardTitle';
+
+interface CardDescriptionProps extends BaseProps {}
+
+const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
+  ({ className, children }, ref) => (
+    <p ref={ref} className={cn('text-sm text-muted-foreground', className)}>
+      {children}
+    </p>
+  )
+);
+
+CardDescription.displayName = 'CardDescription';
+
 interface CardContentProps extends BaseProps {}
 
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
@@ -158,4 +182,4 @@ const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
 
 CardFooter.displayName = 'CardFooter';
 
-export { Card, CardHeader, CardContent, CardFooter };
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter };

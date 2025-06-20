@@ -1,82 +1,134 @@
 import React from 'react';
-import { Input } from '../../../components/ui2/input';
-import { Label } from '../../../components/ui2/label';
-import { Briefcase, Heart, Gift, UserPlus, Users } from 'lucide-react';
+import { Card, CardContent } from '../../../components/ui2/card';
+import { Badge } from '../../../components/ui2/badge';
 
 interface MinistryInfoTabProps {
-  formData: any;
-  onChange: (field: string, value: any) => void;
+  member: any;
 }
 
-export function MinistryInfoTab({ formData, onChange }: MinistryInfoTabProps) {
+function MinistryInfoTab({ member }: MinistryInfoTabProps) {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="leadership_position">Leadership Position</Label>
-          <Input
-            id="leadership_position"
-            value={formData.leadership_position || ''}
-            onChange={(e) => onChange('leadership_position', e.target.value)}
-            icon={<Briefcase className="h-4 w-4" />}
-          />
+    <Card>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="text-lg font-medium mb-4">Ministry Involvement</h3>
+            
+            <div className="space-y-4">
+              {member.leadership_position && (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Leadership Position</h4>
+                  <p className="mt-1">{member.leadership_position}</p>
+                </div>
+              )}
+              
+              {member.ministries && member.ministries.length > 0 ? (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Ministries</h4>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {member.ministries.map((ministry: string, index: number) => (
+                      <Badge key={index} variant="outline">{ministry}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Ministries</h4>
+                  <p className="mt-1 text-muted-foreground">No ministries listed</p>
+                </div>
+              )}
+              
+              {member.small_groups && member.small_groups.length > 0 ? (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Small Groups</h4>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {member.small_groups.map((group: string, index: number) => (
+                      <Badge key={index} variant="outline">{group}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Small Groups</h4>
+                  <p className="mt-1 text-muted-foreground">No small groups listed</p>
+                </div>
+              )}
+              
+              {member.volunteer_roles && member.volunteer_roles.length > 0 ? (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Volunteer Roles</h4>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {member.volunteer_roles.map((role: string, index: number) => (
+                      <Badge key={index} variant="outline">{role}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Volunteer Roles</h4>
+                  <p className="mt-1 text-muted-foreground">No volunteer roles listed</p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-medium mb-4">Spiritual Information</h3>
+            
+            <div className="space-y-4">
+              {member.spiritual_gifts && member.spiritual_gifts.length > 0 ? (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Spiritual Gifts</h4>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {member.spiritual_gifts.map((gift: string, index: number) => (
+                      <Badge key={index} variant="secondary">{gift}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Spiritual Gifts</h4>
+                  <p className="mt-1 text-muted-foreground">No spiritual gifts listed</p>
+                </div>
+              )}
+              
+              {member.ministry_interests && member.ministry_interests.length > 0 ? (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Ministry Interests</h4>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {member.ministry_interests.map((interest: string, index: number) => (
+                      <Badge key={index} variant="outline">{interest}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Ministry Interests</h4>
+                  <p className="mt-1 text-muted-foreground">No ministry interests listed</p>
+                </div>
+              )}
+              
+              {member.attendance_rate !== null && (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Attendance Rate</h4>
+                  <p className="mt-1">{member.attendance_rate}%</p>
+                </div>
+              )}
+              
+              {member.last_attendance_date && (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Last Attendance</h4>
+                  <p className="mt-1">{new Date(member.last_attendance_date).toLocaleDateString()}</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-
-        <div>
-          <Label htmlFor="spiritual_gifts">Spiritual Gifts</Label>
-          <Input
-            id="spiritual_gifts"
-            value={formData.spiritual_gifts?.join(', ') || ''}
-            onChange={(e) => onChange('spiritual_gifts', e.target.value.split(',').map(s => s.trim()))}
-            icon={<Gift className="h-4 w-4" />}
-            placeholder="e.g., Teaching, Leadership, Service"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="ministry_interests">Ministry Interests</Label>
-          <Input
-            id="ministry_interests"
-            value={formData.ministry_interests?.join(', ') || ''}
-            onChange={(e) => onChange('ministry_interests', e.target.value.split(',').map(s => s.trim()))}
-            icon={<Heart className="h-4 w-4" />}
-            placeholder="e.g., Youth, Worship, Outreach"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="volunteer_roles">Volunteer Roles</Label>
-          <Input
-            id="volunteer_roles"
-            value={formData.volunteer_roles?.join(', ') || ''}
-            onChange={(e) => onChange('volunteer_roles', e.target.value.split(',').map(s => s.trim()))}
-            icon={<UserPlus className="h-4 w-4" />}
-            placeholder="e.g., Usher, Sunday School Teacher"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="small_groups">Small Groups</Label>
-          <Input
-            id="small_groups"
-            value={formData.small_groups?.join(', ') || ''}
-            onChange={(e) => onChange('small_groups', e.target.value.split(',').map(s => s.trim()))}
-            icon={<Users className="h-4 w-4" />}
-            placeholder="e.g., Young Adults, Bible Study"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="ministries">Ministries</Label>
-          <Input
-            id="ministries"
-            value={formData.ministries?.join(', ') || ''}
-            onChange={(e) => onChange('ministries', e.target.value.split(',').map(s => s.trim()))}
-            icon={<Heart className="h-4 w-4" />}
-            placeholder="e.g., Children's Ministry, Music Ministry"
-          />
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
+
+export default MinistryInfoTab;
+
+export { MinistryInfoTab }
