@@ -389,33 +389,27 @@ function TransactionList() {
           </CardHeader>
           
           <CardContent className="p-0">
-            <DataGrid
-              columns={columns}
-              data={filteredTransactions}
-              totalRows={filteredTransactions.length}
-              loading={isLoading}
-              onPageChange={setPage}
-              onPageSizeChange={setPageSize}
-              getRowId={(row) => row.id}
-              onRowClick={(params) => navigate(`/finances/transactions/${params.id}`)}
-              autoHeight
-              disableColumnMenu={false}
-              disableColumnFilter={false}
-              disableColumnSelector={false}
-              disableDensitySelector={false}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: pageSize,
-                    page: page,
-                  },
-                },
-              }}
-              toolbar={{
-                showQuickFilter: true,
-                quickFilterProps: { debounceMs: 500 },
-              }}
-            />
+          <DataGrid
+            columns={columns}
+            data={filteredTransactions}
+            totalRows={filteredTransactions.length}
+            loading={isLoading}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            getRowId={(row) => row.id}
+            onRowClick={(params) => navigate(`/finances/transactions/${params.id}`)}
+            autoHeight
+            disableColumnMenu={false}
+            disableColumnFilter={false}
+            disableColumnSelector={false}
+            disableDensitySelector={false}
+            page={page}
+            pageSize={pageSize}
+            toolbar={{
+              showQuickFilter: true,
+              quickFilterProps: { debounceMs: 500 },
+            }}
+          />
           </CardContent>
         </Card>
       </div>

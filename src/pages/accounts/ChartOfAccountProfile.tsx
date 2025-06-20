@@ -539,10 +539,9 @@ function ChartOfAccountProfile() {
               enabled: true,
               fileName: `account_${account.code}_transactions`,
             }}
-            pagination={{
-              pageSize: 10,
-              pageSizeOptions: [5, 10, 25, 50, 100],
-            }}
+            pageSize={10}
+            page={0}
+            pageSizeOptions={[5, 10, 25, 50, 100]}
           />
         </CardContent>
       </Card>

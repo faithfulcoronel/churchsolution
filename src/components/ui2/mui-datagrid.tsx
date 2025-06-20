@@ -1,8 +1,7 @@
 import React from 'react';
-import { 
-  DataGrid as MuiDataGrid, 
+import {
+  DataGrid as MuiDataGrid,
   DataGridProps as MuiDataGridProps,
-  GridColDef,
   GridFilterModel,
   GridPaginationModel,
   GridSortModel,
@@ -20,6 +19,9 @@ export interface DataGridProps extends Omit<MuiDataGridProps, 'rows'> {
   onPageSizeChange?: (pageSize: number) => void;
   onSortChange?: (model: GridSortModel) => void;
   onFilterChange?: (model: GridFilterModel) => void;
+  page?: number;
+  pageSize?: number;
+  pageSizeOptions?: number[];
   loading?: boolean;
   error?: string;
 }
@@ -150,6 +152,9 @@ export function DataGrid({
   onPageSizeChange,
   onSortChange,
   onFilterChange,
+  page = 0,
+  pageSize = 10,
+  pageSizeOptions = [5, 10, 25, 50, 100],
   loading = false,
   error,
   columns,
@@ -183,7 +188,7 @@ export function DataGrid({
         columns={columns}
         rowCount={totalRows}
         loading={loading}
-        pageSizeOptions={[5, 10, 25, 50, 100]}
+        pageSizeOptions={pageSizeOptions}
         paginationMode="server"
         sortingMode="server"
         filterMode="server"
@@ -202,13 +207,7 @@ export function DataGrid({
         onPaginationModelChange={handlePaginationModelChange}
         onSortModelChange={onSortChange}
         onFilterModelChange={onFilterChange}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
-            },
-          },
-        }}
+        paginationModel={{ page, pageSize }}
         getRowClassName={() => 'cursor-pointer hover:bg-muted/50'}
         {...props}
       />

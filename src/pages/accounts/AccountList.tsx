@@ -244,14 +244,8 @@ function AccountList() {
                 disableColumnFilter={false}
                 disableColumnSelector={false}
                 disableDensitySelector={false}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: pageSize,
-                      page: page,
-                    },
-                  },
-                }}
+                page={page}
+                pageSize={pageSize}
                 slots={{
                   toolbar: () => (
                     <div className="flex justify-between items-center p-4">
