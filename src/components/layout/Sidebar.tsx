@@ -9,24 +9,13 @@ import { Button } from '../ui2/button';
 import { Badge } from '../ui2/badge';
 import { Separator } from '../ui2/separator';
 import {
-  Home,
-  Users,
-  DollarSign,
   Settings as SettingsIcon,
   Crown,
-  Building2,
   Sparkles,
-  ChevronRight,
   ChevronDown,
   Search,
-  Heart,
-  BarChart3,
-  FileText,
-  CreditCard,
-  History,
-  Shield,
-  Menu,
 } from 'lucide-react';
+import { navigation as baseNavigation } from '../../config/navigation';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -50,94 +39,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     },
   });
 
-  const navigation = [
-    { 
-      name: 'Dashboard', 
-      icon: Home,
-      permission: null,
-      submenu: [
-        {
-          name: 'Church Overview',
-          href: '/dashboard/church',
-          icon: Building2,
-        },
-        {
-          name: 'Personal Overview',
-          href: '/dashboard/personal',
-          icon: Users,
-        }
-      ]
-    },
-    { 
-      name: 'Members', 
-      href: '/members', 
-      icon: Users,
-      permission: 'member.view',
-      submenu: [
-        {
-          name: 'Member List',
-          href: '/members/list',
-          icon: Users,
-        },
-        {
-          name: 'Family Relationships',
-          href: '/members/family',
-          icon: Heart,
-        }
-      ]
-    },
-    { 
-      name: 'Finances', 
-      href: '/finances', 
-      icon: DollarSign,
-      permission: 'finance.view',
-      submenu: [
-        {
-          name: 'Overview',
-          href: '/finances',
-          icon: BarChart3,
-        },
-        {
-          name: 'Transactions',
-          href: '/finances/transactions',
-          icon: History,
-        },
-        {
-          name: 'Budgets',
-          href: '/finances/budgets',
-          icon: CreditCard,
-        },
-        {
-          name: 'Reports',
-          href: '/finances/reports',
-          icon: FileText,
-        },
-      ]
-    },
-    { 
-      name: 'Accounts', 
-      href: '/accounts', 
-      icon: Building2,
-      permission: 'finance.view',
-      submenu: [
-        {
-          name: 'Accounts',
-          href: '/accounts',
-          icon: Building2,
-        },
-        {
-          name: 'Financial Sources',
-          href: '/accounts/sources',
-          icon: CreditCard,
-        },
-        {
-          name: 'Chart of Accounts',
-          href: '/accounts/chart-of-accounts',
-          icon: FileText,
-        },
-      ]
-    },
-  ];
+  const navigation = useMemo(
+    () =>
+      baseNavigation.filter(
+        (item) => !item.permission || hasPermission(item.permission)
+      ),
+    [hasPermission]
+  );
 
   // Filter navigation items based on search term
   const filteredNavigation = useMemo(() => {
