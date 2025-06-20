@@ -5,8 +5,13 @@ import { Account } from '../models/account.model';
 import { AuditService, SupabaseAuditService } from '../services/AuditService';
 import { supabase } from '../lib/supabase';
 
+export interface IAccountAdapter extends BaseAdapter<Account> {}
+
 @injectable()
-export class AccountAdapter extends BaseAdapter<Account> {
+export class AccountAdapter
+  extends BaseAdapter<Account>
+  implements IAccountAdapter
+{
   constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
     super();
   }

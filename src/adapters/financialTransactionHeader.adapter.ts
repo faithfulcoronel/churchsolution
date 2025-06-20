@@ -5,8 +5,14 @@ import { FinancialTransactionHeader } from '../models/financialTransactionHeader
 import { AuditService, SupabaseAuditService } from '../services/AuditService';
 import { supabase } from '../lib/supabase';
 
+export interface IFinancialTransactionHeaderAdapter
+  extends BaseAdapter<FinancialTransactionHeader> {}
+
 @injectable()
-export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTransactionHeader> {
+export class FinancialTransactionHeaderAdapter
+  extends BaseAdapter<FinancialTransactionHeader>
+  implements IFinancialTransactionHeaderAdapter
+{
   constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
     super();
   }

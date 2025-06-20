@@ -1,24 +1,29 @@
 import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { Notification } from '../models/notification.model';
-import { NotificationAdapter } from '../adapters/notification.adapter';
+import type { INotificationAdapter } from '../adapters/notification.adapter';
+
+export interface INotificationRepository extends BaseRepository<Notification> {}
 
 @injectable()
-export class NotificationRepository extends BaseRepository<Notification> {
-  constructor(@inject(NotificationAdapter) adapter: NotificationAdapter) {
+export class NotificationRepository
+  extends BaseRepository<Notification>
+  implements INotificationRepository
+{
+  constructor(@inject('INotificationAdapter') adapter: INotificationAdapter) {
     super(adapter);
   }
 
   async markAsRead(id: string): Promise<void> {
-    await (this.adapter as NotificationAdapter).markAsRead(id);
+    await (this.adapter as INotificationAdapter).markAsRead(id);
   }
 
   async markAllAsRead(userId: string): Promise<void> {
-    await (this.adapter as NotificationAdapter).markAllAsRead(userId);
+    await (this.adapter as INotificationAdapter).markAllAsRead(userId);
   }
 
   async deleteExpired(): Promise<void> {
-    await (this.adapter as NotificationAdapter).deleteExpired();
+    await (this.adapter as INotificationAdapter).deleteExpired();
   }
 
   protected override async beforeCreate(data: Partial<Notification>): Promise<Partial<Notification>> {

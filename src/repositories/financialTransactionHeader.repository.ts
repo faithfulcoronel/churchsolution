@@ -1,13 +1,22 @@
 import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { FinancialTransactionHeader } from '../models/financialTransactionHeader.model';
-import { FinancialTransactionHeaderAdapter } from '../adapters/financialTransactionHeader.adapter';
+import type { IFinancialTransactionHeaderAdapter } from '../adapters/financialTransactionHeader.adapter';
 import { NotificationService } from '../services/NotificationService';
 import { FinancialTransactionHeaderValidator } from '../validators/financialTransactionHeader.validator';
 
+export interface IFinancialTransactionHeaderRepository
+  extends BaseRepository<FinancialTransactionHeader> {}
+
 @injectable()
-export class FinancialTransactionHeaderRepository extends BaseRepository<FinancialTransactionHeader> {
-  constructor(@inject(FinancialTransactionHeaderAdapter) adapter: FinancialTransactionHeaderAdapter) {
+export class FinancialTransactionHeaderRepository
+  extends BaseRepository<FinancialTransactionHeader>
+  implements IFinancialTransactionHeaderRepository
+{
+  constructor(
+    @inject('IFinancialTransactionHeaderAdapter')
+    adapter: IFinancialTransactionHeaderAdapter
+  ) {
     super(adapter);
   }
 

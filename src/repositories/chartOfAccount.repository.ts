@@ -1,13 +1,20 @@
 import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { ChartOfAccount } from '../models/chartOfAccount.model';
-import { ChartOfAccountAdapter } from '../adapters/chartOfAccount.adapter';
+import type { IChartOfAccountAdapter } from '../adapters/chartOfAccount.adapter';
 import { NotificationService } from '../services/NotificationService';
 import { ChartOfAccountValidator } from '../validators/chartOfAccount.validator';
 
+export interface IChartOfAccountRepository extends BaseRepository<ChartOfAccount> {}
+
 @injectable()
-export class ChartOfAccountRepository extends BaseRepository<ChartOfAccount> {
-  constructor(@inject(ChartOfAccountAdapter) adapter: ChartOfAccountAdapter) {
+export class ChartOfAccountRepository
+  extends BaseRepository<ChartOfAccount>
+  implements IChartOfAccountRepository
+{
+  constructor(
+    @inject('IChartOfAccountAdapter') adapter: IChartOfAccountAdapter
+  ) {
     super(adapter);
   }
 

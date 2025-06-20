@@ -1,13 +1,20 @@
 import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { FinancialSource } from '../models/financialSource.model';
-import { FinancialSourceAdapter } from '../adapters/financialSource.adapter';
+import type { IFinancialSourceAdapter } from '../adapters/financialSource.adapter';
 import { NotificationService } from '../services/NotificationService';
 import { FinancialSourceValidator } from '../validators/financialSource.validator';
 
+export interface IFinancialSourceRepository extends BaseRepository<FinancialSource> {}
+
 @injectable()
-export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
-  constructor(@inject(FinancialSourceAdapter) adapter: FinancialSourceAdapter) {
+export class FinancialSourceRepository
+  extends BaseRepository<FinancialSource>
+  implements IFinancialSourceRepository
+{
+  constructor(
+    @inject('IFinancialSourceAdapter') adapter: IFinancialSourceAdapter
+  ) {
     super(adapter);
   }
 
