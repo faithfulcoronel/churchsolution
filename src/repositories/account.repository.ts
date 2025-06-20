@@ -2,7 +2,7 @@ import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { Account } from '../models/account.model';
 import { AccountAdapter } from '../adapters/account.adapter';
-import { useMessageStore } from '../components/MessageHandler';
+import { NotificationService } from '../services/NotificationService';
 
 @injectable()
 export class AccountRepository extends BaseRepository<Account> {
@@ -20,12 +20,7 @@ export class AccountRepository extends BaseRepository<Account> {
 
   protected override async afterCreate(data: Account): Promise<void> {
     // Additional repository-level operations after creation
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: `Account "${data.name}" created successfully`,
-      duration: 3000,
-    });
+    NotificationService.showSuccess(`Account "${data.name}" created successfully`);
   }
 
   protected override async beforeUpdate(id: string, data: Partial<Account>): Promise<Partial<Account>> {
@@ -38,12 +33,7 @@ export class AccountRepository extends BaseRepository<Account> {
 
   protected override async afterUpdate(data: Account): Promise<void> {
     // Additional repository-level operations after update
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: `Account "${data.name}" updated successfully`,
-      duration: 3000,
-    });
+    NotificationService.showSuccess(`Account "${data.name}" updated successfully`);
   }
 
   protected override async beforeDelete(id: string): Promise<void> {
@@ -56,12 +46,7 @@ export class AccountRepository extends BaseRepository<Account> {
 
   protected override async afterDelete(id: string): Promise<void> {
     // Additional repository-level cleanup after delete
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: 'Account deleted successfully',
-      duration: 3000,
-    });
+    NotificationService.showSuccess('Account deleted successfully');
   }
 
   // Private helper methods
@@ -87,13 +72,8 @@ export class AccountRepository extends BaseRepository<Account> {
     }
 
     if (errors.length > 0) {
-      const { addMessage } = useMessageStore.getState();
       errors.forEach(error => {
-        addMessage({
-          type: 'error',
-          text: error,
-          duration: 5000,
-        });
+        NotificationService.showError(error, 5000);
       });
       throw new Error('Validation failed: ' + errors.join(', '));
     }
