@@ -89,5 +89,3 @@ function BasicInfoTab({ member }: BasicInfoTabProps) {
 }
 
 export default BasicInfoTab;
-
-export { BasicInfoTab }
