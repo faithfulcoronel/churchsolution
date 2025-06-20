@@ -154,5 +154,3 @@ function NotesTab({ member }: NotesTabProps) {
 }
 
 export default NotesTab;
-
-export { NotesTab }

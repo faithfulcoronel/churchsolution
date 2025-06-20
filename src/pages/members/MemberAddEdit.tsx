@@ -21,10 +21,10 @@ import {
 import { Save, ArrowLeft, Loader2 } from 'lucide-react';
 
 // Import tabs
-import { BasicInfoTab } from './tabs/BasicInfoTab';
-import { ContactInfoTab } from './tabs/ContactInfoTab';
-import { MinistryInfoTab } from './tabs/MinistryInfoTab';
-import { NotesTab } from './tabs/NotesTab';
+import BasicInfoTab from './tabs/BasicInfoTab';
+import ContactInfoTab from './tabs/ContactInfoTab';
+import MinistryInfoTab from './tabs/MinistryInfoTab';
+import NotesTab from './tabs/NotesTab';
 
 function MemberAddEdit() {
   const { id } = useParams<{ id: string }>();

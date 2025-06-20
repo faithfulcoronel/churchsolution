@@ -94,5 +94,3 @@ function ContactInfoTab({ member }: ContactInfoTabProps) {
 }
 
 export default ContactInfoTab;
-
-export { ContactInfoTab }

@@ -131,5 +131,3 @@ function MinistryInfoTab({ member }: MinistryInfoTabProps) {
 }
 
 export default MinistryInfoTab;
-
-export { MinistryInfoTab }
