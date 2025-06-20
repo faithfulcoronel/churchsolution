@@ -1,11 +1,11 @@
-import { ChangeEvent, Fragment } from 'react';
+import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { useAuthContext } from '@/auth';
 import { useLanguage } from '@/i18n';
 import { toAbsoluteUrl } from '@/utils';
 import { DropdownUserLanguages } from './DropdownUserLanguages';
-import { useSettings } from '@/providers/SettingsProvider';
+import { useThemeSwitcher } from '@/hooks';
 import { DefaultTooltip, KeenIcon } from '@/components';
 import {
   MenuItem,
@@ -22,17 +22,9 @@ interface IDropdownUserProps {
 }
 
 const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
-  const { settings, storeSettings } = useSettings();
+  const { settings, handleThemeToggle } = useThemeSwitcher();
   const { logout } = useAuthContext();
   const { isRTL } = useLanguage();
-
-  const handleThemeMode = (event: ChangeEvent<HTMLInputElement>) => {
-    const newThemeMode = event.target.checked ? 'dark' : 'light';
-
-    storeSettings({
-      themeMode: newThemeMode
-    });
-  };
 
   const buildHeader = () => {
     return (
@@ -231,7 +223,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
                 name="theme"
                 type="checkbox"
                 checked={settings.themeMode === 'dark'}
-                onChange={handleThemeMode}
+                onChange={handleThemeToggle}
                 value="1"
               />
             </label>

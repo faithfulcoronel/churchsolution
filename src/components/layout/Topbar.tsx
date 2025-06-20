@@ -3,6 +3,8 @@ import { Menu, AlignJustify, Bell, User } from 'lucide-react';
 import { Button } from '../ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui2/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui2/dropdown-menu';
+import { Switch } from '../ui2/switch';
+import { useThemeSwitcher } from '@/hooks';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import ChurchBranding from '../ChurchBranding';
@@ -15,6 +17,7 @@ interface TopbarProps {
 function Topbar({ setSidebarOpen }: TopbarProps) {
   const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
+  const { settings, handleThemeToggle } = useThemeSwitcher();
 
   const handleSignOut = async () => {
     await signOut();
@@ -43,6 +46,12 @@ function Topbar({ setSidebarOpen }: TopbarProps) {
         </div>
         
         <div className="ml-auto flex items-center space-x-4">
+          {/* Theme switch */}
+          <Switch
+            checked={settings.themeMode === 'dark'}
+            onCheckedChange={handleThemeToggle}
+          />
+
           {/* Notification dropdown */}
           <NotificationDropdown />
 

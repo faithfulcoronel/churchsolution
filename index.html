@@ -11,23 +11,32 @@
     <script type="module" src="/src/main.tsx"></script>
     <script>
       const defaultThemeMode = 'light'; // light|dark|system
-         let themeMode;
-   
-         if ( document.documentElement ) {
-           if ( localStorage.getItem('theme')) {
-               themeMode = localStorage.getItem('theme');
-           } else if ( document.documentElement.hasAttribute('data-theme-mode')) {
-             themeMode = document.documentElement.getAttribute('data-theme-mode');
-           } else {
-             themeMode = defaultThemeMode;
-           }
-   
-           if (themeMode === 'system') {
-             themeMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-           }
-   
-           document.documentElement.classList.add(themeMode);
-         }
+      let themeMode;
+
+      if (document.documentElement) {
+        const storedSettings = localStorage.getItem('settings-configs');
+        if (storedSettings) {
+          try {
+            themeMode = JSON.parse(storedSettings).themeMode;
+          } catch (e) {
+            console.error('Failed to parse settings-configs', e);
+          }
+        }
+
+        if (!themeMode && document.documentElement.hasAttribute('data-theme-mode')) {
+          themeMode = document.documentElement.getAttribute('data-theme-mode');
+        }
+
+        if (!themeMode) {
+          themeMode = defaultThemeMode;
+        }
+
+        if (themeMode === 'system') {
+          themeMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        document.documentElement.classList.add(themeMode);
+      }
      </script>
   </body>
 </html>
