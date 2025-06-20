@@ -6,6 +6,7 @@ interface BasicInfoTabProps {
 }
 
 function BasicInfoTab({ member }: BasicInfoTabProps) {
+  if (!member) return null;
   return (
     <Card>
       <CardContent className="p-6">
