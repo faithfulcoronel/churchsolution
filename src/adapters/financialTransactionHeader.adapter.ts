@@ -1,12 +1,15 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { FinancialTransactionHeader } from '../models/financialTransactionHeader.model';
-import { logAuditEvent } from '../utils/auditLogger';
+import { AuditService, SupabaseAuditService } from '../services/AuditService';
 import { supabase } from '../lib/supabase';
 
 @injectable()
 export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTransactionHeader> {
+  constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
+    super();
+  }
   protected tableName = 'financial_transaction_headers';
   
   protected defaultSelect = `
@@ -55,7 +58,7 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
 
   protected override async onAfterCreate(data: FinancialTransactionHeader): Promise<void> {
     // Log audit event
-    await logAuditEvent('create', 'financial_transaction_header', data.id, data);
+    await this.auditService.logAuditEvent('create', 'financial_transaction_header', data.id, data);
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<FinancialTransactionHeader>): Promise<Partial<FinancialTransactionHeader>> {
@@ -103,7 +106,7 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
 
   protected override async onAfterUpdate(data: FinancialTransactionHeader): Promise<void> {
     // Log audit event
-    await logAuditEvent('update', 'financial_transaction_header', data.id, data);
+    await this.auditService.logAuditEvent('update', 'financial_transaction_header', data.id, data);
   }
 
   protected override async onBeforeDelete(id: string): Promise<void> {
@@ -134,7 +137,7 @@ export class FinancialTransactionHeaderAdapter extends BaseAdapter<FinancialTran
 
   protected override async onAfterDelete(id: string): Promise<void> {
     // Log audit event
-    await logAuditEvent('delete', 'financial_transaction_header', id, { id });
+    await this.auditService.logAuditEvent('delete', 'financial_transaction_header', id, { id });
   }
 
 

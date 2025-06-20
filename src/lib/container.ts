@@ -12,6 +12,7 @@ import { AccountRepository } from '../repositories/account.repository';
 import { FinancialSourceRepository } from '../repositories/financialSource.repository';
 import { ChartOfAccountRepository } from '../repositories/chartOfAccount.repository';
 import { FinancialTransactionHeaderRepository } from '../repositories/financialTransactionHeader.repository';
+import { SupabaseAuditService } from '../services/AuditService';
 
 const container = new Container();
 
@@ -22,6 +23,9 @@ container.bind(AccountAdapter).toSelf().inSingletonScope();
 container.bind(FinancialSourceAdapter).toSelf().inSingletonScope();
 container.bind(ChartOfAccountAdapter).toSelf().inSingletonScope();
 container.bind(FinancialTransactionHeaderAdapter).toSelf().inSingletonScope();
+
+// Register services
+container.bind(SupabaseAuditService).toSelf().inSingletonScope();
 
 // Register repositories
 container.bind(MemberRepository).toSelf().inSingletonScope();
