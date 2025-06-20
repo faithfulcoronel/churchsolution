@@ -4,8 +4,17 @@ import { BaseAdapter, QueryOptions } from './base.adapter';
 import { Notification } from '../models/notification.model';
 import { supabase } from '../lib/supabase';
 
+export interface INotificationAdapter extends BaseAdapter<Notification> {
+  markAsRead(id: string): Promise<void>;
+  markAllAsRead(userId: string): Promise<void>;
+  deleteExpired(): Promise<void>;
+}
+
 @injectable()
-export class NotificationAdapter extends BaseAdapter<Notification> {
+export class NotificationAdapter
+  extends BaseAdapter<Notification>
+  implements INotificationAdapter
+{
   protected tableName = 'notifications';
   
   protected defaultSelect = `

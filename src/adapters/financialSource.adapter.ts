@@ -5,8 +5,13 @@ import { FinancialSource } from '../models/financialSource.model';
 import { AuditService, SupabaseAuditService } from '../services/AuditService';
 import { supabase } from '../lib/supabase';
 
+export interface IFinancialSourceAdapter extends BaseAdapter<FinancialSource> {}
+
 @injectable()
-export class FinancialSourceAdapter extends BaseAdapter<FinancialSource> {
+export class FinancialSourceAdapter
+  extends BaseAdapter<FinancialSource>
+  implements IFinancialSourceAdapter
+{
   constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
     super();
   }

@@ -1,13 +1,18 @@
 import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { Member } from '../models/member.model';
-import { MemberAdapter } from '../adapters/member.adapter';
+import type { IMemberAdapter } from '../adapters/member.adapter';
 import { NotificationService } from '../services/NotificationService';
 import { MemberValidator } from '../validators/member.validator';
 
+export interface IMemberRepository extends BaseRepository<Member> {}
+
 @injectable()
-export class MemberRepository extends BaseRepository<Member> {
-  constructor(@inject(MemberAdapter) adapter: MemberAdapter) {
+export class MemberRepository
+  extends BaseRepository<Member>
+  implements IMemberRepository
+{
+  constructor(@inject('IMemberAdapter') adapter: IMemberAdapter) {
     super(adapter);
   }
 

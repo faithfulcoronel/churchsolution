@@ -5,8 +5,13 @@ import { Member } from '../models/member.model';
 import { AuditService, SupabaseAuditService } from '../services/AuditService';
 import { supabase } from '../lib/supabase';
 
+export interface IMemberAdapter extends BaseAdapter<Member> {}
+
 @injectable()
-export class MemberAdapter extends BaseAdapter<Member> {
+export class MemberAdapter
+  extends BaseAdapter<Member>
+  implements IMemberAdapter
+{
   constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
     super();
   }
