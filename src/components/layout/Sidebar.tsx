@@ -15,7 +15,7 @@ import {
   ChevronDown,
   Search,
 } from 'lucide-react';
-import { navigation as baseNavigation } from '../../config/navigation';
+import { navigation as baseNavigation, NavItem } from '../../config/navigation';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -108,6 +108,21 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     return openSubmenus.has(itemName);
   };
 
+  const isNavItemActive = React.useCallback(
+    (item: NavItem) => {
+      if (item.href) {
+        return location.pathname.startsWith(item.href);
+      }
+      if (item.submenu) {
+        return item.submenu.some((sub) =>
+          location.pathname.startsWith(sub.href)
+        );
+      }
+      return false;
+    },
+    [location.pathname]
+  );
+
   // Auto-expand submenu based on current path
   React.useEffect(() => {
     const currentPath = location.pathname;
@@ -181,7 +196,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                         className={`
                           w-full group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium
                           transition-colors duration-200
-                          ${location.pathname.startsWith(item.href || '')
+                          ${isNavItemActive(item)
                             ? 'bg-primary text-white'
                             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                             ? 'bg-primary/20 text-white'
@@ -192,7 +207,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                         <div className="flex items-center">
                           <item.icon className={`
                             h-5 w-5 flex-shrink-0 transition-colors
-                            ${location.pathname.startsWith(item.href || '')
+                            ${isNavItemActive(item)
                               ? 'text-white'
                               : 'text-gray-400 group-hover:text-white'
                             }
@@ -242,7 +257,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                       className={`
                         group flex items-center rounded-lg px-3 py-2 text-sm font-medium
                         transition-colors duration-200
-                        ${location.pathname.startsWith(item.href || '')
+                        ${isNavItemActive(item)
                           ? 'bg-primary text-white'
                           : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                           ? 'bg-primary/20 text-white'
@@ -252,7 +267,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                     >
                       <item.icon className={`
                         mr-3 h-5 w-5 flex-shrink-0 transition-colors
-                        ${location.pathname.startsWith(item.href || '')
+                        ${isNavItemActive(item)
                           ? 'text-white'
                           : 'text-gray-400 group-hover:text-white'
                         }
