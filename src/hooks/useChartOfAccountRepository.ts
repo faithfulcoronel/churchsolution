@@ -1,9 +1,9 @@
-import { container } from '../lib/container';
+import { container, TYPES } from '../lib/container';
 import type { IChartOfAccountRepository } from '../repositories/chartOfAccount.repository';
 import { useBaseRepository } from './useBaseRepository';
 
 export function useChartOfAccountRepository() {
-  const repository = container.get<IChartOfAccountRepository>('IChartOfAccountRepository');
+  const repository = container.get<IChartOfAccountRepository>(TYPES.IChartOfAccountRepository);
   return {
     ...useBaseRepository(repository, 'Chart of Account', 'chart_of_accounts'),
     getHierarchy: async () => {

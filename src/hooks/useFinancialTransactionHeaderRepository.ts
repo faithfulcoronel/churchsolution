@@ -1,9 +1,9 @@
-import { container } from '../lib/container';
+import { container, TYPES } from '../lib/container';
 import type { IFinancialTransactionHeaderRepository } from '../repositories/financialTransactionHeader.repository';
 import { useBaseRepository } from './useBaseRepository';
 
 export function useFinancialTransactionHeaderRepository() {
-  const repository = container.get<IFinancialTransactionHeaderRepository>('IFinancialTransactionHeaderRepository');
+  const repository = container.get<IFinancialTransactionHeaderRepository>(TYPES.IFinancialTransactionHeaderRepository);
   return {
     ...useBaseRepository(repository, 'Transaction', 'financial_transaction_headers'),
     postTransaction: async (id: string) => {

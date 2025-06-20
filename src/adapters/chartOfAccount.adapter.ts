@@ -2,7 +2,8 @@ import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { ChartOfAccount } from '../models/chartOfAccount.model';
-import { AuditService, SupabaseAuditService } from '../services/AuditService';
+import { AuditService } from '../services/AuditService';
+import { TYPES } from '../lib/container';
 import { supabase } from '../lib/supabase';
 
 export interface IChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {}
@@ -12,7 +13,7 @@ export class ChartOfAccountAdapter
   extends BaseAdapter<ChartOfAccount>
   implements IChartOfAccountAdapter
 {
-  constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
+  constructor(@inject(TYPES.AuditService) private auditService: AuditService) {
     super();
   }
   protected tableName = 'chart_of_accounts';
