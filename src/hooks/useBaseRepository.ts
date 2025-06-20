@@ -2,7 +2,7 @@ import { useQuery as useReactQuery, useMutation, useQueryClient } from '@tanstac
 import { BaseRepository } from '../repositories/base.repository';
 import { BaseModel } from '../models/base.model';
 import { QueryOptions } from '../adapters/base.adapter';
-import { useMessageStore } from '../components/MessageHandler';
+import { NotificationService } from '../services/NotificationService';
 
 export function useBaseRepository<T extends BaseModel>(
   repository: BaseRepository<T>,
@@ -10,7 +10,6 @@ export function useBaseRepository<T extends BaseModel>(
   queryKey: string
 ) {
   const queryClient = useQueryClient();
-  const { addMessage } = useMessageStore();
 
   const useQuery = (options: QueryOptions = {}) => {
     return useReactQuery({
@@ -32,18 +31,10 @@ export function useBaseRepository<T extends BaseModel>(
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [queryKey] });
-        addMessage({
-          type: 'success',
-          text: `${resourceName} created successfully`,
-          duration: 3000,
-        });
+        NotificationService.showSuccess(`${resourceName} created successfully`);
       },
       onError: (error: Error) => {
-        addMessage({
-          type: 'error',
-          text: error.message,
-          duration: 5000,
-        });
+        NotificationService.showError(error.message, 5000);
       },
     });
   };
@@ -61,18 +52,10 @@ export function useBaseRepository<T extends BaseModel>(
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [queryKey] });
-        addMessage({
-          type: 'success',
-          text: `${resourceName} updated successfully`,
-          duration: 3000,
-        });
+        NotificationService.showSuccess(`${resourceName} updated successfully`);
       },
       onError: (error: Error) => {
-        addMessage({
-          type: 'error',
-          text: error.message,
-          duration: 5000,
-        });
+        NotificationService.showError(error.message, 5000);
       },
     });
   };
@@ -82,18 +65,10 @@ export function useBaseRepository<T extends BaseModel>(
       mutationFn: (id: string) => repository.delete(id),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [queryKey] });
-        addMessage({
-          type: 'success',
-          text: `${resourceName} deleted successfully`,
-          duration: 3000,
-        });
+        NotificationService.showSuccess(`${resourceName} deleted successfully`);
       },
       onError: (error: Error) => {
-        addMessage({
-          type: 'error',
-          text: error.message,
-          duration: 5000,
-        });
+        NotificationService.showError(error.message, 5000);
       },
     });
   };

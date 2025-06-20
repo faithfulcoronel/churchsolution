@@ -2,7 +2,7 @@ import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { FinancialSource } from '../models/financialSource.model';
 import { FinancialSourceAdapter } from '../adapters/financialSource.adapter';
-import { useMessageStore } from '../components/MessageHandler';
+import { NotificationService } from '../services/NotificationService';
 
 @injectable()
 export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
@@ -20,12 +20,7 @@ export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
 
   protected override async afterCreate(data: FinancialSource): Promise<void> {
     // Additional repository-level operations after creation
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: `Financial source "${data.name}" created successfully`,
-      duration: 3000,
-    });
+    NotificationService.showSuccess(`Financial source "${data.name}" created successfully`);
   }
 
   protected override async beforeUpdate(id: string, data: Partial<FinancialSource>): Promise<Partial<FinancialSource>> {
@@ -38,12 +33,7 @@ export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
 
   protected override async afterUpdate(data: FinancialSource): Promise<void> {
     // Additional repository-level operations after update
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: `Financial source "${data.name}" updated successfully`,
-      duration: 3000,
-    });
+    NotificationService.showSuccess(`Financial source "${data.name}" updated successfully`);
   }
 
   protected override async beforeDelete(id: string): Promise<void> {
@@ -56,12 +46,7 @@ export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
 
   protected override async afterDelete(id: string): Promise<void> {
     // Additional repository-level cleanup after delete
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: 'Financial source deleted successfully',
-      duration: 3000,
-    });
+    NotificationService.showSuccess('Financial source deleted successfully');
   }
 
   // Private helper methods
@@ -81,13 +66,8 @@ export class FinancialSourceRepository extends BaseRepository<FinancialSource> {
     }
 
     if (errors.length > 0) {
-      const { addMessage } = useMessageStore.getState();
       errors.forEach(error => {
-        addMessage({
-          type: 'error',
-          text: error,
-          duration: 5000,
-        });
+        NotificationService.showError(error, 5000);
       });
       throw new Error('Validation failed: ' + errors.join(', '));
     }

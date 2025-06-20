@@ -2,7 +2,7 @@ import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { Member } from '../models/member.model';
 import { MemberAdapter } from '../adapters/member.adapter';
-import { useMessageStore } from '../components/MessageHandler';
+import { NotificationService } from '../services/NotificationService';
 
 @injectable()
 export class MemberRepository extends BaseRepository<Member> {
@@ -76,13 +76,8 @@ export class MemberRepository extends BaseRepository<Member> {
     }
 
     if (errors.length > 0) {
-      const { addMessage } = useMessageStore.getState();
       errors.forEach(error => {
-        addMessage({
-          type: 'error',
-          text: error,
-          duration: 5000,
-        });
+        NotificationService.showError(error, 5000);
       });
       throw new Error('Validation failed: ' + errors.join(', '));
     }

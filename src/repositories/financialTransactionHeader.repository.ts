@@ -2,7 +2,7 @@ import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { FinancialTransactionHeader } from '../models/financialTransactionHeader.model';
 import { FinancialTransactionHeaderAdapter } from '../adapters/financialTransactionHeader.adapter';
-import { useMessageStore } from '../components/MessageHandler';
+import { NotificationService } from '../services/NotificationService';
 
 @injectable()
 export class FinancialTransactionHeaderRepository extends BaseRepository<FinancialTransactionHeader> {
@@ -20,12 +20,7 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
 
   protected override async afterCreate(data: FinancialTransactionHeader): Promise<void> {
     // Additional repository-level operations after creation
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: `Transaction "${data.transaction_number}" created successfully`,
-      duration: 3000,
-    });
+    NotificationService.showSuccess(`Transaction "${data.transaction_number}" created successfully`);
   }
 
   protected override async beforeUpdate(id: string, data: Partial<FinancialTransactionHeader>): Promise<Partial<FinancialTransactionHeader>> {
@@ -38,12 +33,7 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
 
   protected override async afterUpdate(data: FinancialTransactionHeader): Promise<void> {
     // Additional repository-level operations after update
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: `Transaction "${data.transaction_number}" updated successfully`,
-      duration: 3000,
-    });
+    NotificationService.showSuccess(`Transaction "${data.transaction_number}" updated successfully`);
   }
 
   protected override async beforeDelete(id: string): Promise<void> {
@@ -60,12 +50,7 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
 
   protected override async afterDelete(id: string): Promise<void> {
     // Additional repository-level cleanup after delete
-    const { addMessage } = useMessageStore.getState();
-    addMessage({
-      type: 'success',
-      text: 'Transaction deleted successfully',
-      duration: 3000,
-    });
+    NotificationService.showSuccess('Transaction deleted successfully');
   }
 
   // Private helper methods
@@ -89,13 +74,8 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
     }
 
     if (errors.length > 0) {
-      const { addMessage } = useMessageStore.getState();
       errors.forEach(error => {
-        addMessage({
-          type: 'error',
-          text: error,
-          duration: 5000,
-        });
+        NotificationService.showError(error, 5000);
       });
       throw new Error('Validation failed: ' + errors.join(', '));
     }
@@ -119,19 +99,12 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
     try {
       await (this.adapter as FinancialTransactionHeaderAdapter).postTransaction(id);
       
-      const { addMessage } = useMessageStore.getState();
-      addMessage({
-        type: 'success',
-        text: 'Transaction posted successfully',
-        duration: 3000,
-      });
+      NotificationService.showSuccess('Transaction posted successfully');
     } catch (error) {
-      const { addMessage } = useMessageStore.getState();
-      addMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Failed to post transaction',
-        duration: 5000,
-      });
+      NotificationService.showError(
+        error instanceof Error ? error.message : 'Failed to post transaction',
+        5000
+      );
       throw error;
     }
   }
@@ -140,19 +113,12 @@ export class FinancialTransactionHeaderRepository extends BaseRepository<Financi
     try {
       await (this.adapter as FinancialTransactionHeaderAdapter).voidTransaction(id, reason);
       
-      const { addMessage } = useMessageStore.getState();
-      addMessage({
-        type: 'success',
-        text: 'Transaction voided successfully',
-        duration: 3000,
-      });
+      NotificationService.showSuccess('Transaction voided successfully');
     } catch (error) {
-      const { addMessage } = useMessageStore.getState();
-      addMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Failed to void transaction',
-        duration: 5000,
-      });
+      NotificationService.showError(
+        error instanceof Error ? error.message : 'Failed to void transaction',
+        5000
+      );
       throw error;
     }
   }
