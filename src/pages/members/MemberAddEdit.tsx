@@ -229,7 +229,7 @@ function MemberAddEdit() {
 
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList variant="enclosed" size="sm">
+                <TabsList size="sm">
                   {tabs.map(tab => (
                     <TabsTrigger key={tab.id} value={tab.id}>
                       {tab.label}
