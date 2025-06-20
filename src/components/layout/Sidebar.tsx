@@ -308,7 +308,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                             className={`
                               group flex items-center rounded-lg pl-11 pr-3 py-2 text-sm font-medium
                               transition-colors duration-200
-                              ${location.pathname === subitem.href
+                              ${location.pathname.startsWith(subitem.href)
                                 ? 'bg-primary text-white'
                                 : searchTerm && subitem.name.toLowerCase().includes(searchTerm.toLowerCase())
                                 ? 'bg-primary/20 text-white'
@@ -318,7 +318,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                           >
                             <subitem.icon className={`
                               mr-3 h-4 w-4 flex-shrink-0 transition-colors
-                              ${location.pathname === subitem.href
+                              ${location.pathname.startsWith(subitem.href)
                                 ? 'text-white'
                                 : 'text-gray-400 group-hover:text-white'
                               }
