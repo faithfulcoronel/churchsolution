@@ -17,7 +17,7 @@ function Layout() {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       {/* Main content wrapper */}
-      <div className="flex-1 flex flex-col min-h-screen lg:pl-64">
+      <div className="flex-1 flex flex-col min-h-screen lg:pl-64 pb-24">
         {/* Top navigation */}
         <Topbar setSidebarOpen={setSidebarOpen} />
 
