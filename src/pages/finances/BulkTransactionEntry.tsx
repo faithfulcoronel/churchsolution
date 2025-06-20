@@ -9,6 +9,8 @@ import { Button } from '../../components/ui2/button';
 import { Textarea } from '../../components/ui2/textarea';
 import { DatePickerInput } from '../../components/ui2/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui2/select';
+import { Combobox } from '../../components/ui2/combobox';
+import { useMemberRepository } from '../../hooks/useMemberRepository';
 import { 
   ArrowLeft, 
   Save, 
@@ -23,6 +25,7 @@ import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
 
 interface TransactionEntry {
+  member_id: string;
   account_id: string;
   description: string;
   debit: number | null;
@@ -37,6 +40,7 @@ function BulkTransactionEntry() {
   const { useCreate } = useFinancialTransactionHeaderRepository();
   const { useAccountOptions } = useChartOfAccounts();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
+  const { useQuery: useMembersQuery } = useMemberRepository();
   
   // Create mutation
   const createMutation = useCreate();
@@ -54,6 +58,35 @@ function BulkTransactionEntry() {
     }
   });
   const sources = sourcesData?.data || [];
+
+  // Get members with their accounts
+  const { data: membersData, isLoading: isMembersLoading } = useMembersQuery({
+    relationships: [
+      {
+        table: 'accounts',
+        foreignKey: 'member_id',
+        select: ['id']
+      }
+    ]
+  });
+  const members = membersData?.data || [];
+
+  const memberOptions = React.useMemo(() =>
+    members.map(m => ({
+      value: m.id,
+      label: `${m.first_name} ${m.last_name}`
+    })), [members]);
+
+  const memberAccountMap = React.useMemo(() => {
+    const map: Record<string, string> = {};
+    members.forEach(m => {
+      const acc = (m as any).accounts?.[0];
+      if (acc?.id) {
+        map[m.id] = acc.id as string;
+      }
+    });
+    return map;
+  }, [members]);
   
   // Form state
   const [headerData, setHeaderData] = useState({
@@ -64,8 +97,8 @@ function BulkTransactionEntry() {
   });
   
   const [entries, setEntries] = useState<TransactionEntry[]>([
-    { account_id: '', description: '', debit: null, credit: null },
-    { account_id: '', description: '', debit: null, credit: null }
+    { member_id: '', account_id: '', description: '', debit: null, credit: null },
+    { member_id: '', account_id: '', description: '', debit: null, credit: null }
   ]);
   
   const [error, setError] = useState<string | null>(null);
@@ -113,7 +146,7 @@ function BulkTransactionEntry() {
   
   // Add new entry row
   const addEntry = () => {
-    setEntries([...entries, { account_id: '', description: '', debit: null, credit: null }]);
+    setEntries([...entries, { member_id: '', account_id: '', description: '', debit: null, credit: null }]);
   };
   
   // Remove entry row
@@ -188,6 +221,7 @@ function BulkTransactionEntry() {
       // Format entries for submission
       const formattedEntries = entries.map(entry => ({
         account_id: entry.account_id,
+        accounts_account_id: entry.member_id ? memberAccountMap[entry.member_id] : null,
         description: entry.description || headerData.description,
         debit: entry.debit || 0,
         credit: entry.credit || 0,
@@ -324,6 +358,7 @@ function BulkTransactionEntry() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-border">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Person</th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Account</th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Description</th>
                     <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">Debit</th>
@@ -335,27 +370,22 @@ function BulkTransactionEntry() {
                   {entries.map((entry, index) => (
                     <tr key={index} className="border-b border-border">
                       <td className="px-4 py-2">
-                        <Select
+                        <Combobox
+                          options={memberOptions}
+                          value={entry.member_id}
+                          onChange={(value) => handleEntryChange(index, 'member_id', value)}
+                          placeholder={isMembersLoading ? 'Loading people...' : 'Select person'}
+                          disabled={isMembersLoading}
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <Combobox
+                          options={accountOptions || []}
                           value={entry.account_id}
-                          onValueChange={(value) => handleEntryChange(index, 'account_id', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select account" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {isAccountsLoading ? (
-                              <SelectItem value="loading" disabled>
-                                Loading accounts...
-                              </SelectItem>
-                            ) : (
-                              accountOptions?.map(option => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
+                          onChange={(value) => handleEntryChange(index, 'account_id', value)}
+                          placeholder={isAccountsLoading ? 'Loading accounts...' : 'Select account'}
+                          disabled={isAccountsLoading}
+                        />
                       </td>
                       <td className="px-4 py-2">
                         <Input
@@ -402,7 +432,7 @@ function BulkTransactionEntry() {
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-border font-medium">
-                    <td className="px-4 py-2" colSpan={2}>
+                    <td className="px-4 py-2" colSpan={3}>
                       Totals
                     </td>
                     <td className="px-4 py-2 text-right">
@@ -414,7 +444,7 @@ function BulkTransactionEntry() {
                     <td className="px-4 py-2"></td>
                   </tr>
                   <tr>
-                    <td className="px-4 py-2" colSpan={2}>
+                    <td className="px-4 py-2" colSpan={3}>
                       Difference
                     </td>
                     <td className="px-4 py-2 text-right" colSpan={2}>
