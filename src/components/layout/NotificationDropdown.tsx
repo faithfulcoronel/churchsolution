@@ -51,6 +51,9 @@ export default function NotificationDropdown() {
       if (error) throw error;
       return data as Notification[];
     },
+    // Poll as a fallback in case realtime events fail
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
   });
 
   // Count unread notifications
