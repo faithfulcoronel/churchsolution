@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMemberRepository } from '../../hooks/useMemberRepository';
 import { Member } from '../../models/member.model';
-import { Container } from '../../components/ui2/container';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
 import { ImageInput } from '../../components/ui2/image-input';
@@ -191,8 +190,7 @@ function MemberAddEdit() {
   }
 
   return (
-    <Container>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Back Button */}
         <Button
           variant="ghost"
@@ -343,7 +341,6 @@ function MemberAddEdit() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </Container>
   );
 }
 
