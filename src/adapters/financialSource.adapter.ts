@@ -1,12 +1,15 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { FinancialSource } from '../models/financialSource.model';
-import { logAuditEvent } from '../utils/auditLogger';
+import { AuditService, SupabaseAuditService } from '../services/AuditService';
 import { supabase } from '../lib/supabase';
 
 @injectable()
 export class FinancialSourceAdapter extends BaseAdapter<FinancialSource> {
+  constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
+    super();
+  }
   protected tableName = 'financial_sources';
   
   protected defaultSelect = `
@@ -33,7 +36,7 @@ export class FinancialSourceAdapter extends BaseAdapter<FinancialSource> {
 
   protected override async onAfterCreate(data: FinancialSource): Promise<void> {
     // Log audit event
-    await logAuditEvent('create', 'financial_source', data.id, data);
+    await this.auditService.logAuditEvent('create', 'financial_source', data.id, data);
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<FinancialSource>): Promise<Partial<FinancialSource>> {
@@ -43,7 +46,7 @@ export class FinancialSourceAdapter extends BaseAdapter<FinancialSource> {
 
   protected override async onAfterUpdate(data: FinancialSource): Promise<void> {
     // Log audit event
-    await logAuditEvent('update', 'financial_source', data.id, data);
+    await this.auditService.logAuditEvent('update', 'financial_source', data.id, data);
   }
 
   protected override async onBeforeDelete(id: string): Promise<void> {
@@ -62,7 +65,7 @@ export class FinancialSourceAdapter extends BaseAdapter<FinancialSource> {
 
   protected override async onAfterDelete(id: string): Promise<void> {
     // Log audit event
-    await logAuditEvent('delete', 'financial_source', id, { id });
+    await this.auditService.logAuditEvent('delete', 'financial_source', id, { id });
   }
 
 }

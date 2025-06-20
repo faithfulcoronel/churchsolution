@@ -1,12 +1,15 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { Member } from '../models/member.model';
-import { logAuditEvent } from '../utils/auditLogger';
+import { AuditService, SupabaseAuditService } from '../services/AuditService';
 import { supabase } from '../lib/supabase';
 
 @injectable()
 export class MemberAdapter extends BaseAdapter<Member> {
+  constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
+    super();
+  }
   protected tableName = 'members';
   
   protected defaultSelect = `
@@ -83,7 +86,7 @@ export class MemberAdapter extends BaseAdapter<Member> {
 
   protected override async onAfterDelete(id: string): Promise<void> {
     // Log audit event
-    await logAuditEvent('delete', 'member', id, { id });
+    await this.auditService.logAuditEvent('delete', 'member', id, { id });
   }
 
   protected override async onBeforeCreate(data: Partial<Member>): Promise<Partial<Member>> {
@@ -110,7 +113,7 @@ export class MemberAdapter extends BaseAdapter<Member> {
 
   protected override async onAfterCreate(data: Member): Promise<void> {
     // Log audit event
-    await logAuditEvent('create', 'member', data.id, data);
+    await this.auditService.logAuditEvent('create', 'member', data.id, data);
   }
 
   protected override async onBeforeUpdate(id: string, data: Partial<Member>): Promise<Partial<Member>> {
@@ -144,6 +147,6 @@ export class MemberAdapter extends BaseAdapter<Member> {
 
   protected override async onAfterUpdate(data: Member): Promise<void> {
     // Log audit event
-    await logAuditEvent('update', 'member', data.id, data);
+    await this.auditService.logAuditEvent('update', 'member', data.id, data);
   }
 }
