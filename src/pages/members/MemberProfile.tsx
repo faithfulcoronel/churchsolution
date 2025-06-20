@@ -271,19 +271,19 @@ function MemberProfile() {
             </TabsList>
             
             <TabsContent value="basic">
-              <BasicInfoTab member={member} />
+              <BasicInfoTab mode="view" member={member} onChange={() => {}} />
             </TabsContent>
-            
+
             <TabsContent value="contact">
-              <ContactInfoTab member={member} />
+              <ContactInfoTab mode="view" member={member} onChange={() => {}} />
             </TabsContent>
-            
+
             <TabsContent value="ministry">
-              <MinistryInfoTab member={member} />
+              <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
             </TabsContent>
-            
+
             <TabsContent value="notes">
-              <NotesTab member={member} />
+              <NotesTab mode="view" member={member} onChange={() => {}} />
             </TabsContent>
           </Tabs>
         </CardContent>
