@@ -190,8 +190,8 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Urbanist', ...defaultTheme.fontFamily.sans],
-        secondary: ['Inter', ...defaultTheme.fontFamily.sans],
+        sans: ['DM Sans', ...defaultTheme.fontFamily.sans],
+        heading: ['Urbanist', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         //begin: Shadcn UI Colors
