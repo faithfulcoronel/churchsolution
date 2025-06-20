@@ -6,7 +6,7 @@ import { Container } from '../../components/ui2/container';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
 import { ImageInput } from '../../components/ui2/image-input';
-import { Tabs } from '../../components/ui2/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
 import { Separator } from '../../components/ui2/separator';
 import {
   AlertDialog,
@@ -204,17 +204,20 @@ function MemberAddEdit() {
             </CardHeader>
 
             <CardContent>
-              <Tabs
-                tabs={tabs}
-                activeTab={activeTab}
-                onChange={setActiveTab}
-                variant="enclosed"
-                size="sm"
-              />
-
-              <div className="mt-6">
-                {tabs.find(tab => tab.id === activeTab)?.content}
-              </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList variant="enclosed" size="sm">
+                  {tabs.map(tab => (
+                    <TabsTrigger key={tab.id} value={tab.id}>
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {tabs.map(tab => (
+                  <TabsContent key={tab.id} value={tab.id}>
+                    {tab.content}
+                  </TabsContent>
+                ))}
+              </Tabs>
 
               <Separator className="my-6" />
 
