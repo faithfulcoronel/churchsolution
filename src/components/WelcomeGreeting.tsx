@@ -74,7 +74,7 @@ function WelcomeGreeting() {
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   Happy Birthday, {member.first_name}! 🎉
                 </h1>
-                <p className="mt-1 text-gray-600 dark:text-gray-300">
+                <p className="mt-1 text-gray-600 dark:text-gray-100">
                   May your day be filled with joy and blessings!
                 </p>
               </div>
@@ -82,12 +82,12 @@ function WelcomeGreeting() {
           </div>
         </Card>
       ) : (
-        <Card className="bg-white dark:bg-gray-800 shadow-sm">
+        <Card className="bg-white dark:bg-gray-900 shadow-sm">
           <div className="p-6">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {getGreeting()}, {member.first_name} {member.last_name}
             </h1>
-            <p className="mt-1 text-gray-600 dark:text-gray-300">
+            <p className="mt-1 text-gray-600 dark:text-gray-100">
               Welcome back to your church administration dashboard
             </p>
           </div>

@@ -56,7 +56,7 @@ export function InputAddon({
     inline-flex items-center justify-center
     px-3 text-sm
     text-gray-500 dark:text-gray-400
-    bg-gray-50 dark:bg-gray-800
+    bg-gray-50 dark:bg-gray-900
     border border-gray-300 dark:border-gray-600
     ${position === 'left' ? 'rounded-l-btn border-r-0' : 'rounded-r-btn border-l-0'}
   `;

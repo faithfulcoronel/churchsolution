@@ -83,7 +83,7 @@ export function ChartLegend({
             className="h-3 w-3 rounded-full" 
             style={{ backgroundColor: item.color }}
           />
-          <span className="text-sm text-gray-600 dark:text-gray-300">
+          <span className="text-sm text-gray-600 dark:text-gray-100">
             {item.label}
           </span>
           <span className="text-sm font-medium text-gray-900 dark:text-gray-100">

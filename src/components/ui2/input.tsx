@@ -100,7 +100,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             }
             className={cn(
               inputVariants({ size, error }),
-              icon && 'pl-10 dark:bg-gray-800 dark:border-gray-700',
+              icon && 'pl-10 dark:bg-gray-900 dark:border-gray-700',
               (showClearButton || showPasswordButton || rightElement) && 'pr-10',
               className
             )}

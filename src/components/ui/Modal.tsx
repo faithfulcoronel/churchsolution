@@ -67,7 +67,7 @@ export function Modal({
             <div
               className={`
                 relative transform overflow-hidden rounded-modal
-                bg-white dark:bg-gray-800
+                bg-white dark:bg-gray-900
                 text-left
                 shadow-modal dark:shadow-none
                 border border-gray-200 dark:border-gray-700
@@ -93,7 +93,7 @@ export function Modal({
                 </div>
               )}
 
-              <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:p-6">
+              <div className="bg-white dark:bg-gray-900 px-4 py-5 sm:p-6">
                 {children}
               </div>
             </div>

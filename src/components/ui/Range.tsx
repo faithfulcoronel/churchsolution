@@ -46,7 +46,7 @@ export const Range = forwardRef<HTMLInputElement, RangeProps>(
               </label>
             )}
             {showValue && (
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-100">
                 {value}
               </span>
             )}

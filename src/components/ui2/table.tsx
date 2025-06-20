@@ -24,7 +24,7 @@ const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody ref={ref} className={cn('[&_tr:last-child]:border-0 dark:text-gray-300', className)} {...props} />
+  <tbody ref={ref} className={cn('[&_tr:last-child]:border-0 dark:text-gray-100', className)} {...props} />
 ));
 TableBody.displayName = 'TableBody';
 
@@ -34,7 +34,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn('border-t bg-muted/50 dark:bg-gray-800/50 font-medium [&>tr]:last:border-b-0 dark:border-gray-800', className)}
+    className={cn('border-t bg-muted/50 dark:bg-gray-900/50 font-medium [&>tr]:last:border-b-0 dark:border-gray-800', className)}
     {...props}
   />
 ));
@@ -75,7 +75,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn('p-4 align-middle [&:has([role=checkbox])]:pe-0 dark:text-gray-300', className)}
+    className={cn('p-4 align-middle [&:has([role=checkbox])]:pe-0 dark:text-gray-100', className)}
     {...props}
   />
 ));

@@ -119,7 +119,7 @@ export const ImageInput = forwardRef<HTMLInputElement, ImageInputProps>(
             ${sizeClasses[size]}
             ${shapeClasses[shape]}
             overflow-hidden
-            bg-gray-100 dark:bg-gray-800
+            bg-gray-100 dark:bg-gray-900
             flex
             items-center
             justify-center
