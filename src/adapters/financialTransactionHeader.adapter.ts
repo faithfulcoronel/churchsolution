@@ -2,7 +2,8 @@ import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { FinancialTransactionHeader } from '../models/financialTransactionHeader.model';
-import { AuditService, SupabaseAuditService } from '../services/AuditService';
+import { AuditService } from '../services/AuditService';
+import { TYPES } from '../lib/container';
 import { supabase } from '../lib/supabase';
 
 export interface IFinancialTransactionHeaderAdapter
@@ -13,7 +14,7 @@ export class FinancialTransactionHeaderAdapter
   extends BaseAdapter<FinancialTransactionHeader>
   implements IFinancialTransactionHeaderAdapter
 {
-  constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
+  constructor(@inject(TYPES.AuditService) private auditService: AuditService) {
     super();
   }
   protected tableName = 'financial_transaction_headers';

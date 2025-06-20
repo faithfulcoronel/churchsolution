@@ -2,7 +2,8 @@ import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { BaseAdapter, QueryOptions } from './base.adapter';
 import { FinancialSource } from '../models/financialSource.model';
-import { AuditService, SupabaseAuditService } from '../services/AuditService';
+import { AuditService } from '../services/AuditService';
+import { TYPES } from '../lib/container';
 import { supabase } from '../lib/supabase';
 
 export interface IFinancialSourceAdapter extends BaseAdapter<FinancialSource> {}
@@ -12,7 +13,7 @@ export class FinancialSourceAdapter
   extends BaseAdapter<FinancialSource>
   implements IFinancialSourceAdapter
 {
-  constructor(@inject(SupabaseAuditService) private auditService: AuditService) {
+  constructor(@inject(TYPES.AuditService) private auditService: AuditService) {
     super();
   }
   protected tableName = 'financial_sources';
