@@ -231,6 +231,8 @@ function MemberList() {
             onSortChange={setSortModel}
             onFilterChange={setFilterModel}
             onRowClick={(params) => navigate(`/members/${params.row.id}`)}
+            page={page}
+            pageSize={pageSize}
             disableRowSelectionOnClick
           />
         </div>
