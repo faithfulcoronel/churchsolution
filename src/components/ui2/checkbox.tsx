@@ -26,7 +26,7 @@ const Checkbox = React.forwardRef<
       <CheckboxPrimitive.Root
         ref={ref}
         className={cn(
-          'peer shrink-0 border border-input ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
+          'peer shrink-0 border border-input ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:border-gray-600 dark:bg-gray-800',
           sizeClasses[size],
           error && 'border-destructive',
           className
@@ -36,7 +36,7 @@ const Checkbox = React.forwardRef<
         <CheckboxPrimitive.Indicator
           className={cn('flex items-center justify-center text-current')}
         >
-          <Check className="h-4 w-4" />
+          <Check className="h-4 w-4 dark:text-white" />
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Root>
     </div>
@@ -47,7 +47,7 @@ const Checkbox = React.forwardRef<
           <label
             htmlFor={props.id}
             className={cn(
-              'font-medium text-foreground',
+              'font-medium text-foreground dark:text-gray-300',
               props.disabled && 'opacity-50'
             )}
           >
@@ -57,7 +57,7 @@ const Checkbox = React.forwardRef<
         {(helperText || error) && (
           <p className={cn(
             'text-sm',
-            error ? 'text-destructive' : 'text-muted-foreground'
+            error ? 'text-destructive' : 'text-muted-foreground dark:text-gray-400'
           )}>
             {error || helperText}
           </p>

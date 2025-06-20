@@ -1,5 +1,4 @@
 import { PostgrestError } from '@supabase/supabase-js';
-import { useNotifications } from '../hooks/useNotifications';
 
 // Map of database error codes to user-friendly messages
 const DB_ERROR_MESSAGES: Record<string, string> = {
@@ -32,7 +31,9 @@ export function handleSupabaseError(
 
   console.error('Database Error:', errorDetails);
 
-  // Show notification
-  const { notifyError } = useNotifications();
-  notifyError(new Error(userMessage), errorDetails);
+  // Show a simple console warning for now since we can't use hooks here
+  console.warn('User-friendly error:', userMessage);
+  
+  // Throw the error with user-friendly message so it can be caught by components
+  throw new Error(userMessage);
 }

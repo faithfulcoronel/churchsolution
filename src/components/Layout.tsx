@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { Container } from './ui2/container';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './layout/Sidebar';
 import Topbar from './layout/Topbar';
 import Footer from './Footer';
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  
+  // Check if current page is settings
+  const isSettingsPage = location.pathname.startsWith('/settings');
 
   return (
     <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900">
@@ -19,10 +22,14 @@ function Layout() {
         <Topbar setSidebarOpen={setSidebarOpen} />
 
         {/* Main content */}
-        <main className="flex-1 bg-white">
-          <Container className="px-8 py-6">
+        <main className={`flex-1 ${isSettingsPage ? '' : 'bg-white'}`}>
+          {isSettingsPage ? (
             <Outlet />
-          </Container>
+          ) : (
+            <div className="px-8 py-6">
+              <Outlet />
+            </div>
+          )}
         </main>
 
         {/* Footer */}

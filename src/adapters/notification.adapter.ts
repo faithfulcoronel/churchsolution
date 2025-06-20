@@ -14,18 +14,17 @@ export class NotificationAdapter extends BaseAdapter<Notification> {
     title,
     message,
     type,
-    read,
-    action_url,
-    action_text,
-    metadata,
-    expires_at,
-    created_at
+    is_read,
+    action_type,
+    action_payload,
+    created_at,
+    tenant_id
   `;
 
   public async markAsRead(id: string): Promise<void> {
     const { error } = await supabase
       .from(this.tableName)
-      .update({ read: true })
+      .update({ is_read: true })
       .eq('id', id);
 
     if (error) throw error;
@@ -34,9 +33,9 @@ export class NotificationAdapter extends BaseAdapter<Notification> {
   public async markAllAsRead(userId: string): Promise<void> {
     const { error } = await supabase
       .from(this.tableName)
-      .update({ read: true })
+      .update({ is_read: true })
       .eq('user_id', userId)
-      .eq('read', false);
+      .eq('is_read', false);
 
     if (error) throw error;
   }
@@ -44,9 +43,8 @@ export class NotificationAdapter extends BaseAdapter<Notification> {
   public async deleteExpired(): Promise<void> {
     const { error } = await supabase
       .from(this.tableName)
-      .update({ deleted_at: new Date().toISOString() })
-      .lt('expires_at', new Date().toISOString())
-      .is('deleted_at', null);
+      .delete()
+      .lt('expires_at', new Date().toISOString());
 
     if (error) throw error;
   }

@@ -1,71 +1,97 @@
 import React from 'react';
-import { Input } from '../../../components/ui2/input';
-import { Textarea } from '../../../components/ui2/textarea';
-import { Label } from '../../../components/ui2/label';
-import { Mail, Phone, MapPin, Users } from 'lucide-react';
+import { Card, CardContent } from '../../../components/ui2/card';
+import { Mail, Phone, MapPin, User } from 'lucide-react';
 
 interface ContactInfoTabProps {
-  formData: any;
-  onChange: (field: string, value: any) => void;
+  member: any;
 }
 
-export function ContactInfoTab({ formData, onChange }: ContactInfoTabProps) {
+function ContactInfoTab({ member }: ContactInfoTabProps) {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="email">Email Address</Label>
-          <Input
-            type="email"
-            id="email"
-            value={formData.email || ''}
-            onChange={(e) => onChange('email', e.target.value)}
-            icon={<Mail className="h-4 w-4" />}
-          />
+    <Card>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="text-lg font-medium mb-4">Contact Information</h3>
+            <dl className="space-y-4">
+              {member.email && (
+                <div className="flex items-start">
+                  <Mail className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                  <div>
+                    <dt className="text-sm font-medium text-muted-foreground">Email</dt>
+                    <dd className="mt-1">
+                      <a href={`mailto:${member.email}`} className="text-primary hover:underline">
+                        {member.email}
+                      </a>
+                    </dd>
+                  </div>
+                </div>
+              )}
+              
+              {member.contact_number && (
+                <div className="flex items-start">
+                  <Phone className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                  <div>
+                    <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
+                    <dd className="mt-1">
+                      <a href={`tel:${member.contact_number}`} className="text-primary hover:underline">
+                        {member.contact_number}
+                      </a>
+                    </dd>
+                  </div>
+                </div>
+              )}
+              
+              {member.address && (
+                <div className="flex items-start">
+                  <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                  <div>
+                    <dt className="text-sm font-medium text-muted-foreground">Address</dt>
+                    <dd className="mt-1 whitespace-pre-line">{member.address}</dd>
+                  </div>
+                </div>
+              )}
+            </dl>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-medium mb-4">Emergency Contact</h3>
+            {member.emergency_contact_name || member.emergency_contact_phone ? (
+              <dl className="space-y-4">
+                {member.emergency_contact_name && (
+                  <div className="flex items-start">
+                    <User className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                    <div>
+                      <dt className="text-sm font-medium text-muted-foreground">Name</dt>
+                      <dd className="mt-1">{member.emergency_contact_name}</dd>
+                    </div>
+                  </div>
+                )}
+                
+                {member.emergency_contact_phone && (
+                  <div className="flex items-start">
+                    <Phone className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                    <div>
+                      <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
+                      <dd className="mt-1">
+                        <a href={`tel:${member.emergency_contact_phone}`} className="text-primary hover:underline">
+                          {member.emergency_contact_phone}
+                        </a>
+                      </dd>
+                    </div>
+                  </div>
+                )}
+              </dl>
+            ) : (
+              <p className="text-muted-foreground">No emergency contact information provided.</p>
+            )}
+          </div>
         </div>
-
-        <div>
-          <Label htmlFor="contact_number">Contact Number *</Label>
-          <Input
-            id="contact_number"
-            value={formData.contact_number || ''}
-            onChange={(e) => onChange('contact_number', e.target.value)}
-            required
-            icon={<Phone className="h-4 w-4" />}
-          />
-        </div>
-
-        <div className="sm:col-span-2">
-          <Label htmlFor="address">Address *</Label>
-          <Textarea
-            id="address"
-            value={formData.address || ''}
-            onChange={(e) => onChange('address', e.target.value)}
-            required
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="emergency_contact_name">Emergency Contact Name</Label>
-          <Input
-            id="emergency_contact_name"
-            value={formData.emergency_contact_name || ''}
-            onChange={(e) => onChange('emergency_contact_name', e.target.value)}
-            icon={<Users className="h-4 w-4" />}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="emergency_contact_phone">Emergency Contact Phone</Label>
-          <Input
-            id="emergency_contact_phone"
-            value={formData.emergency_contact_phone || ''}
-            onChange={(e) => onChange('emergency_contact_phone', e.target.value)}
-            icon={<Phone className="h-4 w-4" />}
-          />
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
+
+export default ContactInfoTab;
+
+export { ContactInfoTab }

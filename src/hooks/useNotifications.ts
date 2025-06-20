@@ -2,6 +2,12 @@ import { useCallback } from 'react';
 import { useNotificationRepository } from './useNotificationRepository';
 import { useAuthStore } from '../stores/authStore';
 import { useSnackbar, VariantType } from 'notistack';
+import { tenantUtils } from '../utils/tenantUtils';
+
+export type NotifyErrorOptions = {
+  originalError?: Error;
+  [key: string]: any;
+};
 
 export function useNotifications() {
   const { user } = useAuthStore();
@@ -13,8 +19,8 @@ export function useNotifications() {
     title,
     message,
     type = 'info',
-    actionUrl,
-    actionText,
+    actionType = 'none',
+    actionPayload,
     metadata,
     expiresAt,
     showSnackbar = true,
@@ -23,8 +29,8 @@ export function useNotifications() {
     title: string;
     message: string;
     type?: 'info' | 'success' | 'warning' | 'error';
-    actionUrl?: string;
-    actionText?: string;
+    actionType?: 'redirect' | 'modal' | 'none';
+    actionPayload?: string;
     metadata?: Record<string, any>;
     expiresAt?: Date;
     showSnackbar?: boolean;
@@ -33,18 +39,22 @@ export function useNotifications() {
     if (!user) return;
 
     try {
+      // Get current tenant
+      const tenant = await tenantUtils.getCurrentTenant();
+      
       // Create persistent notification in database
       await createNotification.mutateAsync({
         data: {
           user_id: user.id,
+          tenant_id: tenant?.id,
           title,
           message,
           type,
-          action_url: actionUrl,
-          action_text: actionText,
+          action_type: actionType,
+          action_payload: actionPayload,
           metadata,
           expires_at: expiresAt?.toISOString(),
-          read: false
+          is_read: false
         }
       });
 
@@ -53,9 +63,6 @@ export function useNotifications() {
         enqueueSnackbar(message, {
           variant: type as VariantType,
           autoHideDuration: snackbarDuration,
-          action: actionUrl ? () => {
-            window.location.href = actionUrl;
-          } : undefined
         });
       }
     } catch (error) {
@@ -69,17 +76,17 @@ export function useNotifications() {
     }
   }, [user, createNotification, enqueueSnackbar]);
 
-  const notifyError = useCallback(async (error: Error | string, metadata?: Record<string, any>) => {
+  const notifyError = useCallback((error: Error | string, options?: NotifyErrorOptions) => {
     const errorMessage = typeof error === 'string' ? error : error.message;
     const errorStack = typeof error === 'string' ? undefined : error.stack;
 
     // Create error notification
-    await notify({
+    notify({
       title: 'Error',
       message: errorMessage,
       type: 'error',
       metadata: {
-        ...metadata,
+        ...options,
         stack: errorStack,
       },
       showSnackbar: true,

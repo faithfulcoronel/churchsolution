@@ -79,7 +79,8 @@ export function Combobox({
           className={cn(
             'w-full justify-between',
             !value && 'text-muted-foreground',
-            className
+            className,
+            'dark:border-gray-700 dark:bg-gray-800'
           )}
           disabled={disabled}
           onClick={() => setOpen(!open)}
@@ -87,10 +88,10 @@ export function Combobox({
           {value
             ? options.find((option) => option.value === value)?.label
             : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 dark:text-gray-400" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 dark:border-gray-700" align="start">
         <Command shouldFilter={false}>
           <CommandInput 
             placeholder={`Search ${placeholder.toLowerCase()}...`}
@@ -100,18 +101,19 @@ export function Combobox({
             className="h-9"
           />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandGroup className="max-h-[200px] overflow-auto">
+          <CommandGroup className="max-h-[200px] overflow-auto dark:border-gray-700">
             {filteredOptions.map((option) => (
               <CommandItem
                 key={option.value}
                 value={option.value}
                 onSelect={handleSelect}
-                className="cursor-pointer"
+                className="cursor-pointer dark:aria-selected:bg-gray-700"
               >
                 <Check
                   className={cn(
                     'mr-2 h-4 w-4 shrink-0',
-                    value === option.value ? 'opacity-100' : 'opacity-0'
+                    value === option.value ? 'opacity-100' : 'opacity-0',
+                    'dark:text-gray-300'
                   )}
                 />
                 {option.label}

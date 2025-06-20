@@ -26,7 +26,7 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
       className={cn(
         'relative flex shrink-0 overflow-hidden',
         sizeClasses[size],
-        shape === 'circle' ? 'rounded-full' : 'rounded-lg',
+        shape === 'circle' ? 'rounded-full' : 'rounded-lg dark:bg-gray-800',
         className
       )}
       {...props}
@@ -34,12 +34,13 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
       <AvatarPrimitive.Image
         src={src}
         alt={alt || ''}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover dark:border-gray-700"
       />
       <AvatarPrimitive.Fallback
         className={cn(
-          'flex h-full w-full items-center justify-center bg-muted',
-          shape === 'circle' ? 'rounded-full' : 'rounded-lg'
+          'flex h-full w-full items-center justify-center bg-muted dark:bg-gray-700',
+          shape === 'circle' ? 'rounded-full' : 'rounded-lg',
+          'dark:text-gray-200'
         )}
         delayMs={600}
       >
@@ -50,4 +51,31 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
 );
 Avatar.displayName = 'Avatar';
 
-export { Avatar };
+const AvatarImage = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Image>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Image
+    ref={ref}
+    className={cn("aspect-square h-full w-full", className)}
+    {...props}
+  />
+));
+AvatarImage.displayName = AvatarPrimitive.Image.displayName;
+
+const AvatarFallback = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Fallback>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Fallback
+    ref={ref}
+    className={cn(
+      "flex h-full w-full items-center justify-center rounded-full bg-muted",
+      className
+    )}
+    {...props}
+  />
+));
+AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
+
+export { Avatar, AvatarImage, AvatarFallback };

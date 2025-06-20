@@ -162,7 +162,7 @@ export function DateRangePicker({
       {label && (
         <label 
           className={cn(
-            "block text-sm font-medium mb-1.5",
+            "block text-sm font-medium mb-1.5 dark:text-gray-300",
             error ? 'text-destructive' : 'text-foreground',
             disabled && 'opacity-50'
           )}
@@ -182,11 +182,12 @@ export function DateRangePicker({
                 "w-full justify-between text-left font-normal",
                 !value.from && "text-muted-foreground",
                 error && "border-destructive",
+                "dark:border-gray-700 dark:bg-gray-800"
               )}
             >
               {icon || <CalendarIcon className="h-4 w-4 mr-2" />}
               <span className="flex-1 truncate">{formattedDateRange}</span>
-              <ChevronDown className="h-4 w-4 opacity-50" />
+              <ChevronDown className="h-4 w-4 opacity-50 dark:text-gray-400" />
             </Button>
           ) : (
             <div className="relative">
@@ -197,6 +198,7 @@ export function DateRangePicker({
                 className={cn(
                   "cursor-pointer",
                   error && "border-destructive",
+                  "dark:bg-gray-800 dark:border-gray-700"
                 )}
                 icon={icon || <CalendarIcon className="h-4 w-4" />}
                 clearable={clearable && !!value.from}
@@ -208,20 +210,20 @@ export function DateRangePicker({
           )}
         </PopoverTrigger>
         <PopoverContent 
-          className="w-auto p-0" 
+          className="w-auto p-0 dark:border-gray-700" 
           align={align}
           side={side}
         >
           <div className="flex flex-col sm:flex-row">
             {finalPresets.length > 0 && (
-              <div className="p-2 sm:p-3 sm:border-r">
+              <div className="p-2 sm:p-3 sm:border-r dark:border-gray-700">
                 <div className="space-y-1.5">
                   {finalPresets.map((preset) => (
                     <Button
                       key={preset.name}
                       variant="ghost"
                       size="sm"
-                      className="justify-start font-normal w-full"
+                      className="justify-start font-normal w-full dark:text-gray-300 dark:hover:bg-gray-800"
                       onClick={() => handlePresetSelect(preset)}
                     >
                       {preset.label}
@@ -256,10 +258,10 @@ export function DateRangePicker({
                 numberOfMonths={2}
                 className="flex flex-col sm:flex-row gap-2"
               />
-              <div className="flex items-center justify-between pt-4 border-t mt-4">
+              <div className="flex items-center justify-between pt-4 border-t mt-4 dark:border-gray-700">
                 <div className="text-sm text-muted-foreground">
                   {value.from && value.to && (
-                    <Badge variant="secondary" className="font-normal">
+                    <Badge variant="secondary" className="font-normal dark:bg-gray-700 dark:text-gray-300">
                       {`${format(value.from, 'MMM d, yyyy')} - ${format(value.to, 'MMM d, yyyy')}`}
                     </Badge>
                   )}
@@ -270,6 +272,7 @@ export function DateRangePicker({
                     size="sm"
                     onClick={handleClear}
                     disabled={!value.from}
+                    className="dark:border-gray-700 dark:bg-gray-800"
                   >
                     Clear
                   </Button>
@@ -290,7 +293,7 @@ export function DateRangePicker({
         <p
           className={cn(
             "mt-1.5 text-sm",
-            error ? "text-destructive" : "text-muted-foreground"
+            error ? "text-destructive" : "text-muted-foreground dark:text-gray-400"
           )}
         >
           {error || helperText}
