@@ -2,6 +2,7 @@ import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { Member } from '../models/member.model';
 import type { IMemberAdapter } from '../adapters/member.adapter';
+import type { IAccountRepository } from './account.repository';
 import { NotificationService } from '../services/NotificationService';
 import { MemberValidator } from '../validators/member.validator';
 
@@ -12,7 +13,10 @@ export class MemberRepository
   extends BaseRepository<Member>
   implements IMemberRepository
 {
-  constructor(@inject('IMemberAdapter') adapter: IMemberAdapter) {
+  constructor(
+    @inject('IMemberAdapter') adapter: IMemberAdapter,
+    @inject('IAccountRepository') private accountRepository: IAccountRepository
+  ) {
     super(adapter);
   }
 
@@ -25,6 +29,14 @@ export class MemberRepository
   }
 
   protected override async afterCreate(data: Member): Promise<void> {
+    const accountNumber = `MEM-${data.id.slice(0, 8)}`;
+    await this.accountRepository.create({
+      name: `${data.first_name} ${data.last_name}`,
+      account_type: 'person',
+      account_number: accountNumber,
+      member_id: data.id
+    });
+
     // Additional repository-level operations after creation
     await this.sendWelcomeNotification(data);
   }
