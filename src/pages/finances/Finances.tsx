@@ -45,6 +45,11 @@ function Finances() {
             <TransactionAdd />
           </SubscriptionGate>
         } />
+        <Route path="transactions/:id/bulk" element={
+          <SubscriptionGate type="transaction">
+            <BulkTransactionEntry />
+          </SubscriptionGate>
+        } />
         <Route path="transactions/bulk" element={
           <SubscriptionGate type="transaction">
             <BulkTransactionEntry />
