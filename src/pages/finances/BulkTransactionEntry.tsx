@@ -73,15 +73,7 @@ function BulkTransactionEntry() {
   const sources = sourcesData?.data || [];
 
   // Get members with their accounts
-  const { data: membersData, isLoading: isMembersLoading } = useMembersQuery({
-    relationships: [
-      {
-        table: "accounts",
-        foreignKey: "member_id",
-        select: ["id"],
-      },
-    ],
-  });
+  const { data: membersData, isLoading: isMembersLoading } = useMembersQuery();
   const members = membersData?.data || [];
 
   const memberOptions = React.useMemo(
