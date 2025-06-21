@@ -10,6 +10,12 @@ export function useFinancialTransactionHeaderRepository() {
     postTransaction: async (id: string) => {
       return repository.postTransaction(id);
     },
+    submitTransaction: async (id: string) => {
+      return repository.submitTransaction(id);
+    },
+    approveTransaction: async (id: string) => {
+      return repository.approveTransaction(id);
+    },
     voidTransaction: async (id: string, reason: string) => {
       return repository.voidTransaction(id, reason);
     },
