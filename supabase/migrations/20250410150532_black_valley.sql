@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS financial_transaction_headers (
   reference TEXT,
   source_id UUID REFERENCES financial_sources(id),
   status TEXT NOT NULL CHECK (
-    status IN ('draft', 'submitted', 'approved', 'posted', 'voided')
+    status IN ('draft', 'posted', 'voided')
   ) DEFAULT 'draft',
   posted_at TIMESTAMPTZ,
   posted_by UUID REFERENCES auth.users(id),
