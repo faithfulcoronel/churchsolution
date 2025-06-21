@@ -74,6 +74,6 @@ export class ChartOfAccountRepository
   }
 
   public async getHierarchy(): Promise<ChartOfAccount[]> {
-    return (this.adapter as ChartOfAccountAdapter).getHierarchy();
+    return (this.adapter as unknown as IChartOfAccountAdapter).getHierarchy();
   }
 }

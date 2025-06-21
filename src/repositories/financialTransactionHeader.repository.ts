@@ -81,7 +81,7 @@ export class FinancialTransactionHeaderRepository
 
   public async postTransaction(id: string): Promise<void> {
     try {
-      await (this.adapter as FinancialTransactionHeaderAdapter).postTransaction(id);
+      await (this.adapter as unknown as IFinancialTransactionHeaderAdapter).postTransaction(id);
       
       NotificationService.showSuccess('Transaction posted successfully');
     } catch (error) {
@@ -95,7 +95,7 @@ export class FinancialTransactionHeaderRepository
 
   public async voidTransaction(id: string, reason: string): Promise<void> {
     try {
-      await (this.adapter as FinancialTransactionHeaderAdapter).voidTransaction(id, reason);
+      await (this.adapter as unknown as IFinancialTransactionHeaderAdapter).voidTransaction(id, reason);
       
       NotificationService.showSuccess('Transaction voided successfully');
     } catch (error) {
@@ -108,10 +108,10 @@ export class FinancialTransactionHeaderRepository
   }
 
   public async getTransactionEntries(headerId: string): Promise<any[]> {
-    return (this.adapter as FinancialTransactionHeaderAdapter).getTransactionEntries(headerId);
+    return (this.adapter as unknown as IFinancialTransactionHeaderAdapter).getTransactionEntries(headerId);
   }
 
   public async isTransactionBalanced(headerId: string): Promise<boolean> {
-    return (this.adapter as FinancialTransactionHeaderAdapter).isTransactionBalanced(headerId);
+    return (this.adapter as unknown as IFinancialTransactionHeaderAdapter).isTransactionBalanced(headerId);
   }
 }

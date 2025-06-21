@@ -7,7 +7,12 @@ import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 
 export interface IFinancialTransactionHeaderAdapter
-  extends BaseAdapter<FinancialTransactionHeader> {}
+  extends BaseAdapter<FinancialTransactionHeader> {
+  postTransaction(id: string): Promise<void>;
+  voidTransaction(id: string, reason: string): Promise<void>;
+  getTransactionEntries(headerId: string): Promise<any[]>;
+  isTransactionBalanced(headerId: string): Promise<boolean>;
+}
 
 @injectable()
 export class FinancialTransactionHeaderAdapter

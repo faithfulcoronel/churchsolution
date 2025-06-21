@@ -6,7 +6,9 @@ import { AuditService } from '../services/AuditService';
 import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 
-export interface IChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {}
+export interface IChartOfAccountAdapter extends BaseAdapter<ChartOfAccount> {
+  getHierarchy(): Promise<ChartOfAccount[]>;
+}
 
 @injectable()
 export class ChartOfAccountAdapter
