@@ -63,7 +63,7 @@ export class FinancialTransactionHeaderAdapter
     if (!data.transaction_number) {
       data.transaction_number = await this.generateTransactionNumber(
         data.transaction_date || new Date().toISOString().split('T')[0],
-        data.status === 'draft' ? 'DFT' : 'TRX'
+        data.status ?? 'draft'
       );
     }
     
@@ -155,7 +155,16 @@ export class FinancialTransactionHeaderAdapter
   }
 
 
-  private async generateTransactionNumber(date: string, prefix: string): Promise<string> {
+  private async generateTransactionNumber(date: string, status: string): Promise<string> {
+    const prefixMap: Record<string, string> = {
+      draft: 'DFT',
+      submitted: 'SUB',
+      approved: 'APP',
+      posted: 'TRX',
+      voided: 'TRX'
+    };
+    const prefix = prefixMap[status] || 'TRX';
+
     // Format: PREFIX-YYYYMM-SEQUENCE
     const dateObj = new Date(date);
     const year = dateObj.getFullYear();
