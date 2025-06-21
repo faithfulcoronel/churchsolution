@@ -115,6 +115,18 @@ function BulkTransactionEntry() {
   const [autoBalance, setAutoBalance] = useState(false);
   const [offsetAccountId, setOffsetAccountId] = useState("");
 
+  // Default offset account when auto balance is enabled
+  React.useEffect(() => {
+    if (!autoBalance || offsetAccountId) return;
+
+    const defaultAccount = accountOptions?.find(
+      (opt) => opt.type === "asset",
+    );
+    if (defaultAccount) {
+      setOffsetAccountId(defaultAccount.value);
+    }
+  }, [autoBalance, offsetAccountId, accountOptions]);
+
   const [entries, setEntries] = useState<TransactionEntry[]>([
     {
       member_id: "",
@@ -136,7 +148,11 @@ function BulkTransactionEntry() {
 
   // Build displayed entries including offset when auto balancing
   const displayedEntries = React.useMemo(() => {
-    if (!autoBalance || !offsetAccountId) return entries;
+    if (!autoBalance) return entries;
+
+    const accountId =
+      offsetAccountId || accountOptions?.find((opt) => opt.type === "asset")?.value;
+    if (!accountId) return entries;
 
     const totalDebits = entries.reduce((sum, e) => sum + (e.debit || 0), 0);
     const totalCredits = entries.reduce((sum, e) => sum + (e.credit || 0), 0);
@@ -144,7 +160,7 @@ function BulkTransactionEntry() {
 
     const offset: TransactionEntry = {
       member_id: "",
-      account_id: offsetAccountId,
+      account_id: accountId,
       description: "",
       debit: null,
       credit: null,
@@ -157,7 +173,7 @@ function BulkTransactionEntry() {
     }
 
     return [...entries, offset];
-  }, [entries, autoBalance, offsetAccountId]);
+  }, [entries, autoBalance, offsetAccountId, accountOptions]);
 
   // Calculate totals
   const totalDebits = displayedEntries.reduce(
@@ -181,7 +197,7 @@ function BulkTransactionEntry() {
   // Handle entry field changes
   const handleEntryChange = (index: number, field: string, value: any) => {
     // Prevent edits to the auto-balance row
-    if (autoBalance && offsetAccountId && index === entries.length) {
+    if (autoBalance && index === entries.length) {
       return;
     }
 
@@ -228,7 +244,7 @@ function BulkTransactionEntry() {
   // Remove entry row
   const removeEntry = (index: number) => {
     // Prevent removing the auto-balance row
-    if (autoBalance && offsetAccountId && index === entries.length) {
+    if (autoBalance && index === entries.length) {
       return;
     }
 
@@ -528,9 +544,7 @@ function BulkTransactionEntry() {
                           }
                           disabled={
                             isMembersLoading ||
-                            (autoBalance &&
-                              offsetAccountId &&
-                              index === entries.length)
+                            (autoBalance && index === entries.length)
                           }
                         />
                       </td>
@@ -548,9 +562,7 @@ function BulkTransactionEntry() {
                           }
                           disabled={
                             isAccountsLoading ||
-                            (autoBalance &&
-                              offsetAccountId &&
-                              index === entries.length)
+                            (autoBalance && index === entries.length)
                           }
                         />
                       </td>
@@ -566,9 +578,7 @@ function BulkTransactionEntry() {
                           }
                           placeholder="Entry description (optional)"
                           disabled={
-                            autoBalance &&
-                            offsetAccountId &&
-                            index === entries.length
+                            autoBalance && index === entries.length
                           }
                         />
                       </td>
@@ -584,9 +594,7 @@ function BulkTransactionEntry() {
                           min="0"
                           className="text-right"
                           disabled={
-                            autoBalance &&
-                            offsetAccountId &&
-                            index === entries.length
+                            autoBalance && index === entries.length
                           }
                         />
                       </td>
@@ -602,9 +610,7 @@ function BulkTransactionEntry() {
                           min="0"
                           className="text-right"
                           disabled={
-                            autoBalance &&
-                            offsetAccountId &&
-                            index === entries.length
+                            autoBalance && index === entries.length
                           }
                         />
                       </td>
@@ -616,9 +622,7 @@ function BulkTransactionEntry() {
                           onClick={() => removeEntry(index)}
                           disabled={
                             entries.length <= 2 ||
-                            (autoBalance &&
-                              offsetAccountId &&
-                              index === entries.length)
+                            (autoBalance && index === entries.length)
                           }
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
