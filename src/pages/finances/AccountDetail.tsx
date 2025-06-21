@@ -346,6 +346,10 @@ function AccountDetail() {
                           <Badge variant="success">Posted</Badge>
                         ) : transaction.header?.status === 'voided' ? (
                           <Badge variant="destructive">Voided</Badge>
+                        ) : transaction.header?.status === 'approved' ? (
+                          <Badge variant="warning">Approved</Badge>
+                        ) : transaction.header?.status === 'submitted' ? (
+                          <Badge variant="info">Submitted</Badge>
                         ) : (
                           <Badge variant="secondary">Draft</Badge>
                         )}

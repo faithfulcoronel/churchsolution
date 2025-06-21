@@ -194,11 +194,17 @@ function TransactionList() {
       renderCell: (params) => {
         const status = params.value;
         return (
-          <Badge 
+          <Badge
             variant={
-              status === 'posted' ? 'success' : 
-              status === 'voided' ? 'destructive' : 
-              'secondary'
+              status === 'posted'
+                ? 'success'
+                : status === 'voided'
+                ? 'destructive'
+                : status === 'approved'
+                ? 'warning'
+                : status === 'submitted'
+                ? 'info'
+                : 'secondary'
             }
             className="flex items-center"
           >
@@ -211,6 +217,16 @@ function TransactionList() {
               <>
                 <X className="h-3 w-3 mr-1" />
                 Voided
+              </>
+            ) : status === 'approved' ? (
+              <>
+                <Check className="h-3 w-3 mr-1" />
+                Approved
+              </>
+            ) : status === 'submitted' ? (
+              <>
+                <FileText className="h-3 w-3 mr-1" />
+                Submitted
               </>
             ) : (
               <>
@@ -372,6 +388,8 @@ function TransactionList() {
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="posted">Posted</SelectItem>
               <SelectItem value="voided">Voided</SelectItem>
             </SelectContent>
