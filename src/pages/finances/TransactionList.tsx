@@ -249,7 +249,7 @@ function TransactionList() {
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0"
-                onClick={() => navigate(`/finances/transactions/${params.row.id}/bulk`)}
+              onClick={() => navigate(`/finances/transactions/${params.row.id}/edit`)}
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -276,7 +276,7 @@ function TransactionList() {
                 
                 {canEdit && (
                   <DropdownMenuItem
-                    onClick={() => navigate(`/finances/transactions/${params.row.id}/bulk`)}
+                    onClick={() => navigate(`/finances/transactions/${params.row.id}/edit`)}
                     className="flex items-center"
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -324,7 +324,7 @@ function TransactionList() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate('/finances/transactions/bulk')}
+              onClick={() => navigate('/finances/transactions/add')}
               className="flex items-center"
             >
               <FileUp className="h-4 w-4 mr-2" />
@@ -400,7 +400,7 @@ function TransactionList() {
             onRowClick={(params) =>
               navigate(
                 params.row.status === 'draft'
-                  ? `/finances/transactions/${params.id}/bulk`
+                  ? `/finances/transactions/${params.id}/edit`
                   : `/finances/transactions/${params.id}`
               )
             }
