@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useFinancialTransactionHeaderRepository } from "../../hooks/useFinancialTransactionHeaderRepository";
 import { useChartOfAccounts } from "../../hooks/useChartOfAccounts";
 import { useFinancialSourceRepository } from "../../hooks/useFinancialSourceRepository";
@@ -46,16 +46,38 @@ interface TransactionEntry {
 
 function BulkTransactionEntry() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEditMode = !!id;
   const { currency } = useCurrencyStore();
 
   // Repositories
-  const { useCreate } = useFinancialTransactionHeaderRepository();
+  const { useCreate, useUpdate, useQuery, getTransactionEntries } =
+    useFinancialTransactionHeaderRepository();
   const { useAccountOptions } = useChartOfAccounts();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
   const { useQuery: useMembersQuery } = useMemberRepository();
 
-  // Create mutation
+  // Get transaction data if editing
+  const { data: transactionData } = useQuery({
+    filters: {
+      id: {
+        operator: "eq",
+        value: id,
+      },
+    },
+    relationships: [
+      {
+        table: "financial_sources",
+        foreignKey: "source_id",
+        select: ["id", "name", "source_type"],
+      },
+    ],
+    enabled: isEditMode,
+  });
+
+  // Create/update mutations
   const createMutation = useCreate();
+  const updateMutation = useUpdate();
 
   // Get account options
   const { data: accountOptions, isLoading: isAccountsLoading } =
@@ -104,6 +126,8 @@ function BulkTransactionEntry() {
     source_id: "none",
   });
 
+  const [isLoading, setIsLoading] = useState(isEditMode);
+
   const [autoBalance, setAutoBalance] = useState(false);
   const [offsetAccountId, setOffsetAccountId] = useState("");
 
@@ -118,6 +142,46 @@ function BulkTransactionEntry() {
       setOffsetAccountId(defaultAccount.value);
     }
   }, [autoBalance, offsetAccountId, accountOptions]);
+
+  // Load transaction data when editing
+  React.useEffect(() => {
+    const loadTransactionData = async () => {
+      if (isEditMode && id && transactionData?.data?.[0]) {
+        const header = transactionData.data[0];
+
+        setHeaderData({
+          transaction_date: header.transaction_date,
+          description: header.description,
+          reference: header.reference || "",
+          source_id: header.source_id || "none",
+        });
+
+        try {
+          const entriesData = await getTransactionEntries(id);
+          if (entriesData && entriesData.length > 0) {
+            setEntries(
+              entriesData.map((entry: any) => ({
+                member_id: "",
+                account_id: entry.account_id,
+                description: entry.description,
+                debit: entry.debit || null,
+                credit: entry.credit || null,
+              }))
+            );
+          }
+        } catch (error) {
+          console.error("Error loading transaction entries:", error);
+          setError("Failed to load transaction entries");
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    loadTransactionData();
+  }, [isEditMode, id, transactionData, getTransactionEntries]);
 
   const [entries, setEntries] = useState<TransactionEntry[]>([
     {
@@ -332,20 +396,37 @@ function BulkTransactionEntry() {
         date: headerData.transaction_date,
       }));
 
-      // Create transaction header and entries
-      await createMutation.mutateAsync({
-        data: {
-          transaction_date: headerData.transaction_date,
-          description: headerData.description,
-          reference: headerData.reference || null,
-          source_id:
-            headerData.source_id === "none" ? null : headerData.source_id,
-          status: "draft",
-        },
-        relations: {
-          transactions: formattedEntries,
-        },
-      });
+      if (isEditMode && id) {
+        // Update transaction
+        await updateMutation.mutateAsync({
+          id,
+          data: {
+            transaction_date: headerData.transaction_date,
+            description: headerData.description,
+            reference: headerData.reference || null,
+            source_id:
+              headerData.source_id === "none" ? null : headerData.source_id,
+          },
+          relations: {
+            transactions: formattedEntries,
+          },
+        });
+      } else {
+        // Create transaction header and entries
+        await createMutation.mutateAsync({
+          data: {
+            transaction_date: headerData.transaction_date,
+            description: headerData.description,
+            reference: headerData.reference || null,
+            source_id:
+              headerData.source_id === "none" ? null : headerData.source_id,
+            status: "draft",
+          },
+          relations: {
+            transactions: formattedEntries,
+          },
+        });
+      }
 
       // Navigate to transaction list
       navigate("/finances/transactions");
@@ -358,6 +439,14 @@ function BulkTransactionEntry() {
       );
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -377,7 +466,9 @@ function BulkTransactionEntry() {
           <CardHeader>
             <div className="flex items-center">
               <FileText className="h-6 w-6 text-primary mr-2" />
-              <h3 className="text-lg font-medium">Transaction Header</h3>
+              <h3 className="text-lg font-medium">
+                {isEditMode ? "Edit Transaction" : "New Transaction"}
+              </h3>
             </div>
           </CardHeader>
 
@@ -684,9 +775,11 @@ function BulkTransactionEntry() {
             </Button>
             <Button
               type="submit"
-              disabled={createMutation.isPending || !isBalanced}
+              disabled={
+                createMutation.isPending || updateMutation.isPending || !isBalanced
+              }
             >
-              {createMutation.isPending ? (
+              {createMutation.isPending || updateMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
@@ -694,7 +787,7 @@ function BulkTransactionEntry() {
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Create Transaction
+                  {isEditMode ? "Update Transaction" : "Create Transaction"}
                 </>
               )}
             </Button>
