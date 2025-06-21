@@ -248,8 +248,7 @@ export class FinancialTransactionHeaderAdapter
       `
       )
       .eq('tenant_id', tenantId)
-      .eq('header_id', headerId)
-      .is('deleted_at', null);
+      .eq('header_id', headerId);
 
     if (error) throw error;
     return data || [];
