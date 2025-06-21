@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
+import { usePermissions } from '../../hooks/usePermissions';
+import PermissionGate from '../../components/PermissionGate';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
 import { Input } from '../../components/ui2/input';
@@ -76,8 +78,17 @@ function TransactionList() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   
-  // Get transaction headers
-  const { useQuery, useDelete } = useFinancialTransactionHeaderRepository();
+  // Get transaction headers and actions
+  const {
+    useQuery,
+    useDelete,
+    submitTransaction,
+    approveTransaction,
+    postTransaction,
+    useUpdate,
+  } = useFinancialTransactionHeaderRepository();
+  const updateMutation = useUpdate();
+  const { hasPermission } = usePermissions();
   
   const { data: result, isLoading } = useQuery({
     filters: {
@@ -299,7 +310,59 @@ function TransactionList() {
                     Edit Transaction
                   </DropdownMenuItem>
                 )}
-                
+
+                {status === 'draft' && (
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await submitTransaction(params.row.id);
+                      window.location.reload();
+                    }}
+                    className="flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Submit Transaction
+                  </DropdownMenuItem>
+                )}
+
+                {status === 'submitted' && hasPermission('finance.approve') && (
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await approveTransaction(params.row.id);
+                      window.location.reload();
+                    }}
+                    className="flex items-center"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Approve Transaction
+                  </DropdownMenuItem>
+                )}
+
+                {status === 'submitted' && hasPermission('finance.approve') && (
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await updateMutation.mutateAsync({ id: params.row.id, data: { status: 'draft' } });
+                      window.location.reload();
+                    }}
+                    className="flex items-center"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Reject to Draft
+                  </DropdownMenuItem>
+                )}
+
+                {status === 'approved' && hasPermission('finance.approve') && (
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await postTransaction(params.row.id);
+                      window.location.reload();
+                    }}
+                    className="flex items-center"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Post Transaction
+                  </DropdownMenuItem>
+                )}
+
                 {canEdit && (
                   <DropdownMenuItem
                     onClick={() => {

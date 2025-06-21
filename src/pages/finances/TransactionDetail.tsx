@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
+import { usePermissions } from '../../hooks/usePermissions';
+import PermissionGate from '../../components/PermissionGate';
 import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
 import { Badge } from '../../components/ui2/badge';
@@ -42,18 +44,26 @@ function TransactionDetail() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showVoidDialog, setShowVoidDialog] = useState(false);
   const [showPostDialog, setShowPostDialog] = useState(false);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [voidReason, setVoidReason] = useState('');
   const [actionInProgress, setActionInProgress] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   
   // Get transaction data
-  const { 
-    useQuery, 
-    useDelete, 
-    getTransactionEntries, 
-    postTransaction, 
-    voidTransaction 
+  const {
+    useQuery,
+    useDelete,
+    getTransactionEntries,
+    postTransaction,
+    submitTransaction,
+    approveTransaction,
+    useUpdate,
+    voidTransaction
   } = useFinancialTransactionHeaderRepository();
+  const updateMutation = useUpdate();
+  const { hasPermission } = usePermissions();
   
   const { data: headerData, isLoading: isHeaderLoading } = useQuery({
     filters: {
@@ -139,6 +149,72 @@ function TransactionDetail() {
     } catch (error) {
       console.error('Error posting transaction:', error);
       setActionError(error instanceof Error ? error.message : 'An error occurred while posting the transaction');
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
+  // Handle submit transaction
+  const handleSubmit = async () => {
+    if (!id) return;
+
+    try {
+      setActionInProgress(true);
+      setActionError(null);
+
+      await submitTransaction(id);
+      setShowSubmitDialog(false);
+
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting transaction:', error);
+      setActionError(
+        error instanceof Error ? error.message : 'An error occurred while submitting the transaction'
+      );
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
+  // Handle approve transaction
+  const handleApprove = async () => {
+    if (!id) return;
+
+    try {
+      setActionInProgress(true);
+      setActionError(null);
+
+      await approveTransaction(id);
+      setShowApproveDialog(false);
+
+      window.location.reload();
+    } catch (error) {
+      console.error('Error approving transaction:', error);
+      setActionError(
+        error instanceof Error ? error.message : 'An error occurred while approving the transaction'
+      );
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
+  // Handle reject transaction back to draft
+  const handleReject = async () => {
+    if (!id) return;
+
+    try {
+      setActionInProgress(true);
+      setActionError(null);
+
+      await updateMutation.mutateAsync({ id, data: { status: 'draft' } });
+      setShowRejectDialog(false);
+
+      window.location.reload();
+    } catch (error) {
+      console.error('Error rejecting transaction:', error);
+      setActionError(
+        error instanceof Error ? error.message : 'An error occurred while rejecting the transaction'
+      );
     } finally {
       setActionInProgress(false);
     }
@@ -317,14 +393,16 @@ function TransactionDetail() {
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowPostDialog(true)}
-                    className="flex items-center"
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    Post
-                  </Button>
+                  <PermissionGate permission="finance.edit">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowSubmitDialog(true)}
+                      className="flex items-center"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Submit
+                    </Button>
+                  </PermissionGate>
                   <Button
                     variant="destructive"
                     onClick={() => setShowDeleteDialog(true)}
@@ -335,7 +413,39 @@ function TransactionDetail() {
                   </Button>
                 </>
               )}
-              
+
+              {header.status === 'submitted' && hasPermission('finance.approve') && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowApproveDialog(true)}
+                    className="flex items-center"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Approve
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowRejectDialog(true)}
+                    className="flex items-center"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Reject
+                  </Button>
+                </>
+              )}
+
+              {header.status === 'approved' && hasPermission('finance.approve') && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPostDialog(true)}
+                  className="flex items-center"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Post
+                </Button>
+              )}
+
               {header.status === 'posted' && (
                 <Button
                   variant="outline"
@@ -591,6 +701,135 @@ function TransactionDetail() {
                 </>
               ) : (
                 'Delete Transaction'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Submit Confirmation Dialog */}
+      <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="default">Submit Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to submit this transaction for approval?
+              {actionError && (
+                <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start">
+                  <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>{actionError}</span>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowSubmitDialog(false);
+                setActionError(null);
+              }}
+              disabled={actionInProgress}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="default"
+              onClick={handleSubmit}
+              disabled={actionInProgress}
+            >
+              {actionInProgress ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Transaction'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Approve Confirmation Dialog */}
+      <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="success">Approve Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to approve this transaction?
+              {actionError && (
+                <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start">
+                  <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>{actionError}</span>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowApproveDialog(false);
+                setActionError(null);
+              }}
+              disabled={actionInProgress}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="default"
+              onClick={handleApprove}
+              disabled={actionInProgress}
+            >
+              {actionInProgress ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                'Approve Transaction'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reject Confirmation Dialog */}
+      <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="destructive">Reject Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to move this transaction back to draft?
+              {actionError && (
+                <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start">
+                  <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>{actionError}</span>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowRejectDialog(false);
+                setActionError(null);
+              }}
+              disabled={actionInProgress}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleReject}
+              disabled={actionInProgress}
+            >
+              {actionInProgress ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Rejecting...
+                </>
+              ) : (
+                'Reject Transaction'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
