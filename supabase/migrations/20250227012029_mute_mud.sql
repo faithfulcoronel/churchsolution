@@ -1,5 +1,11 @@
 -- Create custom types for categories
-CREATE TYPE category_type AS ENUM ('membership', 'member_status', 'transaction', 'budget');
+CREATE TYPE category_type AS ENUM (
+  'membership',
+  'member_status',
+  'income_transaction',
+  'expense_transaction',
+  'budget'
+);
 
 -- Create categories table
 CREATE TABLE IF NOT EXISTS categories (
@@ -248,26 +254,26 @@ BEGIN
   -- Transaction Categories (Income)
   INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
   VALUES
-    (p_tenant_id, 'transaction', 'tithe', 'Tithe', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'first_fruit_offering', 'First Fruit Offering', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'love_offering', 'Love Offering', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'mission_offering', 'Mission Offering', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'mission_pledge', 'Mission Pledge', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'building_offering', 'Building Offering', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'lot_offering', 'Lot Offering', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'other_income', 'Other Income', true, auth.uid());
+    (p_tenant_id, 'income_transaction', 'tithe', 'Tithe', true, auth.uid()),
+    (p_tenant_id, 'income_transaction', 'first_fruit_offering', 'First Fruit Offering', true, auth.uid()),
+    (p_tenant_id, 'income_transaction', 'love_offering', 'Love Offering', true, auth.uid()),
+    (p_tenant_id, 'income_transaction', 'mission_offering', 'Mission Offering', true, auth.uid()),
+    (p_tenant_id, 'income_transaction', 'mission_pledge', 'Mission Pledge', true, auth.uid()),
+    (p_tenant_id, 'income_transaction', 'building_offering', 'Building Offering', true, auth.uid()),
+    (p_tenant_id, 'income_transaction', 'lot_offering', 'Lot Offering', true, auth.uid()),
+    (p_tenant_id, 'income_transaction', 'other_income', 'Other Income', true, auth.uid());
 
   -- Transaction Categories (Expense)
   INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
   VALUES
-    (p_tenant_id, 'transaction', 'ministry_expense', 'Ministry Expense', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'payroll', 'Payroll', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'utilities', 'Utilities', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'maintenance', 'Maintenance', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'events', 'Events', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'missions', 'Missions', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'education', 'Education', true, auth.uid()),
-    (p_tenant_id, 'transaction', 'other_expense', 'Other Expense', true, auth.uid());
+    (p_tenant_id, 'expense_transaction', 'ministry_expense', 'Ministry Expense', true, auth.uid()),
+    (p_tenant_id, 'expense_transaction', 'payroll', 'Payroll', true, auth.uid()),
+    (p_tenant_id, 'expense_transaction', 'utilities', 'Utilities', true, auth.uid()),
+    (p_tenant_id, 'expense_transaction', 'maintenance', 'Maintenance', true, auth.uid()),
+    (p_tenant_id, 'expense_transaction', 'events', 'Events', true, auth.uid()),
+    (p_tenant_id, 'expense_transaction', 'missions', 'Missions', true, auth.uid()),
+    (p_tenant_id, 'expense_transaction', 'education', 'Education', true, auth.uid()),
+    (p_tenant_id, 'expense_transaction', 'other_expense', 'Other Expense', true, auth.uid());
 
   -- Budget Categories
   INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)

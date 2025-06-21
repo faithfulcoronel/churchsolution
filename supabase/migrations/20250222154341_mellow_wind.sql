@@ -37,16 +37,3 @@ CREATE POLICY "Users can delete profile pictures"
     bucket_id = 'profiles' AND
     (storage.foldername(name))[2] = auth.uid()::text
   );
-
--- Add helpful comments
-COMMENT ON POLICY "Profile pictures are publicly accessible" ON storage.objects IS
-  'Allow public access to all profile pictures';
-
-COMMENT ON POLICY "Users can upload profile pictures" ON storage.objects IS
-  'Allow users to upload profile pictures for any member in their tenant';
-
-COMMENT ON POLICY "Users can update profile pictures" ON storage.objects IS
-  'Allow users to update profile pictures for any member in their tenant';
-
-COMMENT ON POLICY "Users can delete profile pictures" ON storage.objects IS
-  'Allow users to delete profile pictures for any member in their tenant';

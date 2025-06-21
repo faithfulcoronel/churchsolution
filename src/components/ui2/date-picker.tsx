@@ -9,8 +9,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from './popover';
+import { Calendar } from './calendar';
+import { FormFieldProps } from './types';
 
-export interface DatePickerProps {
+export interface DatePickerProps extends FormFieldProps {
   value?: Date;
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
@@ -26,6 +28,9 @@ export function DatePickerInput({
   className,
   disabled = false,
   clearable = true,
+  label,
+  error,
+  helperText,
 }: DatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(value);
   const [isOpen, setIsOpen] = React.useState(false);
@@ -48,18 +53,58 @@ export function DatePickerInput({
   };
 
   return (
-    <div className="relative">
-      <Input
-        type="date"
-        value={date ? format(date, 'yyyy-MM-dd') : ''}
-        onChange={handleInputChange}
-        placeholder={placeholder}
-        className={className}
-        disabled={disabled}
-        icon={<CalendarIcon className="h-4 w-4" />}
-        clearable={clearable && !!date}
-        onClear={() => handleSelect(undefined)}
-      />
+    <div className={cn("relative", className)}>
+      {label && (
+        <label 
+          className={cn(
+            "block text-sm font-medium mb-1.5 dark:text-gray-300",
+            error ? 'text-destructive' : 'text-foreground',
+            disabled && 'opacity-50'
+          )}
+        >
+          {label}
+          {error && <span className="text-destructive ml-1">*</span>}
+        </label>
+      )}
+      
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <div className="relative">
+            <Input
+              type="text"
+              value={date ? format(date, 'yyyy-MM-dd') : ''}
+              onChange={handleInputChange}
+              placeholder={placeholder}
+              className={cn(error && "border-destructive", "dark:bg-gray-800 dark:border-gray-700")}
+              disabled={disabled}
+              icon={<CalendarIcon className="h-4 w-4" />}
+              clearable={clearable && !!date}
+              onClear={() => handleSelect(undefined)}
+              onClick={() => setIsOpen(true)}
+              error={error}
+            />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0 dark:border-gray-700" align="start">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={handleSelect}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+      
+      {(helperText || error) && (
+        <p
+          className={cn(
+            "mt-1.5 text-sm",
+            error ? "text-destructive" : "text-muted-foreground dark:text-gray-400"
+          )}
+        >
+          {error || helperText}
+        </p>
+      )}
     </div>
   );
 }

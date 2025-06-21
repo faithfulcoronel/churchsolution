@@ -1,114 +1,40 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
-import { Heart, Mail, Globe, Phone, FileText, Shield } from 'lucide-react';
+import { Heart, FileText, Shield } from 'lucide-react';
 import Modal from './Modal';
 
 function Footer() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
-  const { data: tenant } = useQuery({
-    queryKey: ['tenant-settings'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_current_tenant');
-
-      if (error) throw error;
-      return data?.[0];
-    },
-  });
 
   const currentYear = new Date().getFullYear();
 
   return (
     <>
-      <footer className="bg-gray-100 border-t border-gray-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="py-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Church Info */}
-              <div>
-                <h3 className="text-gray-900 text-sm font-semibold mb-4">About Us</h3>
-                <p className="text-gray-600 text-sm">
-                  Steward Track - Streamlining church administration and enhancing community engagement through technology.
-                </p>
-              </div>
-
-              {/* Contact Info */}
-              <div>
-                <h3 className="text-gray-900 text-sm font-semibold mb-4">Contact</h3>
-                <div className="space-y-2">
-                  {tenant?.email && (
-                    <a 
-                      href={`mailto:${tenant.email}`}
-                      className="flex items-center text-gray-600 hover:text-gray-900 text-sm transition-colors"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      {tenant.email}
-                    </a>
-                  )}
-                  {tenant?.contact_number && (
-                    <p className="flex items-center text-gray-600 text-sm">
-                      <Phone className="h-4 w-4 mr-2" />
-                      {tenant.contact_number}
-                    </p>
-                  )}
-                  {tenant?.website && (
-                    <a 
-                      href={tenant.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-gray-600 hover:text-gray-900 text-sm transition-colors"
-                    >
-                      <Globe className="h-4 w-4 mr-2" />
-                      Visit our website
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {/* Address */}
-              <div>
-                <h3 className="text-gray-900 text-sm font-semibold mb-4">Location</h3>
-                {tenant?.address ? (
-                  <p className="text-gray-600 text-sm">{tenant.address}</p>
-                ) : (
-                  <p className="text-gray-600 text-sm">Address not specified</p>
-                )}
-              </div>
-            </div>
-
-            {/* Copyright */}
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row justify-between items-center">
-                <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                  <p className="text-gray-600 text-sm">
-                    © Steward Track. All rights reserved.
-                  </p>
-                  <div className="flex items-center space-x-4">
-                    <button
-                      onClick={() => setShowPrivacyModal(true)}
-                      className="text-gray-600 hover:text-gray-900 text-sm flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-2 py-1"
-                    >
-                      <Shield className="h-4 w-4 mr-1" />
-                      Privacy Policy
-                    </button>
-                    <button
-                      onClick={() => setShowTermsModal(true)}
-                      className="text-gray-600 hover:text-gray-900 text-sm flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-2 py-1"
-                    >
-                      <FileText className="h-4 w-4 mr-1" />
-                      Terms of Service
-                    </button>
-                  </div>
-                </div>
-                <p className="text-gray-600 text-sm flex items-center mt-2 sm:mt-0">
-                  Made with <Heart className="h-4 w-4 mx-1 text-red-500" /> by Cortanatech Solutions, Inc.
-                </p>
-              </div>
-            </div>
+      <footer className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 py-4 px-6 lg:pl-64">
+        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap space-y-2 sm:space-y-0">
+          <div className="flex items-center space-x-4">
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              © {currentYear} Steward Track. All rights reserved.
+            </p>
+            <button
+              onClick={() => setShowPrivacyModal(true)}
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-2 py-1"
+            >
+              <Shield className="h-4 w-4 mr-1" />
+              Privacy Policy
+            </button>
+            <button
+              onClick={() => setShowTermsModal(true)}
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm flex items-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-2 py-1"
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              Terms of Service
+            </button>
           </div>
+          <p className="text-gray-600 dark:text-gray-300 text-sm flex items-center">
+            Made with <Heart className="h-4 w-4 mx-1 text-red-500" /> by Cortanatech Solutions, Inc.
+          </p>
         </div>
       </footer>
 

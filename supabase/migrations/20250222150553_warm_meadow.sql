@@ -55,16 +55,3 @@ CREATE POLICY "Users can delete their profile pictures"
     ) AND
     (storage.foldername(name))[2] = auth.uid()::text
   );
-
--- Add helpful comments
-COMMENT ON POLICY "Profile pictures are publicly accessible" ON storage.objects IS
-  'Allow public access to all profile pictures';
-
-COMMENT ON POLICY "Users can upload profile pictures" ON storage.objects IS
-  'Allow users to upload profile pictures only to their tenant/user folder';
-
-COMMENT ON POLICY "Users can update their profile pictures" ON storage.objects IS
-  'Allow users to update only their own profile pictures within their tenant';
-
-COMMENT ON POLICY "Users can delete their profile pictures" ON storage.objects IS
-  'Allow users to delete only their own profile pictures within their tenant';

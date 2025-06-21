@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 const progressVariants = cva(
-  'relative w-full overflow-hidden rounded-full bg-secondary',
+  'relative w-full overflow-hidden rounded-full bg-secondary dark:bg-gray-700',
   {
     variants: {
       size: {
@@ -13,12 +13,12 @@ const progressVariants = cva(
         lg: 'h-6'
       },
       variant: {
-        default: '[&>div]:bg-primary',
-        secondary: '[&>div]:bg-secondary',
-        destructive: '[&>div]:bg-destructive',
-        success: '[&>div]:bg-green-500',
-        warning: '[&>div]:bg-yellow-500',
-        info: '[&>div]:bg-blue-500'
+        default: '[&>div]:bg-primary dark:[&>div]:bg-primary/90',
+        secondary: '[&>div]:bg-secondary dark:[&>div]:bg-secondary/90',
+        destructive: '[&>div]:bg-destructive dark:[&>div]:bg-destructive/90',
+        success: '[&>div]:bg-green-500 dark:[&>div]:bg-green-600',
+        warning: '[&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-600',
+        info: '[&>div]:bg-blue-500 dark:[&>div]:bg-blue-600'
       }
     },
     defaultVariants: {

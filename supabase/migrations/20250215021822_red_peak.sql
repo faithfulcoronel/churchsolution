@@ -47,16 +47,3 @@ CREATE POLICY "Users can delete their logos"
       LIMIT 1
     )
   );
-
--- Add helpful comments
-COMMENT ON POLICY "Logo images are publicly accessible" ON storage.objects IS
-  'Allow public access to all logo images';
-
-COMMENT ON POLICY "Users can upload logos" ON storage.objects IS
-  'Allow users to upload logos only to their church''s folder';
-
-COMMENT ON POLICY "Users can update their logos" ON storage.objects IS
-  'Allow users to update only their church''s logos';
-
-COMMENT ON POLICY "Users can delete their logos" ON storage.objects IS
-  'Allow users to delete only their church''s logos';

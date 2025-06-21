@@ -371,7 +371,7 @@ function FinancesDashboard() {
               {
                 label: 'Bulk Transaction Entry',
                 icon: <Layers className="h-4 w-4" />,
-                onClick: () => navigate('/finances/transactions/bulk')
+                onClick: () => navigate('/finances/transactions/add')
               },
               {
                 label: 'Bulk Income Entry',
@@ -618,7 +618,7 @@ function FinancesDashboard() {
                   </CardContent>
                 </Card>
               </Link>
-              <Link to="/finances/transactions/bulk">
+              <Link to="/finances/transactions/add">
                 <Card className="hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-4 flex items-center space-x-3">
                     <div className="flex-shrink-0">
@@ -641,8 +641,8 @@ function FinancesDashboard() {
               <DollarSign className="h-5 w-5 text-muted-foreground mr-2" />
               <h3 className="text-base font-medium text-foreground">Bulk Operations</h3>
             </div>
-            <div className="space-y-4">
-              <Link to="/finances/transactions/bulk">
+            <div className="space-y-4 grid grid-cols-1 gap-2">
+              <Link to="/finances/transactions/add">
                 <Card className="hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">

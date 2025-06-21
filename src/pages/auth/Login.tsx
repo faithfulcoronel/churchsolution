@@ -11,9 +11,8 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogAction,
-  AlertDialogCancel,
 } from '../../components/ui2/alert-dialog';
-import { Building2, LogIn, Loader2, Mail, Lock } from 'lucide-react';
+import { Loader2, Mail, Lock } from 'lucide-react';
 
 function Login() {
   const [email, setEmail] = useState('');

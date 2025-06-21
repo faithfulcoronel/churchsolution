@@ -94,7 +94,6 @@ function BulkIncomeEntry() {
         .from('categories')
         .select('*')
         .eq('tenant_id', currentTenant?.id)
-        .eq('is_active', true)
         .eq('type', 'income_transaction')
         .is('deleted_at', null)
         .order('sort_order');
@@ -495,7 +494,7 @@ function BulkIncomeEntry() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
         <Button
           variant="ghost"

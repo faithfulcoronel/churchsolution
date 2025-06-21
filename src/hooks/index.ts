@@ -11,3 +11,4 @@ export * from './useFeatures';
 export * from './usePagination';
 export * from './usePermissions';
 export * from './useSubscriptionLimits';
+export * from './useThemeSwitcher';

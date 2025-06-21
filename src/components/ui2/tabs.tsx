@@ -1,141 +1,89 @@
-import * as React from 'react';
-import { cn } from '@/lib/utils';
-import { Scrollable } from './scrollable';
+import * as React from "react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
 
-interface TabsProps {
-  tabs: {
-    id: string;
-    label: string;
-    icon?: React.ReactNode;
-    badge?: number;
-    disabled?: boolean;
-  }[];
-  activeTab: string;
-  onChange: (tabId: string) => void;
-  className?: string;
-  variant?: 'line' | 'enclosed' | 'pills';
-  size?: 'sm' | 'md' | 'lg';
-  fullWidth?: boolean;
-}
+import { cn } from "@/lib/utils"
 
-const sizeClasses = {
-  sm: 'text-sm',
-  md: 'text-base',
-  lg: 'text-lg'
-};
+const Tabs = TabsPrimitive.Root
 
-const variantClasses = {
-  line: {
-    nav: 'border-b border-border',
-    tab: 'border-b-2 -mb-px',
-    active: 'border-primary text-primary',
-    inactive: 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-  },
-  enclosed: {
-    nav: 'bg-muted/50 rounded-xl p-1.5',
-    tab: 'rounded-lg',
-    active: 'bg-background text-foreground shadow-sm',
-    inactive: 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-  },
-  pills: {
-    nav: 'space-x-2',
-    tab: 'rounded-full',
-    active: 'bg-primary text-primary-foreground shadow-sm',
-    inactive: 'text-muted-foreground hover:text-foreground hover:bg-muted'
+const TabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+    variant?: 'default' | 'enclosed' | 'pills';
+    size?: 'sm' | 'md' | 'lg';
   }
-};
-
-export function Tabs({ 
-  tabs, 
-  activeTab, 
-  onChange, 
-  className = '',
-  variant = 'line',
-  size = 'md',
-  fullWidth = false
-}: TabsProps) {
-  const tabsRef = React.useRef<HTMLDivElement>(null);
-  const activeTabRef = React.useRef<HTMLButtonElement>(null);
-
-  // Scroll active tab into view when it changes
-  React.useEffect(() => {
-    if (activeTabRef.current && tabsRef.current) {
-      const container = tabsRef.current;
-      const activeElement = activeTabRef.current;
-      
-      // Calculate scroll position to center the active tab
-      const scrollLeft = activeElement.offsetLeft - (container.clientWidth / 2) + (activeElement.clientWidth / 2);
-      
-      container.scrollTo({
-        left: scrollLeft,
-        behavior: 'smooth'
-      });
-    }
-  }, [activeTab]);
-
+>(({ className, variant = 'default', size = 'md', ...props }, ref) => {
+  const variantClasses = {
+    default: "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground dark:bg-gray-800 dark:text-gray-300",
+    enclosed: "inline-flex items-center justify-start border-b border-border dark:border-gray-700",
+    pills: "inline-flex items-center justify-start space-x-2"
+  };
+  
+  const sizeClasses = {
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base"
+  };
+  
   return (
-    <div className={className}>
-      <Scrollable orientation="horizontal" className={cn(
-        'relative',
-        variantClasses[variant].nav,
-        fullWidth ? 'flex' : 'inline-flex',
-        'space-x-2'
-      )}>
-        <div className="flex min-w-full sm:min-w-0 items-center" ref={tabsRef}>
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            const isDisabled = tab.disabled;
-
-            return (
-              <button
-                key={tab.id}
-                ref={isActive ? activeTabRef : null}
-                onClick={() => !isDisabled && onChange(tab.id)}
-                disabled={isDisabled}
-                className={cn(
-                  'group inline-flex items-center py-3 px-4',
-                  'font-medium',
-                  'transition-all duration-200',
-                  sizeClasses[size],
-                  variantClasses[variant].tab,
-                  isActive 
-                    ? variantClasses[variant].active 
-                    : variantClasses[variant].inactive,
-                  isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-                  fullWidth ? 'flex-1 justify-center' : '',
-                  'whitespace-nowrap',
-                  'select-none'
-                )}
-                role="tab"
-                aria-selected={isActive}
-                aria-disabled={isDisabled}
-              >
-                {tab.icon && (
-                  <span className={cn(
-                    'mr-2 transition-colors',
-                    isActive 
-                      ? 'text-primary dark:text-primary' 
-                      : 'text-muted-foreground group-hover:text-foreground'
-                  )}>
-                    {tab.icon}
-                  </span>
-                )}
-                {tab.label}
-                {typeof tab.badge === 'number' && (
-                  <span className={cn(
-                    'ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium',
-                    isActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground'
-                  )}>
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </Scrollable>
-    </div>
+    <TabsPrimitive.List
+      ref={ref}
+      className={cn(
+        variantClasses[variant],
+        sizeClasses[size],
+        className
+      )}
+      {...props}
+    />
   );
-}
+});
+TabsList.displayName = TabsPrimitive.List.displayName
+
+const TabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
+    variant?: 'default' | 'enclosed' | 'pills';
+    size?: 'sm' | 'md' | 'lg';
+  }
+>(({ className, variant = 'default', size = 'md', ...props }, ref) => {
+  const variantClasses = {
+    default: "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-gray-100",
+    enclosed: "inline-flex items-center justify-center whitespace-nowrap border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all hover:text-foreground focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-primary data-[state=active]:text-foreground dark:text-gray-400 dark:hover:text-gray-300 dark:data-[state=active]:text-gray-100",
+    pills: "inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 font-medium text-muted-foreground transition-all hover:text-foreground focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:text-gray-400 dark:hover:text-gray-300"
+  };
+  
+  const sizeClasses = {
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base"
+  };
+  
+  return (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        variantClasses[variant],
+        sizeClasses[size],
+        className
+      )}
+      {...props}
+    />
+  );
+});
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
+
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn(
+      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      className
+    )}
+    {...props}
+  />
+))
+TabsContent.displayName = TabsPrimitive.Content.displayName
+
+export { Tabs, TabsList, TabsTrigger, TabsContent }

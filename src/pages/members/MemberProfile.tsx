@@ -1,686 +1,325 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
-import { format } from 'date-fns';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
-import { useMessageStore } from '../../components/MessageHandler';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import { Badge } from '../../components/ui2/badge';
-import { ImageInput } from '../../components/ui2/image-input';
-import { Tabs } from '../../components/ui2/tabs';
-import { Separator } from '../../components/ui2/separator';
-import { ScrollArea } from '../../components/ui2/scroll-area';
-import {
-  User,
-  Phone,
-  MapPin,
-  Mail,
-  Calendar,
-  Heart,
-  Gift,
-  UserPlus,
-  Home,
-  Briefcase,
-  Users,
-  Cake,
-  Loader2,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Edit2,
+import { 
+  User, 
+  Users, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Calendar, 
+  Edit, 
+  Trash2, 
   ArrowLeft,
+  Cake,
+  Heart,
+  Loader2,
+  AlertTriangle,
+  FileText
 } from 'lucide-react';
 
-type Member = {
-  id: uuid;
-  first_name: string;
-  last_name: string;
-  middle_name?: string;
-  preferred_name?: string;
-  contact_number: string;
-  address: string;
-  email?: string;
-  envelope_number?: string;
-  membership_category_id: uuid;
-  status_category_id: uuid;
-  membership_date: string | null;
-  birthday: string | null;
-  profile_picture_url: string | null;
-  tenant_id: uuid;
-  created_by: uuid;
-  updated_by: uuid;
-  deleted_at: string | null;
-  gender?: 'male' | 'female' | 'other';
-  marital_status?: 'single' | 'married' | 'widowed' | 'divorced';
-  baptism_date?: string;
-  spiritual_gifts?: string[];
-  ministry_interests?: string[];
-  emergency_contact_name?: string;
-  emergency_contact_phone?: string;
-  leadership_position?: string;
-  small_groups?: string[];
-  ministries?: string[];
-  volunteer_roles?: string[];
-  attendance_rate?: number;
-  last_attendance_date?: string;
-  pastoral_notes?: string;
-  prayer_requests?: string[];
-};
+// UI Components
+import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '../../components/ui2/card';
+import { Button } from '../../components/ui2/button';
+import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
+import { Badge } from '../../components/ui2/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui2/alert-dialog';
 
-type Transaction = {
-  id: string;
-  date: string;
-  type: 'income' | 'expense';
-  category: string;
-  description: string;
-  amount: number;
-  member_id: string;
-  tenant_id: string;
-};
-
-type Category = {
-  id: uuid;
-  code: string;
-  name: string;
-  description: string | null;
-  is_system: boolean;
-  is_active: boolean;
-  sort_order: number;
-};
+// Tabs
+import BasicInfoTab from './tabs/BasicInfoTab';
+import ContactInfoTab from './tabs/ContactInfoTab';
+import MinistryInfoTab from './tabs/MinistryInfoTab';
+import NotesTab from './tabs/NotesTab';
 
 function MemberProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { currency } = useCurrencyStore();
-  const { addMessage } = useMessageStore();
+  const [activeTab, setActiveTab] = useState('basic');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Get current tenant
-  const { data: currentTenant } = useQuery({
-    queryKey: ['current-tenant'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_current_tenant');
-      if (error) throw error;
-      return data?.[0];
-    },
-  });
-
-  // Get member data
-  const { data: member, isLoading: memberLoading } = useQuery({
-    queryKey: ['member', id, currentTenant?.id],
+  // Fetch member data
+  const { data: member, isLoading, error } = useQuery({
+    queryKey: ['member', id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('members')
-        .select('*')
+        .select(`
+          *,
+          membership_categories:membership_category_id(id, name, code),
+          status_categories:status_category_id(id, name, code)
+        `)
         .eq('id', id)
-        .eq('tenant_id', currentTenant?.id)
         .single();
-
+      
       if (error) throw error;
-      return data as Member;
+      return data;
     },
-    enabled: !!id && !!currentTenant?.id,
+    enabled: !!id
   });
 
-  // Get membership categories
-  const { data: categories } = useQuery({
-    queryKey: ['categories', 'membership', currentTenant?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .eq('is_active', true)
-        .eq('type', 'membership')
-        .is('deleted_at', null)
-        .order('sort_order');
-
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      setIsDeleting(true);
+      const { error } = await supabase
+        .from('members')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id);
+      
       if (error) throw error;
-      return data as Category[];
+      return true;
     },
-    enabled: !!currentTenant?.id,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      navigate('/members');
+    },
+    onError: (error) => {
+      console.error('Error deleting member:', error);
+      setIsDeleting(false);
+    },
+    onSettled: () => {
+      setDeleteDialogOpen(false);
+    }
   });
 
-  // Get status categories
-  const { data: statusCategories } = useQuery({
-    queryKey: ['categories', 'member_status', currentTenant?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .eq('is_active', true)
-        .eq('type', 'member_status')
-        .is('deleted_at', null)
-        .order('sort_order');
-
-      if (error) throw error;
-      return data as Category[];
-    },
-    enabled: !!currentTenant?.id,
-  });
-
-  // Get transactions for this member
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ['member-transactions', id, currentTenant?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('financial_transactions')
-        .select('*')
-        .eq('member_id', id)
-        .eq('tenant_id', currentTenant?.id)
-        .order('date', { ascending: false });
-
-      if (error) throw error;
-      return data as Transaction[];
-    },
-    enabled: !!id && !!currentTenant?.id,
-  });
-
-  const getMembershipCategory = (categoryId: string) => {
-    return categories?.find(c => c.id === categoryId)?.name || 'Unknown';
+  // Get member initials for avatar fallback
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`;
   };
 
-  const getStatusCategory = (categoryId: string) => {
-    return statusCategories?.find(c => c.id === categoryId)?.name || 'Unknown';
+  // Format date for display
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
   };
 
-  const getStatusColor = (statusId: string) => {
-    const status = statusCategories?.find(c => c.id === statusId)?.code;
-    const statusColors: Record<string, string> = {
-      active: 'success',
-      inactive: 'secondary',
-      under_discipline: 'destructive',
-      regular_attender: 'info',
-      visitor: 'warning',
-      withdrawn: 'warning',
-      removed: 'destructive',
-      donor: 'primary'
-    };
-
-    return statusColors[status || ''] || 'secondary';
-  };
-
-  const tabs = [
-    {
-      id: 'overview',
-      label: 'Overview',
-      icon: <User className="h-5 w-5" />,
-    },
-    {
-      id: 'ministry',
-      label: 'Ministry',
-      icon: <Heart className="h-5 w-5" />,
-    },
-    {
-      id: 'financial',
-      label: 'Financial',
-      icon: <DollarSign className="h-5 w-5" />,
-    },
-  ];
-
-  const [activeTab, setActiveTab] = useState('overview');
-
-  if (memberLoading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (!member) {
+  if (error || !member) {
     return (
-      <Card className="text-center py-8">
-        <h3 className="text-lg font-medium text-foreground">Member not found</h3>
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <AlertTriangle className="h-12 w-12 text-warning mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">Member Not Found</h3>
+          <p className="text-muted-foreground mb-6">The member you're looking for doesn't exist or has been removed.</p>
+          <Button onClick={() => navigate('/members')}>
+            Go Back to Members
+          </Button>
+        </CardContent>
       </Card>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        onClick={() => navigate('/members')}
-        className="flex items-center"
-      >
-        <ArrowLeft className="h-5 w-5 mr-2" />
-        Back to Members
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/members')}
+          className="flex items-center"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back to Members
+        </Button>
+        
+        <div className="flex space-x-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/members/${id}/edit`)}
+            className="flex items-center"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="flex items-center"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
+        </div>
+      </div>
 
-      {/* Member Profile Card */}
+      {/* Member Header Card */}
       <Card>
-        <CardHeader className="relative">
-          <div className="flex items-center">
-            <div className="relative">
-              <ImageInput
-                value={member.profile_picture_url}
-                onChange={() => {}}
-                size="xl"
-                shape="circle"
-                className="ring-4 ring-background"
-              />
-            </div>
-            <div className="ml-6">
-              <h2 className="text-2xl font-bold text-foreground">
-                {member.preferred_name || `${member.first_name} ${member.middle_name ? `${member.middle_name} ` : ''}${member.last_name}`}
-              </h2>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Badge variant={getStatusColor(member.status_category_id)}>
-                  {getStatusCategory(member.status_category_id)}
-                </Badge>
-                <Badge variant="primary">
-                  {getMembershipCategory(member.membership_category_id)}
-                </Badge>
-                {member.leadership_position && (
-                  <Badge variant="info">
-                    {member.leadership_position}
-                  </Badge>
-                )}
-              </div>
-              <div className="mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(`/members/${id}/edit`)}
-                  className="flex items-center"
-                >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          <Tabs
-            tabs={tabs}
-            activeTab={activeTab}
-            onChange={setActiveTab}
-            variant="enclosed"
-            size="sm"
-          />
-
-          <div className="mt-6">
-            <ScrollArea className="h-[calc(100vh-24rem)]">
-              {activeTab === 'overview' && (
-                <div className="space-y-8">
-                  {/* Basic Information */}
-                  <div>
-                    <h4 className="text-lg font-medium text-foreground mb-4">Basic Information</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                          <User className="h-5 w-5 mr-2" />
-                          Full Name
-                        </dt>
-                        <dd className="mt-1 text-sm text-foreground">
-                          {member.first_name} {member.middle_name && `${member.middle_name} `}{member.last_name}
-                          {member.preferred_name && (
-                            <span className="ml-2 text-muted-foreground">
-                              (Preferred: {member.preferred_name})
-                            </span>
-                          )}
-                        </dd>
-                      </div>
-
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                          <Users className="h-5 w-5 mr-2" />
-                          Gender & Marital Status
-                        </dt>
-                        <dd className="mt-1 text-sm text-foreground">
-                          {member.gender?.charAt(0).toUpperCase() + member.gender?.slice(1) || 'Not specified'}, {' '}
-                          {member.marital_status?.charAt(0).toUpperCase() + member.marital_status?.slice(1) || 'Not specified'}
-                        </dd>
-                      </div>
-
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                          <Cake className="h-5 w-5 mr-2" />
-                          Birthday
-                        </dt>
-                        <dd className="mt-1 text-sm text-foreground">
-                          {member.birthday
-                            ? format(new Date(member.birthday), 'MMMM d, yyyy')
-                            : 'Not specified'}
-                        </dd>
-                      </div>
-
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                          <Calendar className="h-5 w-5 mr-2" />
-                          Baptism Date
-                        </dt>
-                        <dd className="mt-1 text-sm text-foreground">
-                          {member.baptism_date
-                            ? format(new Date(member.baptism_date), 'MMMM d, yyyy')
-                            : 'Not specified'}
-                        </dd>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Contact Information */}
-                  <div>
-                    <h4 className="text-lg font-medium text-foreground mb-4">Contact Information</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                          <Phone className="h-5 w-5 mr-2" />
-                          Contact Number
-                        </dt>
-                        <dd className="mt-1 text-sm text-foreground">{member.contact_number}</dd>
-                      </div>
-
-                      {member.email && (
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Mail className="h-5 w-5 mr-2" />
-                            Email Address
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">{member.email}</dd>
-                        </div>
-                      )}
-
-                      <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                          <MapPin className="h-5 w-5 mr-2" />
-                          Address
-                        </dt>
-                        <dd className="mt-1 text-sm text-foreground">{member.address}</dd>
-                      </div>
-
-                      {member.emergency_contact_name && (
-                        <div className="sm:col-span-2">
-                          <dt className="text-sm font-medium text-muted-foreground">Emergency Contact</dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.emergency_contact_name} - {member.emergency_contact_phone}
-                          </dd>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Church Information */}
-                  <div>
-                    <h4 className="text-lg font-medium text-foreground mb-4">Church Information</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                          <Users className="h-5 w-5 mr-2" />
-                          Membership Status
-                        </dt>
-                        <dd className="mt-1 text-sm text-foreground">
-                          {getStatusCategory(member.status_category_id)}
-                        </dd>
-                      </div>
-
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                          <Calendar className="h-5 w-5 mr-2" />
-                          Membership Date
-                        </dt>
-                        <dd className="mt-1 text-sm text-foreground">
-                          {member.membership_date
-                            ? format(new Date(member.membership_date), 'MMMM d, yyyy')
-                            : 'Not specified'}
-                        </dd>
-                      </div>
-
-                      {member.envelope_number && (
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground">
-                            Envelope Number
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">{member.envelope_number}</dd>
-                        </div>
-                      )}
-
-                      {member.leadership_position && (
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Briefcase className="h-5 w-5 mr-2" />
-                            Leadership Position
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">{member.leadership_position}</dd>
-                        </div>
-                      )}
-                    </div>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <Avatar className="h-24 w-24 border-2 border-primary">
+              {member.profile_picture_url ? (
+                <AvatarImage src={member.profile_picture_url} alt={`${member.first_name} ${member.last_name}`} />
+              ) : (
+                <AvatarFallback className="text-xl">
+                  {getInitials(member.first_name, member.last_name)}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            
+            <div className="flex-1">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold">
+                    {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}{member.last_name}
+                    {member.preferred_name && <span className="text-muted-foreground ml-2 text-lg">({member.preferred_name})</span>}
+                  </h1>
+                  
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {member.membership_categories && (
+                      <Badge variant="secondary">{member.membership_categories.name}</Badge>
+                    )}
+                    {member.status_categories && (
+                      <Badge variant="outline">{member.status_categories.name}</Badge>
+                    )}
+                    {member.envelope_number && (
+                      <Badge variant="outline" className="bg-primary-50 text-primary border-primary-200">
+                        Envelope #{member.envelope_number}
+                      </Badge>
+                    )}
                   </div>
                 </div>
-              )}
-
-              {activeTab === 'ministry' && (
-                <div className="space-y-8">
-                  {/* Ministry Information */}
-                  <div>
-                    <h4 className="text-lg font-medium text-foreground mb-4">Ministry Information</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {member.spiritual_gifts && member.spiritual_gifts.length > 0 && (
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Gift className="h-5 w-5 mr-2" />
-                            Spiritual Gifts
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.spiritual_gifts.join(', ')}
-                          </dd>
-                        </div>
-                      )}
-
-                      {member.ministry_interests && member.ministry_interests.length > 0 && (
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Heart className="h-5 w-5 mr-2" />
-                            Ministry Interests
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.ministry_interests.join(', ')}
-                          </dd>
-                        </div>
-                      )}
-
-                      {member.volunteer_roles && member.volunteer_roles.length > 0 && (
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <UserPlus className="h-5 w-5 mr-2" />
-                            Volunteer Roles
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.volunteer_roles.join(', ')}
-                          </dd>
-                        </div>
-                      )}
-
-                      {member.small_groups && member.small_groups.length > 0 && (
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                            <Users className="h-5 w-5 mr-2" />
-                            Small Groups
-                          </dt>
-                          <dd className="mt-1 text-sm text-foreground">
-                            {member.small_groups.join(', ')}
-                          </dd>
-                        </div>
-                      )}
+                
+                <div className="flex flex-col gap-2">
+                  {member.birthday && (
+                    <div className="flex items-center text-sm">
+                      <Cake className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>Birthday: {formatDate(member.birthday)}</span>
                     </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Additional Notes */}
-                  {(member.pastoral_notes || (member.prayer_requests && member.prayer_requests.length > 0)) && (
-                    <div>
-                      <h4 className="text-lg font-medium text-foreground mb-4">Additional Notes</h4>
-                      <div className="grid grid-cols-1 gap-4">
-                        {member.pastoral_notes && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground">Pastoral Notes</dt>
-                            <dd className="mt-1 text-sm text-foreground whitespace-pre-line">
-                              {member.pastoral_notes}
-                            </dd>
-                          </div>
-                        )}
-
-                        {member.prayer_requests && member.prayer_requests.length > 0 && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground">Prayer Requests</dt>
-                            <dd className="mt-1 text-sm text-foreground">
-                              <ul className="list-disc pl-5 space-y-1">
-                                {member.prayer_requests.map((request, index) => (
-                                  <li key={index}>{request}</li>
-                                ))}
-                              </ul>
-                            </dd>
-                          </div>
-                        )}
-                      </div>
+                  )}
+                  {member.membership_date && (
+                    <div className="flex items-center text-sm">
+                      <Heart className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>Member since: {formatDate(member.membership_date)}</span>
                     </div>
                   )}
                 </div>
-              )}
-
-              {activeTab === 'financial' && (
-                <div className="space-y-8">
-                  {/* Financial Summary */}
-                  <div>
-                    <h4 className="text-lg font-medium text-foreground mb-4">Financial Summary</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <TrendingUp className="h-5 w-5 text-success" />
-                              <h3 className="ml-2 text-sm font-medium text-foreground">Total Contributions</h3>
-                            </div>
-                            <Badge variant="success">YTD</Badge>
-                          </div>
-                          <p className="mt-2 text-2xl font-semibold text-foreground">
-                            {formatCurrency(
-                              transactions
-                                ?.filter(t => t.type === 'income')
-                                .reduce((sum, t) => sum + Number(t.amount), 0) || 0,
-                              currency
-                            )}
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <TrendingDown className="h-5 w-5 text-destructive" />
-                              <h3 className="ml-2 text-sm font-medium text-foreground">Total Expenses</h3>
-                            </div>
-                            <Badge variant="destructive">YTD</Badge>
-                          </div>
-                          <p className="mt-2 text-2xl font-semibold text-foreground">
-                            {formatCurrency(
-                              transactions
-                                ?.filter(t => t.type === 'expense')
-                                .reduce((sum, t) => sum + Number(t.amount), 0) || 0,
-                              currency
-                            )}
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <DollarSign className="h-5 w-5 text-primary" />
-                              <h3 className="ml-2 text-sm font-medium text-foreground">Average Contribution</h3>
-                            </div>
-                            <Badge variant="primary">Per Transaction</Badge>
-                          </div>
-                          <p className="mt-2 text-2xl font-semibold text-foreground">
-                            {formatCurrency(
-                              transactions?.filter(t => t.type === 'income').length
-                                ? transactions
-                                    ?.filter(t => t.type === 'income')
-                                    .reduce((sum, t) => sum + Number(t.amount), 0) /
-                                  transactions?.filter(t => t.type === 'income').length
-                                : 0,
-                              currency
-                            )}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
+                {member.email && (
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <a href={`mailto:${member.email}`} className="text-primary hover:underline">
+                      {member.email}
+                    </a>
                   </div>
-
-                  <Separator />
-
-                  {/* Transaction History */}
-                  <div>
-                    <h4 className="text-lg font-medium text-foreground mb-4">Transaction History</h4>
-                    <div className="space-y-4">
-                      {transactions?.map((transaction) => (
-                        <Card key={transaction.id}>
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-4">
-                                {transaction.type === 'income' ? (
-                                  <TrendingUp className="h-5 w-5 text-success" />
-                                ) : (
-                                  <TrendingDown className="h-5 w-5 text-destructive" />
-                                )}
-                                <div>
-                                  <p className="text-sm font-medium text-foreground">
-                                    {transaction.description}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {format(new Date(transaction.date), 'MMM d, yyyy')}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className={`text-sm font-medium ${
-                                  transaction.type === 'income' 
-                                    ? 'text-success' 
-                                    : 'text-destructive'
-                                }`}>
-                                  {transaction.type === 'income' ? '+' : '-'}
-                                  {formatCurrency(transaction.amount, currency)}
-                                </p>
-                                <Badge variant={transaction.type === 'income' ? 'success' : 'destructive'}>
-                                  {transaction.category}
-                                </Badge>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-
-                      {(!transactions || transactions.length === 0) && (
-                        <Card>
-                          <CardContent className="p-8 text-center">
-                            <p className="text-sm text-muted-foreground">
-                              No transactions found
-                            </p>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
+                )}
+                {member.contact_number && (
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <a href={`tel:${member.contact_number}`} className="text-primary hover:underline">
+                      {member.contact_number}
+                    </a>
                   </div>
-                </div>
-              )}
-            </ScrollArea>
+                )}
+                {member.address && (
+                  <div className="flex items-center md:col-span-2">
+                    <MapPin className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
+                    <span className="truncate">{member.address}</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Member Details Tabs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Member Details</CardTitle>
+          <CardDescription>View and manage member information</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-6">
+              <TabsTrigger value="basic">
+                <User className="h-4 w-4 mr-2" />
+                Basic Info
+              </TabsTrigger>
+              <TabsTrigger value="contact">
+                <Phone className="h-4 w-4 mr-2" />
+                Contact Info
+              </TabsTrigger>
+              <TabsTrigger value="ministry">
+                <Users className="h-4 w-4 mr-2" />
+                Ministry Info
+              </TabsTrigger>
+              <TabsTrigger value="notes">
+                <FileText className="h-4 w-4 mr-2" />
+                Notes
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="basic">
+              <BasicInfoTab mode="view" member={member} onChange={() => {}} />
+            </TabsContent>
+
+            <TabsContent value="contact">
+              <ContactInfoTab mode="view" member={member} onChange={() => {}} />
+            </TabsContent>
+
+            <TabsContent value="ministry">
+              <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
+            </TabsContent>
+
+            <TabsContent value="notes">
+              <NotesTab mode="view" member={member} onChange={() => {}} />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="danger">Delete Member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this member? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                deleteMutation.mutate();
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Member'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

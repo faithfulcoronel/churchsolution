@@ -1,4 +1,3 @@
-// src/components/snackbar/SolidSnackbar.tsx
 import React from 'react';
 import { SnackbarContent, CustomContentProps } from 'notistack';
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';

@@ -1,4 +1,3 @@
-// src/providers/SnackbarProvider.tsx
 import { SolidSnackbar } from '@/components/snackbar';
 import { SnackbarProvider as CustomSnackbarProvider } from 'notistack';
 import { type PropsWithChildren } from 'react';

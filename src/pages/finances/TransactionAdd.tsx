@@ -1,384 +1,563 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
+import { useChartOfAccounts } from '../../hooks/useChartOfAccounts';
+import { useFinancialSourceRepository } from '../../hooks/useFinancialSourceRepository';
+import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
+import { Textarea } from '../../components/ui2/textarea';
 import { DatePickerInput } from '../../components/ui2/date-picker';
-import { Combobox } from '../../components/ui2/combobox';
-import {
-  ArrowLeft,
-  Save,
-  Loader2,
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui2/select';
+import { 
+  ArrowLeft, 
+  Save, 
+  Loader2, 
+  Plus, 
+  Trash2, 
   DollarSign,
-  TrendingUp,
-  TrendingDown,
+  FileText,
+  AlertCircle
 } from 'lucide-react';
+import { useCurrencyStore } from '../../stores/currencyStore';
+import { formatCurrency } from '../../utils/currency';
 
-type Transaction = {
-  type: 'income' | 'expense';
-  category_id: string;
-  amount: number;
+interface TransactionEntry {
+  id?: string;
+  account_id: string;
   description: string;
-  date: string;
-  budget_id?: string;
-  member_id?: string;
-};
+  debit: number | null;
+  credit: number | null;
+}
 
 function TransactionAdd() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { currency } = useCurrencyStore();
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Transaction>({
-    type: 'income',
-    category_id: '',
-    amount: 0,
+  const isEditMode = !!id;
+  
+  // Repositories
+  const { useQuery, useCreate, useUpdate, getTransactionEntries } = useFinancialTransactionHeaderRepository();
+  const { useAccountOptions } = useChartOfAccounts();
+  const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
+  
+  // Create/update mutation
+  const createMutation = useCreate();
+  const updateMutation = useUpdate();
+  
+  // Get account options
+  const { data: accountOptions, isLoading: isAccountsLoading } = useAccountOptions();
+  
+  // Get financial sources
+  const { data: sourcesData, isLoading: isSourcesLoading } = useSourcesQuery({
+    filters: {
+      is_active: {
+        operator: 'eq',
+        value: true
+      }
+    }
+  });
+  const sources = sourcesData?.data || [];
+  
+  // Get transaction data if in edit mode
+  const { data: transactionData, isLoading: isTransactionLoading } = useQuery({
+    filters: {
+      id: {
+        operator: 'eq',
+        value: id
+      }
+    },
+    relationships: [
+      {
+        table: 'financial_sources',
+        foreignKey: 'source_id',
+        select: ['id', 'name', 'source_type']
+      }
+    ],
+    enabled: isEditMode
+  });
+  
+  // Form state
+  const [headerData, setHeaderData] = useState({
+    transaction_date: new Date().toISOString().split('T')[0],
     description: '',
-    date: new Date().toISOString().split('T')[0],
+    reference: '',
+    source_id: 'none'
   });
-
-  // Get current tenant
-  const { data: currentTenant } = useQuery({
-    queryKey: ['current-tenant'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_current_tenant');
-      if (error) throw error;
-      return data?.[0];
-    },
-  });
-
-  // Get budgets
-  const { data: budgets } = useQuery({
-    queryKey: ['budgets', currentTenant?.id],
-    queryFn: async () => {
-      const today = new Date().toISOString();
-      
-      // Get active budgets
-      const { data: budgets, error: budgetsError } = await supabase
-        .from('budgets')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .lte('start_date', today)
-        .gte('end_date', today);
-
-      if (budgetsError) throw budgetsError;
-
-      // Get used amounts for each budget
-      const budgetsWithUsage = await Promise.all(
-        (budgets || []).map(async (budget) => {
-          const { data: transactions, error: transactionsError } = await supabase
-            .from('financial_transactions')
-            .select('amount')
-            .eq('budget_id', budget.id)
-            .eq('type', 'expense');
-
-          if (transactionsError) throw transactionsError;
-
-          const used_amount = transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-          return {
-            ...budget,
-            used_amount,
-          };
-        })
-      );
-
-      return budgetsWithUsage;
-    },
-    enabled: !!currentTenant?.id,
-  });
-
-  // Get members
-  const { data: members } = useQuery({
-    queryKey: ['members', currentTenant?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('members')
-        .select('id, first_name, last_name')
-        .eq('tenant_id', currentTenant?.id)
-        .is('deleted_at', null)
-        .order('last_name');
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentTenant?.id,
-  });
-
-  // Get categories based on transaction type
-  const { data: categories } = useQuery({
-    queryKey: ['categories', formData.type, currentTenant?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .eq('is_active', true)
-        .eq('type', `${formData.type}_transaction`)
-        .is('deleted_at', null)
-        .order('sort_order');
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentTenant?.id,
-  });
-
-  const addTransactionMutation = useMutation({
-    mutationFn: async (data: Transaction) => {
-      const { data: newTransaction, error } = await supabase
-        .from('financial_transactions')
-        .insert([{
-          ...data,
-          tenant_id: currentTenant?.id,
-          created_by: (await supabase.auth.getUser()).data.user?.id,
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return newTransaction;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['finance-stats'] });
-      navigate('/finances/transactions');
-    },
-    onError: (error: Error) => {
-      setError(error.message);
-    },
-  });
-
+  
+  const [entries, setEntries] = useState<TransactionEntry[]>([
+    { account_id: '', description: '', debit: null, credit: null },
+    { account_id: '', description: '', debit: null, credit: null }
+  ]);
+  
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(isEditMode);
+  
+  // Load transaction data if in edit mode
+  React.useEffect(() => {
+    const loadTransactionData = async () => {
+      if (isEditMode && id && transactionData?.data?.[0]) {
+        const header = transactionData.data[0];
+        
+        // Set header data
+        setHeaderData({
+          transaction_date: header.transaction_date,
+          description: header.description,
+          reference: header.reference || '',
+          source_id: header.source_id || 'none'
+        });
+        
+        try {
+          // Load transaction entries
+          const entriesData = await getTransactionEntries(id);
+          
+          if (entriesData && entriesData.length > 0) {
+            setEntries(entriesData.map(entry => ({
+              id: entry.id,
+              account_id: entry.account_id,
+              description: entry.description,
+              debit: entry.debit || null,
+              credit: entry.credit || null
+            })));
+          }
+        } catch (error) {
+          console.error('Error loading transaction entries:', error);
+          setError('Failed to load transaction entries');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadTransactionData();
+  }, [isEditMode, id, transactionData, getTransactionEntries]);
+  
+  // Calculate totals
+  const totalDebits = entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
+  const totalCredits = entries.reduce((sum, entry) => sum + (entry.credit || 0), 0);
+  const isBalanced = Math.abs(totalDebits - totalCredits) < 0.01;
+  
+  // Handle header field changes
+  const handleHeaderChange = (field: string, value: string) => {
+    setHeaderData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  // Handle entry field changes
+  const handleEntryChange = (index: number, field: string, value: any) => {
+    const newEntries = [...entries];
+    
+    if (field === 'debit' && value !== null && value !== '') {
+      // If debit is set, clear credit
+      newEntries[index] = {
+        ...newEntries[index],
+        [field]: parseFloat(value) || 0,
+        credit: null
+      };
+    } else if (field === 'credit' && value !== null && value !== '') {
+      // If credit is set, clear debit
+      newEntries[index] = {
+        ...newEntries[index],
+        [field]: parseFloat(value) || 0,
+        debit: null
+      };
+    } else {
+      newEntries[index] = {
+        ...newEntries[index],
+        [field]: value
+      };
+    }
+    
+    setEntries(newEntries);
+  };
+  
+  // Add new entry row
+  const addEntry = () => {
+    setEntries([...entries, { account_id: '', description: '', debit: null, credit: null }]);
+  };
+  
+  // Remove entry row
+  const removeEntry = (index: number) => {
+    if (entries.length <= 2) {
+      setError('A transaction must have at least two entries');
+      return;
+    }
+    
+    const newEntries = [...entries];
+    newEntries.splice(index, 1);
+    setEntries(newEntries);
+  };
+  
+  // Validate form
+  const validateForm = () => {
+    // Reset error
+    setError(null);
+    
+    // Check header fields
+    if (!headerData.transaction_date) {
+      setError('Transaction date is required');
+      return false;
+    }
+    
+    if (!headerData.description.trim()) {
+      setError('Transaction description is required');
+      return false;
+    }
+    
+    // Check entries
+    if (entries.length < 2) {
+      setError('A transaction must have at least two entries');
+      return false;
+    }
+    
+    // Check if all entries have an account
+    const missingAccount = entries.some(entry => !entry.account_id);
+    if (missingAccount) {
+      setError('All entries must have an account selected');
+      return false;
+    }
+    
+    // Check if all entries have either debit or credit
+    const invalidAmount = entries.some(entry => 
+      (entry.debit === null || entry.debit === undefined || entry.debit === 0) && 
+      (entry.credit === null || entry.credit === undefined || entry.credit === 0)
+    );
+    if (invalidAmount) {
+      setError('All entries must have either a debit or credit amount');
+      return false;
+    }
+    
+    // Check if transaction is balanced
+    if (!isBalanced) {
+      setError('Transaction must be balanced (total debits must equal total credits)');
+      return false;
+    }
+    
+    return true;
+  };
+  
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.category_id || !formData.amount || !formData.description || !formData.date) {
-      setError('Please fill in all required fields');
+    if (!validateForm()) {
       return;
     }
-
-    if (formData.type === 'income' && !formData.member_id) {
-      setError('Please select a member for income transactions');
-      return;
-    }
-
-    if (formData.type === 'expense' && !formData.budget_id) {
-      setError('Please select a budget for expense transactions');
-      return;
-    }
-
+    
     try {
-      await addTransactionMutation.mutateAsync(formData);
+      // Format entries for submission
+      const formattedEntries = entries.map(entry => ({
+        id: entry.id, // Include ID for existing entries
+        account_id: entry.account_id,
+        description: entry.description || headerData.description,
+        debit: entry.debit || 0,
+        credit: entry.credit || 0,
+        date: headerData.transaction_date
+      }));
+      
+      if (isEditMode && id) {
+        // Update transaction
+        await updateMutation.mutateAsync({
+          id,
+          data: {
+            transaction_date: headerData.transaction_date,
+            description: headerData.description,
+            reference: headerData.reference || null,
+            source_id: headerData.source_id === 'none' ? null : headerData.source_id
+          },
+          relations: {
+            transactions: formattedEntries
+          }
+        });
+      } else {
+        // Create transaction
+        await createMutation.mutateAsync({
+          data: {
+            transaction_date: headerData.transaction_date,
+            description: headerData.description,
+            reference: headerData.reference || null,
+            source_id: headerData.source_id === 'none' ? null : headerData.source_id,
+            status: 'draft'
+          },
+          relations: {
+            transactions: formattedEntries
+          }
+        });
+      }
+      
+      // Navigate to transaction list
+      navigate('/finances/transactions');
     } catch (error) {
-      console.error('Error adding transaction:', error);
+      console.error('Error saving transaction:', error);
+      setError(error instanceof Error ? error.message : 'An error occurred while saving the transaction');
     }
   };
-
-  const handleInputChange = (
-    field: keyof Transaction,
-    value: string | number
-  ) => {
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [field]: value,
-      };
-
-      // Clear category when changing type
-      if (field === 'type') {
-        newData.category_id = '';
-      }
-
-      // Clear member/budget when changing type
-      if (field === 'type') {
-        if (value === 'income') {
-          delete newData.budget_id;
-        } else {
-          delete newData.member_id;
-        }
-      }
-
-      return newData;
-    });
-  };
-
-  const budgetOptions = React.useMemo(() => 
-    budgets?.map(b => ({
-      value: b.id,
-      label: `${b.name} (${formatCurrency(b.amount - (b.used_amount || 0), currency)} remaining)`
-    })) || [], 
-    [budgets, currency]
-  );
-
-  const memberOptions = React.useMemo(() => 
-    members?.map(m => ({
-      value: m.id,
-      label: `${m.first_name} ${m.last_name}`
-    })) || [], 
-    [members]
-  );
-
-  const categoryOptions = React.useMemo(() => 
-    categories?.map(c => ({
-      value: c.id,
-      label: c.name
-    })) || [],
-    [categories]
-  );
-
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => navigate('/finances')}
+          onClick={() => navigate('/finances/transactions')}
           className="flex items-center"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Finances
+          Back to Transactions
         </Button>
       </div>
-
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-medium text-foreground">Add New Transaction</h3>
-          <p className="text-sm text-muted-foreground">
-            Record a new financial transaction
-          </p>
-        </CardHeader>
-
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+      
+      <form onSubmit={handleSubmit}>
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center">
+              <FileText className="h-6 w-6 text-primary mr-2" />
+              <h3 className="text-lg font-medium">
+                {isEditMode ? 'Edit Transaction' : 'New Transaction'}
+              </h3>
+            </div>
+          </CardHeader>
+          
+          <CardContent>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
+                <DatePickerInput
+                  label="Transaction Date"
+                  value={headerData.transaction_date ? new Date(headerData.transaction_date) : undefined}
+                  onChange={(date) => handleHeaderChange('transaction_date', date ? date.toISOString().split('T')[0] : '')}
+                  placeholder="Select date"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1.5 text-foreground">
+                  Financial Source
+                </label>
                 <Select
-                  value={formData.type}
-                  onValueChange={(value) => handleInputChange('type', value)}
+                  value={headerData.source_id}
+                  onValueChange={(value) => handleHeaderChange('source_id', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Type" />
+                    <SelectValue placeholder="Select financial source (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="income">
-                      <div className="flex items-center">
-                        <TrendingUp className="h-4 w-4 mr-2 text-success" />
-                        Income
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="expense">
-                      <div className="flex items-center">
-                        <TrendingDown className="h-4 w-4 mr-2 text-destructive" />
-                        Expense
-                      </div>
-                    </SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                    {isSourcesLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Loading sources...
+                      </SelectItem>
+                    ) : (
+                      sources.map(source => (
+                        <SelectItem key={source.id} value={source.id}>
+                          {source.name} ({source.source_type})
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
-
-              <div>
-                <Combobox
-                  options={categoryOptions}
-                  value={formData.category_id}
-                  onChange={(value) => handleInputChange('category_id', value)}
-                  placeholder="Select Category"
-                />
-              </div>
-
-              <div>
-                <Input
-                  type="number"
-                  value={formData.amount || ''}
-                  onChange={(e) => handleInputChange('amount', e.target.value)}
-                  icon={<DollarSign className="h-4 w-4" />}
-                  placeholder="Amount"
-                  min={0}
-                  step="0.01"
-                />
-              </div>
-
-              <div>
-                <DatePickerInput
-                  value={formData.date ? new Date(formData.date) : undefined}
-                  onChange={(date) => handleInputChange(
-                    'date',
-                    date?.toISOString().split('T')[0] || ''
-                  )}
-                  placeholder="Date"
-                />
-              </div>
-
-              {formData.type === 'expense' ? (
-                <div>
-                  <Combobox
-                    options={budgetOptions}
-                    value={formData.budget_id}
-                    onChange={(value) => handleInputChange('budget_id', value)}
-                    placeholder="Select Budget"
-                  />
-                </div>
-              ) : (
-                <div>
-                  <Combobox
-                    options={memberOptions}
-                    value={formData.member_id}
-                    onChange={(value) => handleInputChange('member_id', value)}
-                    placeholder="Select Member"
-                  />
-                </div>
-              )}
-
+              
               <div className="sm:col-span-2">
                 <Input
-                  placeholder="Description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  label="Description"
+                  value={headerData.description}
+                  onChange={(e) => handleHeaderChange('description', e.target.value)}
+                  placeholder="Enter transaction description"
+                  required
+                />
+              </div>
+              
+              <div className="sm:col-span-2">
+                <Input
+                  label="Reference (Optional)"
+                  value={headerData.reference}
+                  onChange={(e) => handleHeaderChange('reference', e.target.value)}
+                  placeholder="Enter reference number or document"
                 />
               </div>
             </div>
-
+          </CardContent>
+        </Card>
+        
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <DollarSign className="h-6 w-6 text-primary mr-2" />
+                <h3 className="text-lg font-medium">Transaction Entries</h3>
+              </div>
+              
+              <Button
+                type="button"
+                onClick={addEntry}
+                className="flex items-center"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Entry
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Account</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Description</th>
+                    <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">Debit</th>
+                    <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">Credit</th>
+                    <th className="px-4 py-2 text-center text-sm font-medium text-muted-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {entries.map((entry, index) => (
+                    <tr key={index} className="border-b border-border">
+                      <td className="px-4 py-2">
+                        <Select
+                          value={entry.account_id}
+                          onValueChange={(value) => handleEntryChange(index, 'account_id', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select account" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {isAccountsLoading ? (
+                              <SelectItem value="loading" disabled>
+                                Loading accounts...
+                              </SelectItem>
+                            ) : (
+                              accountOptions?.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="px-4 py-2">
+                        <Input
+                          value={entry.description}
+                          onChange={(e) => handleEntryChange(index, 'description', e.target.value)}
+                          placeholder="Entry description (optional)"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <Input
+                          type="number"
+                          value={entry.debit !== null ? entry.debit : ''}
+                          onChange={(e) => handleEntryChange(index, 'debit', e.target.value)}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          className="text-right"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <Input
+                          type="number"
+                          value={entry.credit !== null ? entry.credit : ''}
+                          onChange={(e) => handleEntryChange(index, 'credit', e.target.value)}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          className="text-right"
+                        />
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeEntry(index)}
+                          disabled={entries.length <= 2}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-border font-medium">
+                    <td className="px-4 py-2" colSpan={2}>
+                      Totals
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {formatCurrency(totalDebits, currency)}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {formatCurrency(totalCredits, currency)}
+                    </td>
+                    <td className="px-4 py-2"></td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2" colSpan={2}>
+                      Difference
+                    </td>
+                    <td className="px-4 py-2 text-right" colSpan={2}>
+                      <span className={isBalanced ? 'text-success' : 'text-destructive'}>
+                        {isBalanced 
+                          ? 'Balanced' 
+                          : formatCurrency(Math.abs(totalDebits - totalCredits), currency)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            
             {error && (
-              <div className="rounded-lg bg-destructive/15 p-4">
+              <div className="mt-4 bg-destructive/10 border border-destructive/30 rounded-md p-4">
                 <div className="flex">
+                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-destructive">{error}</h3>
                   </div>
                 </div>
               </div>
             )}
-
-            <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/finances')}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={addTransactionMutation.isPending}
-              >
-                {addTransactionMutation.isPending ? (
-                  <>
-                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Add Transaction
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+          
+          <CardFooter className="flex justify-end space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/finances/transactions')}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createMutation.isPending || updateMutation.isPending || !isBalanced}
+            >
+              {createMutation.isPending || updateMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {isEditMode ? 'Update Transaction' : 'Create Transaction'}
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
     </div>
   );
 }

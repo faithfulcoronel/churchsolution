@@ -18,28 +18,76 @@ interface SelectTriggerProps
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   SelectTriggerProps
->(({ className, children, icon, error, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-      error && 'border-destructive focus:ring-destructive',
-      icon && 'pl-10',
-      className
-    )}
-    {...props}
-  >
-    {icon && (
-      <span className="absolute left-3 flex items-center text-muted-foreground">
-        {icon}
-      </span>
-    )}
-    {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50" />
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
-));
+>(({
+  className,
+  children,
+  icon,
+  label,
+  error,
+  helperText,
+  required,
+  disabled,
+  ...props
+}, ref) => {
+  const id = props.id ?? React.useId();
+
+  return (
+    <div className="w-full">
+      {label && (
+        <label
+          htmlFor={id}
+          className={cn(
+            'block text-sm font-medium mb-1.5 dark:text-gray-300',
+            error ? 'text-destructive' : 'text-foreground',
+            disabled && 'opacity-50'
+          )}
+        >
+          {label}
+          {required && <span className="text-destructive ml-1">*</span>}
+        </label>
+      )}
+
+      <SelectPrimitive.Trigger
+        ref={ref}
+        id={id}
+        disabled={disabled}
+        aria-invalid={error ? 'true' : undefined}
+        aria-describedby={
+          error || helperText ? `${id}-description` : undefined
+        }
+        className={cn(
+          'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800',
+          error && 'border-destructive focus:ring-destructive',
+          icon && 'pl-10',
+          className
+        )}
+        {...props}
+      >
+        {icon && (
+          <span className="absolute left-3 flex items-center text-muted-foreground dark:text-gray-400">
+            {icon}
+          </span>
+        )}
+        {children}
+        <SelectPrimitive.Icon asChild>
+          <ChevronDown className="h-4 w-4 opacity-50 dark:text-gray-400" />
+        </SelectPrimitive.Icon>
+      </SelectPrimitive.Trigger>
+
+      {(helperText || error) && (
+        <p
+          id={`${id}-description`}
+          className={cn(
+            'mt-1.5 text-sm',
+            error ? 'text-destructive' : 'text-muted-foreground'
+          )}
+        >
+          {error || helperText}
+        </p>
+      )}
+    </div>
+  );
+});
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectContent = React.forwardRef<

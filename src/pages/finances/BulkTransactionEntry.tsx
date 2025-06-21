@@ -1,587 +1,799 @@
-import React, { useState, useRef, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
-import { groupBy } from 'lodash-es';
-import { Card } from '../../components/ui2/card';
-import { Input } from '../../components/ui2/input';
-import { Button } from '../../components/ui2/button';
-import { DatePickerInput } from '../../components/ui2/date-picker';
-import { Combobox } from '../../components/ui2/combobox';
-import { Badge } from '../../components/ui2/badge';
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useFinancialTransactionHeaderRepository } from "../../hooks/useFinancialTransactionHeaderRepository";
+import { useChartOfAccounts } from "../../hooks/useChartOfAccounts";
+import { useFinancialSourceRepository } from "../../hooks/useFinancialSourceRepository";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "../../components/ui2/card";
+import { Input } from "../../components/ui2/input";
+import { Button } from "../../components/ui2/button";
+import { Textarea } from "../../components/ui2/textarea";
+import { DatePickerInput } from "../../components/ui2/date-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui2/select";
+import { Combobox } from "../../components/ui2/combobox";
+import { Switch } from "../../components/ui2/switch";
+import { useMemberRepository } from "../../hooks/useMemberRepository";
 import {
   ArrowLeft,
   Save,
   Loader2,
   Plus,
   Trash2,
-  TrendingUp,
-  TrendingDown,
   DollarSign,
-  Calculator,
-  PieChart,
-  Users,
-} from 'lucide-react';
+  FileText,
+  AlertCircle,
+} from "lucide-react";
+import { useCurrencyStore } from "../../stores/currencyStore";
+import { formatCurrency } from "../../utils/currency";
 
-type Transaction = {
-  id?: string;
-  type: 'income' | 'expense';
-  category_id: string;
-  amount: number;
+interface TransactionEntry {
+  member_id: string;
+  account_id: string;
   description: string;
-  date: string;
-  member_id?: string;
-  budget_id?: string;
-  created_by?: string;
-};
+  debit: number | null;
+  credit: number | null;
+}
 
 function BulkTransactionEntry() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { id } = useParams<{ id: string }>();
+  const isEditMode = !!id;
   const { currency } = useCurrencyStore();
+
+  // Repositories
+  const { useCreate, useUpdate, useQuery, getTransactionEntries } =
+    useFinancialTransactionHeaderRepository();
+  const { useAccountOptions } = useChartOfAccounts();
+  const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
+  const { useQuery: useMembersQuery } = useMemberRepository();
+
+  // Get transaction data if editing
+  const { data: transactionData } = useQuery({
+    filters: {
+      id: {
+        operator: "eq",
+        value: id,
+      },
+    },
+    relationships: [
+      {
+        table: "financial_sources",
+        foreignKey: "source_id",
+        select: ["id", "name", "source_type"],
+      },
+    ],
+    enabled: isEditMode,
+  });
+
+  // Create/update mutations
+  const createMutation = useCreate();
+  const updateMutation = useUpdate();
+
+  // Get account options
+  const { data: accountOptions, isLoading: isAccountsLoading } =
+    useAccountOptions();
+
+  // Get financial sources
+  const { data: sourcesData, isLoading: isSourcesLoading } = useSourcesQuery({
+    filters: {
+      is_active: {
+        operator: "eq",
+        value: true,
+      },
+    },
+  });
+  const sources = sourcesData?.data || [];
+
+  // Get members with their accounts
+  const { data: membersData, isLoading: isMembersLoading } = useMembersQuery();
+  const members = membersData?.data || [];
+
+  const memberOptions = React.useMemo(
+    () =>
+      members.map((m) => ({
+        value: m.id,
+        label: `${m.first_name} ${m.last_name}`,
+      })),
+    [members],
+  );
+
+  const memberAccountMap = React.useMemo(() => {
+    const map: Record<string, string> = {};
+    members.forEach((m) => {
+      const acc = (m as any).accounts?.[0];
+      if (acc?.id) {
+        map[m.id] = acc.id as string;
+      }
+    });
+    return map;
+  }, [members]);
+
+  // Form state
+  const [headerData, setHeaderData] = useState({
+    transaction_date: new Date().toISOString().split("T")[0],
+    description: "",
+    reference: "",
+    source_id: "none",
+  });
+
+  const [isLoading, setIsLoading] = useState(isEditMode);
+
+  const [autoBalance, setAutoBalance] = useState(false);
+  const [offsetAccountId, setOffsetAccountId] = useState("");
+
+  // Default offset account when auto balance is enabled
+  React.useEffect(() => {
+    if (!autoBalance || offsetAccountId) return;
+
+    const defaultAccount = accountOptions?.find(
+      (opt) => opt.type === "asset",
+    );
+    if (defaultAccount) {
+      setOffsetAccountId(defaultAccount.value);
+    }
+  }, [autoBalance, offsetAccountId, accountOptions]);
+
+  // Load transaction data when editing
+  React.useEffect(() => {
+    const loadTransactionData = async () => {
+      if (isEditMode && id && transactionData?.data?.[0]) {
+        const header = transactionData.data[0];
+
+        setHeaderData({
+          transaction_date: header.transaction_date,
+          description: header.description,
+          reference: header.reference || "",
+          source_id: header.source_id || "none",
+        });
+
+        try {
+          const entriesData = await getTransactionEntries(id);
+          if (entriesData && entriesData.length > 0) {
+            setEntries(
+              entriesData.map((entry: any) => ({
+                member_id: "",
+                account_id: entry.account_id,
+                description: entry.description,
+                debit: entry.debit || null,
+                credit: entry.credit || null,
+              }))
+            );
+          }
+        } catch (error) {
+          console.error("Error loading transaction entries:", error);
+          setError("Failed to load transaction entries");
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    loadTransactionData();
+  }, [isEditMode, id, transactionData, getTransactionEntries]);
+
+  const [entries, setEntries] = useState<TransactionEntry[]>([
+    {
+      member_id: "",
+      account_id: "",
+      description: "",
+      debit: null,
+      credit: null,
+    },
+    {
+      member_id: "",
+      account_id: "",
+      description: "",
+      debit: null,
+      credit: null,
+    },
+  ]);
+
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
-  const [transactions, setTransactions] = useState<Partial<Transaction>[]>([{
-    type: 'income',
-    amount: 0,
-    category_id: '',
-    description: '',
-    date: new Date().toISOString().split('T')[0],
-  }]);
 
-  // Get current tenant
-  const { data: currentTenant } = useQuery({
-    queryKey: ['current-tenant'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_current_tenant');
-      if (error) throw error;
-      return data?.[0];
-    },
-  });
+  // Build displayed entries including offset when auto balancing
+  const displayedEntries = React.useMemo(() => {
+    if (!autoBalance) return entries;
 
-  // Fetch members
-  const { data: members } = useQuery({
-    queryKey: ['members'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('members')
-        .select('id, first_name, last_name')
-        .eq('tenant_id', currentTenant?.id)
-        .is('deleted_at', null)
-        .order('last_name');
+    const accountId =
+      offsetAccountId || accountOptions?.find((opt) => opt.type === "asset")?.value;
+    if (!accountId) return entries;
 
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentTenant?.id,
-  });
+    const totalDebits = entries.reduce((sum, e) => sum + (e.debit || 0), 0);
+    const totalCredits = entries.reduce((sum, e) => sum + (e.credit || 0), 0);
+    const diff = totalDebits - totalCredits;
 
-  // Fetch budgets
-  const { data: budgets } = useQuery({
-    queryKey: ['budgets'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('budgets')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .order('name');
+    const offset: TransactionEntry = {
+      member_id: "",
+      account_id: accountId,
+      description: "",
+      debit: null,
+      credit: null,
+    };
 
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentTenant?.id,
-  });
+    if (diff > 0) {
+      offset.credit = diff;
+    } else if (diff < 0) {
+      offset.debit = -diff;
+    }
 
-  // Fetch categories
-  const { data: categories } = useQuery({
-    queryKey: ['categories', transactionType],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .eq('is_active', true)
-        .eq('type', transactionType === 'income' ? 'income_transaction' : 'expense_transaction')
-        .is('deleted_at', null)
-        .order('sort_order', { ascending: true });
+    return [...entries, offset];
+  }, [entries, autoBalance, offsetAccountId, accountOptions]);
 
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentTenant?.id,
-  });
+  // Calculate totals
+  const totalDebits = displayedEntries.reduce(
+    (sum, entry) => sum + (entry.debit || 0),
+    0,
+  );
+  const totalCredits = displayedEntries.reduce(
+    (sum, entry) => sum + (entry.credit || 0),
+    0,
+  );
+  const isBalanced = Math.abs(totalDebits - totalCredits) < 0.01;
 
-  const addTransactionsMutation = useMutation({
-    mutationFn: async (transactions: Partial<Transaction>[]) => {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!user) throw new Error('Not authenticated');
+  // Handle header field changes
+  const handleHeaderChange = (field: string, value: string) => {
+    setHeaderData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-      const transactionsWithUser = transactions.map(t => ({
-        ...t,
-        type: transactionType,
-        tenant_id: currentTenant?.id,
-        created_by: user.id
-      }));
+  // Handle entry field changes
+  const handleEntryChange = (index: number, field: string, value: any) => {
+    // Prevent edits to the auto-balance row
+    if (autoBalance && index === entries.length) {
+      return;
+    }
 
-      const { data, error } = await supabase
-        .from('financial_transactions')
-        .insert(transactionsWithUser)
-        .select();
+    const newEntries = [...entries];
 
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['finance-stats'] });
-      setSuccess('Transactions added successfully');
-      setTransactions([{
-        type: transactionType,
-        amount: 0,
-        category_id: '',
-        description: '',
-        date: new Date().toISOString().split('T')[0],
-      }]);
-      setTimeout(() => setSuccess(null), 3000);
-    },
-    onError: (error: Error) => {
-      setError(error.message);
-      setTimeout(() => setError(null), 5000);
-    },
-  });
+    if (field === "debit" && value !== null && value !== "") {
+      // If debit is set, clear credit
+      newEntries[index] = {
+        ...newEntries[index],
+        [field]: parseFloat(value) || 0,
+        credit: null,
+      };
+    } else if (field === "credit" && value !== null && value !== "") {
+      // If credit is set, clear debit
+      newEntries[index] = {
+        ...newEntries[index],
+        [field]: parseFloat(value) || 0,
+        debit: null,
+      };
+    } else {
+      newEntries[index] = {
+        ...newEntries[index],
+        [field]: value,
+      };
+    }
 
+    setEntries(newEntries);
+  };
+
+  // Add new entry row
+  const addEntry = () => {
+    setEntries([
+      ...entries,
+      {
+        member_id: "",
+        account_id: "",
+        description: "",
+        debit: null,
+        credit: null,
+      },
+    ]);
+  };
+
+  // Remove entry row
+  const removeEntry = (index: number) => {
+    // Prevent removing the auto-balance row
+    if (autoBalance && index === entries.length) {
+      return;
+    }
+
+    if (entries.length <= 2) {
+      setError("A transaction must have at least two entries");
+      return;
+    }
+
+    const newEntries = [...entries];
+    newEntries.splice(index, 1);
+    setEntries(newEntries);
+  };
+
+  // Validate form
+  const validateForm = () => {
+    // Reset error
+    setError(null);
+
+    // Check header fields
+    if (!headerData.transaction_date) {
+      setError("Transaction date is required");
+      return false;
+    }
+
+    if (!headerData.description.trim()) {
+      setError("Transaction description is required");
+      return false;
+    }
+
+    // Check entries
+    if (entries.length < 2) {
+      setError("A transaction must have at least two entries");
+      return false;
+    }
+
+    // Check if all entries have an account
+    const missingAccount = entries.some((entry) => !entry.account_id);
+    if (missingAccount) {
+      setError("All entries must have an account selected");
+      return false;
+    }
+
+    // Check if all entries have either debit or credit
+    const invalidAmount = entries.some(
+      (entry) =>
+        (entry.debit === null ||
+          entry.debit === undefined ||
+          entry.debit === 0) &&
+        (entry.credit === null ||
+          entry.credit === undefined ||
+          entry.credit === 0),
+    );
+    if (invalidAmount) {
+      setError("All entries must have either a debit or credit amount");
+      return false;
+    }
+
+    // Require offset account when auto balancing
+    if (autoBalance && !offsetAccountId) {
+      setError("Select an offset account for automatic balancing");
+      return false;
+    }
+
+    // Check if transaction is balanced when auto balance is off
+    if (!autoBalance && !isBalanced) {
+      setError(
+        "Transaction must be balanced (total debits must equal total credits)",
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const validTransactions = transactions.filter(t => 
-      t.amount && t.amount > 0 && 
-      t.category_id && 
-      t.date &&
-      ((transactionType === 'income' && t.member_id) || 
-       (transactionType === 'expense' && t.budget_id))
-    );
 
-    if (validTransactions.length === 0) {
-      setError('Please fill in all required fields for at least one transaction');
+    if (!validateForm()) {
       return;
     }
 
     try {
-      await addTransactionsMutation.mutateAsync(validTransactions);
+      // Format entries for submission
+      const formattedEntries = displayedEntries.map((entry) => ({
+        account_id: entry.account_id,
+        accounts_account_id: entry.member_id
+          ? memberAccountMap[entry.member_id]
+          : null,
+        description: entry.description || headerData.description,
+        debit: entry.debit || 0,
+        credit: entry.credit || 0,
+        date: headerData.transaction_date,
+      }));
+
+      if (isEditMode && id) {
+        // Update transaction
+        await updateMutation.mutateAsync({
+          id,
+          data: {
+            transaction_date: headerData.transaction_date,
+            description: headerData.description,
+            reference: headerData.reference || null,
+            source_id:
+              headerData.source_id === "none" ? null : headerData.source_id,
+          },
+          relations: {
+            transactions: formattedEntries,
+          },
+        });
+      } else {
+        // Create transaction header and entries
+        await createMutation.mutateAsync({
+          data: {
+            transaction_date: headerData.transaction_date,
+            description: headerData.description,
+            reference: headerData.reference || null,
+            source_id:
+              headerData.source_id === "none" ? null : headerData.source_id,
+            status: "draft",
+          },
+          relations: {
+            transactions: formattedEntries,
+          },
+        });
+      }
+
+      // Navigate to transaction list
+      navigate("/finances/transactions");
     } catch (error) {
-      console.error('Error adding transactions:', error);
+      console.error("Error creating transaction:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while creating the transaction",
+      );
     }
   };
 
-  const handleAddRow = (copyPrevious = true) => {
-    const lastTransaction = transactions[transactions.length - 1];
-    setTransactions([...transactions, {
-      type: transactionType,
-      amount: 0,
-      category_id: copyPrevious ? lastTransaction.category_id : '',
-      description: '',
-      date: copyPrevious ? lastTransaction.date : new Date().toISOString().split('T')[0],
-      member_id: copyPrevious ? lastTransaction.member_id : undefined,
-      budget_id: copyPrevious ? lastTransaction.budget_id : undefined,
-    }]);
-  };
-
-  const handleRemoveRow = (index: number) => {
-    if (transactions.length > 1) {
-      setTransactions(transactions.filter((_, i) => i !== index));
-    }
-  };
-
-  const handleInputChange = (index: number, field: keyof Transaction, value: any) => {
-    const newTransactions = [...transactions];
-    newTransactions[index] = {
-      ...newTransactions[index],
-      [field]: field === 'amount' ? (value === '' ? 0 : Number(value)) : value,
-    };
-    setTransactions(newTransactions);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent, index: number, field: keyof Transaction) => {
-    if (e.key === 'Tab' && !e.shiftKey && index === transactions.length - 1) {
-      e.preventDefault();
-      handleAddRow(true);
-    }
-  };
-
-  const memberOptions = React.useMemo(() => 
-    members?.map(m => ({
-      value: m.id,
-      label: `${m.first_name} ${m.last_name}`
-    })) || [], 
-    [members]
-  );
-
-  const budgetOptions = React.useMemo(() => 
-    budgets?.map(b => ({
-      value: b.id,
-      label: `${b.name} (${formatCurrency(b.amount - (b.used_amount || 0), currency)} remaining)`
-    })) || [],
-    [budgets, currency]
-  );
-
-  const categoryOptions = React.useMemo(() => 
-    categories?.map(c => ({
-      value: c.id,
-      label: c.name
-    })) || [],
-    [categories]
-  );
-
-  // Calculate running totals
-  const runningTotals = useMemo(() => {
-    // Calculate total with proper decimal handling
-    const total = Number(transactions.reduce((sum, t) => {
-      const amount = Number(t.amount) || 0;
-      return Number((sum + amount).toFixed(2));
-    }, 0));
-
-    // Calculate category totals with proper decimal handling
-    const categoryTotals: Record<string, number> = {};
-    transactions.forEach(t => {
-      if (t.category_id && t.amount) {
-        const amount = Number(t.amount) || 0;
-        const currentTotal = categoryTotals[t.category_id] || 0;
-        categoryTotals[t.category_id] = Number((currentTotal + amount).toFixed(2));
-      }
-    });
-
-    // Calculate person totals with proper decimal handling
-    const personTotals: Record<string, number> = {};
-    transactions.forEach(t => {
-      const personId = transactionType === 'income' ? t.member_id : t.budget_id;
-      if (personId && t.amount) {
-        const amount = Number(t.amount) || 0;
-        const currentTotal = personTotals[personId] || 0;
-        personTotals[personId] = Number((currentTotal + amount).toFixed(2));
-      }
-    });
-
-    return {
-      total,
-      categoryTotals,
-      personTotals
-    };
-  }, [transactions, transactionType]);
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => navigate('/finances')}
+          onClick={() => navigate("/finances/transactions")}
           className="flex items-center"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Finances
+          Back to Transactions
         </Button>
       </div>
 
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Bulk Transaction Entry</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Add multiple transactions at once
-          </p>
-        </div>
-        
-        <div className="mt-4 sm:mt-0 flex flex-col sm:items-end space-y-4">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 bg-white rounded-lg shadow-sm p-1 border border-gray-200">
-              <Button
-                type="button"
-                onClick={() => setTransactionType('income')}
-                className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  transactionType === 'income'
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <TrendingUp className={`h-4 w-4 mr-2 ${
-                  transactionType === 'income' ? 'text-primary-600' : 'text-gray-400'
-                }`} />
-                Income
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setTransactionType('expense')}
-                className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  transactionType === 'expense'
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <TrendingDown className={`h-4 w-4 mr-2 ${
-                  transactionType === 'expense' ? 'text-primary-600' : 'text-gray-400'
-                }`} />
-                Expense
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Running Totals */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-8">
-        {/* Overall Total */}
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Calculator className="h-5 w-5 text-primary mr-2" />
-                <h3 className="text-sm font-medium text-gray-900">Running Total</h3>
-              </div>
-              <Badge variant={transactionType === 'income' ? 'success' : 'destructive'}>
-                {transactionType === 'income' ? 'Income' : 'Expense'}
-              </Badge>
-            </div>
-            <p className="mt-2 text-2xl font-semibold text-gray-900">
-              {formatCurrency(runningTotals.total || 0, currency)}
-            </p>
-          </div>
-        </Card>
-
-        {/* Category Breakdown */}
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="p-6">
-            <div className="flex items-center mb-4">
-              <PieChart className="h-5 w-5 text-primary mr-2" />
-              <h3 className="text-sm font-medium text-gray-900">By Category</h3>
-            </div>
-            <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
-              {Object.entries(runningTotals.categoryTotals).map(([categoryId, amount]) => {
-                const category = categories?.find(c => c.id === categoryId);
-                return (
-                  <div key={categoryId} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
-                    <span className="text-sm text-gray-600 truncate mr-2">
-                      {category?.name || 'Unknown'}
-                    </span>
-                    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                      {formatCurrency(amount || 0, currency)}
-                    </span>
-                  </div>
-                );
-              })}
-              {Object.keys(runningTotals.categoryTotals).length === 0 && (
-                <div className="text-sm text-gray-500 text-center py-2">
-                  No categories yet
-                </div>
-              )}
-            </div>
-          </div>
-        </Card>
-
-        {/* Person Breakdown */}
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="p-6">
-            <div className="flex items-center mb-4">
-              <Users className="h-5 w-5 text-primary mr-2" />
-              <h3 className="text-sm font-medium text-gray-900">
-                By {transactionType === 'income' ? 'Member' : 'Budget'}
+      <form onSubmit={handleSubmit}>
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center">
+              <FileText className="h-6 w-6 text-primary mr-2" />
+              <h3 className="text-lg font-medium">
+                {isEditMode ? "Edit Transaction" : "New Transaction"}
               </h3>
             </div>
-            <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
-              {Object.entries(runningTotals.personTotals).map(([personId, amount]) => {
-                const person = transactionType === 'income'
-                  ? members?.find(m => m.id === personId)
-                  : budgets?.find(b => b.id === personId);
-                const label = transactionType === 'income'
-                  ? person ? `${person.first_name} ${person.last_name}` : 'Unknown'
-                  : person?.name || 'Unknown';
-                return (
-                  <div key={personId} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
-                    <span className="text-sm text-gray-600 truncate mr-2">
-                      {label}
-                    </span>
-                    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                      {formatCurrency(amount || 0, currency)}
-                    </span>
-                  </div>
-                );
-              })}
-              {Object.keys(runningTotals.personTotals).length === 0 && (
-                <div className="text-sm text-gray-500 text-center py-2">
-                  No {transactionType === 'income' ? 'members' : 'budgets'} yet
-                </div>
-              )}
+          </CardHeader>
+
+          <CardContent>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <DatePickerInput
+                  label="Transaction Date"
+                  value={
+                    headerData.transaction_date
+                      ? new Date(headerData.transaction_date)
+                      : undefined
+                  }
+                  onChange={(date) =>
+                    handleHeaderChange(
+                      "transaction_date",
+                      date ? date.toISOString().split("T")[0] : "",
+                    )
+                  }
+                  placeholder="Select date"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1.5 text-foreground">
+                  Financial Source
+                </label>
+                <Select
+                  value={headerData.source_id}
+                  onValueChange={(value) =>
+                    handleHeaderChange("source_id", value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select financial source (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {isSourcesLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Loading sources...
+                      </SelectItem>
+                    ) : (
+                      sources.map((source) => (
+                        <SelectItem key={source.id} value={source.id}>
+                          {source.name} ({source.source_type})
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <Input
+                  label="Description"
+                  value={headerData.description}
+                  onChange={(e) =>
+                    handleHeaderChange("description", e.target.value)
+                  }
+                  placeholder="Enter transaction description"
+                  required
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <Input
+                  label="Reference (Optional)"
+                  value={headerData.reference}
+                  onChange={(e) =>
+                    handleHeaderChange("reference", e.target.value)
+                  }
+                  placeholder="Enter reference number or document"
+                />
+              </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
-      </div>
 
-      {/* Error and Success messages */}
-      {error && (
-        <div className="mb-6 rounded-md bg-red-50 p-4">
-          <div className="flex">
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">{error}</h3>
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <DollarSign className="h-6 w-6 text-primary mr-2" />
+                <h3 className="text-lg font-medium">Transaction Entries</h3>
+              </div>
+
+              <Button
+                type="button"
+                onClick={addEntry}
+                className="flex items-center"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Entry
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+          </CardHeader>
 
-      {success && (
-        <div className="mb-6 rounded-md bg-green-50 p-4">
-          <div className="flex">
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">{success}</h3>
+          <CardContent>
+            <div className="flex items-center gap-4 mb-4">
+              <Switch
+                id="auto-balance"
+                checked={autoBalance}
+                onCheckedChange={setAutoBalance}
+              />
+              <label htmlFor="auto-balance" className="text-sm font-medium">
+                Auto Balance
+              </label>
+              <Combobox
+                options={accountOptions || []}
+                value={offsetAccountId}
+                onChange={setOffsetAccountId}
+                placeholder="Select offset account"
+                disabled={!autoBalance || isAccountsLoading}
+              />
             </div>
-          </div>
-        </div>
-      )}
-
-      <Card>
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-6">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
+                      Person
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {transactionType === 'income' ? 'Member' : 'Budget'}
+                    <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
+                      Account
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
                       Description
                     </th>
-                    <th className="relative px-6 py-3">
-                      <span className="sr-only">Actions</span>
+                    <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">
+                      Debit
+                    </th>
+                    <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">
+                      Credit
+                    </th>
+                    <th className="px-4 py-2 text-center text-sm font-medium text-muted-foreground">
+                      Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {transactions.map((transaction, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <DatePickerInput
-                          value={transaction.date ? new Date(transaction.date) : undefined}
-                          onChange={(date) => handleInputChange(
-                            index,
-                            'date',
-                            date?.toISOString().split('T')[0]
-                          )}
-                          onKeyDown={(e) => handleKeyDown(e, index, 'date')}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                <tbody>
+                  {displayedEntries.map((entry, index) => (
+                    <tr key={index} className="border-b border-border">
+                      <td className="px-4 py-2">
                         <Combobox
-                          options={transactionType === 'income' ? memberOptions : budgetOptions}
-                          value={transactionType === 'income' ? transaction.member_id : transaction.budget_id}
-                          onChange={(value) => handleInputChange(
-                            index,
-                            transactionType === 'income' ? 'member_id' : 'budget_id',
-                            value
-                          )}
-                          placeholder={transactionType === 'income' ? 'Select Member' : 'Select Budget'}
-                          onKeyDown={(e) => handleKeyDown(e, index, transactionType === 'income' ? 'member_id' : 'budget_id')}
+                          options={memberOptions}
+                          value={entry.member_id}
+                          onChange={(value) =>
+                            handleEntryChange(index, "member_id", value)
+                          }
+                          placeholder={
+                            isMembersLoading
+                              ? "Loading people..."
+                              : "Select person"
+                          }
+                          disabled={
+                            isMembersLoading ||
+                            (autoBalance && index === entries.length)
+                          }
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-2">
                         <Combobox
-                          options={categoryOptions}
-                          value={transaction.category_id}
-                          onChange={(value) => handleInputChange(index, 'category_id', value)}
-                          placeholder="Select Category"
-                          onKeyDown={(e) => handleKeyDown(e, index, 'category_id')}
+                          options={accountOptions || []}
+                          value={entry.account_id}
+                          onChange={(value) =>
+                            handleEntryChange(index, "account_id", value)
+                          }
+                          placeholder={
+                            isAccountsLoading
+                              ? "Loading accounts..."
+                              : "Select account"
+                          }
+                          disabled={
+                            isAccountsLoading ||
+                            (autoBalance && index === entries.length)
+                          }
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-2">
+                        <Input
+                          value={entry.description}
+                          onChange={(e) =>
+                            handleEntryChange(
+                              index,
+                              "description",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Entry description (optional)"
+                          disabled={
+                            autoBalance && index === entries.length
+                          }
+                        />
+                      </td>
+                      <td className="px-4 py-2">
                         <Input
                           type="number"
-                          value={transaction.amount || ''}
-                          onChange={(e) => handleInputChange(index, 'amount', e.target.value)}
-                          icon={<DollarSign className="h-4 w-4" />}
-                          min={0}
+                          value={entry.debit !== null ? entry.debit : ""}
+                          onChange={(e) =>
+                            handleEntryChange(index, "debit", e.target.value)
+                          }
+                          placeholder="0.00"
                           step="0.01"
-                          className='min-w-32'
-                          onKeyDown={(e) => handleKeyDown(e, index, 'amount')}
-                          onBlur={(e) => {
-                            const value = Number(e.target.value);
-                            if (!isNaN(value)) {
-                              handleInputChange(index, 'amount', value);
-                            }
-                          }}
+                          min="0"
+                          className="text-right"
+                          disabled={
+                            autoBalance && index === entries.length
+                          }
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-2">
                         <Input
-                          value={transaction.description || ''}
-                          className='min-w-32'
-                          onChange={(e) => handleInputChange(index, 'description', e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(e, index, 'description')}
+                          type="number"
+                          value={entry.credit !== null ? entry.credit : ""}
+                          onChange={(e) =>
+                            handleEntryChange(index, "credit", e.target.value)
+                          }
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          className="text-right"
+                          disabled={
+                            autoBalance && index === entries.length
+                          }
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-4 py-2 text-center">
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleRemoveRow(index)}
-                          disabled={transactions.length === 1}
+                          onClick={() => removeEntry(index)}
+                          disabled={
+                            entries.length <= 2 ||
+                            (autoBalance && index === entries.length)
+                          }
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-border font-medium">
+                    <td className="px-4 py-2" colSpan={3}>
+                      Totals
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {formatCurrency(totalDebits, currency)}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {formatCurrency(totalCredits, currency)}
+                    </td>
+                    <td className="px-4 py-2"></td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2" colSpan={3}>
+                      Difference
+                    </td>
+                    <td className="px-4 py-2 text-right" colSpan={2}>
+                      <span
+                        className={
+                          isBalanced ? "text-success" : "text-destructive"
+                        }
+                      >
+                        {isBalanced
+                          ? "Balanced"
+                          : formatCurrency(
+                              Math.abs(totalDebits - totalCredits),
+                              currency,
+                            )}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2"></td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
 
-            <div className="mt-6 flex justify-between">
-              <Button
-                type="button"
-                onClick={() => handleAddRow(false)}
-                variant="outline"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Row
-              </Button>
-
-              <div className="flex space-x-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/finances')}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={addTransactionsMutation.isPending}
-                >
-                  {addTransactionsMutation.isPending ? (
-                    <>
-                      <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="-ml-1 mr-2 h-5 w-5" />
-                      Save All
-                    </>
-                  )}
-                </Button>
+            {error && (
+              <div className="mt-4 bg-destructive/10 border border-destructive/30 rounded-md p-4">
+                <div className="flex">
+                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-destructive">
+                      {error}
+                    </h3>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </form>
-      </Card>
+            )}
+          </CardContent>
+
+          <CardFooter className="flex justify-end space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/finances/transactions")}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={
+                createMutation.isPending || updateMutation.isPending || !isBalanced
+              }
+            >
+              {createMutation.isPending || updateMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {isEditMode ? "Update Transaction" : "Create Transaction"}
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
     </div>
   );
 }
