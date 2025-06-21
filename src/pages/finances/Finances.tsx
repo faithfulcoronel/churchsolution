@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Card, CardContent } from "../../components/ui2/card";
 import { Loader2 } from 'lucide-react';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
@@ -7,7 +7,6 @@ import { SubscriptionGate } from '../../components/SubscriptionGate';
 // Lazy load finance components
 const FinancesDashboard = React.lazy(() => import('./FinancesDashboard'));
 const TransactionList = React.lazy(() => import('./TransactionList'));
-const TransactionAdd = React.lazy(() => import('./TransactionAdd'));
 const TransactionDetail = React.lazy(() => import('./TransactionDetail'));
 const BulkTransactionEntry = React.lazy(() => import('./BulkTransactionEntry'));
 const BulkIncomeEntry = React.lazy(() => import('./BulkIncomeEntry'));
@@ -28,6 +27,11 @@ function LoadingSpinner() {
   );
 }
 
+function TransactionBulkRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/finances/transactions/${id}/edit`} replace />;
+}
+
 function Finances() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
@@ -36,25 +40,17 @@ function Finances() {
         <Route path="transactions" element={<TransactionList />} />
         <Route path="transactions/add" element={
           <SubscriptionGate type="transaction">
-            <TransactionAdd />
+            <BulkTransactionEntry />
           </SubscriptionGate>
         } />
         <Route path="transactions/:id" element={<TransactionDetail />} />
         <Route path="transactions/:id/edit" element={
           <SubscriptionGate type="transaction">
-            <TransactionAdd />
-          </SubscriptionGate>
-        } />
-        <Route path="transactions/:id/bulk" element={
-          <SubscriptionGate type="transaction">
             <BulkTransactionEntry />
           </SubscriptionGate>
         } />
-        <Route path="transactions/bulk" element={
-          <SubscriptionGate type="transaction">
-            <BulkTransactionEntry />
-          </SubscriptionGate>
-        } />
+        <Route path="transactions/:id/bulk" element={<TransactionBulkRedirect />} />
+        <Route path="transactions/bulk" element={<Navigate to="/finances/transactions/add" replace />} />
         <Route path="transactions/bulk-income" element={
           <SubscriptionGate type="transaction">
             <BulkIncomeEntry />
