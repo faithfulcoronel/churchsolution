@@ -8,6 +8,8 @@
 
 - When a member is created an account is automatically generated.
 - Member accounts use the format `MEM-<first 8 characters of member id>` for the account number.
+- Financial transaction numbers use status-based prefixes such as `DFT` for drafts,
+  `SUB` for submitted, `APP` for approved and `TRX` once posted.
 
 ## Running tests
 
