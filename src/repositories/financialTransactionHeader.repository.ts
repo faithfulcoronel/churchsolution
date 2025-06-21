@@ -6,7 +6,10 @@ import { NotificationService } from '../services/NotificationService';
 import { FinancialTransactionHeaderValidator } from '../validators/financialTransactionHeader.validator';
 
 export interface IFinancialTransactionHeaderRepository
-  extends BaseRepository<FinancialTransactionHeader> {}
+  extends BaseRepository<FinancialTransactionHeader> {
+  submitTransaction(id: string): Promise<void>;
+  approveTransaction(id: string): Promise<void>;
+}
 
 @injectable()
 export class FinancialTransactionHeaderRepository
