@@ -198,16 +198,28 @@ function ChartOfAccountProfile() {
       renderCell: (params) => {
         const status = params.value;
         return (
-          <Badge 
+          <Badge
             variant={
-              status === 'posted' ? 'success' : 
-              status === 'voided' ? 'destructive' : 
-              'secondary'
+              status === 'posted'
+                ? 'success'
+                : status === 'voided'
+                ? 'destructive'
+                : status === 'approved'
+                ? 'warning'
+                : status === 'submitted'
+                ? 'info'
+                : 'secondary'
             }
           >
-            {status === 'posted' ? 'Posted' : 
-             status === 'voided' ? 'Voided' : 
-             'Draft'}
+            {status === 'posted'
+              ? 'Posted'
+              : status === 'voided'
+              ? 'Voided'
+              : status === 'approved'
+              ? 'Approved'
+              : status === 'submitted'
+              ? 'Submitted'
+              : 'Draft'}
           </Badge>
         );
       },

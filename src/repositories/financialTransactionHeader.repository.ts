@@ -53,7 +53,7 @@ export class FinancialTransactionHeaderRepository
       throw new Error('Transaction not found');
     }
     
-    if (header.status !== 'draft') {
+    if (header.status === 'posted' || header.status === 'voided') {
       throw new Error(`Cannot delete a ${header.status} transaction`);
     }
   }

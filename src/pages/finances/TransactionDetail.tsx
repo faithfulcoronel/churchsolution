@@ -249,11 +249,17 @@ function TransactionDetail() {
               <div className="ml-4">
                 <div className="flex items-center">
                   <h2 className="text-2xl font-bold text-foreground">{header.transaction_number}</h2>
-                  <Badge 
+                  <Badge
                     variant={
-                      header.status === 'posted' ? 'success' : 
-                      header.status === 'voided' ? 'destructive' : 
-                      'secondary'
+                      header.status === 'posted'
+                        ? 'success'
+                        : header.status === 'voided'
+                        ? 'destructive'
+                        : header.status === 'approved'
+                        ? 'warning'
+                        : header.status === 'submitted'
+                        ? 'info'
+                        : 'secondary'
                     }
                     className="ml-3 capitalize"
                   >
@@ -266,6 +272,16 @@ function TransactionDetail() {
                       <>
                         <X className="h-3 w-3 mr-1" />
                         Voided
+                      </>
+                    ) : header.status === 'approved' ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" />
+                        Approved
+                      </>
+                    ) : header.status === 'submitted' ? (
+                      <>
+                        <FileText className="h-3 w-3 mr-1" />
+                        Submitted
                       </>
                     ) : (
                       <>
@@ -471,11 +487,17 @@ function TransactionDetail() {
                 <div className="py-3 grid grid-cols-3 gap-4">
                   <dt className="text-sm font-medium text-muted-foreground">Status</dt>
                   <dd className="text-sm text-foreground col-span-2">
-                    <Badge 
+                    <Badge
                       variant={
-                        header.status === 'posted' ? 'success' : 
-                        header.status === 'voided' ? 'destructive' : 
-                        'secondary'
+                        header.status === 'posted'
+                          ? 'success'
+                          : header.status === 'voided'
+                          ? 'destructive'
+                          : header.status === 'approved'
+                          ? 'warning'
+                          : header.status === 'submitted'
+                          ? 'info'
+                          : 'secondary'
                       }
                       className="capitalize"
                     >

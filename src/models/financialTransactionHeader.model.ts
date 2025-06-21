@@ -2,7 +2,12 @@ import { BaseModel } from './base.model';
 import { FinancialSource } from './financialSource.model';
 import { FinancialTransaction } from './financialTransaction.model';
 
-export type TransactionStatus = 'draft' | 'posted' | 'voided';
+export type TransactionStatus =
+  | 'draft'
+  | 'submitted'
+  | 'approved'
+  | 'posted'
+  | 'voided';
 
 export interface FinancialTransactionHeader extends BaseModel {
   id: string;

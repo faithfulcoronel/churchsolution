@@ -11,9 +11,17 @@ export class FinancialTransactionHeaderValidator {
     }
 
     if (data.status !== undefined) {
-      const validStatuses = ['draft', 'posted', 'voided'];
+      const validStatuses = [
+        'draft',
+        'submitted',
+        'approved',
+        'posted',
+        'voided'
+      ];
       if (!validStatuses.includes(data.status)) {
-        throw new Error('Invalid status. Must be one of: draft, posted, voided');
+        throw new Error(
+          'Invalid status. Must be one of: draft, submitted, approved, posted, voided'
+        );
       }
     }
   }
