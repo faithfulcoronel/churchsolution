@@ -5,6 +5,7 @@ import { FinancialTransactionHeader } from '../models/financialTransactionHeader
 import { AuditService } from '../services/AuditService';
 import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
+import { tenantUtils } from '../utils/tenantUtils';
 
 export interface IFinancialTransactionHeaderAdapter
   extends BaseAdapter<FinancialTransactionHeader> {
@@ -228,9 +229,13 @@ export class FinancialTransactionHeaderAdapter
   }
 
   public async getTransactionEntries(headerId: string): Promise<any[]> {
+    const tenantId = await tenantUtils.getTenantId();
+    if (!tenantId) return [];
+
     const { data, error } = await supabase
       .from('financial_transactions')
-      .select(`
+      .select(
+        `
         id,
         type,
         amount,
@@ -240,10 +245,12 @@ export class FinancialTransactionHeaderAdapter
         credit,
         account_id,
         account:chart_of_accounts(id, code, name, account_type)
-      `)
+      `
+      )
+      .eq('tenant_id', tenantId)
       .eq('header_id', headerId)
       .is('deleted_at', null);
-    
+
     if (error) throw error;
     return data || [];
   }
