@@ -9,6 +9,8 @@ import { supabase } from '../lib/supabase';
 export interface IFinancialTransactionHeaderAdapter
   extends BaseAdapter<FinancialTransactionHeader> {
   postTransaction(id: string): Promise<void>;
+  submitTransaction(id: string): Promise<void>;
+  approveTransaction(id: string): Promise<void>;
   voidTransaction(id: string, reason: string): Promise<void>;
   getTransactionEntries(headerId: string): Promise<any[]>;
   isTransactionBalanced(headerId: string): Promise<boolean>;
@@ -184,7 +186,25 @@ export class FinancialTransactionHeaderAdapter
       p_header_id: id,
       p_user_id: (await supabase.auth.getUser()).data.user?.id
     });
-    
+
+    if (error) throw error;
+  }
+
+  public async submitTransaction(id: string): Promise<void> {
+    const { error } = await supabase.rpc('submit_transaction', {
+      p_header_id: id,
+      p_user_id: (await supabase.auth.getUser()).data.user?.id
+    });
+
+    if (error) throw error;
+  }
+
+  public async approveTransaction(id: string): Promise<void> {
+    const { error } = await supabase.rpc('approve_transaction', {
+      p_header_id: id,
+      p_user_id: (await supabase.auth.getUser()).data.user?.id
+    });
+
     if (error) throw error;
   }
 

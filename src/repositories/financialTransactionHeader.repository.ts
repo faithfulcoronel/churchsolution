@@ -82,11 +82,39 @@ export class FinancialTransactionHeaderRepository
   public async postTransaction(id: string): Promise<void> {
     try {
       await (this.adapter as unknown as IFinancialTransactionHeaderAdapter).postTransaction(id);
-      
+
       NotificationService.showSuccess('Transaction posted successfully');
     } catch (error) {
       NotificationService.showError(
         error instanceof Error ? error.message : 'Failed to post transaction',
+        5000
+      );
+      throw error;
+    }
+  }
+
+  public async submitTransaction(id: string): Promise<void> {
+    try {
+      await (this.adapter as unknown as IFinancialTransactionHeaderAdapter).submitTransaction(id);
+
+      NotificationService.showSuccess('Transaction submitted successfully');
+    } catch (error) {
+      NotificationService.showError(
+        error instanceof Error ? error.message : 'Failed to submit transaction',
+        5000
+      );
+      throw error;
+    }
+  }
+
+  public async approveTransaction(id: string): Promise<void> {
+    try {
+      await (this.adapter as unknown as IFinancialTransactionHeaderAdapter).approveTransaction(id);
+
+      NotificationService.showSuccess('Transaction approved successfully');
+    } catch (error) {
+      NotificationService.showError(
+        error instanceof Error ? error.message : 'Failed to approve transaction',
         5000
       );
       throw error;
