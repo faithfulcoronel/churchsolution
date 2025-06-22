@@ -73,6 +73,10 @@ function FinancesDashboard() {
               category:category_id (
                 name,
                 type
+              ),
+              fund:fund_id (
+                name,
+                code
               )
             `)
             .eq('tenant_id', currentTenant?.id)
@@ -136,6 +140,11 @@ function FinancesDashboard() {
             id,
             name,
             type
+          ),
+          fund:fund_id (
+            id,
+            name,
+            code
           )
         `)
         .eq('tenant_id', currentTenant?.id)

@@ -60,7 +60,8 @@ function FinancialSourceProfile() {
           amount,
           date,
           description,
-          category:category_id (name)
+          category:category_id (name),
+          fund:fund_id (name, code)
         `)
         .eq('source_id', id)
         .order('date', { ascending: false })

@@ -105,6 +105,10 @@ function BudgetProfile() {
           ),
           category:category_id (
             name
+          ),
+          fund:fund_id (
+            name,
+            code
           )
         `)
         .eq('budget_id', id)

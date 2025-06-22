@@ -31,6 +31,7 @@ type BulkEntry = {
   member_id: string;
   amount: number;
   category_id: string;
+  fund_id: string;
   description: string;
   date: string;
   envelope_number?: string;
@@ -54,6 +55,7 @@ function BulkIncomeEntry() {
     member_id: '',
     amount: 0,
     category_id: '',
+    fund_id: '',
     description: '',
     date: new Date().toISOString().split('T')[0],
     envelope_number: '',
@@ -104,6 +106,22 @@ function BulkIncomeEntry() {
     enabled: !!currentTenant?.id,
   });
 
+  // Get designated funds
+  const { data: funds } = useQuery({
+    queryKey: ['designated-funds', currentTenant?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('designated_funds')
+        .select('*')
+        .eq('tenant_id', currentTenant?.id)
+        .is('deleted_at', null)
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentTenant?.id,
+  });
+
   const addBulkEntriesMutation = useMutation({
     mutationFn: async (entries: BulkEntry[]) => {
       const user = (await supabase.auth.getUser()).data.user;
@@ -145,6 +163,7 @@ function BulkIncomeEntry() {
           member_id: memberId,
           amount: entry.amount,
           category_id: entry.category_id,
+          fund_id: entry.fund_id || null,
           description: entry.description || '',
           date: entry.date,
           created_by: user?.id,
@@ -167,6 +186,7 @@ function BulkIncomeEntry() {
         member_id: '',
         amount: 0,
         category_id: '',
+        fund_id: '',
         description: '',
         date: new Date().toISOString().split('T')[0],
         envelope_number: '',
@@ -206,6 +226,7 @@ function BulkIncomeEntry() {
       member_id: '',
       amount: 0,
       category_id: '',
+      fund_id: '',
       description: '',
       date: new Date().toISOString().split('T')[0],
       envelope_number: '',
@@ -297,6 +318,8 @@ function BulkIncomeEntry() {
                 throw new Error(`Invalid envelope number format in row ${index + 2}: ${envelopeNumber}. Must contain only digits.`);
               }
               entry[header] = envelopeNumber;
+            } else if (header === 'fund_id') {
+              entry[header] = values[i];
             } else {
               entry[header] = values[i];
             }
@@ -343,9 +366,9 @@ function BulkIncomeEntry() {
 
     // Transactions sheet (template)
     const transactionsData = [
-      ['member_id', 'amount', 'category_id', 'date', 'description', 'envelope_number'],
-      ['member-uuid', 1000, 'category-uuid', '2025-02-12', 'Sunday Tithe', '001'],
-      ['member-uuid', 500, 'category-uuid', '2025-02-12', 'Love Offering', '002'],
+      ['member_id', 'amount', 'category_id', 'fund_id', 'date', 'description', 'envelope_number'],
+      ['member-uuid', 1000, 'category-uuid', 'fund-uuid', '2025-02-12', 'Sunday Tithe', '001'],
+      ['member-uuid', 500, 'category-uuid', 'fund-uuid', '2025-02-12', 'Love Offering', '002'],
     ];
     const wsTransactions = XLSX.utils.aoa_to_sheet(transactionsData);
 
@@ -354,6 +377,7 @@ function BulkIncomeEntry() {
       { wch: 40 }, // member_id
       { wch: 10 }, // amount
       { wch: 40 }, // category_id
+      { wch: 40 }, // fund_id
       { wch: 12 }, // date
       { wch: 30 }, // description
       { wch: 15 }, // envelope_number
@@ -485,12 +509,17 @@ function BulkIncomeEntry() {
   );
 
   // Convert categories to Combobox options
-  const categoryOptions = React.useMemo(() => 
+  const categoryOptions = React.useMemo(() =>
     categories?.map(c => ({
       value: c.id,
       label: c.name
     })) || [],
     [categories]
+  );
+
+  const fundOptions = React.useMemo(
+    () => funds?.map(f => ({ value: f.id, label: f.name })) || [],
+    [funds]
   );
 
   return (
@@ -698,6 +727,15 @@ function BulkIncomeEntry() {
                       value={entry.category_id}
                       onChange={(value) => handleInputChange(index, 'category_id', value)}
                       placeholder="Select Category"
+                    />
+                  </div>
+
+                  <div>
+                    <Combobox
+                      options={fundOptions}
+                      value={entry.fund_id}
+                      onChange={(value) => handleInputChange(index, 'fund_id', value)}
+                      placeholder="Select Fund (optional)"
                     />
                   </div>
 

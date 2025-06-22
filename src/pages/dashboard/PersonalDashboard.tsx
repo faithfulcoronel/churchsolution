@@ -75,6 +75,10 @@ function PersonalDashboard() {
               category:category_id (
                 name,
                 type
+              ),
+              fund:fund_id (
+                name,
+                code
               )
             `)
             .eq('member_id', memberData.id)
@@ -137,6 +141,10 @@ function PersonalDashboard() {
           category:category_id (
             name,
             type
+          ),
+          fund:fund_id (
+            name,
+            code
           )
         `)
         .eq('member_id', memberData.id)
@@ -155,6 +163,10 @@ function PersonalDashboard() {
           category:category_id (
             name,
             type
+          ),
+          fund:fund_id (
+            name,
+            code
           )
         `)
         .eq('member_id', memberData.id)
