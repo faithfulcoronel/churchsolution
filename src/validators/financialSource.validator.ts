@@ -6,6 +6,10 @@ export class FinancialSourceValidator {
       throw new Error('Source name is required');
     }
 
+    if (!data.account_id?.trim()) {
+      throw new Error('Account ID is required');
+    }
+
     if (data.source_type !== undefined) {
       const validTypes = ['bank', 'fund', 'wallet', 'cash', 'online', 'other'];
       if (!validTypes.includes(data.source_type)) {
