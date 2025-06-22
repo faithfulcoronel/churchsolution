@@ -81,6 +81,11 @@ export const navigation: NavItem[] = [
         href: '/finances/reports',
         icon: FileText,
       },
+      {
+        name: 'Statements',
+        href: '/finances/statements',
+        icon: FileText,
+      },
     ],
   },
   {

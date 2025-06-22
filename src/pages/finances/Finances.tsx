@@ -16,6 +16,7 @@ const BudgetAdd = React.lazy(() => import('./BudgetAdd'));
 const BudgetProfile = React.lazy(() => import('./BudgetProfile'));
 const Reports = React.lazy(() => import('./Reports'));
 const JournalEntryForm = React.lazy(() => import('./JournalEntryForm'));
+const Statements = React.lazy(() => import('./Statements'));
 
 function LoadingSpinner() {
   return (
@@ -65,6 +66,7 @@ function Finances() {
         <Route path="budgets/add" element={<BudgetAdd />} />
         <Route path="budgets/:id" element={<BudgetProfile />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="statements" element={<Statements />} />
         <Route path="journal-entry" element={<JournalEntryForm />} />
       </Routes>
     </Suspense>
