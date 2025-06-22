@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useAccountRepository } from '../../hooks/useAccountRepository';
+import { useMemberRepository } from '../../hooks/useMemberRepository';
 import { AccountType } from '../../models/account.model';
 import { Input } from '../ui2/input';
 import { Button } from '../ui2/button';
 import { Textarea } from '../ui2/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui2/select';
+import { Combobox } from '../ui2/combobox';
 import { Switch } from '../ui2/switch';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 interface AccountCreateFormProps {
   onCancel: () => void;
@@ -16,12 +18,21 @@ interface AccountCreateFormProps {
 export default function AccountCreateForm({ onCancel, onSuccess }: AccountCreateFormProps) {
   const { useCreate } = useAccountRepository();
   const createMutation = useCreate();
+  const { useQuery: useMembersQuery } = useMemberRepository();
+
+  const { data: membersData, isLoading: isMembersLoading } = useMembersQuery();
+  const members = membersData?.data || [];
+  const memberOptions = React.useMemo(
+    () => members.map(m => ({ value: m.id, label: `${m.first_name} ${m.last_name}` })) || [],
+    [members]
+  );
 
   const [formData, setFormData] = useState({
     name: '',
     account_type: 'organization' as AccountType,
     account_number: '',
     description: '',
+    member_id: null as string | null,
     is_active: true,
   });
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +79,26 @@ export default function AccountCreateForm({ onCancel, onSuccess }: AccountCreate
         onChange={(e) => handleChange('name', e.target.value)}
         required
       />
+      {formData.account_type === 'person' && (
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-foreground">
+            Person
+          </label>
+          {isMembersLoading ? (
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Loading members...</span>
+            </div>
+          ) : (
+            <Combobox
+              options={memberOptions}
+              value={formData.member_id || ''}
+              onChange={(value) => handleChange('member_id', value)}
+              placeholder="Select a person"
+            />
+          )}
+        </div>
+      )}
       <Input
         label="Account Number"
         value={formData.account_number}
