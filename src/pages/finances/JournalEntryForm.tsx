@@ -25,7 +25,7 @@ import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
 
 function JournalEntryForm() {
-  const navigate = navigate();
+  const navigate = useNavigate();
   const { currency } = useCurrencyStore();
   const { useCreateJournalEntry } = useJournalEntry();
   const { useAccountOptions } = useChartOfAccounts();
