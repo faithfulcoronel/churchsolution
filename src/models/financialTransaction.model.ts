@@ -20,6 +20,12 @@ export interface FinancialTransaction extends BaseModel {
     name: string;
     code: string;
   };
+  fund_id: string | null;
+  fund?: {
+    id: string;
+    name: string;
+    code: string;
+  };
   account_id: string | null;
   account?: ChartOfAccount;
   header_id: string | null;
