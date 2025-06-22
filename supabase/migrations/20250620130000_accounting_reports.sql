@@ -130,7 +130,13 @@ AS $$
 DECLARE
   v_balance numeric;
 BEGIN
-  SELECT COALESCE(SUM(ft.debit - ft.credit), 0)
+  SELECT COALESCE(SUM(
+      CASE
+        WHEN a.account_type = 'asset' THEN COALESCE(ft.debit,0) - COALESCE(ft.credit,0)
+        WHEN a.account_type IN ('liability','equity') THEN COALESCE(ft.credit,0) - COALESCE(ft.debit,0)
+        ELSE COALESCE(ft.debit,0) - COALESCE(ft.credit,0)
+      END
+    ), 0)
   INTO v_balance
   FROM financial_transactions ft
   JOIN chart_of_accounts a ON ft.account_id = a.id
