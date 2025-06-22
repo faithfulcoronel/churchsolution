@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
 type MessageType = 'success' | 'error' | 'info' | 'warning';
 
 type Message = {
+  id: number;
   type: MessageType;
   text: string;
   duration?: number;
@@ -12,29 +13,30 @@ type Message = {
 
 type MessageStore = {
   messages: Message[];
-  addMessage: (message: Message) => void;
-  removeMessage: (index: number) => void;
+  addMessage: (message: Omit<Message, 'id'>) => void;
+  removeMessage: (id: number) => void;
 };
 
 export const useMessageStore = create<MessageStore>((set) => ({
   messages: [],
   addMessage: (message) => {
     const id = Date.now();
+    const messageWithId: Message = { ...message, id };
     set((state) => ({
-      messages: [...state.messages, message],
+      messages: [...state.messages, messageWithId],
     }));
 
     if (message.duration !== 0) {
       setTimeout(() => {
         set((state) => ({
-          messages: state.messages.filter((_, i) => i !== state.messages.length - 1),
+          messages: state.messages.filter((m) => m.id !== id),
         }));
       }, message.duration || 3000);
     }
   },
-  removeMessage: (index) =>
+  removeMessage: (id) =>
     set((state) => ({
-      messages: state.messages.filter((_, i) => i !== index),
+      messages: state.messages.filter((m) => m.id !== id),
     })),
 }));
 
@@ -71,9 +73,9 @@ export function MessageHandler() {
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 min-w-[320px] max-w-md pointer-events-none">
-      {messages.map((message, index) => (
+      {messages.map((message) => (
         <div
-          key={index}
+          key={message.id}
           className={`rounded-md p-4 ${getMessageStyles(message.type)} shadow-lg transition-all duration-300 ease-in-out pointer-events-auto`}
           role="alert"
         >
@@ -87,7 +89,7 @@ export function MessageHandler() {
             <div className="ml-3">
               <button
                 className="inline-flex rounded-md bg-transparent text-current hover:opacity-75 focus:outline-none"
-                onClick={() => removeMessage(index)}
+                onClick={() => removeMessage(message.id)}
               >
                 <span className="sr-only">Dismiss</span>
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
