@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFinancialSourceRepository } from '../../hooks/useFinancialSourceRepository';
+import { useChartOfAccounts } from '../../hooks/useChartOfAccounts';
 import { FinancialSource, SourceType } from '../../models/financialSource.model';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
 import { Textarea } from '../../components/ui2/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
+import { Combobox } from '../../components/ui2/combobox';
+import { Label } from '../../components/ui2/label';
 import { Switch } from '../../components/ui2/switch';
 import { ArrowLeft, Save, Loader2, Briefcase as Bank, Wallet, Globe, CreditCard, AlertCircle, Hash, FileText } from 'lucide-react';
 
@@ -16,10 +19,12 @@ function FinancialSourceAddEdit() {
   const isEditMode = !!id;
   
   const { useQuery: useSourceQuery, useCreate, useUpdate } = useFinancialSourceRepository();
+  const { useAccountOptions } = useChartOfAccounts();
   
   const [formData, setFormData] = useState<Partial<FinancialSource>>({
     name: '',
     source_type: 'bank',
+    account_id: '',
     account_number: '',
     description: '',
     is_active: true,
@@ -41,6 +46,7 @@ function FinancialSourceAddEdit() {
   // Create and update mutations
   const createMutation = useCreate();
   const updateMutation = useUpdate();
+  const { data: accountOptions, isLoading: isAccountsLoading } = useAccountOptions();
   
   // Set form data when source data is loaded
   useEffect(() => {
@@ -69,6 +75,11 @@ function FinancialSourceAddEdit() {
       
       if (!formData.source_type) {
         setError('Source type is required');
+        return;
+      }
+
+      if (!formData.account_id) {
+        setError('Account is required');
         return;
       }
       
@@ -201,6 +212,23 @@ function FinancialSourceAddEdit() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="sm:col-span-1">
+                <Label htmlFor="account_id">Account *</Label>
+                {isAccountsLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">Loading accounts...</span>
+                  </div>
+                ) : (
+                  <Combobox
+                    options={accountOptions || []}
+                    value={formData.account_id || ''}
+                    onChange={(value) => handleInputChange('account_id', value)}
+                    placeholder="Select account"
+                  />
+                )}
               </div>
               
               <div className="sm:col-span-1">

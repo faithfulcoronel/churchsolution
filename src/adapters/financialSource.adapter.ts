@@ -24,12 +24,21 @@ export class FinancialSourceAdapter
     description,
     source_type,
     account_number,
+    account_id,
     is_active,
     created_by,
     updated_by,
     created_at,
     updated_at
   `;
+
+  protected defaultRelationships: QueryOptions['relationships'] = [
+    {
+      table: 'chart_of_accounts',
+      foreignKey: 'account_id',
+      select: ['id', 'code', 'name']
+    }
+  ];
 
   protected override async onBeforeCreate(data: Partial<FinancialSource>): Promise<Partial<FinancialSource>> {
     // Set default values
