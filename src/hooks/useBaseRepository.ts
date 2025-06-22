@@ -27,7 +27,7 @@ export function useBaseRepository<T extends BaseModel>(
                      relations?: Record<string, any[]>,
                      fieldsToRemove?: string[]
                    }) => {
-        return repository.create(data, relations);
+        return repository.create(data, relations, fieldsToRemove);
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [queryKey] });
