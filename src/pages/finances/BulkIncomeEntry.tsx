@@ -13,6 +13,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 import { DatePickerInput } from '../../components/ui2/date-picker';
 import { Combobox } from '../../components/ui2/combobox';
 import { Badge } from '../../components/ui2/badge';
+import type { OfferingBatch } from '../../models/offeringBatch.model';
 import {
   Plus,
   Minus,
@@ -32,6 +33,7 @@ type BulkEntry = {
   amount: number;
   category_id: string;
   fund_id: string;
+  batch_id?: string;
   description: string;
   date: string;
   envelope_number?: string;
@@ -51,11 +53,13 @@ function BulkIncomeEntry() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [batchId, setBatchId] = useState<string>('');
   const [entries, setEntries] = useState<BulkEntry[]>([{
     member_id: '',
     amount: 0,
     category_id: '',
     fund_id: '',
+    batch_id: '',
     description: '',
     date: new Date().toISOString().split('T')[0],
     envelope_number: '',
@@ -122,6 +126,22 @@ function BulkIncomeEntry() {
     enabled: !!currentTenant?.id,
   });
 
+  // Get offering batches
+  const { data: batches } = useQuery({
+    queryKey: ['offering-batches', currentTenant?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('offering_batches')
+        .select('*')
+        .eq('tenant_id', currentTenant?.id)
+        .is('deleted_at', null)
+        .order('batch_date', { ascending: false });
+      if (error) throw error;
+      return data as OfferingBatch[];
+    },
+    enabled: !!currentTenant?.id,
+  });
+
   const addBulkEntriesMutation = useMutation({
     mutationFn: async (entries: BulkEntry[]) => {
       const user = (await supabase.auth.getUser()).data.user;
@@ -164,6 +184,7 @@ function BulkIncomeEntry() {
           amount: entry.amount,
           category_id: entry.category_id,
           fund_id: entry.fund_id || null,
+          batch_id: batchId || null,
           description: entry.description || '',
           date: entry.date,
           created_by: user?.id,
@@ -187,6 +208,7 @@ function BulkIncomeEntry() {
         amount: 0,
         category_id: '',
         fund_id: '',
+        batch_id: batchId,
         description: '',
         date: new Date().toISOString().split('T')[0],
         envelope_number: '',
@@ -227,6 +249,7 @@ function BulkIncomeEntry() {
       amount: 0,
       category_id: '',
       fund_id: '',
+      batch_id: batchId,
       description: '',
       date: new Date().toISOString().split('T')[0],
       envelope_number: '',
@@ -319,6 +342,8 @@ function BulkIncomeEntry() {
               }
               entry[header] = envelopeNumber;
             } else if (header === 'fund_id') {
+              entry[header] = values[i];
+            } else if (header === 'batch_id') {
               entry[header] = values[i];
             } else {
               entry[header] = values[i];
@@ -541,6 +566,17 @@ function BulkIncomeEntry() {
           <p className="mt-2 text-sm text-muted-foreground">
             Add multiple income transactions at once
           </p>
+          <div className="mt-4 max-w-xs">
+            <Combobox
+              options={batches?.map(b => ({
+                value: b.id,
+                label: `${b.batch_date} - ${b.service_description || ''}`.trim()
+              })) || []}
+              value={batchId}
+              onChange={value => setBatchId(value)}
+              placeholder="Select Offering Batch"
+            />
+          </div>
         </div>
         <div className="mt-4 sm:mt-0 flex space-x-3">
           <Button

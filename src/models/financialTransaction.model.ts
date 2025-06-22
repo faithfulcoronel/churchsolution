@@ -26,6 +26,13 @@ export interface FinancialTransaction extends BaseModel {
     name: string;
     code: string;
   };
+  batch_id: string | null;
+  batch?: {
+    id: string;
+    service_description: string | null;
+    batch_date: string;
+    total_amount: number;
+  };
   account_id: string | null;
   account?: ChartOfAccount;
   header_id: string | null;
