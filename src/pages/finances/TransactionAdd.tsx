@@ -37,13 +37,18 @@ function TransactionAdd() {
   const isEditMode = !!id;
   
   // Repositories
-  const { useQuery, useCreate, useUpdate, getTransactionEntries } = useFinancialTransactionHeaderRepository();
+  const {
+    useQuery,
+    useCreateWithTransactions,
+    useUpdateWithTransactions,
+    getTransactionEntries,
+  } = useFinancialTransactionHeaderRepository();
   const { useAccountOptions } = useChartOfAccounts();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
   
   // Create/update mutation
-  const createMutation = useCreate();
-  const updateMutation = useUpdate();
+  const createMutation = useCreateWithTransactions();
+  const updateMutation = useUpdateWithTransactions();
   
   // Get account options
   const { data: accountOptions, isLoading: isAccountsLoading } = useAccountOptions();
@@ -267,9 +272,7 @@ function TransactionAdd() {
             reference: headerData.reference || null,
             source_id: headerData.source_id === 'none' ? null : headerData.source_id
           },
-          relations: {
-            transactions: formattedEntries
-          }
+          transactions: formattedEntries
         });
       } else {
         // Create transaction
@@ -281,9 +284,7 @@ function TransactionAdd() {
             source_id: headerData.source_id === 'none' ? null : headerData.source_id,
             status: 'draft'
           },
-          relations: {
-            transactions: formattedEntries
-          }
+          transactions: formattedEntries
         });
       }
       

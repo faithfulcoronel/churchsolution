@@ -51,8 +51,12 @@ function BulkTransactionEntry() {
   const { currency } = useCurrencyStore();
 
   // Repositories
-  const { useCreate, useUpdate, useQuery, getTransactionEntries } =
-    useFinancialTransactionHeaderRepository();
+  const {
+    useCreateWithTransactions,
+    useUpdateWithTransactions,
+    useQuery,
+    getTransactionEntries,
+  } = useFinancialTransactionHeaderRepository();
   const { useAccountOptions } = useChartOfAccounts();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
   const { useQuery: useMembersQuery } = useMemberRepository();
@@ -76,8 +80,8 @@ function BulkTransactionEntry() {
   });
 
   // Create/update mutations
-  const createMutation = useCreate();
-  const updateMutation = useUpdate();
+  const createMutation = useCreateWithTransactions();
+  const updateMutation = useUpdateWithTransactions();
 
   // Get account options
   const { data: accountOptions, isLoading: isAccountsLoading } =
@@ -407,9 +411,7 @@ function BulkTransactionEntry() {
             source_id:
               headerData.source_id === "none" ? null : headerData.source_id,
           },
-          relations: {
-            transactions: formattedEntries,
-          },
+          transactions: formattedEntries,
         });
       } else {
         // Create transaction header and entries
@@ -422,9 +424,7 @@ function BulkTransactionEntry() {
               headerData.source_id === "none" ? null : headerData.source_id,
             status: "draft",
           },
-          relations: {
-            transactions: formattedEntries,
-          },
+          transactions: formattedEntries,
         });
       }
 

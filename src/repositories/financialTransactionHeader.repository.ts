@@ -9,6 +9,15 @@ export interface IFinancialTransactionHeaderRepository
   extends BaseRepository<FinancialTransactionHeader> {
   submitTransaction(id: string): Promise<void>;
   approveTransaction(id: string): Promise<void>;
+  createWithTransactions(
+    data: Partial<FinancialTransactionHeader>,
+    transactions: any[],
+  ): Promise<FinancialTransactionHeader>;
+  updateWithTransactions(
+    id: string,
+    data: Partial<FinancialTransactionHeader>,
+    transactions: any[],
+  ): Promise<FinancialTransactionHeader>;
 }
 
 @injectable()
@@ -64,6 +73,31 @@ export class FinancialTransactionHeaderRepository
   protected override async afterDelete(id: string): Promise<void> {
     // Additional repository-level cleanup after delete
     NotificationService.showSuccess('Transaction deleted successfully');
+  }
+
+  public async createWithTransactions(
+    data: Partial<FinancialTransactionHeader>,
+    transactions: any[],
+  ): Promise<FinancialTransactionHeader> {
+    const processed = await this.beforeCreate(data);
+    const created = await (
+      this.adapter as unknown as IFinancialTransactionHeaderAdapter
+    ).createWithTransactions(processed, transactions);
+    await this.afterCreate(created);
+    return created;
+  }
+
+  public async updateWithTransactions(
+    id: string,
+    data: Partial<FinancialTransactionHeader>,
+    transactions: any[],
+  ): Promise<FinancialTransactionHeader> {
+    const processed = await this.beforeUpdate(id, data);
+    const updated = await (
+      this.adapter as unknown as IFinancialTransactionHeaderAdapter
+    ).updateWithTransactions(id, processed, transactions);
+    await this.afterUpdate(updated);
+    return updated;
   }
 
   // Private helper methods
