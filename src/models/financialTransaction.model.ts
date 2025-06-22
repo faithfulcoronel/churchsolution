@@ -8,7 +8,7 @@ export type TransactionType = 'income' | 'expense';
 export interface FinancialTransaction extends BaseModel {
   id: string;
   type: TransactionType | null;
-  amount: number;
+  amount: number | null;
   description: string;
   date: string;
   budget_id: string | null;
