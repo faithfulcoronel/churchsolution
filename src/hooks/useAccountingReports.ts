@@ -156,9 +156,9 @@ export function useAccountingReports() {
             p_account_id: accountId,
             p_end_date: endDate
           });
-          
+
           if (error) throw error;
-          return data || 0;
+          return data?.balance ?? 0;
         } catch (error) {
           console.error(`Error fetching balance for account ${accountId}:`, error);
           addMessage({
