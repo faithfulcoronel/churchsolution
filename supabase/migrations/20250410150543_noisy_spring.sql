@@ -16,7 +16,7 @@
 ALTER TABLE financial_transactions 
   ADD COLUMN IF NOT EXISTS header_id UUID REFERENCES financial_transaction_headers(id),
   ADD COLUMN IF NOT EXISTS account_id UUID REFERENCES chart_of_accounts(id),
-  ADD COLUMN IF NOT EXISTS accounts_account_id UUID REFERENCES accounts(id);
+  ADD COLUMN IF NOT EXISTS accounts_account_id UUID REFERENCES accounts(id),
   ADD COLUMN IF NOT EXISTS debit NUMERIC(10,2) DEFAULT 0,
   ADD COLUMN IF NOT EXISTS credit NUMERIC(10,2) DEFAULT 0,
   ADD COLUMN IF NOT EXISTS is_reconciled BOOLEAN DEFAULT FALSE,
