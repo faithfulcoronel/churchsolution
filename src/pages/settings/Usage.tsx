@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { Users, DollarSign, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Progress } from '../../components/ui/Progress';
+import { Progress } from '../../components/ui2/progress';
 
 type UsageStats = {
   members: {
@@ -95,9 +95,9 @@ function Usage() {
   }
 
   const getMeterColor = (used: number, limit: number) => {
-    if (limit === -1) return 'primary';
+    if (limit === -1) return 'default';
     const percentage = (used / limit) * 100;
-    if (percentage >= 90) return 'danger';
+    if (percentage >= 90) return 'destructive';
     if (percentage >= 75) return 'warning';
     return 'success';
   };
