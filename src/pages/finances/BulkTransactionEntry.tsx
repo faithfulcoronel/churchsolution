@@ -29,12 +29,17 @@ import {
   Loader2,
   Plus,
   Trash2,
+  BookOpen,
+  Building2,
   DollarSign,
   FileText,
   AlertCircle,
 } from "lucide-react";
 import { useCurrencyStore } from "../../stores/currencyStore";
 import { formatCurrency } from "../../utils/currency";
+import { FormDialog } from "../../components/ui2/form-dialog";
+import AccountCreateForm from "../../components/forms/AccountCreateForm";
+import ChartOfAccountCreateForm from "../../components/forms/ChartOfAccountCreateForm";
 
 interface TransactionEntry {
   accounts_account_id: string;
@@ -117,6 +122,9 @@ function BulkTransactionEntry() {
   });
 
   const [isLoading, setIsLoading] = useState(isEditMode);
+
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [showChartAccountModal, setShowChartAccountModal] = useState(false);
 
   const [autoBalance, setAutoBalance] = useState(false);
   const [offsetAccountId, setOffsetAccountId] = useState("");
@@ -541,14 +549,36 @@ function BulkTransactionEntry() {
                 <h3 className="text-lg font-medium">Transaction Entries</h3>
               </div>
 
-              <Button
-                type="button"
-                onClick={addEntry}
-                className="flex items-center"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Entry
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowAccountModal(true)}
+                  className="flex items-center"
+                >
+                  <Building2 className="h-4 w-4 mr-1" />
+                  New Account
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowChartAccountModal(true)}
+                  className="flex items-center"
+                >
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  New Chart
+                </Button>
+                <Button
+                  type="button"
+                  onClick={addEntry}
+                  className="flex items-center"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Entry
+                </Button>
+              </div>
             </div>
           </CardHeader>
 
@@ -778,6 +808,26 @@ function BulkTransactionEntry() {
           </CardFooter>
         </Card>
       </form>
+      <FormDialog
+        open={showAccountModal}
+        onOpenChange={setShowAccountModal}
+        title="Add Account"
+      >
+        <AccountCreateForm
+          onCancel={() => setShowAccountModal(false)}
+          onSuccess={() => setShowAccountModal(false)}
+        />
+      </FormDialog>
+      <FormDialog
+        open={showChartAccountModal}
+        onOpenChange={setShowChartAccountModal}
+        title="Add Chart of Account"
+      >
+        <ChartOfAccountCreateForm
+          onCancel={() => setShowChartAccountModal(false)}
+          onSuccess={() => setShowChartAccountModal(false)}
+        />
+      </FormDialog>
     </div>
   );
 }
