@@ -253,7 +253,9 @@ export class FinancialTransactionHeaderAdapter
         debit,
         credit,
         account_id,
-        account:chart_of_accounts(id, code, name, account_type)
+        accounts_account_id,
+        account:chart_of_accounts(id, code, name, account_type),
+        account_holder:accounts(id, name)
       `
       )
       .eq('tenant_id', tenantId)

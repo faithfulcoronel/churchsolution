@@ -22,7 +22,7 @@ import {
 } from "../../components/ui2/select";
 import { Combobox } from "../../components/ui2/combobox";
 import { Switch } from "../../components/ui2/switch";
-import { useMemberRepository } from "../../hooks/useMemberRepository";
+import { useAccountRepository } from "../../hooks/useAccountRepository";
 import {
   ArrowLeft,
   Save,
@@ -37,7 +37,7 @@ import { useCurrencyStore } from "../../stores/currencyStore";
 import { formatCurrency } from "../../utils/currency";
 
 interface TransactionEntry {
-  member_id: string;
+  accounts_account_id: string;
   account_id: string;
   description: string;
   debit: number | null;
@@ -59,7 +59,7 @@ function BulkTransactionEntry() {
   } = useFinancialTransactionHeaderRepository();
   const { useAccountOptions } = useChartOfAccounts();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
-  const { useQuery: useMembersQuery } = useMemberRepository();
+  const { useQuery: useAccountsQuery } = useAccountRepository();
 
   // Get transaction data if editing
   const { data: transactionData } = useQuery({
@@ -98,29 +98,15 @@ function BulkTransactionEntry() {
   });
   const sources = sourcesData?.data || [];
 
-  // Get members with their accounts
-  const { data: membersData, isLoading: isMembersLoading } = useMembersQuery();
-  const members = membersData?.data || [];
+  // Get accounts for People/Org column
+  const { data: accountRecordsData, isLoading: isAccountRecordsLoading } =
+    useAccountsQuery();
+  const accountRecords = accountRecordsData?.data || [];
 
-  const memberOptions = React.useMemo(
-    () =>
-      members.map((m) => ({
-        value: m.id,
-        label: `${m.first_name} ${m.last_name}`,
-      })),
-    [members],
+  const accountRecordOptions = React.useMemo(
+    () => accountRecords.map((a) => ({ value: a.id, label: a.name })),
+    [accountRecords],
   );
-
-  const memberAccountMap = React.useMemo(() => {
-    const map: Record<string, string> = {};
-    members.forEach((m) => {
-      const acc = (m as any).accounts?.[0];
-      if (acc?.id) {
-        map[m.id] = acc.id as string;
-      }
-    });
-    return map;
-  }, [members]);
 
   // Form state
   const [headerData, setHeaderData] = useState({
@@ -165,7 +151,7 @@ function BulkTransactionEntry() {
           if (entriesData && entriesData.length > 0) {
             setEntries(
               entriesData.map((entry: any) => ({
-                member_id: "",
+                accounts_account_id: entry.accounts_account_id || "",
                 account_id: entry.account_id,
                 description: entry.description,
                 debit: entry.debit || null,
@@ -189,14 +175,14 @@ function BulkTransactionEntry() {
 
   const [entries, setEntries] = useState<TransactionEntry[]>([
     {
-      member_id: "",
+      accounts_account_id: "",
       account_id: "",
       description: "",
       debit: null,
       credit: null,
     },
     {
-      member_id: "",
+      accounts_account_id: "",
       account_id: "",
       description: "",
       debit: null,
@@ -219,7 +205,7 @@ function BulkTransactionEntry() {
     const diff = totalDebits - totalCredits;
 
     const offset: TransactionEntry = {
-      member_id: "",
+      accounts_account_id: "",
       account_id: accountId,
       description: "",
       debit: null,
@@ -292,7 +278,7 @@ function BulkTransactionEntry() {
     setEntries([
       ...entries,
       {
-        member_id: "",
+        accounts_account_id: "",
         account_id: "",
         description: "",
         debit: null,
@@ -391,9 +377,7 @@ function BulkTransactionEntry() {
       // Format entries for submission
       const formattedEntries = displayedEntries.map((entry) => ({
         account_id: entry.account_id,
-        accounts_account_id: entry.member_id
-          ? memberAccountMap[entry.member_id]
-          : null,
+        accounts_account_id: entry.accounts_account_id || null,
         description: entry.description || headerData.description,
         debit: entry.debit || 0,
         credit: entry.credit || 0,
@@ -591,7 +575,7 @@ function BulkTransactionEntry() {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
-                      Person
+                      People/Org
                     </th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
                       Account
@@ -615,18 +599,18 @@ function BulkTransactionEntry() {
                     <tr key={index} className="border-b border-border">
                       <td className="px-4 py-2">
                         <Combobox
-                          options={memberOptions}
-                          value={entry.member_id}
+                          options={accountRecordOptions}
+                          value={entry.accounts_account_id}
                           onChange={(value) =>
-                            handleEntryChange(index, "member_id", value)
+                            handleEntryChange(index, "accounts_account_id", value)
                           }
                           placeholder={
-                            isMembersLoading
-                              ? "Loading people..."
-                              : "Select person"
+                            isAccountRecordsLoading
+                              ? "Loading accounts..."
+                              : "Select account"
                           }
                           disabled={
-                            isMembersLoading ||
+                            isAccountRecordsLoading ||
                             (autoBalance && index === entries.length)
                           }
                         />
