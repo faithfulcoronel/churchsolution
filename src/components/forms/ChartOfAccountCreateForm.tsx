@@ -5,8 +5,9 @@ import { Input } from '../ui2/input';
 import { Button } from '../ui2/button';
 import { Textarea } from '../ui2/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui2/select';
+import { Combobox } from '../ui2/combobox';
 import { Switch } from '../ui2/switch';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 interface ChartOfAccountCreateFormProps {
   onCancel: () => void;
@@ -14,16 +15,22 @@ interface ChartOfAccountCreateFormProps {
 }
 
 export default function ChartOfAccountCreateForm({ onCancel, onSuccess }: ChartOfAccountCreateFormProps) {
-  const { useCreateAccount } = useChartOfAccounts();
+  const { useCreateAccount, useAccountOptions } = useChartOfAccounts();
   const createMutation = useCreateAccount();
 
   const [formData, setFormData] = useState({
     code: '',
     name: '',
     account_type: 'asset' as AccountType,
+    account_subtype: '',
     description: '',
     is_active: true,
+    parent_id: null as string | null,
   });
+  const {
+    data: parentOptions,
+    isLoading: isLoadingParents,
+  } = useAccountOptions(formData.account_type);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (field: string, value: any) => {
@@ -44,7 +51,11 @@ export default function ChartOfAccountCreateForm({ onCancel, onSuccess }: ChartO
     }
 
     try {
-      await createMutation.mutateAsync(formData);
+      await createMutation.mutateAsync({
+        ...formData,
+        account_subtype: formData.account_subtype || null,
+        parent_id: formData.parent_id,
+      });
       onSuccess && onSuccess();
     } catch (err) {
       console.error('Error creating account:', err);
@@ -80,6 +91,27 @@ export default function ChartOfAccountCreateForm({ onCancel, onSuccess }: ChartO
             <SelectItem value="expense">Expense</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+      <Input
+        label="Account Subtype (Optional)"
+        value={formData.account_subtype}
+        onChange={(e) => handleChange('account_subtype', e.target.value)}
+      />
+      <div>
+        <label className="block text-sm font-medium mb-1.5 text-foreground">Parent Account (Optional)</label>
+        {isLoadingParents ? (
+          <div className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            <span className="text-sm text-muted-foreground">Loading accounts...</span>
+          </div>
+        ) : (
+          <Combobox
+            options={parentOptions || []}
+            value={formData.parent_id || ''}
+            onChange={(value) => handleChange('parent_id', value || null)}
+            placeholder="Select parent account"
+          />
+        )}
       </div>
       <Textarea
         label="Description"
