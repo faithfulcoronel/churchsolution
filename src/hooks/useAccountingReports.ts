@@ -203,7 +203,6 @@ export function useAccountingReports() {
             .eq('account_id', accountId)
             .gte('date', start)
             .lte('date', end)
-            .is('deleted_at', null)
             .order('date', { ascending: true });
           
           if (error) throw error;
