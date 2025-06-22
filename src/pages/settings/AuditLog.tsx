@@ -2,12 +2,24 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
-import { Card } from '../../components/ui/Card';
-import { Input } from '../../components/ui/Input';
-import { Select } from '../../components/ui/Select';
-import { Button } from '../../components/ui/Button';
-import { Table, TableHeader, TableBody, TableRow, TableCell } from '../../components/ui/Table';
-import { Badge } from '../../components/ui/Badge';
+import { Card } from '../../components/ui2/card';
+import { Input } from '../../components/ui2/input';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from '../../components/ui2/select';
+import { Button } from '../../components/ui2/button';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell
+} from '../../components/ui2/table';
+import { Badge } from '../../components/ui2/badge';
 import {
   Calendar,
   Filter,
@@ -17,8 +29,6 @@ import {
   Loader2,
   History,
   Users,
-  ChevronDown,
-  ChevronUp,
   AlertTriangle,
   CheckCircle2,
   Pencil,
@@ -194,18 +204,20 @@ function AuditLog() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <Select
-                label="Date Range"
                 value={dateRange}
-                onChange={(e) => handleDateRangeChange(e.target.value as DateRange)}
-                icon={<Calendar />}
-                options={[
-                  { value: 'daily', label: 'Today' },
-                  { value: 'weekly', label: 'This Week' },
-                  { value: 'monthly', label: 'This Month' },
-                  { value: 'yearly', label: 'This Year' },
-                  { value: 'custom', label: 'Custom Range' },
-                ]}
-              />
+                onValueChange={(value) => handleDateRangeChange(value as DateRange)}
+              >
+                <SelectTrigger label="Date Range" icon={<Calendar />}> 
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Today</SelectItem>
+                  <SelectItem value="weekly">This Week</SelectItem>
+                  <SelectItem value="monthly">This Month</SelectItem>
+                  <SelectItem value="yearly">This Year</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {dateRange === 'custom' && (
@@ -230,33 +242,31 @@ function AuditLog() {
             )}
 
             <div>
-              <Select
-                label="Action"
-                value={actionFilter}
-                onChange={(e) => setActionFilter(e.target.value)}
-                icon={<Filter />}
-                options={[
-                  { value: 'all', label: 'All Actions' },
-                  { value: 'create', label: 'Create' },
-                  { value: 'update', label: 'Update' },
-                  { value: 'delete', label: 'Delete' },
-                ]}
-              />
+              <Select value={actionFilter} onValueChange={setActionFilter}>
+                <SelectTrigger label="Action" icon={<Filter />}> 
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Actions</SelectItem>
+                  <SelectItem value="create">Create</SelectItem>
+                  <SelectItem value="update">Update</SelectItem>
+                  <SelectItem value="delete">Delete</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
-              <Select
-                label="Entity Type"
-                value={entityFilter}
-                onChange={(e) => setEntityFilter(e.target.value)}
-                icon={<Filter />}
-                options={[
-                  { value: 'all', label: 'All Entities' },
-                  { value: 'member', label: 'Members' },
-                  { value: 'transaction', label: 'Transactions' },
-                  { value: 'budget', label: 'Budgets' },
-                ]}
-              />
+              <Select value={entityFilter} onValueChange={setEntityFilter}>
+                <SelectTrigger label="Entity Type" icon={<Filter />}> 
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Entities</SelectItem>
+                  <SelectItem value="member">Members</SelectItem>
+                  <SelectItem value="transaction">Transactions</SelectItem>
+                  <SelectItem value="budget">Budgets</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
