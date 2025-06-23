@@ -19,6 +19,10 @@ import {
   type IFinancialTransactionHeaderAdapter
 } from '../adapters/financialTransactionHeader.adapter';
 import { FundAdapter, type IFundAdapter } from '../adapters/fund.adapter';
+import {
+  OfferingBatchAdapter,
+  type IOfferingBatchAdapter,
+} from '../adapters/offeringBatch.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -38,6 +42,10 @@ import {
   type IFinancialTransactionHeaderRepository
 } from '../repositories/financialTransactionHeader.repository';
 import { FundRepository, type IFundRepository } from '../repositories/fund.repository';
+import {
+  OfferingBatchRepository,
+  type IOfferingBatchRepository,
+} from '../repositories/offeringBatch.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { TYPES } from './types';
 
@@ -71,6 +79,10 @@ container
 container
   .bind<IFundAdapter>(TYPES.IFundAdapter)
   .to(FundAdapter)
+  .inSingletonScope();
+container
+  .bind<IOfferingBatchAdapter>(TYPES.IOfferingBatchAdapter)
+  .to(OfferingBatchAdapter)
   .inSingletonScope();
 
 // Register services
@@ -109,6 +121,10 @@ container
 container
   .bind<IFundRepository>(TYPES.IFundRepository)
   .to(FundRepository)
+  .inSingletonScope();
+container
+  .bind<IOfferingBatchRepository>(TYPES.IOfferingBatchRepository)
+  .to(OfferingBatchRepository)
   .inSingletonScope();
 
 export { container };
