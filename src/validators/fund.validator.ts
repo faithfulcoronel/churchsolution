@@ -6,10 +6,6 @@ export class FundValidator {
       throw new Error('Fund name is required');
     }
 
-    if (!data.account_id?.toString().trim()) {
-      throw new Error('Account ID is required');
-    }
-
     if (data.type !== undefined) {
       const validTypes: Fund['type'][] = ['restricted', 'unrestricted'];
       if (!validTypes.includes(data.type)) {
