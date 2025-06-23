@@ -199,6 +199,40 @@ function FinancesDashboard() {
     enabled: !!currentTenant?.id,
   });
 
+  // Get fund balances
+  const { data: fundBalances } = useQuery({
+    queryKey: ['fund-balances', currentTenant?.id],
+    queryFn: async () => {
+      const { data: funds, error } = await supabase
+        .from('funds')
+        .select('id, name, type')
+        .eq('tenant_id', currentTenant?.id)
+        .is('deleted_at', null);
+      if (error) throw error;
+
+      if (!funds) return [];
+
+      const { data: txs, error: txError } = await supabase
+        .from('financial_transactions')
+        .select('fund_id, type, amount, debit, credit')
+        .eq('tenant_id', currentTenant?.id)
+        .not('fund_id', 'is', null);
+      if (txError) throw txError;
+
+      return funds.map(f => {
+        const total = (txs || []).filter(t => t.fund_id === f.id)
+          .reduce((sum, t) => {
+            if (t.type) {
+              return sum + (t.type === 'income' ? Number(t.amount) : -Number(t.amount));
+            }
+            return sum + (Number(t.debit || 0) - Number(t.credit || 0));
+          }, 0);
+        return { ...f, balance: total };
+      });
+    },
+    enabled: !!currentTenant?.id,
+  });
+
   const isLoading = trendsLoading || statsLoading;
 
   if (isLoading) {
@@ -450,8 +484,26 @@ function FinancesDashboard() {
                   {card.name}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+      </CardContent>
+    </Card>
+
+    {/* Fund Balances */}
+    <Card className="mt-6">
+      <CardContent className="p-4">
+        <div className="flex items-center mb-4">
+          <DollarSign className="h-5 w-5 text-muted-foreground mr-2" />
+          <h3 className="text-base font-medium text-foreground">Fund Balances</h3>
+        </div>
+        <ul className="space-y-2">
+          {fundBalances?.map(f => (
+            <li key={f.id} className="flex justify-between text-sm">
+              <span>{f.name}</span>
+              <span>{formatCurrency(f.balance, currency)}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
         ))}
       </div>
 
