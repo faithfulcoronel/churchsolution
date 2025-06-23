@@ -8,6 +8,7 @@ import {
   FileText,
   CreditCard,
   History,
+  Wallet,
   LucideIcon,
 } from 'lucide-react';
 
@@ -75,6 +76,11 @@ export const navigation: NavItem[] = [
         name: 'Budgets',
         href: '/finances/budgets',
         icon: CreditCard,
+      },
+      {
+        name: 'Funds',
+        href: '/finances/funds',
+        icon: Wallet,
       },
       {
         name: 'Reports',

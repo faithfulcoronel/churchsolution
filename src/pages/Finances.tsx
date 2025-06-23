@@ -14,6 +14,9 @@ const BulkExpenseEntry = React.lazy(() => import('./finances/BulkExpenseEntry'))
 const BudgetList = React.lazy(() => import('./finances/BudgetList'));
 const BudgetAdd = React.lazy(() => import('./finances/BudgetAdd'));
 const BudgetProfile = React.lazy(() => import('./finances/BudgetProfile'));
+const FundList = React.lazy(() => import('./finances/FundList'));
+const FundAddEdit = React.lazy(() => import('./finances/FundAddEdit'));
+const FundProfile = React.lazy(() => import('./finances/FundProfile'));
 const Reports = React.lazy(() => import('./finances/Reports'));
 
 function LoadingSpinner() {
@@ -60,6 +63,10 @@ function Finances() {
         <Route path="budgets" element={<BudgetList />} />
         <Route path="budgets/add" element={<BudgetAdd />} />
         <Route path="budgets/:id" element={<BudgetProfile />} />
+        <Route path="funds" element={<FundList />} />
+        <Route path="funds/add" element={<FundAddEdit />} />
+        <Route path="funds/:id/edit" element={<FundAddEdit />} />
+        <Route path="funds/:id" element={<FundProfile />} />
         <Route path="reports" element={<Reports />} />
       </Routes>
     </Suspense>
