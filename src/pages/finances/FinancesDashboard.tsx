@@ -484,12 +484,13 @@ function FinancesDashboard() {
                   {card.name}
                 </p>
               </div>
-      </CardContent>
-    </Card>
+            </CardContent>
+          </Card>
+        ))}
 
-    {/* Fund Balances */}
-    <Card className="mt-6">
-      <CardContent className="p-4">
+        {/* Fund Balances */}
+        <Card className="mt-6">
+          <CardContent className="p-4">
         <div className="flex items-center mb-4">
           <DollarSign className="h-5 w-5 text-muted-foreground mr-2" />
           <h3 className="text-base font-medium text-foreground">Fund Balances</h3>
@@ -504,7 +505,6 @@ function FinancesDashboard() {
         </ul>
       </CardContent>
     </Card>
-        ))}
       </div>
 
       {/* Monthly Trends Chart */}
