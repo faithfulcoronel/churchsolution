@@ -6,12 +6,13 @@ import { FinancialSource, SourceType } from '../../models/financialSource.model'
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Textarea } from '../../components/ui2/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
 import { Combobox } from '../../components/ui2/combobox';
 import { Label } from '../../components/ui2/label';
 import { Switch } from '../../components/ui2/switch';
-import { ArrowLeft, Save, Loader2, Briefcase as Bank, Wallet, Globe, CreditCard, AlertCircle, Hash, FileText } from 'lucide-react';
+import { Save, Loader2, Briefcase as Bank, Wallet, Globe, CreditCard, AlertCircle, Hash, FileText } from 'lucide-react';
 
 function FinancialSourceAddEdit() {
   const { id } = useParams<{ id: string }>();
@@ -129,14 +130,7 @@ function FinancialSourceAddEdit() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/accounts/sources')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Financial Sources
-        </Button>
+        <BackButton fallbackPath="/accounts/sources" label="Back to Financial Sources" />
       </div>
       
       <Card>

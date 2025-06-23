@@ -4,6 +4,7 @@ import { useChartOfAccountRepository } from '../../hooks/useChartOfAccountReposi
 import { useAccountingReports } from '../../hooks/useAccountingReports';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Badge } from '../../components/ui2/badge';
 import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
 import { DataGrid } from '../../components/ui2/mui-datagrid';
@@ -18,8 +19,7 @@ import {
   AlertDialogTitle,
 } from '../../components/ui2/alert-dialog';
 import { 
-  ArrowLeft, 
-  BookOpen, 
+  BookOpen,
   Pencil, 
   Trash2, 
   Loader2, 
@@ -276,12 +276,10 @@ function ChartOfAccountProfile() {
           <p className="mt-2 text-sm text-muted-foreground">
             The account you're looking for doesn't exist or has been deleted.
           </p>
-          <Button
-            className="mt-4"
-            onClick={() => navigate('/accounts/chart-of-accounts')}
-          >
-            Back to Chart of Accounts
-          </Button>
+          <BackButton
+            fallbackPath="/accounts/chart-of-accounts"
+            label="Back to Chart of Accounts"
+          />
         </div>
       </div>
     );
@@ -290,14 +288,7 @@ function ChartOfAccountProfile() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/accounts/chart-of-accounts')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Chart of Accounts
-        </Button>
+        <BackButton fallbackPath="/accounts/chart-of-accounts" label="Back to Chart of Accounts" />
       </div>
       
       {/* Account Header */}

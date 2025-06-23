@@ -7,11 +7,11 @@ import { formatCurrency } from '../../utils/currency';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Combobox } from '../../components/ui2/combobox';
 import { DatePickerInput } from '../../components/ui2/date-picker';
 import { Textarea } from '../../components/ui2/textarea';
 import {
-  ArrowLeft,
   Save,
   Loader2,
   AlertCircle,
@@ -124,14 +124,7 @@ function BudgetAdd() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/finances/budgets')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Budgets
-        </Button>
+        <BackButton fallbackPath="/finances/budgets" label="Back to Budgets" />
       </div>
 
       <Card>

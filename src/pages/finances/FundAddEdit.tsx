@@ -5,11 +5,12 @@ import { Fund, FundType } from '../../models/fund.model';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
 import { Combobox } from '../../components/ui2/combobox';
 import { Label } from '../../components/ui2/label';
 import { useChartOfAccounts } from '../../hooks/useChartOfAccounts';
-import { ArrowLeft, Save, Loader2, AlertCircle } from 'lucide-react';
+import { Save, Loader2, AlertCircle } from 'lucide-react';
 
 function FundAddEdit() {
   const { id } = useParams<{ id: string }>();
@@ -84,10 +85,7 @@ function FundAddEdit() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate('/finances/funds')} className="flex items-center">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Funds
-        </Button>
+        <BackButton fallbackPath="/finances/funds" label="Back to Funds" />
       </div>
 
       <Card>

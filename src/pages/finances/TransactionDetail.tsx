@@ -5,12 +5,12 @@ import { usePermissions } from '../../hooks/usePermissions';
 import PermissionGate from '../../components/PermissionGate';
 import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Badge } from '../../components/ui2/badge';
 import { Textarea } from '../../components/ui2/textarea';
 import { 
-  ArrowLeft, 
-  FileText, 
-  Loader2, 
+  FileText,
+  Loader2,
   Edit, 
   Trash2,
   Check,
@@ -290,12 +290,7 @@ function TransactionDetail() {
           <p className="mt-2 text-sm text-muted-foreground">
             The transaction you're looking for doesn't exist or has been deleted.
           </p>
-          <Button
-            className="mt-4"
-            onClick={() => navigate('/finances/transactions')}
-          >
-            Back to Transactions
-          </Button>
+          <BackButton fallbackPath="/finances/transactions" label="Back to Transactions" />
         </div>
       </div>
     );
@@ -304,14 +299,7 @@ function TransactionDetail() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/finances/transactions')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Transactions
-        </Button>
+        <BackButton fallbackPath="/finances/transactions" label="Back to Transactions" />
       </div>
       
       {/* Transaction Header */}
