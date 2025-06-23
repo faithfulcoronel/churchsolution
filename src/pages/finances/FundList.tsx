@@ -20,7 +20,9 @@ function FundList() {
 
   const { useQuery: useFundsQuery } = useFundRepository();
 
-  const { data: result, isLoading } = useFundsQuery();
+  const { data: result, isLoading } = useFundsQuery({
+    pagination: { page: page + 1, pageSize },
+  });
   const funds = result?.data || [];
 
   const filteredFunds = funds.filter((fund: Fund) => {
