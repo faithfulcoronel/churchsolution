@@ -14,6 +14,9 @@ const BulkExpenseEntry = React.lazy(() => import('./BulkExpenseEntry'));
 const BudgetList = React.lazy(() => import('./BudgetList'));
 const BudgetAdd = React.lazy(() => import('./BudgetAdd'));
 const BudgetProfile = React.lazy(() => import('./BudgetProfile'));
+const FundList = React.lazy(() => import('./FundList'));
+const FundAddEdit = React.lazy(() => import('./FundAddEdit'));
+const FundProfile = React.lazy(() => import('./FundProfile'));
 const Reports = React.lazy(() => import('./Reports'));
 const JournalEntryForm = React.lazy(() => import('./JournalEntryForm'));
 const Statements = React.lazy(() => import('./Statements'));
@@ -65,6 +68,10 @@ function Finances() {
         <Route path="budgets" element={<BudgetList />} />
         <Route path="budgets/add" element={<BudgetAdd />} />
         <Route path="budgets/:id" element={<BudgetProfile />} />
+        <Route path="funds" element={<FundList />} />
+        <Route path="funds/add" element={<FundAddEdit />} />
+        <Route path="funds/:id/edit" element={<FundAddEdit />} />
+        <Route path="funds/:id" element={<FundProfile />} />
         <Route path="reports" element={<Reports />} />
         <Route path="statements" element={<Statements />} />
         <Route path="journal-entry" element={<JournalEntryForm />} />
