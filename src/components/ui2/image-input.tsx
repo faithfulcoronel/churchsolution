@@ -18,6 +18,7 @@ interface ImageInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElemen
   showOverlay?: boolean;
   loading?: boolean;
   placeholder?: React.ReactNode;
+  required?: boolean;
 }
 
 const sizeClasses = {
@@ -33,13 +34,14 @@ const shapeClasses = {
 };
 
 export const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
-  ({ 
-    className = '', 
-    error, 
-    label, 
-    helperText, 
-    value, 
-    onChange, 
+  ({
+    className = '',
+    error,
+    label,
+    required,
+    helperText,
+    value,
+    onChange,
     onRemove,
     success = false,
     size = 'md',
@@ -103,6 +105,7 @@ export const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
         {label && (
           <Label className="block text-sm font-medium mb-2">
             {label}
+            {required && <span className="text-destructive ml-1">*</span>}
           </Label>
         )}
 
@@ -194,6 +197,7 @@ export const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
             className="sr-only"
             onChange={handleFileChange}
             accept="image/*"
+            required={required}
             {...props}
           />
         </div>
