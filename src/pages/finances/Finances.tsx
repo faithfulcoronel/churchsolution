@@ -9,8 +9,6 @@ const FinancesDashboard = React.lazy(() => import('./FinancesDashboard'));
 const TransactionList = React.lazy(() => import('./TransactionList'));
 const TransactionDetail = React.lazy(() => import('./TransactionDetail'));
 const BulkTransactionEntry = React.lazy(() => import('./BulkTransactionEntry'));
-const BulkIncomeEntry = React.lazy(() => import('./BulkIncomeEntry'));
-const BulkExpenseEntry = React.lazy(() => import('./BulkExpenseEntry'));
 const BudgetList = React.lazy(() => import('./BudgetList'));
 const BudgetAdd = React.lazy(() => import('./BudgetAdd'));
 const BudgetProfile = React.lazy(() => import('./BudgetProfile'));
@@ -55,16 +53,6 @@ function Finances() {
         } />
         <Route path="transactions/:id/bulk" element={<TransactionBulkRedirect />} />
         <Route path="transactions/bulk" element={<Navigate to="/finances/transactions/add" replace />} />
-        <Route path="transactions/bulk-income" element={
-          <SubscriptionGate type="transaction">
-            <BulkIncomeEntry />
-          </SubscriptionGate>
-        } />
-        <Route path="transactions/bulk-expense" element={
-          <SubscriptionGate type="transaction">
-            <BulkExpenseEntry />
-          </SubscriptionGate>
-        } />
         <Route path="budgets" element={<BudgetList />} />
         <Route path="budgets/add" element={<BudgetAdd />} />
         <Route path="budgets/:id" element={<BudgetProfile />} />
