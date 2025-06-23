@@ -24,6 +24,7 @@ export function DateRangePickerField({
   clearable = true,
   showCompactInput = false,
   label,
+  required,
   error,
   helperText,
 }: DateRangePickerFieldProps) {
@@ -38,6 +39,7 @@ export function DateRangePickerField({
       showCompactInput={showCompactInput}
       icon={<CalendarIcon className="h-4 w-4" />}
       label={label}
+      required={required}
       error={error}
       helperText={helperText}
     />

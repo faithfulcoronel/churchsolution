@@ -29,6 +29,7 @@ export function DatePickerInput({
   disabled = false,
   clearable = true,
   label,
+  required,
   error,
   helperText,
 }: DatePickerProps) {
@@ -63,7 +64,7 @@ export function DatePickerInput({
           )}
         >
           {label}
-          {error && <span className="text-destructive ml-1">*</span>}
+          {required && <span className="text-destructive ml-1">*</span>}
         </label>
       )}
       
@@ -81,6 +82,7 @@ export function DatePickerInput({
               clearable={clearable && !!date}
               onClear={() => handleSelect(undefined)}
               onClick={() => setIsOpen(true)}
+              required={required}
               error={error}
             />
           </div>

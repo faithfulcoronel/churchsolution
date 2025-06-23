@@ -33,6 +33,7 @@ export interface DateRangePickerProps {
   showCompactInput?: boolean;
   icon?: React.ReactNode;
   label?: string;
+  required?: boolean;
   error?: string;
   helperText?: string;
 }
@@ -50,6 +51,7 @@ export function DateRangePicker({
   showCompactInput = false,
   icon,
   label,
+  required,
   error,
   helperText,
 }: DateRangePickerProps) {
@@ -168,7 +170,7 @@ export function DateRangePicker({
           )}
         >
           {label}
-          {error && <span className="text-destructive ml-1">*</span>}
+          {required && <span className="text-destructive ml-1">*</span>}
         </label>
       )}
       
@@ -184,6 +186,7 @@ export function DateRangePicker({
                 error && "border-destructive",
                 "dark:border-gray-700 dark:bg-gray-800"
               )}
+              aria-required={required ? true : undefined}
             >
               {icon || <CalendarIcon className="h-4 w-4 mr-2" />}
               <span className="flex-1 truncate">{formattedDateRange}</span>
@@ -204,6 +207,7 @@ export function DateRangePicker({
                 clearable={clearable && !!value.from}
                 onClear={handleClear}
                 onClick={() => setOpen(true)}
+                required={required}
                 error={error}
               />
             </div>
