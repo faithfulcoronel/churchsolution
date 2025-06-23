@@ -228,21 +228,6 @@ function FinancialSourceList() {
                 disableDensitySelector={false}
                 page={page}
                 pageSize={pageSize}
-                slots={{
-                  toolbar: () => (
-                    <div className="flex justify-between items-center p-4">
-                      <h3 className="text-lg font-semibold">Financial Sources</h3>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate('/accounts/sources/add')}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Source
-                      </Button>
-                    </div>
-                  ),
-                }}
               />
             )}
           </CardContent>

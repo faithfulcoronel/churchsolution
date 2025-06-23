@@ -118,6 +118,11 @@ function FundList() {
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
                 onRowClick={handleRowClick}
+                autoHeight
+                disableColumnMenu={false}
+                disableColumnFilter={false}
+                disableColumnSelector={false}
+                disableDensitySelector={false}
                 getRowId={(row) => row.id}
                 page={page}
                 pageSize={pageSize}
