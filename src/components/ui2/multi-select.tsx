@@ -42,6 +42,7 @@ export function MultiSelect({
   searchable = true,
   icon,
   label,
+  required,
   error,
   helperText,
 }: MultiSelectProps) {
@@ -98,7 +99,7 @@ export function MultiSelect({
           )}
         >
           {label}
-          {error && <span className="text-destructive ml-1">*</span>}
+          {required && <span className="text-destructive ml-1">*</span>}
         </label>
       )}
       
@@ -108,6 +109,7 @@ export function MultiSelect({
             variant="outline"
             role="combobox"
             aria-expanded={open}
+            aria-required={required ? true : undefined}
             className={cn(
               "w-full justify-between",
               value.length === 0 && "text-muted-foreground",
