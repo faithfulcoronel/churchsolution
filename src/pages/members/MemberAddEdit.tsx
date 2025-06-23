@@ -4,6 +4,7 @@ import { useMemberRepository } from '../../hooks/useMemberRepository';
 import { Member } from '../../models/member.model';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton, { performGoBack } from '../../components/BackButton';
 import { ImageInput } from '../../components/ui2/image-input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
 import { Separator } from '../../components/ui2/separator';
@@ -17,7 +18,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from '../../components/ui2/alert-dialog';
-import { Save, ArrowLeft, Loader2 } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 
 // Import tabs
 import BasicInfoTab from './tabs/BasicInfoTab';
@@ -120,7 +121,7 @@ function MemberAddEdit() {
     if (hasUnsavedChanges) {
       setShowCancelConfirm(true);
     } else {
-      navigate(id ? `/members/${id}` : '/members/list');
+      performGoBack(navigate, id ? `/members/${id}` : '/members/list');
     }
   };
 
@@ -192,14 +193,7 @@ function MemberAddEdit() {
   return (
     <div className="space-y-6">
         {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={handleCancel}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Members
-        </Button>
+        <BackButton fallbackPath="/members" label="Back to Members" />
 
         <form onSubmit={handleSubmit}>
           <Card>
@@ -312,7 +306,7 @@ function MemberAddEdit() {
                 variant="destructive"
                 onClick={() => {
                   setShowCancelConfirm(false);
-                  navigate(id ? `/members/${id}` : '/members/list');
+                  performGoBack(navigate, id ? `/members/${id}` : '/members/list');
                 }}
               >
                 Discard Changes

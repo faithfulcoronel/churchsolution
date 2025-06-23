@@ -5,6 +5,7 @@ import { ChartOfAccount } from '../../models/chartOfAccount.model';
 import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Textarea } from '../../components/ui2/textarea';
 import { 
   Select, 
@@ -15,9 +16,8 @@ import {
 } from '../../components/ui2/select';
 import { Switch } from '../../components/ui2/switch';
 import { 
-  ArrowLeft, 
-  Save, 
-  Loader2, 
+  Save,
+  Loader2,
   BookOpen, 
   Hash, 
   FileText, 
@@ -159,14 +159,7 @@ function ChartOfAccountAddEdit() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/accounts/chart-of-accounts')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Chart of Accounts
-        </Button>
+        <BackButton fallbackPath="/accounts/chart-of-accounts" label="Back to Chart of Accounts" />
       </div>
       
       <form onSubmit={handleSubmit}>

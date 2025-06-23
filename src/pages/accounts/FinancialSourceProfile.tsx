@@ -5,6 +5,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Badge } from '../../components/ui2/badge';
 import {
   AlertDialog,
@@ -16,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../../components/ui2/alert-dialog';
-import { ArrowLeft, Ban as Bank, Wallet, Globe, CreditCard, FileText, Pencil, Trash2, Loader2, CheckCircle2, XCircle, Hash, DollarSign, AlertTriangle } from 'lucide-react';
+import { Ban as Bank, Wallet, Globe, CreditCard, FileText, Pencil, Trash2, Loader2, CheckCircle2, XCircle, Hash, DollarSign, AlertTriangle } from 'lucide-react';
 
 // Maximum number of retries for delete operation
 const MAX_RETRIES = 3;
@@ -149,9 +150,7 @@ function FinancialSourceProfile() {
           <AlertTriangle className="h-12 w-12 text-warning mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">Financial Source Not Found</h3>
           <p className="text-muted-foreground mb-6">The financial source you're looking for doesn't exist or has been removed.</p>
-          <Button onClick={() => navigate('/accounts/sources')}>
-            Go Back to Financial Sources
-          </Button>
+          <BackButton fallbackPath="/accounts/sources" label="Go Back to Financial Sources" />
         </CardContent>
       </Card>
     );
@@ -160,14 +159,7 @@ function FinancialSourceProfile() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/accounts/sources')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Financial Sources
-        </Button>
+        <BackButton fallbackPath="/accounts/sources" label="Back to Financial Sources" />
       </div>
       
       {/* Source Header */}

@@ -5,6 +5,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Badge } from '../../components/ui2/badge';
 import { Tabs } from '../../components/ui2/tabs';
 import {
@@ -18,7 +19,6 @@ import {
   AlertDialogTitle,
 } from '../../components/ui2/alert-dialog';
 import {
-  ArrowLeft,
   Building2,
   User,
   Mail,
@@ -163,9 +163,7 @@ function AccountProfile() {
           <AlertTriangle className="h-12 w-12 text-warning mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">Account Not Found</h3>
           <p className="text-muted-foreground mb-6">The account you're looking for doesn't exist or has been removed.</p>
-          <Button onClick={() => navigate('/accounts')}>
-            Go Back to Accounts
-          </Button>
+          <BackButton fallbackPath="/accounts" label="Go Back to Accounts" />
         </CardContent>
       </Card>
     );
@@ -174,14 +172,7 @@ function AccountProfile() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/accounts')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Accounts
-        </Button>
+        <BackButton fallbackPath="/accounts" label="Back to Accounts" />
       </div>
       
       {/* Account Header */}

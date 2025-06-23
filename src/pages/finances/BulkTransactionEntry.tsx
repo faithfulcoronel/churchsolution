@@ -11,6 +11,7 @@ import {
 } from "../../components/ui2/card";
 import { Input } from "../../components/ui2/input";
 import { Button } from "../../components/ui2/button";
+import BackButton from "../../components/BackButton";
 import { Textarea } from "../../components/ui2/textarea";
 import { DatePickerInput } from "../../components/ui2/date-picker";
 import {
@@ -24,7 +25,6 @@ import { Combobox } from "../../components/ui2/combobox";
 import { Switch } from "../../components/ui2/switch";
 import { useAccountRepository } from "../../hooks/useAccountRepository";
 import {
-  ArrowLeft,
   Save,
   Loader2,
   Plus,
@@ -443,14 +443,7 @@ function BulkTransactionEntry() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/finances/transactions")}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Transactions
-        </Button>
+        <BackButton fallbackPath="/finances/transactions" label="Back to Transactions" />
       </div>
 
       <form onSubmit={handleSubmit}>
