@@ -7,9 +7,7 @@ import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
 import BackButton from '../../components/BackButton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
-import { Combobox } from '../../components/ui2/combobox';
-import { Label } from '../../components/ui2/label';
-import { useChartOfAccounts } from '../../hooks/useChartOfAccounts';
+
 import { Save, Loader2, AlertCircle } from 'lucide-react';
 
 function FundAddEdit() {
@@ -18,12 +16,10 @@ function FundAddEdit() {
   const isEditMode = !!id;
 
   const { useQuery: useFundQuery, useCreate, useUpdate } = useFundRepository();
-  const { useAccountOptions } = useChartOfAccounts();
 
   const [formData, setFormData] = useState<Partial<Fund>>({
     name: '',
     type: 'unrestricted',
-    account_id: null,
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +30,6 @@ function FundAddEdit() {
 
   const createMutation = useCreate();
   const updateMutation = useUpdate();
-  const { data: accountOptions, isLoading: isAccountsLoading } = useAccountOptions();
 
   useEffect(() => {
     if (isEditMode && fundData?.data?.[0]) {
@@ -55,10 +50,6 @@ function FundAddEdit() {
       return;
     }
 
-    if (!formData.account_id) {
-      setError('Account is required');
-      return;
-    }
 
     try {
       if (isEditMode && id) {
@@ -123,22 +114,6 @@ function FundAddEdit() {
                 </Select>
               </div>
 
-              <div className="sm:col-span-2">
-                <Label htmlFor="account_id">Chart of Account *</Label>
-                {isAccountsLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">Loading accounts...</span>
-                  </div>
-                ) : (
-                  <Combobox
-                    options={accountOptions || []}
-                    value={formData.account_id || ''}
-                    onChange={(value) => handleInputChange('account_id', value)}
-                    placeholder="Select account"
-                  />
-                )}
-              </div>
             </div>
 
             {error && (

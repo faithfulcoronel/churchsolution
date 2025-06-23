@@ -15,26 +15,26 @@ class TestFundRepository extends FundRepository {
 describe('FundRepository validation', () => {
   it('throws error for invalid data on create', async () => {
     const repo = new TestFundRepository({} as IFundAdapter);
-    await expect(repo.runBeforeCreate({ name: '', account_id: '' })).rejects.toThrow('Fund name is required');
+    await expect(repo.runBeforeCreate({ name: '' })).rejects.toThrow('Fund name is required');
   });
 
   it('throws error for invalid fund type', async () => {
     const repo = new TestFundRepository({} as IFundAdapter);
     await expect(
-      repo.runBeforeCreate({ name: 'Test', account_id: 'a', type: 'bad' as any })
+      repo.runBeforeCreate({ name: 'Test', type: 'bad' as any })
     ).rejects.toThrow('Invalid fund type');
   });
 
   it('formats data on create', async () => {
     const repo = new TestFundRepository({} as IFundAdapter);
-    const data = await repo.runBeforeCreate({ name: '  My Fund ', account_id: 'a', type: 'restricted' });
+    const data = await repo.runBeforeCreate({ name: '  My Fund ', type: 'restricted' });
     expect(data.name).toBe('My Fund');
   });
 
   it('validates on update', async () => {
     const repo = new TestFundRepository({} as IFundAdapter);
     await expect(
-      repo.runBeforeUpdate('1', { name: '', account_id: '' })
+      repo.runBeforeUpdate('1', { name: '' })
     ).rejects.toThrow('Fund name is required');
   });
 });
