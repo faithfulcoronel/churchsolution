@@ -22,13 +22,20 @@ export class FundAdapter
     id,
     name,
     type,
+    account_id,
     created_by,
     updated_by,
     created_at,
     updated_at
   `;
 
-  protected defaultRelationships: QueryOptions['relationships'] = [];
+  protected defaultRelationships: QueryOptions['relationships'] = [
+    {
+      table: 'chart_of_accounts',
+      foreignKey: 'account_id',
+      select: ['id', 'code', 'name']
+    }
+  ];
 
   protected override async onAfterCreate(data: Fund): Promise<void> {
     await this.auditService.logAuditEvent('create', 'fund', data.id, data);
