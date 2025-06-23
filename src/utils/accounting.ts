@@ -25,3 +25,18 @@ export function calculateAccountBalance(
     return sum + debit - credit;
   }, 0);
 }
+
+/**
+ * Check if a set of transactions is balanced (total debits equal credits).
+ */
+export function isTransactionsBalanced(transactions: Transaction[]): boolean {
+  const totals = transactions.reduce(
+    (sum, tx) => {
+      sum.debit += tx.debit ?? 0;
+      sum.credit += tx.credit ?? 0;
+      return sum;
+    },
+    { debit: 0, credit: 0 }
+  );
+  return Math.abs(totals.debit - totals.credit) < 0.01;
+}
