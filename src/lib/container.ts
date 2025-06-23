@@ -18,6 +18,7 @@ import {
   FinancialTransactionHeaderAdapter,
   type IFinancialTransactionHeaderAdapter
 } from '../adapters/financialTransactionHeader.adapter';
+import { FundAdapter, type IFundAdapter } from '../adapters/fund.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -36,6 +37,7 @@ import {
   FinancialTransactionHeaderRepository,
   type IFinancialTransactionHeaderRepository
 } from '../repositories/financialTransactionHeader.repository';
+import { FundRepository, type IFundRepository } from '../repositories/fund.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { TYPES } from './types';
 
@@ -65,6 +67,10 @@ container
 container
   .bind<IFinancialTransactionHeaderAdapter>(TYPES.IFinancialTransactionHeaderAdapter)
   .to(FinancialTransactionHeaderAdapter)
+  .inSingletonScope();
+container
+  .bind<IFundAdapter>(TYPES.IFundAdapter)
+  .to(FundAdapter)
   .inSingletonScope();
 
 // Register services
@@ -99,6 +105,10 @@ container
     TYPES.IFinancialTransactionHeaderRepository
   )
   .to(FinancialTransactionHeaderRepository)
+  .inSingletonScope();
+container
+  .bind<IFundRepository>(TYPES.IFundRepository)
+  .to(FundRepository)
   .inSingletonScope();
 
 export { container };

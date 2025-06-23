@@ -12,3 +12,4 @@ export * from './usePagination';
 export * from './usePermissions';
 export * from './useSubscriptionLimits';
 export * from './useThemeSwitcher';
+export * from './useFundRepository';

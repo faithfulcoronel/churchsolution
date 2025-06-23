@@ -110,12 +110,12 @@ function BulkIncomeEntry() {
     enabled: !!currentTenant?.id,
   });
 
-  // Get designated funds
+  // Get funds
   const { data: funds } = useQuery({
-    queryKey: ['designated-funds', currentTenant?.id],
+    queryKey: ['funds', currentTenant?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('designated_funds')
+        .from('funds')
         .select('*')
         .eq('tenant_id', currentTenant?.id)
         .is('deleted_at', null)

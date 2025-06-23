@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
 import { useChartOfAccounts } from '../../hooks/useChartOfAccounts';
 import { useFinancialSourceRepository } from '../../hooks/useFinancialSourceRepository';
+import { useFundRepository } from '../../hooks/useFundRepository';
 import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
@@ -28,6 +29,7 @@ interface TransactionEntry {
   description: string;
   debit: number | null;
   credit: number | null;
+  fund_id?: string;
 }
 
 function TransactionAdd() {
@@ -45,6 +47,7 @@ function TransactionAdd() {
   } = useFinancialTransactionHeaderRepository();
   const { useAccountOptions } = useChartOfAccounts();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
+  const { useQuery: useFundsQuery } = useFundRepository();
   
   // Create/update mutation
   const createMutation = useCreateWithTransactions();
@@ -63,6 +66,9 @@ function TransactionAdd() {
     }
   });
   const sources = sourcesData?.data || [];
+
+  const { data: fundsData, isLoading: isFundsLoading } = useFundsQuery();
+  const funds = fundsData?.data || [];
   
   // Get transaction data if in edit mode
   const { data: transactionData, isLoading: isTransactionLoading } = useQuery({
@@ -91,8 +97,8 @@ function TransactionAdd() {
   });
   
   const [entries, setEntries] = useState<TransactionEntry[]>([
-    { account_id: '', description: '', debit: null, credit: null },
-    { account_id: '', description: '', debit: null, credit: null }
+    { account_id: '', description: '', debit: null, credit: null, fund_id: '' },
+    { account_id: '', description: '', debit: null, credit: null, fund_id: '' }
   ]);
   
   const [error, setError] = useState<string | null>(null);
@@ -122,7 +128,8 @@ function TransactionAdd() {
               account_id: entry.account_id,
               description: entry.description,
               debit: entry.debit || null,
-              credit: entry.credit || null
+              credit: entry.credit || null,
+              fund_id: entry.fund_id || ''
             })));
           }
         } catch (error) {
@@ -180,7 +187,7 @@ function TransactionAdd() {
   
   // Add new entry row
   const addEntry = () => {
-    setEntries([...entries, { account_id: '', description: '', debit: null, credit: null }]);
+    setEntries([...entries, { account_id: '', description: '', debit: null, credit: null, fund_id: '' }]);
   };
   
   // Remove entry row
@@ -259,6 +266,7 @@ function TransactionAdd() {
         description: entry.description || headerData.description,
         debit: entry.debit || 0,
         credit: entry.credit || 0,
+        fund_id: entry.fund_id || null,
         date: headerData.transaction_date
       }));
       
@@ -416,6 +424,7 @@ function TransactionAdd() {
                   <tr className="border-b border-border">
                     <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Account</th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Description</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Fund</th>
                     <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">Debit</th>
                     <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">Credit</th>
                     <th className="px-4 py-2 text-center text-sm font-medium text-muted-foreground">Actions</th>
@@ -455,6 +464,29 @@ function TransactionAdd() {
                         />
                       </td>
                       <td className="px-4 py-2">
+                        <Select
+                          value={entry.fund_id || ''}
+                          onValueChange={(value) => handleEntryChange(index, 'fund_id', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select fund" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {isFundsLoading ? (
+                              <SelectItem value="loading" disabled>
+                                Loading funds...
+                              </SelectItem>
+                            ) : (
+                              funds.map(f => (
+                                <SelectItem key={f.id} value={f.id}>
+                                  {f.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="px-4 py-2">
                         <Input
                           type="number"
                           value={entry.debit !== null ? entry.debit : ''}
@@ -492,7 +524,7 @@ function TransactionAdd() {
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-border font-medium">
-                    <td className="px-4 py-2" colSpan={2}>
+                    <td className="px-4 py-2" colSpan={3}>
                       Totals
                     </td>
                     <td className="px-4 py-2 text-right">
@@ -504,7 +536,7 @@ function TransactionAdd() {
                     <td className="px-4 py-2"></td>
                   </tr>
                   <tr>
-                    <td className="px-4 py-2" colSpan={2}>
+                    <td className="px-4 py-2" colSpan={3}>
                       Difference
                     </td>
                     <td className="px-4 py-2 text-right" colSpan={2}>

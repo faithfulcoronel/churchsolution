@@ -252,6 +252,8 @@ export class FinancialTransactionHeaderAdapter
         date,
         debit,
         credit,
+        fund_id,
+        fund:fund_id(id, name, type),
         account_id,
         accounts_account_id,
         account:chart_of_accounts(id, code, name, account_type),
