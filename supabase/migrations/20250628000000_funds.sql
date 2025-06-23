@@ -1,7 +1,14 @@
 -- Add funds table with type and enforce non negative balances
 
 -- Create enum for fund type
-CREATE TYPE IF NOT EXISTS fund_type AS ENUM ('restricted', 'unrestricted');
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type WHERE typname = 'fund_type'
+  ) THEN
+    CREATE TYPE fund_type AS ENUM ('restricted', 'unrestricted');
+  END IF;
+END$$;
 
 -- Create funds table
 CREATE TABLE IF NOT EXISTS funds (
