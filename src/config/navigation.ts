@@ -92,6 +92,11 @@ export const navigation: NavItem[] = [
         href: '/finances/statements',
         icon: FileText,
       },
+      {
+        name: 'Journal Entry',
+        href: '/finances/journal-entry',
+        icon: FileText,
+      },
     ],
   },
   {
