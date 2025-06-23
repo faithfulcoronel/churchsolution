@@ -4,11 +4,11 @@ import { useChartOfAccounts } from '../../hooks/useChartOfAccounts';
 import { useAccountingReports } from '../../hooks/useAccountingReports';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
 import { Badge } from '../../components/ui2/badge';
 import { 
-  ArrowLeft, 
-  FileText, 
+  FileText,
   Calendar, 
   Loader2, 
   DollarSign,
@@ -101,12 +101,10 @@ function AccountDetail() {
           <p className="mt-2 text-sm text-muted-foreground">
             The account you're looking for doesn't exist or has been deleted.
           </p>
-          <Button
-            className="mt-4"
-            onClick={() => navigate('/finances/chart-of-accounts')}
-          >
-            Back to Chart of Accounts
-          </Button>
+          <BackButton
+            fallbackPath="/finances/chart-of-accounts"
+            label="Back to Chart of Accounts"
+          />
         </div>
       </div>
     );
@@ -115,14 +113,7 @@ function AccountDetail() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/finances/chart-of-accounts')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Chart of Accounts
-        </Button>
+        <BackButton fallbackPath="/finances/chart-of-accounts" label="Back to Chart of Accounts" />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">

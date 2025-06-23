@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Badge } from '../../components/ui2/badge';
 import { Tabs } from '../../components/ui2/tabs';
 import {
@@ -18,7 +19,6 @@ import {
   AlertDialogTitle,
 } from '../../components/ui2/alert-dialog';
 import {
-  ArrowLeft,
   DollarSign,
   Pencil,
   Trash2,
@@ -123,7 +123,7 @@ function FundProfile() {
         <CardContent className="flex flex-col items-center justify-center py-12">
           <AlertTriangle className="h-12 w-12 text-warning mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">Fund Not Found</h3>
-          <Button onClick={() => navigate('/finances/funds')}>Go Back to Funds</Button>
+          <BackButton fallbackPath="/finances/funds" label="Go Back to Funds" />
         </CardContent>
       </Card>
     );
@@ -132,10 +132,7 @@ function FundProfile() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate('/finances/funds')} className="flex items-center">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Funds
-        </Button>
+        <BackButton fallbackPath="/finances/funds" label="Back to Funds" />
       </div>
 
       <Card className="mb-6">

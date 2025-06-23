@@ -4,17 +4,17 @@ import { useJournalEntry, JournalEntryLine } from '../../hooks/useJournalEntry';
 import { useChartOfAccounts } from '../../hooks/useChartOfAccounts';
 import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Input } from '../../components/ui2/input';
 import { DatePickerInput } from '../../components/ui2/date-picker';
 import { Textarea } from '../../components/ui2/textarea';
 import { Select } from '../../components/ui2/select';
 import { Badge } from '../../components/ui2/badge';
 import { 
-  Plus, 
-  Trash2, 
-  Save, 
-  ArrowLeft, 
-  Calendar, 
+  Plus,
+  Trash2,
+  Save,
+  Calendar,
   FileText, 
   DollarSign,
   Loader2,
@@ -158,14 +158,7 @@ function JournalEntryForm() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/finances/transactions')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Transactions
-        </Button>
+        <BackButton fallbackPath="/finances/transactions" label="Back to Transactions" />
       </div>
       
       <form onSubmit={handleSubmit}>

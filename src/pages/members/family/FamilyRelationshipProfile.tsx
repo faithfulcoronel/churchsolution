@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { Container } from '../../../components/ui2/container';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
 import { Badge } from '../../../components/ui2/badge';
 import { Separator } from '../../../components/ui2/separator';
 import {
@@ -19,7 +20,6 @@ import {
   AlertDialogCancel,
 } from '../../../components/ui2/alert-dialog';
 import {
-  ArrowLeft,
   Edit2,
   Trash2,
   Users,
@@ -147,14 +147,7 @@ function FamilyRelationshipProfile() {
       <div className="space-y-6">
         {/* Back Button */}
         <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/members/family')}
-            className="flex items-center"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Family Relationships
-          </Button>
+          <BackButton fallbackPath="/members/family" label="Back to Family Relationships" />
 
           <div className="flex space-x-2">
             <Button

@@ -2,22 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
-import { 
-  User, 
-  Users, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  Edit, 
-  Trash2, 
-  ArrowLeft,
+import {
+  User,
+  Users,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Edit,
+  Trash2,
   Cake,
   Heart,
   Loader2,
   AlertTriangle,
   FileText
 } from 'lucide-react';
+import BackButton from '../../components/BackButton';
 
 // UI Components
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '../../components/ui2/card';
@@ -121,9 +121,7 @@ function MemberProfile() {
           <AlertTriangle className="h-12 w-12 text-warning mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">Member Not Found</h3>
           <p className="text-muted-foreground mb-6">The member you're looking for doesn't exist or has been removed.</p>
-          <Button onClick={() => navigate('/members')}>
-            Go Back to Members
-          </Button>
+          <BackButton fallbackPath="/members" label="Go Back to Members" />
         </CardContent>
       </Card>
     );
@@ -132,14 +130,7 @@ function MemberProfile() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/members')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Members
-        </Button>
+        <BackButton fallbackPath="/members" label="Back to Members" />
         
         <div className="flex space-x-3">
           <Button

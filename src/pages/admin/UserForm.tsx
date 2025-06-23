@@ -3,13 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { useMessageStore } from '../../components/MessageHandler';
-import {
-  ArrowLeft,
-  Save,
-  Loader2,
-  AlertCircle,
-  UserPlus,
-} from 'lucide-react';
+import { Save, Loader2, AlertCircle, UserPlus } from 'lucide-react';
+import BackButton from '../../components/BackButton';
 
 type UserFormData = {
   email: string;
@@ -221,13 +216,7 @@ const UserForm = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <button
-          onClick={() => navigate('/admin/users')}
-          className="flex items-center text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Users
-        </button>
+        <BackButton fallbackPath="/admin/users" label="Back to Users" />
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">

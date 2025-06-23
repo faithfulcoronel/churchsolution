@@ -6,6 +6,7 @@ import { useMessageStore } from '../../../components/MessageHandler';
 import { Container } from '../../../components/ui2/container';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
+import BackButton, { performGoBack } from '../../../components/BackButton';
 import { Input } from '../../../components/ui2/input';
 import { Label } from '../../../components/ui2/label';
 import { Textarea } from '../../../components/ui2/textarea';
@@ -21,7 +22,6 @@ import {
   AlertDialogCancel,
 } from '../../../components/ui2/alert-dialog';
 import {
-  ArrowLeft,
   Save,
   Loader2,
   Users,
@@ -267,7 +267,7 @@ function FamilyRelationshipAddEdit() {
     if (hasUnsavedChanges) {
       setShowCancelConfirm(true);
     } else {
-      navigate(id ? `/members/family/${id}` : '/members/family');
+      performGoBack(navigate, id ? `/members/family/${id}` : '/members/family');
     }
   };
 
@@ -300,14 +300,7 @@ function FamilyRelationshipAddEdit() {
       <div className="space-y-6">
         {/* Back Button */}
         <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={handleCancel}
-            className="flex items-center"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Family Relationships
-          </Button>
+          <BackButton fallbackPath="/members/family" label="Back to Family Relationships" />
         </div>
 
         <Card>
@@ -414,7 +407,7 @@ function FamilyRelationshipAddEdit() {
               <AlertDialogAction
                 onClick={() => {
                   setShowCancelConfirm(false);
-                  navigate(id ? `/members/family/${id}` : '/members/family');
+                  performGoBack(navigate, id ? `/members/family/${id}` : '/members/family');
                 }}
               >
                 Discard Changes

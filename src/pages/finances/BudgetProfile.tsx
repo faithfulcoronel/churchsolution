@@ -7,10 +7,10 @@ import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Badge } from '../../components/ui2/badge';
 import { Progress } from '../../components/ui2/progress';
 import {
-  ArrowLeft,
   PiggyBank,
   Calendar,
   DollarSign,
@@ -165,14 +165,7 @@ function BudgetProfile() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/finances/budgets')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Budgets
-        </Button>
+        <BackButton fallbackPath="/finances/budgets" label="Back to Budgets" />
       </div>
 
       {/* Budget Overview */}

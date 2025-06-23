@@ -6,13 +6,13 @@ import { Account, AccountType } from '../../models/account.model';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
+import BackButton from '../../components/BackButton';
 import { Textarea } from '../../components/ui2/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
 import { Combobox } from '../../components/ui2/combobox';
 import { Switch } from '../../components/ui2/switch';
 import { Tabs } from '../../components/ui2/tabs';
 import {
-  ArrowLeft,
   Save,
   Loader2,
   Building2,
@@ -136,14 +136,7 @@ function AccountAddEdit() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/accounts')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Accounts
-        </Button>
+        <BackButton fallbackPath="/accounts" label="Back to Accounts" />
       </div>
       
       <Card>
