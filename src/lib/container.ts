@@ -18,6 +18,10 @@ import {
   FinancialTransactionHeaderAdapter,
   type IFinancialTransactionHeaderAdapter
 } from '../adapters/financialTransactionHeader.adapter';
+import {
+  FinancialTransactionAdapter,
+  type IFinancialTransactionAdapter
+} from '../adapters/financialTransaction.adapter';
 import { FundAdapter, type IFundAdapter } from '../adapters/fund.adapter';
 import {
   OfferingBatchAdapter,
@@ -41,6 +45,10 @@ import {
   FinancialTransactionHeaderRepository,
   type IFinancialTransactionHeaderRepository
 } from '../repositories/financialTransactionHeader.repository';
+import {
+  FinancialTransactionRepository,
+  type IFinancialTransactionRepository
+} from '../repositories/financialTransaction.repository';
 import { FundRepository, type IFundRepository } from '../repositories/fund.repository';
 import {
   OfferingBatchRepository,
@@ -75,6 +83,10 @@ container
 container
   .bind<IFinancialTransactionHeaderAdapter>(TYPES.IFinancialTransactionHeaderAdapter)
   .to(FinancialTransactionHeaderAdapter)
+  .inSingletonScope();
+container
+  .bind<IFinancialTransactionAdapter>(TYPES.IFinancialTransactionAdapter)
+  .to(FinancialTransactionAdapter)
   .inSingletonScope();
 container
   .bind<IFundAdapter>(TYPES.IFundAdapter)
@@ -121,6 +133,10 @@ container
 container
   .bind<IFundRepository>(TYPES.IFundRepository)
   .to(FundRepository)
+  .inSingletonScope();
+container
+  .bind<IFinancialTransactionRepository>(TYPES.IFinancialTransactionRepository)
+  .to(FinancialTransactionRepository)
   .inSingletonScope();
 container
   .bind<IOfferingBatchRepository>(TYPES.IOfferingBatchRepository)
