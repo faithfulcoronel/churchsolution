@@ -48,6 +48,14 @@ supabase db reset
    export PGRST_APP_SETTINGS_SERVICE_ROLE_KEY=<service role key>
    ```
 
+5. Configure the Resend email provider used by the edge function by setting
+   the following environment variables in your `.env` file:
+
+   ```bash
+   RESEND_API_KEY=<your Resend API key>
+   RESEND_FROM_EMAIL=<default from address>
+   ```
+
 ## Running tests
 
 This project uses [Vitest](https://vitest.dev) for unit testing. After installing
