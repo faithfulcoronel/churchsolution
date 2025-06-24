@@ -83,7 +83,7 @@ BEGIN
 END;
 $$;
 
--- Create function to check user permissions with caching
+-- Create function to check user permissions
 CREATE OR REPLACE FUNCTION check_user_permission(p_user_id uuid, p_permission_code text)
 RETURNS boolean
 SECURITY DEFINER

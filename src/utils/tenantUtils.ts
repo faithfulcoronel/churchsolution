@@ -17,18 +17,31 @@ export type Tenant = {
   billing_cycle: string;
 };
 
+export interface TenantDataProvider {
+  fetchCurrentTenant(): Promise<Tenant | null>;
+}
+
+class SupabaseTenantDataProvider implements TenantDataProvider {
+  async fetchCurrentTenant(): Promise<Tenant | null> {
+    const { data, error } = await supabase.rpc('get_current_tenant');
+    if (error) throw error;
+    return data?.[0] || null;
+  }
+}
+
 export class TenantUtils {
   private static instance: TenantUtils;
   private currentTenant: Tenant | null = null;
   private lastFetch: number = 0;
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_DURATION =
+    parseInt(import.meta.env.VITE_TENANT_CACHE_DURATION_MS) || 5 * 60 * 1000; // default 5 minutes
   private fetchPromise: Promise<Tenant | null> | null = null;
 
-  private constructor() {}
+  private constructor(private provider: TenantDataProvider = new SupabaseTenantDataProvider()) {}
 
-  public static getInstance(): TenantUtils {
+  public static getInstance(provider: TenantDataProvider = new SupabaseTenantDataProvider()): TenantUtils {
     if (!TenantUtils.instance) {
-      TenantUtils.instance = new TenantUtils();
+      TenantUtils.instance = new TenantUtils(provider);
     }
     return TenantUtils.instance;
   }
@@ -69,9 +82,7 @@ export class TenantUtils {
   }
 
   private async fetchTenant(): Promise<Tenant | null> {
-    const { data, error } = await supabase.rpc('get_current_tenant');
-    if (error) throw error;
-    return data?.[0] || null;
+    return this.provider.fetchCurrentTenant();
   }
 
   public async getTenantId(): Promise<string | null> {
