@@ -193,6 +193,10 @@ function FundProfile() {
                   <dd className="text-sm text-foreground col-span-2 capitalize">{fund.type}</dd>
                 </div>
                 <div className="py-3 grid grid-cols-3 gap-4">
+                  <dt className="text-sm font-medium text-muted-foreground">Description</dt>
+                  <dd className="text-sm text-foreground col-span-2">{fund.description || 'No description provided'}</dd>
+                </div>
+                <div className="py-3 grid grid-cols-3 gap-4">
                   <dt className="text-sm font-medium text-muted-foreground">Created</dt>
                   <dd className="text-sm text-foreground col-span-2">
                     {new Date(fund.created_at).toLocaleDateString()} at {new Date(fund.created_at).toLocaleTimeString()}

@@ -38,6 +38,7 @@ export class FundRepository
     return {
       ...data,
       name: data.name?.trim(),
+      description: data.description?.trim(),
     };
   }
 }

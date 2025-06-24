@@ -27,8 +27,9 @@ describe('FundRepository validation', () => {
 
   it('formats data on create', async () => {
     const repo = new TestFundRepository({} as IFundAdapter);
-    const data = await repo.runBeforeCreate({ name: '  My Fund ', type: 'restricted' });
+    const data = await repo.runBeforeCreate({ name: '  My Fund ', description: '  Desc  ', type: 'restricted' });
     expect(data.name).toBe('My Fund');
+    expect(data.description).toBe('Desc');
   });
 
   it('validates on update', async () => {
