@@ -33,12 +33,14 @@ describe('GivingService', () => {
     vi.clearAllMocks();
   });
 
-  it('creates transactions and refreshes batch totals', async () => {
+  it('creates balanced transactions and refreshes batch totals', async () => {
     const { supabase } = await import('../src/lib/supabase');
     await service.createGivingBatch(header, lines);
 
     expect(headerRepo.createWithTransactions).toHaveBeenCalledTimes(1);
-    const tx = (headerRepo.createWithTransactions as any).mock.calls[0][1];
+    const [passedHeader, tx] =
+      (headerRepo.createWithTransactions as any).mock.calls[0];
+    expect(passedHeader).toBe(header);
     expect(tx).toEqual([
       {
         member_id: 'm1',
@@ -65,6 +67,9 @@ describe('GivingService', () => {
         credit: 100
       }
     ]);
+    const totalDebit = tx.reduce((s: number, t: any) => s + t.debit, 0);
+    const totalCredit = tx.reduce((s: number, t: any) => s + t.credit, 0);
+    expect(totalDebit).toBe(totalCredit);
     expect(supabase.rpc).toHaveBeenCalledWith('refresh_offering_batch_total', { p_batch_id: 'b1' });
   });
 });
