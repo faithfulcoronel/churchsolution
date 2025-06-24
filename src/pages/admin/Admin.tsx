@@ -2,7 +2,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { usePermissions } from '../../hooks/usePermissions';
 import Users from './Users';
-import UserForm from './UserForm';
 import Roles from './Roles';
 import RoleForm from './RoleForm';
 import DatabaseManagement from './DatabaseManagement';
@@ -30,9 +29,7 @@ function Admin() {
 
   return (
     <Routes>
-      <Route path="users" element={<Users />} />
-      <Route path="users/new" element={<UserForm />} />
-      <Route path="users/:id/edit" element={<UserForm />} />
+      <Route path="users/*" element={<Users />} />
       <Route path="roles" element={<Roles />} />
       <Route path="roles/new" element={<RoleForm />} />
       <Route path="roles/:id/edit" element={<RoleForm />} />

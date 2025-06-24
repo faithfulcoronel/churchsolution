@@ -14,7 +14,7 @@ type UserFormData = {
   last_name: string;
 };
 
-const UserForm = () => {
+const UserAddEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -370,4 +370,4 @@ const UserForm = () => {
   );
 };
 
-export default UserForm;
+export default UserAddEdit;
