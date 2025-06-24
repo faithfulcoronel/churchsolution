@@ -77,7 +77,7 @@ export class AuthUserAdapter
     }
   }
 
-  // Create a new user using handle_user_creation RPC
+  // Create a new user via Supabase Auth and setup roles/tenant
   public override async create(data: Partial<User>): Promise<User> {
     try {
       const tenantId = await tenantUtils.getTenantId();
@@ -85,25 +85,81 @@ export class AuthUserAdapter
         throw new Error('No tenant context found');
       }
 
-      const { data: created, error } = await supabase.rpc(
-        'handle_user_creation',
-        {
-          p_email: data.email,
-          p_password: data.password,
-          p_tenant_id: tenantId,
-          p_roles: (data as any).roles || [],
-          p_first_name: (data as any).first_name || '',
-          p_last_name: (data as any).last_name || '',
-          p_admin_role: (data as any).admin_role || 'member',
-        }
-      );
+      // Sign up user
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: data.email!,
+        password: data.password!,
+        options: {
+          data: {
+            first_name: (data as any).first_name || '',
+            last_name: (data as any).last_name || '',
+          },
+        },
+      });
 
-      if (error) {
-        handleSupabaseError(error);
-        throw error;
+      if (signUpError || !signUpData.user) {
+        if (signUpError) handleSupabaseError(signUpError);
+        throw signUpError || new Error('Failed to sign up user');
       }
 
-      const user = (created as any) as User;
+      const userId = signUpData.user.id;
+      const currentUser = (await supabase.auth.getUser()).data.user?.id;
+
+      try {
+        // Fetch role IDs
+        const rolesToFetch = ['member', ...((data as any).roles || [])];
+        const { data: roles, error: rolesError } = await supabase
+          .from('roles')
+          .select('id, name')
+          .in('name', rolesToFetch);
+
+        if (rolesError) throw rolesError;
+
+        const roleIds = roles?.map(r => r.id) || [];
+
+        if (roleIds.length) {
+          const userRoles = roleIds.map(roleId => ({
+            user_id: userId,
+            role_id: roleId,
+            created_by: currentUser,
+          }));
+
+          const { error: urError } = await supabase
+            .from('user_roles')
+            .insert(userRoles);
+
+          if (urError) throw urError;
+        }
+
+        const { error: tuError } = await supabase.from('tenant_users').insert([
+          {
+            tenant_id: tenantId,
+            user_id: userId,
+            admin_role: (data as any).admin_role || 'member',
+            created_by: currentUser,
+          },
+        ]);
+
+        if (tuError) throw tuError;
+      } catch (insertError) {
+        await supabase.from('tenant_users').delete().eq('user_id', userId);
+        await supabase.from('user_roles').delete().eq('user_id', userId);
+        await supabase.rpc('delete_user', { user_id: userId });
+        handleSupabaseError(insertError as any);
+        throw insertError;
+      }
+
+      const { data: userData, error: fetchError } = await supabase.rpc('get_tenant_user', {
+        p_tenant_id: tenantId,
+        p_user_id: userId,
+      });
+
+      if (fetchError) {
+        handleSupabaseError(fetchError);
+        throw fetchError;
+      }
+
+      const user = (userData as any)?.[0] as User;
       await this.auditService.logAuditEvent('create', 'user', user.id, user);
       return user;
     } catch (error) {
