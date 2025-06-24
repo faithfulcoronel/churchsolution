@@ -1,69 +1,50 @@
-import { useFinancialTransactionHeaderRepository } from './useFinancialTransactionHeaderRepository';
 import type { FinancialTransactionHeader } from '../models/financialTransactionHeader.model';
+import { GivingService, GivingLine } from '../services/GivingService';
+import { container } from '../lib/container';
+import { TYPES } from '../lib/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { NotificationService } from '../services/NotificationService';
 
-export interface ContributionEntry {
-  member_id: string | null;
-  fund_id: string | null;
-  category_id: string | null;
-  source_id: string | null;
-  amount: number;
-  source_account_id: string | null;
-  category_account_id: string | null;
-}
+export interface ContributionEntry extends GivingLine {}
 
 export function useGivingService() {
-  const { useCreateWithTransactions, useUpdateWithTransactions } =
-    useFinancialTransactionHeaderRepository();
+  const service = container.get<GivingService>(TYPES.GivingService);
+  const queryClient = useQueryClient();
 
-  const createMutation = useCreateWithTransactions();
-  const updateMutation = useUpdateWithTransactions();
+  const createMutation = useMutation({
+    mutationFn: ({ header, contributions }: { header: Partial<FinancialTransactionHeader>; contributions: ContributionEntry[] }) =>
+      service.createGivingBatch(header, contributions),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
+      NotificationService.showSuccess('Transaction created successfully');
+    },
+    onError: (error: Error) => {
+      NotificationService.showError(error.message, 5000);
+    }
+  });
 
-  const buildTransactions = (
-    header: Partial<FinancialTransactionHeader>,
-    contributions: ContributionEntry[],
-  ) => {
-    return contributions.flatMap((c) => {
-      const base = {
-        member_id: c.member_id,
-        fund_id: c.fund_id,
-        source_id: c.source_id,
-        category_id: c.category_id,
-        date: header.transaction_date!,
-        description: header.description || '',
-      };
-      return [
-        {
-          ...base,
-          account_id: c.source_account_id,
-          debit: c.amount,
-          credit: 0,
-        },
-        {
-          ...base,
-          account_id: c.category_account_id,
-          debit: 0,
-          credit: c.amount,
-        },
-      ];
-    });
-  };
+  const updateMutation = useMutation({
+    mutationFn: ({ id, header, contributions }: { id: string; header: Partial<FinancialTransactionHeader>; contributions: ContributionEntry[] }) =>
+      service.updateGivingBatch(id, header, contributions),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
+      NotificationService.showSuccess('Transaction updated successfully');
+    },
+    onError: (error: Error) => {
+      NotificationService.showError(error.message, 5000);
+    }
+  });
 
   const createGivingBatch = async (
     header: Partial<FinancialTransactionHeader>,
     contributions: ContributionEntry[],
-  ) => {
-    const transactions = buildTransactions(header, contributions);
-    return createMutation.mutateAsync({ data: header, transactions });
-  };
+  ) => createMutation.mutateAsync({ header, contributions });
 
   const updateGivingBatch = async (
     id: string,
     header: Partial<FinancialTransactionHeader>,
     contributions: ContributionEntry[],
-  ) => {
-    const transactions = buildTransactions(header, contributions);
-    return updateMutation.mutateAsync({ id, data: header, transactions });
-  };
+  ) => updateMutation.mutateAsync({ id, header, contributions });
 
   return { createGivingBatch, updateGivingBatch, createMutation, updateMutation };
 }
