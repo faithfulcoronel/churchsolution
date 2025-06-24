@@ -85,9 +85,12 @@ BEGIN
     p_user_id
   )
   RETURNING id INTO new_tenant_id;
--- Create default funds
-INSERT INTO funds (tenant_id, name, type, description)
-VALUES
+  -- Create the default chart of accounts so subsequent inserts can reference
+  -- the accounts within the same transaction
+  PERFORM create_default_chart_of_accounts_for_tenant(new_tenant_id, p_user_id);
+  -- Create default funds
+  INSERT INTO funds (tenant_id, name, type, description)
+  VALUES
   (new_tenant_id, 'General Fund', 'unrestricted', 'Church operations, salaries, utilities, etc.'),
   (new_tenant_id, 'Tithes & Offerings Fund', 'unrestricted', 'Regular giving from members'),
   (new_tenant_id, 'Building Fund', 'restricted', 'Construction, renovation, expansion'),
