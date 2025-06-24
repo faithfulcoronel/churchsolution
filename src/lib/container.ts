@@ -27,6 +27,7 @@ import {
   OfferingBatchAdapter,
   type IOfferingBatchAdapter,
 } from '../adapters/offeringBatch.adapter';
+import { CategoryAdapter, type ICategoryAdapter } from '../adapters/category.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
@@ -55,6 +56,7 @@ import {
   OfferingBatchRepository,
   type IOfferingBatchRepository,
 } from '../repositories/offeringBatch.repository';
+import { CategoryRepository, type ICategoryRepository } from '../repositories/category.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { TYPES } from './types';
@@ -93,6 +95,10 @@ container
 container
   .bind<IFundAdapter>(TYPES.IFundAdapter)
   .to(FundAdapter)
+  .inSingletonScope();
+container
+  .bind<ICategoryAdapter>(TYPES.ICategoryAdapter)
+  .to(CategoryAdapter)
   .inSingletonScope();
 container
   .bind<IOfferingBatchAdapter>(TYPES.IOfferingBatchAdapter)
@@ -139,6 +145,10 @@ container
 container
   .bind<IFundRepository>(TYPES.IFundRepository)
   .to(FundRepository)
+  .inSingletonScope();
+container
+  .bind<ICategoryRepository>(TYPES.ICategoryRepository)
+  .to(CategoryRepository)
   .inSingletonScope();
 container
   .bind<IFinancialTransactionRepository>(TYPES.IFinancialTransactionRepository)
