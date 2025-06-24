@@ -22,7 +22,7 @@ export const MENU_SIDEBAR: TMenuConfig = [
     children: [
       {
         title: 'Users',
-        path: '/admin/users'
+        path: '/settings/administration/users'
       },
       {
         title: 'Roles',
