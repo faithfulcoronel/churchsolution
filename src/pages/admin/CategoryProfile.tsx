@@ -101,7 +101,7 @@ function CategoryProfile() {
             <div className="py-3 grid grid-cols-3 gap-4">
               <dt className="text-sm font-medium text-muted-foreground">Account</dt>
               <dd className="text-sm text-foreground col-span-2">
-                {category.chart_of_account ? `${category.chart_of_account.code} - ${category.chart_of_account.name}` : '-'}
+                {category.chart_of_accounts ? `${category.chart_of_accounts.code} - ${category.chart_of_accounts.name}` : '-'}
               </dd>
             </div>
           </dl>

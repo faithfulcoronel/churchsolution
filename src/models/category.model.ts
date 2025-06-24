@@ -19,5 +19,5 @@ export interface Category extends BaseModel {
   is_active: boolean;
   sort_order: number;
   chart_of_account_id: string | null;
-  chart_of_account?: ChartOfAccount;
+  chart_of_accounts?: ChartOfAccount;
 }

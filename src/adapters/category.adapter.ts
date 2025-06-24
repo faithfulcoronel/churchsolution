@@ -37,7 +37,7 @@ export class CategoryAdapter
 
   protected defaultRelationships: QueryOptions['relationships'] = [
     {
-      table: 'chart_of_account:chart_of_accounts',
+      table: 'chart_of_accounts',
       foreignKey: 'chart_of_account_id',
       select: ['id', 'code', 'name', 'account_type']
     }

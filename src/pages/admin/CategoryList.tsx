@@ -137,7 +137,7 @@ function CategoryList() {
                             </TableCell>
                             <TableCell>{cat.sort_order}</TableCell>
                             <TableCell>
-                              {cat.chart_of_account ? `${cat.chart_of_account.code} - ${cat.chart_of_account.name}` : '-'}
+                              {cat.chart_of_accounts ? `${cat.chart_of_accounts.code} - ${cat.chart_of_accounts.name}` : '-'}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
