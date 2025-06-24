@@ -31,16 +31,7 @@ const UserAddEdit = () => {
 
   const { data: userResult, isLoading: userLoading } = useUserQuery({
     filters: { id: { operator: 'eq', value: id } },
-    relationships: [
-      {
-        table: 'user_roles',
-        foreignKey: 'user_id',
-        nestedRelationships: [
-          { table: 'roles', foreignKey: 'role_id', select: ['name'] }
-        ]
-      }
-    ],
-    enabled: !!id
+    enabled: !!id,
   });
   const userData = userResult?.data?.[0];
 
@@ -60,13 +51,18 @@ const UserAddEdit = () => {
 
   useEffect(() => {
     if (userData) {
-      setFormData({
-        email: userData.email,
-        password: '',
-        roles: userData.user_roles?.map((r: any) => r.roles?.name) || [],
-        first_name: userData.raw_user_meta_data?.first_name || '',
-        last_name: userData.raw_user_meta_data?.last_name || '',
-      });
+      (async () => {
+        const { data } = await supabase.rpc('get_user_roles', {
+          user_id: userData.id,
+        });
+        setFormData({
+          email: userData.email,
+          password: '',
+          roles: (data || []).map((r: any) => r.role_name),
+          first_name: userData.raw_user_meta_data?.first_name || '',
+          last_name: userData.raw_user_meta_data?.last_name || '',
+        });
+      })();
     }
   }, [userData]);
 
