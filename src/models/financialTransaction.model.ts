@@ -34,6 +34,8 @@ export interface FinancialTransaction extends BaseModel {
     total_amount: number;
   };
   account_id: string | null;
+  accounts_account_id: string | null;
+  account_holder?: { id: string; name: string };
   account?: ChartOfAccount;
   header_id: string | null;
   header?: FinancialTransactionHeader;
