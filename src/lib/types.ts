@@ -8,6 +8,7 @@ export const TYPES = {
   IFinancialTransactionAdapter: 'IFinancialTransactionAdapter',
   IFundAdapter: 'IFundAdapter',
   IOfferingBatchAdapter: 'IOfferingBatchAdapter',
+  IUserAdapter: 'IUserAdapter',
   IMemberRepository: 'IMemberRepository',
   INotificationRepository: 'INotificationRepository',
   IAccountRepository: 'IAccountRepository',
@@ -17,5 +18,6 @@ export const TYPES = {
   IFinancialTransactionRepository: 'IFinancialTransactionRepository',
   IFundRepository: 'IFundRepository',
   IOfferingBatchRepository: 'IOfferingBatchRepository',
+  IUserRepository: 'IUserRepository',
   AuditService: 'AuditService'
 };
