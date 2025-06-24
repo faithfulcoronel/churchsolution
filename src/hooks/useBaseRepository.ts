@@ -16,6 +16,7 @@ export function useBaseRepository<T extends BaseModel>(
       queryKey: [queryKey, options],
       queryFn: () => repository.find(options),
       staleTime: 5 * 60 * 1000, // 5 minutes
+      enabled: options.enabled ?? true,
     });
   };
 
