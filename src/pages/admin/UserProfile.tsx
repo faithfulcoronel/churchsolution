@@ -37,19 +37,19 @@ function UserProfile() {
     return (
       <div className="text-center py-8">
         <p className="text-sm text-gray-500">User not found.</p>
-        <BackButton fallbackPath="/admin/users" label="Back to Users" />
+        <BackButton fallbackPath="/settings/administration/users" label="Back to Users" />
       </div>
     );
   }
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <BackButton fallbackPath="/admin/users" label="Back to Users" />
+      <BackButton fallbackPath="/settings/administration/users" label="Back to Users" />
 
       <div className="bg-white shadow sm:rounded-lg p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">{user.email}</h2>
-          <Button variant="outline" onClick={() => navigate(`/admin/users/${id}/edit`)} className="flex items-center">
+          <Button variant="outline" onClick={() => navigate(`/settings/administration/users/${id}/edit`)} className="flex items-center">
             <Edit2 className="h-4 w-4 mr-2" />
             Edit
           </Button>

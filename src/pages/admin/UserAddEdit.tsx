@@ -83,7 +83,7 @@ const UserAddEdit = () => {
       } else {
         await createUserMutation.mutateAsync({ data: formData });
       }
-      navigate('/admin/users');
+      navigate('/settings/administration/users');
     } catch (error) {
       console.error('Error saving user:', error);
     }
@@ -100,7 +100,7 @@ const UserAddEdit = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/admin/users" label="Back to Users" />
+        <BackButton fallbackPath="/settings/administration/users" label="Back to Users" />
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -187,7 +187,7 @@ const UserAddEdit = () => {
             </div>
 
             <div className="mt-6 flex justify-end space-x-3">
-              <Button variant="outline" type="button" onClick={() => navigate('/admin/users')}>
+              <Button variant="outline" type="button" onClick={() => navigate('/settings/administration/users')}>
                 Cancel
               </Button>
               <Button
