@@ -8,7 +8,7 @@ export const TYPES = {
   IFinancialTransactionAdapter: 'IFinancialTransactionAdapter',
   IFundAdapter: 'IFundAdapter',
   IOfferingBatchAdapter: 'IOfferingBatchAdapter',
-  IUserAdapter: 'IUserAdapter',
+  IAuthUserAdapter: 'IAuthUserAdapter',
   IMemberRepository: 'IMemberRepository',
   INotificationRepository: 'INotificationRepository',
   IAccountRepository: 'IAccountRepository',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PermissionGate from '../../components/PermissionGate';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -11,6 +11,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { useUserRepository } from '../../hooks/useUserRepository';
+import { supabase } from '../../lib/supabase';
 import { Input } from '../../components/ui2/input';
 import {
   AlertDialog,
@@ -37,7 +38,7 @@ type User = {
   email: string;
   created_at: string;
   last_sign_in_at: string | null;
-  user_roles: any[];
+  roles?: string[];
 };
 
 function Users() {
@@ -49,19 +50,27 @@ function Users() {
   const { useQuery: useUsersQuery, useDelete } = useUserRepository();
 
   const { data: result, isLoading } = useUsersQuery({
-    relationships: [
-      {
-        table: 'user_roles',
-        foreignKey: 'user_id',
-        nestedRelationships: [
-          { table: 'roles', foreignKey: 'role_id', select: ['name'] }
-        ]
-      }
-    ],
-    enabled: hasPermission('user.view')
+    enabled: hasPermission('user.view'),
   });
 
   const users = result?.data as any[] | undefined;
+
+  const [rolesMap, setRolesMap] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    const loadRoles = async () => {
+      if (!users) return;
+      const map: Record<string, string[]> = {};
+      for (const u of users) {
+        const { data } = await supabase.rpc('get_user_roles', {
+          user_id: u.id,
+        });
+        map[u.id] = (data || []).map((r: any) => r.role_name);
+      }
+      setRolesMap(map);
+    };
+    loadRoles();
+  }, [users]);
 
   const deleteUserMutation = useDelete();
 
@@ -146,12 +155,12 @@ function Users() {
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {user.user_roles?.map((ur: any, index: number) => (
+                    {rolesMap[user.id]?.map((name, index) => (
                       <span
                         key={index}
                         className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
                       >
-                        {ur.roles?.name}
+                        {name}
                       </span>
                     ))}
                   </div>

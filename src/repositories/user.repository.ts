@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 import { BaseRepository } from './base.repository';
 import { User } from '../models/user.model';
-import type { IUserAdapter } from '../adapters/user.adapter';
+import type { IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { UserValidator } from '../validators/user.validator';
 
 export interface IUserRepository extends BaseRepository<User> {}
@@ -10,7 +10,7 @@ export interface IUserRepository extends BaseRepository<User> {}
 export class UserRepository
   extends BaseRepository<User>
   implements IUserRepository {
-  constructor(@inject('IUserAdapter') adapter: IUserAdapter) {
+  constructor(@inject('IAuthUserAdapter') adapter: IAuthUserAdapter) {
     super(adapter);
   }
 

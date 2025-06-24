@@ -27,7 +27,7 @@ import {
   OfferingBatchAdapter,
   type IOfferingBatchAdapter,
 } from '../adapters/offeringBatch.adapter';
-import { UserAdapter, type IUserAdapter } from '../adapters/user.adapter';
+import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -99,8 +99,8 @@ container
   .to(OfferingBatchAdapter)
   .inSingletonScope();
 container
-  .bind<IUserAdapter>(TYPES.IUserAdapter)
-  .to(UserAdapter)
+  .bind<IAuthUserAdapter>(TYPES.IAuthUserAdapter)
+  .to(AuthUserAdapter)
   .inSingletonScope();
 
 // Register services
