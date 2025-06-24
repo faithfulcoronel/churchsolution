@@ -81,7 +81,7 @@ export function usePermissions() {
   };
 
   const isAdmin = () => {
-    return hasRole('admin');
+    return hasRole('admin') || hasRole('tenant_admin');
   };
 
   return {
