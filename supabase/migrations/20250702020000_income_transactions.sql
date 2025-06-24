@@ -35,7 +35,7 @@ CREATE POLICY "Income transactions are viewable by tenant users" ON income_trans
   FOR SELECT TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM user_tenant_access
+      SELECT 1 FROM tenant_users
       WHERE user_id = auth.uid()
       AND tenant_id = income_transactions.tenant_id
     ) AND deleted_at IS NULL
@@ -45,7 +45,7 @@ CREATE POLICY "Income transactions can be managed by tenant users" ON income_tra
   FOR ALL TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM user_tenant_access
+      SELECT 1 FROM tenant_users
       WHERE user_id = auth.uid()
       AND tenant_id = income_transactions.tenant_id
     ) AND deleted_at IS NULL
