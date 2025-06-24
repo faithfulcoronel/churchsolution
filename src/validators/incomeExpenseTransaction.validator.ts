@@ -1,7 +1,7 @@
-import { IncomeTransaction } from '../models/incomeTransaction.model';
+import { IncomeExpenseTransaction } from '../models/incomeExpenseTransaction.model';
 
-export class IncomeTransactionValidator {
-  static validate(data: Partial<IncomeTransaction>): void {
+export class IncomeExpenseTransactionValidator {
+  static validate(data: Partial<IncomeExpenseTransaction>): void {
     if (data.transaction_date !== undefined && !data.transaction_date) {
       throw new Error('Transaction date is required');
     }

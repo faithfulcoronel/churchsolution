@@ -3,9 +3,11 @@ import { Member } from './member.model';
 import { Fund } from './fund.model';
 import { FinancialSource } from './financialSource.model';
 import { Account } from './account.model';
+import type { TransactionType } from './financialTransaction.model';
 
-export interface IncomeTransaction extends BaseModel {
+export interface IncomeExpenseTransaction extends BaseModel {
   id: string;
+  transaction_type: TransactionType;
   transaction_date: string;
   amount: number;
   description: string;
