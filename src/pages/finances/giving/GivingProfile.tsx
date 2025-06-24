@@ -31,7 +31,7 @@ function GivingProfile() {
   }, [id, getTransactionEntries]);
 
   const columns: GridColDef[] = [
-    { field: 'member', headerName: 'Member', flex: 1, minWidth: 150, valueGetter: p => p.row.member?.first_name + ' ' + p.row.member?.last_name },
+    { field: 'account_holder', headerName: 'Account', flex: 1, minWidth: 150, valueGetter: p => p.row.account_holder?.name },
     { field: 'fund', headerName: 'Fund', flex: 1, minWidth: 120, valueGetter: p => p.row.fund?.name },
     { field: 'category', headerName: 'Category', flex: 1, minWidth: 120, valueGetter: p => p.row.category?.name },
     { field: 'source', headerName: 'Source', flex: 1, minWidth: 120, valueGetter: p => p.row.source?.name },
