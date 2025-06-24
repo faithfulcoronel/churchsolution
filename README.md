@@ -31,6 +31,23 @@ supabase db reset
    Use `supabase db push` if you only want to apply migrations without resetting
    the database.
 
+4. Define the `app.settings` values used by database functions. Either set them
+   at the database level:
+
+   ```sql
+   ALTER DATABASE postgres SET app.settings.base_url = '<your site URL>';
+   ALTER DATABASE postgres SET app.settings.email_service_url = '<email service URL>';
+   ALTER DATABASE postgres SET app.settings.service_role_key = '<service role key>';
+   ```
+
+   Or export the equivalent environment variables before starting PostgREST:
+
+   ```bash
+   export PGRST_APP_SETTINGS_BASE_URL=<your site URL>
+   export PGRST_APP_SETTINGS_EMAIL_SERVICE_URL=<email service URL>
+   export PGRST_APP_SETTINGS_SERVICE_ROLE_KEY=<service role key>
+   ```
+
 ## Running tests
 
 This project uses [Vitest](https://vitest.dev) for unit testing. After installing
