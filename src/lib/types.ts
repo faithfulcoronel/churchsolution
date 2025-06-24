@@ -18,6 +18,8 @@ export const TYPES = {
   IFinancialTransactionRepository: 'IFinancialTransactionRepository',
   IFundRepository: 'IFundRepository',
   IOfferingBatchRepository: 'IOfferingBatchRepository',
+  ICategoryAdapter: 'ICategoryAdapter',
+  ICategoryRepository: 'ICategoryRepository',
   IUserRepository: 'IUserRepository',
   AuditService: 'AuditService'
 };
