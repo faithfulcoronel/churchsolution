@@ -27,6 +27,7 @@ import {
   OfferingBatchAdapter,
   type IOfferingBatchAdapter,
 } from '../adapters/offeringBatch.adapter';
+import { UserAdapter, type IUserAdapter } from '../adapters/user.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -54,6 +55,7 @@ import {
   OfferingBatchRepository,
   type IOfferingBatchRepository,
 } from '../repositories/offeringBatch.repository';
+import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { TYPES } from './types';
 
@@ -95,6 +97,10 @@ container
 container
   .bind<IOfferingBatchAdapter>(TYPES.IOfferingBatchAdapter)
   .to(OfferingBatchAdapter)
+  .inSingletonScope();
+container
+  .bind<IUserAdapter>(TYPES.IUserAdapter)
+  .to(UserAdapter)
   .inSingletonScope();
 
 // Register services
@@ -141,6 +147,10 @@ container
 container
   .bind<IOfferingBatchRepository>(TYPES.IOfferingBatchRepository)
   .to(OfferingBatchRepository)
+  .inSingletonScope();
+container
+  .bind<IUserRepository>(TYPES.IUserRepository)
+  .to(UserRepository)
   .inSingletonScope();
 
 export { container };
