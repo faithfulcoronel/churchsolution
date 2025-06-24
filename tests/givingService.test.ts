@@ -17,7 +17,7 @@ const service = new GivingService(headerRepo);
 const header = { transaction_date: '2025-06-01', description: 'Sunday' };
 const lines: GivingLine[] = [
   {
-    member_id: 'm1',
+    accounts_account_id: 'acc1',
     fund_id: 'f1',
     category_id: 'c1',
     source_id: 's1',
@@ -43,7 +43,7 @@ describe('GivingService', () => {
     expect(passedHeader).toBe(header);
     expect(tx).toEqual([
       {
-        member_id: 'm1',
+        accounts_account_id: 'acc1',
         fund_id: 'f1',
         source_id: 's1',
         category_id: 'c1',
@@ -55,7 +55,7 @@ describe('GivingService', () => {
         credit: 0
       },
       {
-        member_id: 'm1',
+        accounts_account_id: 'acc1',
         fund_id: 'f1',
         source_id: 's1',
         category_id: 'c1',

@@ -5,7 +5,7 @@ import { Button } from '../../../components/ui2/button';
 import { Input } from '../../../components/ui2/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui2/select';
 import { DatePickerInput } from '../../../components/ui2/date-picker';
-import { useMemberRepository } from '../../../hooks/useMemberRepository';
+import { useAccountRepository } from '../../../hooks/useAccountRepository';
 import { useFundRepository } from '../../../hooks/useFundRepository';
 import { useCategoryRepository } from '../../../hooks/useCategoryRepository';
 import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
@@ -20,12 +20,12 @@ function GivingAddEdit() {
 
   const { createGivingBatch, updateGivingBatch, createMutation, updateMutation } = useGivingService();
 
-  const { useQuery: useMembersQuery } = useMemberRepository();
+  const { useQuery: useAccountsQuery } = useAccountRepository();
   const { useQuery: useFundsQuery } = useFundRepository();
   const { useQuery: useCategoriesQuery } = useCategoryRepository();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
 
-  const { data: membersData } = useMembersQuery();
+  const { data: accountsData } = useAccountsQuery();
   const { data: fundsData } = useFundsQuery();
   const { data: categoriesData } = useCategoriesQuery({
     filters: { type: { operator: 'eq', value: 'income_transaction' } },
@@ -34,7 +34,7 @@ function GivingAddEdit() {
     filters: { is_active: { operator: 'eq', value: true } },
   });
 
-  const members = membersData?.data || [];
+  const accounts = accountsData?.data || [];
   const funds = fundsData?.data || [];
   const categories = categoriesData?.data || [];
   const sources = sourcesData?.data || [];
@@ -46,7 +46,7 @@ function GivingAddEdit() {
 
   const [entries, setEntries] = useState<ContributionEntry[]>([
     {
-      member_id: '',
+      accounts_account_id: '',
       fund_id: '',
       category_id: '',
       source_id: '',
@@ -82,7 +82,7 @@ function GivingAddEdit() {
     setEntries([
       ...entries,
       {
-        member_id: '',
+        accounts_account_id: '',
         fund_id: '',
         category_id: '',
         source_id: '',
@@ -146,7 +146,7 @@ function GivingAddEdit() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-muted text-xs text-muted-foreground dark:bg-slate-700">
-                  <th className="px-4 py-2 text-left">Member</th>
+                  <th className="px-4 py-2 text-left">Account</th>
                   <th className="px-4 py-2 text-left">Fund</th>
                   <th className="px-4 py-2 text-left">Category</th>
                   <th className="px-4 py-2 text-left">Source</th>
@@ -158,14 +158,14 @@ function GivingAddEdit() {
                 {entries.map((entry, idx) => (
                   <tr key={idx} className="border-b border-border dark:border-slate-700">
                     <td className="px-4 py-2">
-                      <Select value={entry.member_id || ''} onValueChange={(v) => handleEntryChange(idx, 'member_id', v)}>
+                      <Select value={entry.accounts_account_id || ''} onValueChange={(v) => handleEntryChange(idx, 'accounts_account_id', v)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select member" />
+                          <SelectValue placeholder="Select account" />
                         </SelectTrigger>
                         <SelectContent>
-                          {members.map((m: any) => (
-                            <SelectItem key={m.id} value={m.id}>
-                              {m.first_name} {m.last_name}
+                          {accounts.map((a: any) => (
+                            <SelectItem key={a.id} value={a.id}>
+                              {a.name}
                             </SelectItem>
                           ))}
                         </SelectContent>

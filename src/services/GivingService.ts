@@ -5,7 +5,7 @@ import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 
 export interface GivingLine {
-  member_id: string | null;
+  accounts_account_id: string | null;
   fund_id: string | null;
   category_id: string | null;
   source_id: string | null;
@@ -28,7 +28,7 @@ export class GivingService {
   ) {
     return lines.flatMap((line) => {
       const base = {
-        member_id: line.member_id,
+        accounts_account_id: line.accounts_account_id,
         fund_id: line.fund_id,
         source_id: line.source_id,
         category_id: line.category_id,
