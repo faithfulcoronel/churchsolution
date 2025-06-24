@@ -89,7 +89,7 @@ function Administration() {
               <Route path="users/*" element={<Users />} />
               <Route path="roles/*" element={<Roles />} />
               <Route path="church" element={<ChurchSettings />} />
-              <Route path="categories" element={<Categories />} />
+              <Route path="categories/*" element={<Categories />} />
               <Route path="*" element={<Navigate to={adminTabs[0]?.href.split('/').pop() || 'users'} replace />} />
             </Routes>
           </div>
