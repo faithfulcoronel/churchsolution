@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
+import { useMemberRepository } from '../../hooks/useMemberRepository';
 import {
   User,
   Users,
@@ -45,55 +44,25 @@ import NotesTab from './tabs/NotesTab';
 function MemberProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { useQuery, useDelete } = useMemberRepository();
   const [activeTab, setActiveTab] = useState('basic');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch member data
-  const { data: member, isLoading, error } = useQuery({
-    queryKey: ['member', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('members')
-        .select(`
-          *,
-          membership_categories:membership_category_id(id, name, code),
-          status_categories:status_category_id(id, name, code)
-        `)
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      return data;
+  // Fetch member data using repository
+  const { data: result, isLoading, error } = useQuery({
+    filters: {
+      id: {
+        operator: 'eq',
+        value: id
+      }
     },
     enabled: !!id
   });
 
+  const member = result?.data?.[0];
+
   // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      setIsDeleting(true);
-      const { error } = await supabase
-        .from('members')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id);
-      
-      if (error) throw error;
-      return true;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['members'] });
-      navigate('/members');
-    },
-    onError: (error) => {
-      console.error('Error deleting member:', error);
-      setIsDeleting(false);
-    },
-    onSettled: () => {
-      setDeleteDialogOpen(false);
-    }
-  });
+  const deleteMemberMutation = useDelete();
 
   // Get member initials for avatar fallback
   const getInitials = (firstName: string, lastName: string) => {
@@ -290,16 +259,20 @@ function MemberProfile() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMemberMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.preventDefault();
-                deleteMutation.mutate();
+                if (id) {
+                  await deleteMemberMutation.mutateAsync(id);
+                  setDeleteDialogOpen(false);
+                  navigate('/members');
+                }
               }}
-              disabled={isDeleting}
+              disabled={deleteMemberMutation.isPending}
             >
-              {isDeleting ? (
+              {deleteMemberMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Deleting...
