@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { Input } from '../../../components/ui2/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui2/select';
+import { Combobox, ComboboxOption } from '../../../components/ui2/combobox';
 import { DatePickerInput } from '../../../components/ui2/date-picker';
 import { useMemberRepository } from '../../../hooks/useMemberRepository';
 import { useFundRepository } from '../../../hooks/useFundRepository';
@@ -38,6 +38,27 @@ function GivingAddEdit() {
   const funds = fundsData?.data || [];
   const categories = categoriesData?.data || [];
   const sources = sourcesData?.data || [];
+
+  const accountOptions: ComboboxOption[] = React.useMemo(
+    () =>
+      members.map((m) => ({ value: m.id, label: `${m.first_name} ${m.last_name}` })) || [],
+    [members],
+  );
+
+  const fundOptions: ComboboxOption[] = React.useMemo(
+    () => funds.map((f) => ({ value: f.id, label: f.name })) || [],
+    [funds],
+  );
+
+  const categoryOptions: ComboboxOption[] = React.useMemo(
+    () => categories.map((c) => ({ value: c.id, label: c.name })) || [],
+    [categories],
+  );
+
+  const sourceOptions: ComboboxOption[] = React.useMemo(
+    () => sources.map((s) => ({ value: s.id, label: s.name })) || [],
+    [sources],
+  );
 
   const [headerData, setHeaderData] = useState({
     transaction_date: new Date().toISOString().split('T')[0],
@@ -158,60 +179,36 @@ function GivingAddEdit() {
                 {entries.map((entry, idx) => (
                   <tr key={idx} className="border-b border-border dark:border-slate-700">
                     <td className="px-4 py-2">
-                      <Select value={entry.member_id || ''} onValueChange={(v) => handleEntryChange(idx, 'member_id', v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select member" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {members.map((m: any) => (
-                            <SelectItem key={m.id} value={m.id}>
-                              {m.first_name} {m.last_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={accountOptions}
+                        value={entry.member_id || ''}
+                        onChange={(v) => handleEntryChange(idx, 'member_id', v)}
+                        placeholder="Select member"
+                      />
                     </td>
                     <td className="px-4 py-2">
-                      <Select value={entry.fund_id || ''} onValueChange={(v) => handleEntryChange(idx, 'fund_id', v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select fund" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {funds.map((f: any) => (
-                            <SelectItem key={f.id} value={f.id}>
-                              {f.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={fundOptions}
+                        value={entry.fund_id || ''}
+                        onChange={(v) => handleEntryChange(idx, 'fund_id', v)}
+                        placeholder="Select fund"
+                      />
                     </td>
                     <td className="px-4 py-2">
-                      <Select value={entry.category_id || ''} onValueChange={(v) => handleEntryChange(idx, 'category_id', v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((c: any) => (
-                            <SelectItem key={c.id} value={c.id}>
-                              {c.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={categoryOptions}
+                        value={entry.category_id || ''}
+                        onChange={(v) => handleEntryChange(idx, 'category_id', v)}
+                        placeholder="Select category"
+                      />
                     </td>
                     <td className="px-4 py-2">
-                      <Select value={entry.source_id || ''} onValueChange={(v) => handleEntryChange(idx, 'source_id', v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sources.map((s: any) => (
-                            <SelectItem key={s.id} value={s.id}>
-                              {s.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={sourceOptions}
+                        value={entry.source_id || ''}
+                        onChange={(v) => handleEntryChange(idx, 'source_id', v)}
+                        placeholder="Select source"
+                      />
                     </td>
                     <td className="px-4 py-2 text-right">
                       <Input
