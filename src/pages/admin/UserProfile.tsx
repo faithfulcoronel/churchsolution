@@ -1,7 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
+import { useUserRepository } from '../../hooks/useUserRepository';
 import { Loader2, Edit2 } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 import { Button } from '../../components/ui2/button';
@@ -10,29 +9,21 @@ function UserProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: user, isLoading, error } = useQuery({
-    queryKey: ['user-profile', id],
-    queryFn: async () => {
-      if (!id) return null;
-      const { data, error } = await supabase.rpc('manage_user', {
-        operation: 'get',
-        target_user_id: id
-      });
-      if (error) throw error;
-      if (!data) return null;
-
-      const { data: rolesData, error: rolesError } = await supabase.rpc('get_user_roles_with_permissions', {
-        target_user_id: id
-      });
-      if (rolesError) throw rolesError;
-
-      return {
-        ...data,
-        roles: rolesData || []
-      };
-    },
+  const { useQuery: useUserQuery } = useUserRepository();
+  const { data: result, isLoading, error } = useUserQuery({
+    filters: { id: { operator: 'eq', value: id } },
+    relationships: [
+      {
+        table: 'user_roles',
+        foreignKey: 'user_id',
+        nestedRelationships: [
+          { table: 'roles', foreignKey: 'role_id', select: ['name'] }
+        ]
+      }
+    ],
     enabled: !!id
   });
+  const user = result?.data?.[0];
 
   if (isLoading) {
     return (
@@ -83,9 +74,9 @@ function UserProfile() {
           <div className="sm:col-span-2">
             <p className="text-sm text-gray-500">Roles</p>
             <div className="flex flex-wrap gap-1 mt-1">
-              {user.roles.map((r: any, i: number) => (
+              {user.user_roles?.map((r: any, i: number) => (
                 <span key={i} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                  {r.role_name}
+                  {r.roles?.name}
                 </span>
               ))}
             </div>
