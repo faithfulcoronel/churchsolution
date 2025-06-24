@@ -24,17 +24,36 @@ export type CategoryType =
   | 'budget'
   | 'relationship_type';
 
+export interface CategoryDataProvider {
+  fetchCategories(tenantId: string, type: CategoryType): Promise<Category[]>;
+}
+
+class SupabaseCategoryDataProvider implements CategoryDataProvider {
+  async fetchCategories(tenantId: string, type: CategoryType): Promise<Category[]> {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('type', type)
+      .is('deleted_at', null)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return data;
+  }
+}
+
 export class CategoryUtils {
   private static instance: CategoryUtils;
   private categories: Map<string, Category[]> = new Map();
   private lastFetch: Map<string, number> = new Map();
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_DURATION =
+    parseInt(import.meta.env.VITE_CATEGORY_CACHE_DURATION_MS) || 5 * 60 * 1000; // default 5 minutes
 
-  private constructor() {}
+  private constructor(private provider: CategoryDataProvider = new SupabaseCategoryDataProvider()) {}
 
-  public static getInstance(): CategoryUtils {
+  public static getInstance(provider: CategoryDataProvider = new SupabaseCategoryDataProvider()): CategoryUtils {
     if (!CategoryUtils.instance) {
-      CategoryUtils.instance = new CategoryUtils();
+      CategoryUtils.instance = new CategoryUtils(provider);
     }
     return CategoryUtils.instance;
   }
@@ -59,15 +78,7 @@ export class CategoryUtils {
       const tenantId = await tenantUtils.getTenantId();
       if (!tenantId) throw new Error('No tenant found');
 
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('tenant_id', tenantId)
-        .eq('type', type)
-        .is('deleted_at', null)
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
+      const data = await this.provider.fetchCategories(tenantId, type);
 
       this.categories.set(type, data);
       this.lastFetch.set(type, now);
