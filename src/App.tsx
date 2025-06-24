@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
 import { useAuthStore } from './stores/authStore';
 import { supabase } from './lib/supabase';
 import { MessageHandler } from './components/MessageHandler';
@@ -17,20 +18,6 @@ const Finances = React.lazy(() => import('./pages/finances/Finances'));
 const Accounts = React.lazy(() => import('./pages/accounts/Accounts'));
 const Layout = React.lazy(() => import('./components/Layout'));
 
-// Configure React Query client with error handling
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // Data considered fresh for 5 minutes
-      onError: (error) => handleError(error),
-    },
-    mutations: {
-      onError: (error) => handleError(error),
-    },
-  },
-});
 
 // Error boundary component
 class ErrorBoundary extends React.Component<
