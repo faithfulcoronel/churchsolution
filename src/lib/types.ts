@@ -23,5 +23,6 @@ export const TYPES = {
   ICategoryAdapter: 'ICategoryAdapter',
   ICategoryRepository: 'ICategoryRepository',
   IUserRepository: 'IUserRepository',
-  AuditService: 'AuditService'
+  AuditService: 'AuditService',
+  GivingService: 'GivingService'
 };
