@@ -15,3 +15,4 @@ export * from './useThemeSwitcher';
 export * from './useFundRepository';
 export * from './useOfferingBatchRepository';
 export * from './useCategoryRepository';
+export * from './useIncomeTransactionRepository';
