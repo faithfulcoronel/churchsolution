@@ -4,6 +4,7 @@ import { useFundRepository } from '../../hooks/useFundRepository';
 import { Fund, FundType } from '../../models/fund.model';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
+import { Textarea } from '../../components/ui2/textarea';
 import { Button } from '../../components/ui2/button';
 import BackButton from '../../components/BackButton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
@@ -19,6 +20,7 @@ function FundAddEdit() {
 
   const [formData, setFormData] = useState<Partial<Fund>>({
     name: '',
+    description: '',
     type: 'unrestricted',
   });
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +114,16 @@ function FundAddEdit() {
                     <SelectItem value="restricted">Restricted</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <Textarea
+                  label="Description"
+                  value={formData.description || ''}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  rows={3}
+                  placeholder="Enter fund description (optional)"
+                />
               </div>
 
             </div>

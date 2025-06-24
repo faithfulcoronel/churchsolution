@@ -26,7 +26,10 @@ function FundList() {
   const funds = result?.data || [];
 
   const filteredFunds = funds.filter((fund: Fund) => {
-    const matchesSearch = fund.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const search = searchTerm.toLowerCase();
+    const matchesSearch =
+      fund.name.toLowerCase().includes(search) ||
+      (fund.description ? fund.description.toLowerCase().includes(search) : false);
     const matchesType = typeFilter === 'all' || fund.type === typeFilter;
     return matchesSearch && matchesType;
   });
@@ -37,6 +40,12 @@ function FundList() {
       headerName: 'Fund Name',
       flex: 2,
       minWidth: 200,
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      flex: 3,
+      minWidth: 250,
     },
     {
       field: 'type',
