@@ -35,7 +35,7 @@ function Admin() {
       <Route path="roles/:id/edit" element={<RoleForm />} />
       <Route path="databases" element={<DatabaseManagement />} />
       <Route path="settings" element={<ChurchSettings />} />
-      <Route path="categories" element={<Categories />} />
+      <Route path="categories/*" element={<Categories />} />
       <Route path="*" element={<Navigate to="/settings/administration/users" replace />} />
     </Routes>
   );
