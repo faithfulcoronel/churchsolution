@@ -43,6 +43,7 @@ describe('GivingService', () => {
     expect(passedHeader).toBe(header);
     expect(tx).toEqual([
       {
+        type: 'income',
         accounts_account_id: 'acc1',
         fund_id: 'f1',
         source_id: 's1',
@@ -55,6 +56,7 @@ describe('GivingService', () => {
         credit: 0
       },
       {
+        type: 'income',
         accounts_account_id: 'acc1',
         fund_id: 'f1',
         source_id: 's1',
