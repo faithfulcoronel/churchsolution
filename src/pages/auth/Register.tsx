@@ -297,7 +297,7 @@ function Register() {
                         subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') 
                       }))}
                       required
-                      pattern="[a-z0-9-]+"
+                      pattern="(?:[a-z0-9]|-)+"
                       icon={<Globe />}
                       rightElement={
                         <div className="px-3 py-2 bg-muted text-muted-foreground text-sm">
