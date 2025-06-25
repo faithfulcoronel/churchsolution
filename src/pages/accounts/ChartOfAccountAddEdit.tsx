@@ -122,15 +122,18 @@ function ChartOfAccountAddEdit() {
     }
     
     try {
+      const common = { fieldsToRemove: ['chart_of_accounts'] };
       if (isEditMode) {
         await updateMutation.mutateAsync({
           id: id!,
-          data: formData
+          data: formData,
+          ...common
         });
         navigate(`/accounts/chart-of-accounts/${id}`);
       } else {
         const result = await createMutation.mutateAsync({
-          data: formData
+          data: formData,
+          ...common
         });
         navigate(`/accounts/chart-of-accounts/${result.id}`);
       }
