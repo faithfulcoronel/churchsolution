@@ -24,7 +24,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog';
+} from '@/components/ui2/dialog';
 interface IModalSearchProps {
   open: boolean;
   onOpenChange: () => void;

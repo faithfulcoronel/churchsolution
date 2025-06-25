@@ -2,7 +2,7 @@ import { HTMLAttributes, ReactNode } from 'react';
 import { ChevronsUpDown, ArrowUp, ArrowDown, EyeOff, Check } from 'lucide-react';
 import { Column } from '@tanstack/react-table';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui2/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui2/dropdown-menu';
 
 interface IDataGridColumnHeader<TData, TValue> extends HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFeatureStore, type FeatureFlag } from '../stores/featureStore';
-import { Switch } from './ui/Switch';
+import { Switch } from './ui2/switch';
 import { AlertCircle, CheckCircle2, Lock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';

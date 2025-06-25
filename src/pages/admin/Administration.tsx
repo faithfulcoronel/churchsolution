@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { UserCog, Shield, Building2, Tag } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
-import { Card } from '../../components/ui/Card';
+import { Card } from '../../components/ui2/card';
 
 // Import admin pages
 import Users from './Users';

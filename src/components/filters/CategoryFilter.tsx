@@ -1,7 +1,13 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { categoryUtils } from '../../utils/categoryUtils';
-import { Select } from '../ui/Select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '../ui2/select';
 import { Tag, Loader2 } from 'lucide-react';
 
 interface CategoryFilterProps {
@@ -66,29 +72,30 @@ export function CategoryFilter({ value, onChange, transactionType }: CategoryFil
 
   if (isLoading) {
     return (
-      <div className="flex-1 min-w-[100px] relative">
-        <Select
-          value=""
-          onChange={() => {}}
-          options={[{ value: '', label: 'Loading...' }]}
-          icon={<Loader2 className="animate-spin" />}
-          className="w-full"
-          disabled
-        />
+      <div className="flex-1 min-w-[100px]">
+        <Select value="" onValueChange={() => {}} disabled>
+          <SelectTrigger icon={<Loader2 className="animate-spin" />} className="w-full">
+            <SelectValue placeholder="Loading..." />
+          </SelectTrigger>
+        </Select>
       </div>
     );
   }
 
   return (
     <div className="flex-1 min-w-[100px]">
-      <Select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        options={categoryOptions}
-        icon={<Tag />}
-        className="w-full"
-        placeholder="Select Category"
-      />
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger icon={<Tag />} className="w-full">
+          <SelectValue placeholder="Select Category" />
+        </SelectTrigger>
+        <SelectContent>
+          {categoryOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

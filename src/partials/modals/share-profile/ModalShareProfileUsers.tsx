@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select';
+} from '@/components/ui2/select';
 
 const ModalShareProfileUsers = () => {
   const items = [
