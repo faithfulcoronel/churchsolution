@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import { Card, CardContent, CardHeader } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import { GridColDef } from '@mui/x-data-grid';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Edit } from 'lucide-react';
 import BackButton from '../../../components/BackButton';
 
 function GivingProfile() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { useQuery } = useFinancialTransactionHeaderRepository();
   const { getByHeaderId } = useIncomeExpenseTransactionRepository();
   const { data: headerData, isLoading: headerLoading } = useQuery({
@@ -83,8 +85,18 @@ function GivingProfile() {
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
-      <div className="mb-6">
+      <div className="flex items-center justify-between mb-6">
         <BackButton fallbackPath="/finances/giving" label="Back to Giving" />
+        {header.status === 'draft' && (
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/finances/giving/${id}/edit`)}
+            className="flex items-center"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        )}
       </div>
       <Card className="dark:bg-slate-800 mb-6">
         <CardHeader>
