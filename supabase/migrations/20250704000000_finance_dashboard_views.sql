@@ -51,8 +51,7 @@ SELECT
   COALESCE(
     (SELECT COUNT(*) FROM budgets b
       WHERE b.tenant_id = tx.tenant_id
-        AND CURRENT_DATE BETWEEN b.start_date AND b.end_date
-        AND b.deleted_at IS NULL),
+        AND CURRENT_DATE BETWEEN b.start_date AND b.end_date),
     0
   ) AS active_budgets,
   jsonb_object_agg(category_name, total) FILTER (WHERE type = 'income') AS income_by_category,
@@ -78,19 +77,3 @@ LEFT JOIN income_expense_transactions t ON t.fund_id = f.id AND t.deleted_at IS 
 GROUP BY f.tenant_id, f.id, f.name;
 
 COMMENT ON VIEW fund_balances_view IS 'Current running balance for each fund';
-
--- Enable RLS on the views
-ALTER VIEW finance_monthly_trends ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "view own finance_monthly_trends" ON finance_monthly_trends
-  FOR SELECT TO authenticated
-  USING (tenant_id = get_current_tenant_id());
-
-ALTER VIEW finance_monthly_stats ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "view own finance_monthly_stats" ON finance_monthly_stats
-  FOR SELECT TO authenticated
-  USING (tenant_id = get_current_tenant_id());
-
-ALTER VIEW fund_balances_view ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "view own fund_balances_view" ON fund_balances_view
-  FOR SELECT TO authenticated
-  USING (tenant_id = get_current_tenant_id());
