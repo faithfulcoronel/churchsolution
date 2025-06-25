@@ -25,5 +25,6 @@ export const TYPES = {
   IUserRepository: 'IUserRepository',
   AuditService: 'AuditService',
   GivingService: 'GivingService',
-  ExpenseService: 'ExpenseService'
+  ExpenseService: 'ExpenseService',
+  IncomeExpenseTransactionService: 'IncomeExpenseTransactionService'
 };
