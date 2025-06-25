@@ -31,11 +31,20 @@ function ExpenseList() {
     [entryResult]
   );
 
-  const { data: headerResult, isLoading: headerLoading } = useHeaderQuery({
+  const {
+    data: headerResult,
+    isLoading: headerLoading,
+    refetch,
+  } = useHeaderQuery({
     filters: { id: { operator: 'isAnyOf', value: headerIds } },
     order: { column: 'transaction_date', ascending: false },
-    enabled: headerIds.length > 0,
   });
+
+  React.useEffect(() => {
+    if (headerIds.length > 0) {
+      refetch();
+    }
+  }, [headerIds, refetch]);
   const headers = headerResult?.data || [];
   const isLoading = entriesLoading || headerLoading;
 
