@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFinancialSourceRepository } from '../../hooks/useFinancialSourceRepository';
-import { useChartOfAccounts } from '../../hooks/useChartOfAccounts';
-import { FinancialSource, SourceType } from '../../models/financialSource.model';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Input } from '../../components/ui2/input';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Textarea } from '../../components/ui2/textarea';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
-import { Combobox } from '../../components/ui2/combobox';
-import { Label } from '../../components/ui2/label';
-import { Switch } from '../../components/ui2/switch';
+import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
+import { useChartOfAccounts } from '../../../hooks/useChartOfAccounts';
+import { FinancialSource, SourceType } from '../../../models/financialSource.model';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Input } from '../../../components/ui2/input';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Textarea } from '../../../components/ui2/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
+import { Combobox } from '../../../components/ui2/combobox';
+import { Label } from '../../../components/ui2/label';
+import { Switch } from '../../../components/ui2/switch';
 import { Save, Loader2, Briefcase as Bank, Wallet, Globe, CreditCard, AlertCircle, Hash, FileText } from 'lucide-react';
 
 function FinancialSourceAddEdit() {

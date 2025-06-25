@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useChartOfAccountRepository } from '../../hooks/useChartOfAccountRepository';
-import { ChartOfAccount } from '../../models/chartOfAccount.model';
-import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
-import { Input } from '../../components/ui2/input';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Textarea } from '../../components/ui2/textarea';
+import { useChartOfAccountRepository } from '../../../hooks/useChartOfAccountRepository';
+import { ChartOfAccount } from '../../../models/chartOfAccount.model';
+import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
+import { Input } from '../../../components/ui2/input';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Textarea } from '../../../components/ui2/textarea';
 import { 
   Select, 
   SelectTrigger, 
   SelectValue, 
   SelectContent, 
   SelectItem 
-} from '../../components/ui2/select';
-import { Switch } from '../../components/ui2/switch';
+} from '../../../components/ui2/select';
+import { Switch } from '../../../components/ui2/switch';
 import { 
   Save,
   Loader2,
