@@ -243,13 +243,17 @@ function FinancesDashboard() {
     );
   }
 
+  const lastTrend = monthlyTrends && monthlyTrends.length
+    ? monthlyTrends[monthlyTrends.length - 1]
+    : undefined;
+
   const cards = [
     {
       name: 'Monthly Income',
       value: formatCurrency(stats?.monthlyIncome || 0, currency),
       icon: <TrendingUp className="text-emerald-500" />,
       color: 'bg-emerald-100 dark:bg-emerald-900/50',
-      trend: monthlyTrends?.[monthlyTrends.length - 1]?.percentageChange
+      trend: lastTrend?.percentageChange
     },
     {
       name: 'Monthly Expenses',
