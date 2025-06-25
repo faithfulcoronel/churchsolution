@@ -59,7 +59,7 @@ export class NotificationAdapter
   }
 
   protected override async buildSecureQuery(options: QueryOptions = {}): Promise<any> {
-    const query = await super.buildSecureQuery(options);
+    const { query } = await super.buildSecureQuery(options);
     
     // Add user_id filter if not already present
     if (!options.filters?.user_id) {
@@ -69,6 +69,6 @@ export class NotificationAdapter
       }
     }
 
-    return query;
+    return { query };
   }
 }

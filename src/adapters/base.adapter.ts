@@ -142,7 +142,9 @@ export class BaseAdapter<T extends BaseModel> {
     return relationships.map(buildNestedSelect).join(',');
   }
 
-  protected async buildSecureQuery(options: QueryOptions = {}): Promise<PostgrestFilterBuilder<any, any, T[]>> {
+  protected async buildSecureQuery(
+    options: QueryOptions = {}
+  ): Promise<{ query: PostgrestFilterBuilder<any, any, T[]> }> {
     try {
       const tenantId = await tenantUtils.getTenantId();
       if (!tenantId) {
@@ -183,7 +185,7 @@ export class BaseAdapter<T extends BaseModel> {
         query = query.range(start, start + pageSize - 1);
       }
 
-      return query;
+      return { query };
     } catch (error) {
       throw handleError(error, {
         context: 'buildSecureQuery',
@@ -199,7 +201,7 @@ export class BaseAdapter<T extends BaseModel> {
         return { data: [], count: null };
       }
 
-      const query = await this.buildSecureQuery(options);
+      const { query } = await this.buildSecureQuery(options);
       const { data, error, count } = await query;
 
       if (error) {
@@ -219,7 +221,7 @@ export class BaseAdapter<T extends BaseModel> {
 
   public async fetchById(id: string, options: Omit<QueryOptions, 'pagination'> = {}): Promise<T | null> {
     try {
-      const query = await this.buildSecureQuery(options);
+      const { query } = await this.buildSecureQuery(options);
       const { data, error } = await query
         .eq('id', id)
         .single();
