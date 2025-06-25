@@ -124,7 +124,7 @@ function ExpenseAddEdit() {
     if (isEditMode && entryRecords.length > 0) {
       setEntries(
         entryRecords.map((e: any) => ({
-          accounts_account_id: e.accounts_account_id || '',
+          accounts_account_id: e.account_id || '',
           fund_id: e.fund_id || '',
           category_id: e.category_id || '',
           source_id: e.source_id || '',
