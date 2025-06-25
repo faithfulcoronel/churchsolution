@@ -1,5 +1,5 @@
 import { Table } from '@tanstack/react-table';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui2/button';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui2/dropdown-menu';
 import { KeenIcon } from '@/components/keenicons';
 
 interface IDataGridColumnVisibilityProps<TData> {

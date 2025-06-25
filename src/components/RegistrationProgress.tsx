@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Modal } from './ui/Modal';
-import { ProgressSteps } from './ui/ProgressSteps';
+import { Dialog, DialogContent } from './ui2/dialog';
+import { ProgressSteps } from './ui2/progress-steps';
 import { Building2, UserPlus, Database, CheckCircle2 } from 'lucide-react';
 
 interface RegistrationProgressProps {
@@ -40,12 +40,9 @@ export function RegistrationProgress({ isOpen, currentStep }: RegistrationProgre
   }, [currentStep]);
 
   return (
-    <Modal 
-      isOpen={isOpen}
-      onClose={() => {}}
-      size="lg"
-    >
-      <div className="p-6">
+    <Dialog open={isOpen} onOpenChange={() => {}}>
+      <DialogContent className="max-w-lg">
+        <div className="p-6">
         <div className="text-center mb-8">
           <div className="relative mx-auto h-12 w-12">
             <Building2 className={`
@@ -85,6 +82,7 @@ export function RegistrationProgress({ isOpen, currentStep }: RegistrationProgre
           </div>
         )}
       </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../ui/Button';
+import { Button } from '../ui2/button';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface TransactionTypeFilterProps {

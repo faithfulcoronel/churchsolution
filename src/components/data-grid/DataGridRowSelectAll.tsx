@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDataGrid } from '.';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox } from '@/components/ui2/checkbox';
 
 const DataGridRowSelectAll = () => {
   const { table } = useDataGrid();

@@ -7,8 +7,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+} from '@/components/ui2/select';
+import { Button } from '@/components/ui2/button';
 import { cn } from '@/lib/utils';
 
 const DataGridPagination = () => {
