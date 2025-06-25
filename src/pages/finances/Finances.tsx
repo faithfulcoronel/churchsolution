@@ -17,12 +17,9 @@ const FundAddEdit = React.lazy(() => import('./funds/FundAddEdit'));
 const FundProfile = React.lazy(() => import('./funds/FundProfile'));
 const Reports = React.lazy(() => import('./Reports'));
 const Statements = React.lazy(() => import('./Statements'));
-const GivingList = React.lazy(() => import('./giving/GivingList'));
-const GivingAddEdit = React.lazy(() => import('./giving/GivingAddEdit'));
-const GivingProfile = React.lazy(() => import('./giving/GivingProfile'));
-const ExpenseList = React.lazy(() => import('./expenses/ExpenseList'));
-const ExpenseAddEdit = React.lazy(() => import('./expenses/ExpenseAddEdit'));
-const ExpenseProfile = React.lazy(() => import('./expenses/ExpenseProfile'));
+const IncomeExpenseList = React.lazy(() => import('./incomeExpense/IncomeExpenseList'));
+const IncomeExpenseAddEdit = React.lazy(() => import('./incomeExpense/IncomeExpenseAddEdit'));
+const IncomeExpenseProfile = React.lazy(() => import('./incomeExpense/IncomeExpenseProfile'));
 
 function LoadingSpinner() {
   return (
@@ -65,14 +62,14 @@ function Finances() {
         <Route path="funds/add" element={<FundAddEdit />} />
         <Route path="funds/:id/edit" element={<FundAddEdit />} />
         <Route path="funds/:id" element={<FundProfile />} />
-        <Route path="expenses" element={<ExpenseList />} />
-        <Route path="expenses/add" element={<ExpenseAddEdit />} />
-        <Route path="expenses/:id/edit" element={<ExpenseAddEdit />} />
-        <Route path="expenses/:id" element={<ExpenseProfile />} />
-        <Route path="giving" element={<GivingList />} />
-        <Route path="giving/add" element={<GivingAddEdit />} />
-        <Route path="giving/:id/edit" element={<GivingAddEdit />} />
-        <Route path="giving/:id" element={<GivingProfile />} />
+        <Route path="expenses" element={<IncomeExpenseList transactionType="expense" />} />
+        <Route path="expenses/add" element={<IncomeExpenseAddEdit transactionType="expense" />} />
+        <Route path="expenses/:id/edit" element={<IncomeExpenseAddEdit transactionType="expense" />} />
+        <Route path="expenses/:id" element={<IncomeExpenseProfile transactionType="expense" />} />
+        <Route path="giving" element={<IncomeExpenseList transactionType="income" />} />
+        <Route path="giving/add" element={<IncomeExpenseAddEdit transactionType="income" />} />
+        <Route path="giving/:id/edit" element={<IncomeExpenseAddEdit transactionType="income" />} />
+        <Route path="giving/:id" element={<IncomeExpenseProfile transactionType="income" />} />
         <Route path="reports" element={<Reports />} />
         <Route path="statements" element={<Statements />} />
       </Routes>

@@ -9,7 +9,11 @@ import { GridColDef } from '@mui/x-data-grid';
 import { Loader2, Edit } from 'lucide-react';
 import BackButton from '../../../components/BackButton';
 
-function GivingProfile() {
+interface IncomeExpenseProfileProps {
+  transactionType: 'income' | 'expense';
+}
+
+function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { useQuery } = useFinancialTransactionHeaderRepository();
@@ -66,6 +70,10 @@ function GivingProfile() {
     { field: 'amount', headerName: 'Amount', flex: 1, minWidth: 100 },
   ];
 
+  const basePath = transactionType === 'income' ? 'giving' : 'expenses';
+  const backLabel = transactionType === 'income' ? 'Back to Donations' : 'Back to Expenses';
+  const notFound = transactionType === 'income' ? 'Batch not found.' : 'Entry not found.';
+
   if (headerLoading || loading) {
     return (
       <div className="flex justify-center py-8">
@@ -77,8 +85,8 @@ function GivingProfile() {
   if (!header) {
     return (
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <BackButton fallbackPath="/finances/giving" label="Back" />
-        <p className="mt-4">Batch not found.</p>
+        <BackButton fallbackPath={`/finances/${basePath}`} label="Back" />
+        <p className="mt-4">{notFound}</p>
       </div>
     );
   }
@@ -86,11 +94,11 @@ function GivingProfile() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between mb-6">
-        <BackButton fallbackPath="/finances/giving" label="Back to Donations" />
+        <BackButton fallbackPath={`/finances/${basePath}`} label={backLabel} />
         {header.status === 'draft' && (
           <Button
             variant="outline"
-            onClick={() => navigate(`/finances/giving/${id}/edit`)}
+            onClick={() => navigate(`/finances/${basePath}/${id}/edit`)}
             className="flex items-center"
           >
             <Edit className="h-4 w-4 mr-2" />
@@ -124,4 +132,4 @@ function GivingProfile() {
   );
 }
 
-export default GivingProfile;
+export default IncomeExpenseProfile;
