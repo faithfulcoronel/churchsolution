@@ -56,10 +56,22 @@ function GivingAddEdit() {
     headerLoading ||
     entryLoading;
 
-  const accounts = accountsData?.data || [];
-  const funds = fundsData?.data || [];
-  const categories = categoriesData?.data || [];
-  const sources = sourcesData?.data || [];
+  const accounts = React.useMemo(
+    () => accountsData?.data || [],
+    [accountsData?.data],
+  );
+  const funds = React.useMemo(
+    () => fundsData?.data || [],
+    [fundsData?.data],
+  );
+  const categories = React.useMemo(
+    () => categoriesData?.data || [],
+    [categoriesData?.data],
+  );
+  const sources = React.useMemo(
+    () => sourcesData?.data || [],
+    [sourcesData?.data],
+  );
 
   const accountOptions = React.useMemo(
     () => accounts.map(a => ({ value: a.id, label: a.name })),
