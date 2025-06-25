@@ -14,6 +14,8 @@ import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinan
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import BackButton from '../../../components/BackButton';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { useCurrencyStore } from '../../../stores/currencyStore';
+import { formatCurrency } from '../../../utils/currency';
 
 function GivingAddEdit() {
   const { id } = useParams<{ id: string }>();
@@ -191,6 +193,23 @@ function GivingAddEdit() {
     setEntries(newEntries);
   };
 
+  const { currency } = useCurrencyStore();
+
+  const totalAmount = React.useMemo(
+    () => entries.reduce((sum, e) => sum + Number(e.amount || 0), 0),
+    [entries],
+  );
+
+  const categoryTotals = React.useMemo(() => {
+    const totals: Record<string, number> = {};
+    entries.forEach((e) => {
+      const name =
+        categories.find((c) => c.id === e.category_id)?.name || 'Uncategorized';
+      totals[name] = (totals[name] || 0) + Number(e.amount || 0);
+    });
+    return totals;
+  }, [entries, categories]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isEditMode && id) {
@@ -304,7 +323,33 @@ function GivingAddEdit() {
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-border font-medium">
+                  <td className="px-4 py-2" colSpan={4}>Total</td>
+                  <td className="px-4 py-2 text-right">
+                    {formatCurrency(totalAmount, currency)}
+                  </td>
+                  <td className="px-4 py-2"></td>
+                </tr>
+              </tfoot>
             </table>
+            <div className="mt-4">
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                Category Totals
+              </h4>
+              <table className="w-full text-sm">
+                <tbody>
+                  {Object.entries(categoryTotals).map(([name, amt]) => (
+                    <tr key={name} className="border-b border-border">
+                      <td className="px-4 py-1">{name}</td>
+                      <td className="px-4 py-1 text-right">
+                        {formatCurrency(amt, currency)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
           <CardFooter className="flex justify-end">
             <Button type="submit" disabled={isDisabled || createMutation.isPending || updateMutation.isPending}>
