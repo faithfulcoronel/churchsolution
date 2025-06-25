@@ -1,170 +1,28 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
-import { format, subMonths, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
+import { container } from '../lib/container';
+import { TYPES } from '../lib/types';
+import type { IFinanceDashboardRepository } from '../repositories/financeDashboard.repository';
 import { useCurrencyStore } from '../stores/currencyStore';
 import { formatCurrency } from '../utils/currency';
 
 export function useFinanceDashboardData() {
   const { currency } = useCurrencyStore();
-
-  const { data: currentTenant } = useQuery({
-    queryKey: ['current-tenant'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_current_tenant');
-      if (error) throw error;
-      return data?.[0];
-    },
-  });
+  const repository = container.get<IFinanceDashboardRepository>(TYPES.IFinanceDashboardRepository);
 
   const { data: monthlyTrends, isLoading: trendsLoading } = useQuery({
-    queryKey: ['monthly-trends', currentTenant?.id],
-    queryFn: async () => {
-      const today = new Date();
-      const months = Array.from({ length: 12 }, (_, i) => {
-        const date = subMonths(today, i);
-        return {
-          start: startOfMonth(date),
-          end: endOfMonth(date),
-          month: format(date, 'MMM yyyy'),
-        };
-      }).reverse();
-
-      const monthlyData = await Promise.all(
-        months.map(async ({ start, end, month }) => {
-          const { data: transactions, error } = await supabase
-            .from('financial_transactions')
-            .select(
-              `type, amount, category:category_id (name, type), fund:fund_id (name, code)`
-            )
-            .eq('tenant_id', currentTenant?.id)
-            .gte('date', format(startOfDay(start), 'yyyy-MM-dd'))
-            .lte('date', format(endOfDay(end), 'yyyy-MM-dd'));
-
-          if (error) throw error;
-
-          const income =
-            transactions?.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-          const expenses =
-            transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-          const previousMonth = subMonths(start, 1);
-          const { data: prevTransactions } = await supabase
-            .from('financial_transactions')
-            .select('amount')
-            .eq('tenant_id', currentTenant?.id)
-            .eq('type', 'income')
-            .gte('date', format(startOfDay(startOfMonth(previousMonth)), 'yyyy-MM-dd'))
-            .lte('date', format(endOfDay(endOfMonth(previousMonth)), 'yyyy-MM-dd'));
-
-          const previousIncome = prevTransactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-          const percentageChange =
-            previousIncome === 0 ? null : ((income - previousIncome) / previousIncome) * 100;
-
-          return {
-            month,
-            income,
-            expenses,
-            percentageChange,
-          };
-        })
-      );
-
-      return monthlyData;
-    },
-    enabled: !!currentTenant?.id,
+    queryKey: ['monthly-trends'],
+    queryFn: () => repository.getMonthlyTrends(),
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['finance-stats', currentTenant?.id],
-    queryFn: async () => {
-      const today = new Date();
-      const firstDayOfMonth = startOfMonth(today);
-      const lastDayOfMonth = endOfMonth(today);
-
-      const { data: transactions, error: transactionsError } = await supabase
-        .from('financial_transactions')
-        .select(
-          `type, amount, category:category_id (id, name, type), fund:fund_id (id, name, code)`
-        )
-        .eq('tenant_id', currentTenant?.id)
-        .gte('date', format(startOfDay(firstDayOfMonth), 'yyyy-MM-dd'))
-        .lte('date', format(endOfDay(lastDayOfMonth), 'yyyy-MM-dd'));
-
-      if (transactionsError) throw transactionsError;
-
-      const monthlyIncome =
-        transactions?.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-      const monthlyExpenses =
-        transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-
-      const incomeByCategory =
-        transactions?.filter(t => t.type === 'income').reduce((acc, t) => {
-          const categoryName = t.category?.name || 'Uncategorized';
-          acc[categoryName] = (acc[categoryName] || 0) + Number(t.amount);
-          return acc;
-        }, {} as Record<string, number>) || {};
-
-      const expensesByCategory =
-        transactions?.filter(t => t.type === 'expense').reduce((acc, t) => {
-          const categoryName = t.category?.name || 'Uncategorized';
-          acc[categoryName] = (acc[categoryName] || 0) + Number(t.amount);
-          return acc;
-        }, {} as Record<string, number>) || {};
-
-      const { data: activeBudgets, error: budgetsError } = await supabase
-        .from('budgets')
-        .select('id')
-        .eq('tenant_id', currentTenant?.id)
-        .gte('end_date', format(today, 'yyyy-MM-dd'))
-        .lte('start_date', format(today, 'yyyy-MM-dd'));
-
-      if (budgetsError) throw budgetsError;
-
-      return {
-        monthlyIncome,
-        monthlyExpenses,
-        activeBudgets: activeBudgets?.length || 0,
-        incomeByCategory,
-        expensesByCategory,
-      };
-    },
-    enabled: !!currentTenant?.id,
+    queryKey: ['finance-stats'],
+    queryFn: () => repository.getMonthlyStats(),
   });
 
-  const { data: fundBalances } = useQuery({
-    queryKey: ['fund-balances', currentTenant?.id],
-    queryFn: async () => {
-      const { data: funds, error } = await supabase
-        .from('funds')
-        .select('id, name, type')
-        .eq('tenant_id', currentTenant?.id)
-        .is('deleted_at', null);
-      if (error) throw error;
-
-      if (!funds) return [];
-
-      const { data: txs, error: txError } = await supabase
-        .from('financial_transactions')
-        .select('fund_id, type, amount, debit, credit')
-        .eq('tenant_id', currentTenant?.id)
-        .not('fund_id', 'is', null);
-      if (txError) throw txError;
-
-      return funds.map(f => {
-        const total = (txs || []).filter(t => t.fund_id === f.id).reduce((sum, t) => {
-          if (t.type) {
-            return sum + (t.type === 'income' ? Number(t.amount) : -Number(t.amount));
-          }
-          return sum + (Number(t.debit || 0) - Number(t.credit || 0));
-        }, 0);
-        return { ...f, balance: total };
-      });
-    },
-    enabled: !!currentTenant?.id,
+  const { data: fundBalances, isLoading: fundsLoading } = useQuery({
+    queryKey: ['fund-balances'],
+    queryFn: () => repository.getFundBalances(),
   });
 
   const monthlyTrendsChartData = useMemo(() => {
@@ -223,7 +81,7 @@ export function useFinanceDashboardData() {
     };
   }, [stats, currency]);
 
-  const isLoading = trendsLoading || statsLoading;
+  const isLoading = trendsLoading || statsLoading || fundsLoading;
 
   return {
     currency,

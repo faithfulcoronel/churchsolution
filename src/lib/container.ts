@@ -34,6 +34,7 @@ import {
 import { CategoryAdapter, type ICategoryAdapter } from '../adapters/category.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
+import { FinanceDashboardAdapter, type IFinanceDashboardAdapter } from '../adapters/financeDashboard.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -68,6 +69,7 @@ import {
 import { CategoryRepository, type ICategoryRepository } from '../repositories/category.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
+import { FinanceDashboardRepository, type IFinanceDashboardRepository } from '../repositories/financeDashboard.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { GivingService } from '../services/GivingService';
 import { ExpenseService } from '../services/ExpenseService';
@@ -129,6 +131,10 @@ container
 container
   .bind<IErrorLogAdapter>(TYPES.IErrorLogAdapter)
   .to(ErrorLogAdapter)
+  .inSingletonScope();
+container
+  .bind<IFinanceDashboardAdapter>(TYPES.IFinanceDashboardAdapter)
+  .to(FinanceDashboardAdapter)
   .inSingletonScope();
 
 // Register services
@@ -207,6 +213,10 @@ container
 container
   .bind<IErrorLogRepository>(TYPES.IErrorLogRepository)
   .to(ErrorLogRepository)
+  .inSingletonScope();
+container
+  .bind<IFinanceDashboardRepository>(TYPES.IFinanceDashboardRepository)
+  .to(FinanceDashboardRepository)
   .inSingletonScope();
 
 export { container };

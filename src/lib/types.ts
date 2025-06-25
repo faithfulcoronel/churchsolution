@@ -25,6 +25,8 @@ export const TYPES = {
   ICategoryRepository: 'ICategoryRepository',
   IUserRepository: 'IUserRepository',
   IErrorLogRepository: 'IErrorLogRepository',
+  IFinanceDashboardAdapter: 'IFinanceDashboardAdapter',
+  IFinanceDashboardRepository: 'IFinanceDashboardRepository',
   AuditService: 'AuditService',
   ErrorLogService: 'ErrorLogService',
   GivingService: 'GivingService',
