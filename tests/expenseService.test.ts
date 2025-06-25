@@ -34,6 +34,7 @@ describe('ExpenseService', () => {
     expect(passedHeader).toBe(header);
     expect(tx).toEqual([
       {
+        type: 'expense',
         accounts_account_id: 'acc1',
         fund_id: 'f1',
         source_id: 's1',
@@ -45,6 +46,7 @@ describe('ExpenseService', () => {
         credit: 0,
       },
       {
+        type: 'expense',
         accounts_account_id: 'acc1',
         fund_id: 'f1',
         source_id: 's1',
