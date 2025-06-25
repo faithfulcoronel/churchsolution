@@ -33,10 +33,34 @@ function ExpenseProfile() {
   }, [id, getByHeaderId]);
 
   const columns: GridColDef[] = [
-    { field: 'account', headerName: 'Account', flex: 1, minWidth: 150, valueGetter: p => p.row.account?.name },
-    { field: 'fund', headerName: 'Fund', flex: 1, minWidth: 120, valueGetter: p => p.row.fund?.name },
-    { field: 'category', headerName: 'Category', flex: 1, minWidth: 120, valueGetter: p => p.row.category?.name },
-    { field: 'source', headerName: 'Source', flex: 1, minWidth: 120, valueGetter: p => p.row.source?.name },
+    {
+      field: 'accounts',
+      headerName: 'Account',
+      flex: 1,
+      minWidth: 150,
+      valueGetter: (p) => p.row.accounts?.name,
+    },
+    {
+      field: 'funds',
+      headerName: 'Fund',
+      flex: 1,
+      minWidth: 120,
+      valueGetter: (p) => p.row.funds?.name,
+    },
+    {
+      field: 'categories',
+      headerName: 'Category',
+      flex: 1,
+      minWidth: 120,
+      valueGetter: (p) => p.row.categories?.name,
+    },
+    {
+      field: 'financial_sources',
+      headerName: 'Source',
+      flex: 1,
+      minWidth: 120,
+      valueGetter: (p) => p.row.financial_sources?.name,
+    },
     { field: 'amount', headerName: 'Amount', flex: 1, minWidth: 100 },
   ];
 
