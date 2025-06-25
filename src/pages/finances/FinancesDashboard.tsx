@@ -389,7 +389,7 @@ function FinancesDashboard() {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-foreground">Finances</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Accounting</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Manage church finances, track income and expenses, and monitor budgets.
           </p>

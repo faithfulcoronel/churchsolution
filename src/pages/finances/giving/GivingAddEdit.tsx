@@ -192,12 +192,12 @@ function GivingAddEdit() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/finances/giving" label="Back to Giving" />
+        <BackButton fallbackPath="/finances/giving" label="Back to Donations" />
       </div>
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card className="dark:bg-slate-800">
           <CardHeader>
-            <h3 className="text-lg font-medium">{isEditMode ? 'Edit Giving Batch' : 'New Giving Batch'}</h3>
+            <h3 className="text-lg font-medium">{isEditMode ? 'Edit Donation Batch' : 'New Donation Batch'}</h3>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <DatePickerInput

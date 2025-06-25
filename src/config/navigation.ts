@@ -57,78 +57,83 @@ export const navigation: NavItem[] = [
     ],
   },
   {
-    name: 'Finances',
+    name: 'Accounting',
     href: '/finances',
     icon: DollarSign,
     permission: 'finance.view',
     submenu: [
       {
         name: 'Overview',
-        href: '/finances',
         icon: BarChart3,
+        submenu: [
+          {
+            name: 'Dashboard',
+            href: '/finances',
+            icon: BarChart3,
+          },
+          {
+            name: 'Reports',
+            href: '/finances/reports',
+            icon: FileText,
+          },
+          {
+            name: 'Statements',
+            href: '/finances/statements',
+            icon: FileText,
+          },
+        ],
       },
       {
         name: 'Transactions',
-        href: '/finances/transactions',
         icon: History,
+        submenu: [
+          {
+            name: 'Donations',
+            href: '/finances/giving',
+            icon: Heart,
+          },
+          {
+            name: 'Expenses',
+            href: '/finances/expenses',
+            icon: CreditCard,
+          },
+          {
+            name: 'Budgets',
+            href: '/finances/budgets',
+            icon: CreditCard,
+          },
+          {
+            name: 'Funds',
+            href: '/finances/funds',
+            icon: Wallet,
+          },
+          {
+            name: 'Journal Entries',
+            href: '/finances/journal-entry',
+            icon: FileText,
+          },
+        ],
       },
-      {
-        name: 'Budgets',
-        href: '/finances/budgets',
-        icon: CreditCard,
-      },
-      {
-        name: 'Funds',
-        href: '/finances/funds',
-        icon: Wallet,
-      },
-      {
-        name: 'Expenses',
-        href: '/finances/expenses',
-        icon: CreditCard,
-      },
-      {
-        name: 'Giving',
-        href: '/finances/giving',
-        icon: Heart,
-      },
-      {
-        name: 'Reports',
-        href: '/finances/reports',
-        icon: FileText,
-      },
-      {
-        name: 'Statements',
-        href: '/finances/statements',
-        icon: FileText,
-      },
-      {
-        name: 'Journal Entry',
-        href: '/finances/journal-entry',
-        icon: FileText,
-      },
-    ],
-  },
-  {
-    name: 'Accounts',
-    href: '/accounts',
-    icon: Building2,
-    permission: 'finance.view',
-    submenu: [
       {
         name: 'Accounts',
-        href: '/accounts',
         icon: Building2,
-      },
-      {
-        name: 'Financial Sources',
-        href: '/accounts/sources',
-        icon: CreditCard,
-      },
-      {
-        name: 'Chart of Accounts',
-        href: '/accounts/chart-of-accounts',
-        icon: FileText,
+        submenu: [
+          {
+            name: 'Accounts',
+            href: '/accounts',
+            icon: Building2,
+          },
+          {
+            name: 'Financial Sources',
+            href: '/accounts/sources',
+            icon: CreditCard,
+          },
+          {
+            name: 'Chart of Accounts',
+            href: '/accounts/chart-of-accounts',
+            icon: FileText,
+          },
+        ],
       },
     ],
   },
