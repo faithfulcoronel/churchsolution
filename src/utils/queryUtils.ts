@@ -70,7 +70,7 @@ export class QueryUtils {
         case 'contains':
           return query.ilike(key, `%${value}%`);
         case 'notContains':
-          return query.not('ilike', key, `%${value}%`);
+          return query.not(key, 'ilike', `%${value}%`);
         case 'startsWith':
           return query.ilike(key, `${value}%`);
         case 'endsWith':
@@ -78,7 +78,7 @@ export class QueryUtils {
         case 'isEmpty':
           return query.is(key, null);
         case 'isNotEmpty':
-          return query.not('is', key, null);
+          return query.not(key, 'is', null);
         case 'isAnyOf':
           return query.in(key, Array.isArray(value) ? value : [value]);
         case 'between':
