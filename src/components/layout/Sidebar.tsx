@@ -180,7 +180,11 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   const isNavItemActive = React.useCallback(
     (item: NavItem): boolean => {
       if (item.href) {
-        return location.pathname.startsWith(item.href);
+        if (item.exact) {
+          return location.pathname === item.href;
+        }
+        if (location.pathname === item.href) return true;
+        return location.pathname.startsWith(`${item.href}/`);
       }
       if (item.submenu) {
         return item.submenu.some((sub) => isNavItemActive(sub));
@@ -192,13 +196,11 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
 
   // Auto-expand submenu based on current path
   React.useEffect(() => {
-    const currentPath = location.pathname;
-
     const activeNames = new Set<string>();
 
     const collectActive = (items: NavItem[], parents: string[] = []) => {
       items.forEach((item) => {
-        if (item.href && currentPath.startsWith(item.href)) {
+        if (isNavItemActive(item)) {
           parents.forEach((p) => activeNames.add(p));
         }
         if (item.submenu) {
