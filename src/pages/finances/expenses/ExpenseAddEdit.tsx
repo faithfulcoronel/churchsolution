@@ -10,6 +10,8 @@ import { useFundRepository } from '../../../hooks/useFundRepository';
 import { useCategoryRepository } from '../../../hooks/useCategoryRepository';
 import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
 import { useExpenseService, ExpenseEntry } from '../../../hooks/useExpenseService';
+import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
+import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import BackButton from '../../../components/BackButton';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 
@@ -19,6 +21,8 @@ function ExpenseAddEdit() {
   const isEditMode = !!id;
 
   const { createExpenseBatch, updateExpenseBatch, createMutation, updateMutation } = useExpenseService();
+  const { useQuery: useHeaderQuery } = useFinancialTransactionHeaderRepository();
+  const { useQuery: useIeQuery } = useIncomeExpenseTransactionRepository();
 
   const { useQuery: useAccountsQuery } = useAccountRepository();
   const { useQuery: useFundsQuery } = useFundRepository();
@@ -32,6 +36,16 @@ function ExpenseAddEdit() {
   });
   const { data: sourcesData } = useSourcesQuery({
     filters: { is_active: { operator: 'eq', value: true } },
+  });
+
+  const { data: headerResponse } = useHeaderQuery({
+    filters: { id: { operator: 'eq', value: id } },
+    enabled: isEditMode,
+  });
+
+  const { data: entryResponse } = useIeQuery({
+    filters: { header_id: { operator: 'eq', value: id } },
+    enabled: isEditMode,
   });
 
   const accounts = accountsData?.data || [];
@@ -72,6 +86,35 @@ function ExpenseAddEdit() {
       category_account_id: null,
     },
   ]);
+
+  const header = headerResponse?.data?.[0];
+  const entryRecords = entryResponse?.data || [];
+  const isDisabled = isEditMode && header && header.status !== 'draft';
+
+  useEffect(() => {
+    if (isEditMode && header) {
+      setHeaderData({
+        transaction_date: header.transaction_date,
+        description: header.description,
+      });
+    }
+  }, [isEditMode, header]);
+
+  useEffect(() => {
+    if (isEditMode && entryRecords.length > 0) {
+      setEntries(
+        entryRecords.map((e: any) => ({
+          accounts_account_id: e.accounts_account_id || '',
+          fund_id: e.fund_id || '',
+          category_id: e.category_id || '',
+          source_id: e.source_id || '',
+          amount: e.amount || 0,
+          source_account_id: e.source_account_id || null,
+          category_account_id: e.category_account_id || null,
+        })),
+      );
+    }
+  }, [isEditMode, entryRecords]);
 
   useEffect(() => {
     setEntries((prev) =>
@@ -142,12 +185,14 @@ function ExpenseAddEdit() {
               value={headerData.transaction_date ? new Date(headerData.transaction_date) : undefined}
               onChange={(d) => setHeaderData({ ...headerData, transaction_date: d ? d.toISOString().split('T')[0] : '' })}
               required
+              disabled={isDisabled}
             />
             <Input
               label="Description"
               value={headerData.description}
               onChange={(e) => setHeaderData({ ...headerData, description: e.target.value })}
               required
+              disabled={isDisabled}
             />
           </CardContent>
         </Card>
@@ -155,7 +200,7 @@ function ExpenseAddEdit() {
         <Card className="dark:bg-slate-800">
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-medium">Entries</h3>
-            <Button type="button" onClick={addEntry} className="flex items-center">
+            <Button type="button" onClick={addEntry} className="flex items-center" disabled={isDisabled}>
               <Plus className="h-4 w-4 mr-2" /> Add Row
             </Button>
           </CardHeader>
@@ -179,6 +224,7 @@ function ExpenseAddEdit() {
                         options={accountOptions}
                         value={entry.accounts_account_id || ''}
                         onChange={(v) => handleEntryChange(idx, 'accounts_account_id', v)}
+                        disabled={isDisabled}
                         placeholder="Select account"
                       />
                     </td>
@@ -187,6 +233,7 @@ function ExpenseAddEdit() {
                         options={fundOptions}
                         value={entry.fund_id || ''}
                         onChange={(v) => handleEntryChange(idx, 'fund_id', v)}
+                        disabled={isDisabled}
                         placeholder="Select fund"
                       />
                     </td>
@@ -195,6 +242,7 @@ function ExpenseAddEdit() {
                         options={categoryOptions}
                         value={entry.category_id || ''}
                         onChange={(v) => handleEntryChange(idx, 'category_id', v)}
+                        disabled={isDisabled}
                         placeholder="Select category"
                       />
                     </td>
@@ -203,6 +251,7 @@ function ExpenseAddEdit() {
                         options={sourceOptions}
                         value={entry.source_id || ''}
                         onChange={(v) => handleEntryChange(idx, 'source_id', v)}
+                        disabled={isDisabled}
                         placeholder="Select source"
                       />
                     </td>
@@ -212,10 +261,11 @@ function ExpenseAddEdit() {
                         value={entry.amount}
                         onChange={(e) => handleEntryChange(idx, 'amount', parseFloat(e.target.value) || 0)}
                         className="text-right"
+                        disabled={isDisabled}
                       />
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(idx)}>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(idx)} disabled={isDisabled}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </td>
@@ -225,7 +275,7 @@ function ExpenseAddEdit() {
             </table>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+            <Button type="submit" disabled={isDisabled || createMutation.isPending || updateMutation.isPending}>
               {createMutation.isPending || updateMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
