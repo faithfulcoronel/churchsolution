@@ -29,24 +29,32 @@ function GivingAddEdit() {
   const { useQuery: useCategoriesQuery } = useCategoryRepository();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
 
-  const { data: accountsData } = useAccountsQuery();
-  const { data: fundsData } = useFundsQuery();
-  const { data: categoriesData } = useCategoriesQuery({
+  const { data: accountsData, isLoading: accountsLoading } = useAccountsQuery();
+  const { data: fundsData, isLoading: fundsLoading } = useFundsQuery();
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesQuery({
     filters: { type: { operator: 'eq', value: 'income_transaction' } },
   });
-  const { data: sourcesData } = useSourcesQuery({
+  const { data: sourcesData, isLoading: sourcesLoading } = useSourcesQuery({
     filters: { is_active: { operator: 'eq', value: true } },
   });
 
-  const { data: headerResponse } = useHeaderQuery({
+  const { data: headerResponse, isLoading: headerLoading } = useHeaderQuery({
     filters: { id: { operator: 'eq', value: id } },
     enabled: isEditMode,
   });
 
-  const { data: entryResponse } = useIeQuery({
+  const { data: entryResponse, isLoading: entryLoading } = useIeQuery({
     filters: { header_id: { operator: 'eq', value: id } },
     enabled: isEditMode,
   });
+
+  const isLoading =
+    accountsLoading ||
+    fundsLoading ||
+    categoriesLoading ||
+    sourcesLoading ||
+    headerLoading ||
+    entryLoading;
 
   const accounts = accountsData?.data || [];
   const funds = fundsData?.data || [];
@@ -90,6 +98,18 @@ function GivingAddEdit() {
   const header = headerResponse?.data?.[0];
   const entryRecords = entryResponse?.data || [];
   const isDisabled = isEditMode && header && header.status !== 'draft';
+
+  if (
+    isLoading &&
+    (!accountsData || !fundsData || !categoriesData || !sourcesData ||
+      (isEditMode && !header))
+  ) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (isEditMode && header) {
