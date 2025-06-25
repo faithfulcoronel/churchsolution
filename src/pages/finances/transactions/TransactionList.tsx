@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
-import { usePermissions } from '../../hooks/usePermissions';
-import PermissionGate from '../../components/PermissionGate';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import { Input } from '../../components/ui2/input';
-import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
-import { Badge } from '../../components/ui2/badge';
-import { DataGrid } from '../../components/ui2/mui-datagrid';
+import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
+import { usePermissions } from '../../../hooks/usePermissions';
+import PermissionGate from '../../../components/PermissionGate';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import { Input } from '../../../components/ui2/input';
+import { DateRangePickerField } from '../../../components/ui2/date-range-picker-field';
+import { Badge } from '../../../components/ui2/badge';
+import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import { 
   Plus, 
   Search, 
@@ -26,15 +26,15 @@ import {
   MoreHorizontal
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
+import { useCurrencyStore } from '../../../stores/currencyStore';
+import { formatCurrency } from '../../../utils/currency';
 import { GridColDef } from '@mui/x-data-grid';
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '../../components/ui2/dropdown-menu';
+} from '../../../components/ui2/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,14 +44,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui2/alert-dialog';
+} from '../../../components/ui2/alert-dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '../../components/ui2/select';
+} from '../../../components/ui2/select';
 
 function TransactionList() {
   const navigate = useNavigate();

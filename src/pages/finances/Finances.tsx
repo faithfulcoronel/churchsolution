@@ -6,15 +6,15 @@ import { SubscriptionGate } from '../../components/SubscriptionGate';
 
 // Lazy load finance components
 const FinancesDashboard = React.lazy(() => import('./FinancesDashboard'));
-const TransactionList = React.lazy(() => import('./TransactionList'));
-const TransactionDetail = React.lazy(() => import('./TransactionDetail'));
-const BulkTransactionEntry = React.lazy(() => import('./BulkTransactionEntry'));
-const BudgetList = React.lazy(() => import('./BudgetList'));
-const BudgetAdd = React.lazy(() => import('./BudgetAdd'));
-const BudgetProfile = React.lazy(() => import('./BudgetProfile'));
-const FundList = React.lazy(() => import('./FundList'));
-const FundAddEdit = React.lazy(() => import('./FundAddEdit'));
-const FundProfile = React.lazy(() => import('./FundProfile'));
+const TransactionList = React.lazy(() => import('./transactions/TransactionList'));
+const TransactionDetail = React.lazy(() => import('./transactions/TransactionDetail'));
+const BulkTransactionEntry = React.lazy(() => import('./transactions/BulkTransactionEntry'));
+const BudgetList = React.lazy(() => import('./budgets/BudgetList'));
+const BudgetAdd = React.lazy(() => import('./budgets/BudgetAdd'));
+const BudgetProfile = React.lazy(() => import('./budgets/BudgetProfile'));
+const FundList = React.lazy(() => import('./funds/FundList'));
+const FundAddEdit = React.lazy(() => import('./funds/FundAddEdit'));
+const FundProfile = React.lazy(() => import('./funds/FundProfile'));
 const Reports = React.lazy(() => import('./Reports'));
 const Statements = React.lazy(() => import('./Statements'));
 const GivingList = React.lazy(() => import('./giving/GivingList'));

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
-import { usePermissions } from '../../hooks/usePermissions';
-import PermissionGate from '../../components/PermissionGate';
-import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Badge } from '../../components/ui2/badge';
-import { Textarea } from '../../components/ui2/textarea';
+import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
+import { usePermissions } from '../../../hooks/usePermissions';
+import PermissionGate from '../../../components/PermissionGate';
+import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Badge } from '../../../components/ui2/badge';
+import { Textarea } from '../../../components/ui2/textarea';
 import { 
   FileText,
   Loader2,
@@ -22,8 +22,8 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
+import { useCurrencyStore } from '../../../stores/currencyStore';
+import { formatCurrency } from '../../../utils/currency';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +33,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui2/alert-dialog';
+} from '../../../components/ui2/alert-dialog';
 
 function TransactionDetail() {
   const { id } = useParams<{ id: string }>();

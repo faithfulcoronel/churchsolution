@@ -1,29 +1,29 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useFinancialTransactionHeaderRepository } from "../../hooks/useFinancialTransactionHeaderRepository";
-import { useChartOfAccounts } from "../../hooks/useChartOfAccounts";
-import { useFinancialSourceRepository } from "../../hooks/useFinancialSourceRepository";
+import { useFinancialTransactionHeaderRepository } from "../../../hooks/useFinancialTransactionHeaderRepository";
+import { useChartOfAccounts } from "../../../hooks/useChartOfAccounts";
+import { useFinancialSourceRepository } from "../../../hooks/useFinancialSourceRepository";
 import {
   Card,
   CardHeader,
   CardContent,
   CardFooter,
-} from "../../components/ui2/card";
-import { Input } from "../../components/ui2/input";
-import { Button } from "../../components/ui2/button";
-import BackButton from "../../components/BackButton";
-import { Textarea } from "../../components/ui2/textarea";
-import { DatePickerInput } from "../../components/ui2/date-picker";
+} from "../../../components/ui2/card";
+import { Input } from "../../../components/ui2/input";
+import { Button } from "../../../components/ui2/button";
+import BackButton from "../../../components/BackButton";
+import { Textarea } from "../../../components/ui2/textarea";
+import { DatePickerInput } from "../../../components/ui2/date-picker";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/ui2/select";
-import { Combobox } from "../../components/ui2/combobox";
-import { Switch } from "../../components/ui2/switch";
-import { useAccountRepository } from "../../hooks/useAccountRepository";
+} from "../../../components/ui2/select";
+import { Combobox } from "../../../components/ui2/combobox";
+import { Switch } from "../../../components/ui2/switch";
+import { useAccountRepository } from "../../../hooks/useAccountRepository";
 import {
   Save,
   Loader2,
@@ -35,11 +35,11 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
-import { useCurrencyStore } from "../../stores/currencyStore";
-import { formatCurrency } from "../../utils/currency";
-import { FormDialog } from "../../components/ui2/form-dialog";
-import AccountCreateForm from "../../components/forms/AccountCreateForm";
-import ChartOfAccountCreateForm from "../../components/forms/ChartOfAccountCreateForm";
+import { useCurrencyStore } from "../../../stores/currencyStore";
+import { formatCurrency } from "../../../utils/currency";
+import { FormDialog } from "../../../components/ui2/form-dialog";
+import AccountCreateForm from "../../../components/forms/AccountCreateForm";
+import ChartOfAccountCreateForm from "../../../components/forms/ChartOfAccountCreateForm";
 
 interface TransactionEntry {
   accounts_account_id: string;

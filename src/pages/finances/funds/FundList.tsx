@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFundRepository } from '../../hooks/useFundRepository';
-import { Fund } from '../../models/fund.model';
-import { Card, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import { Input } from '../../components/ui2/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
-import { Badge } from '../../components/ui2/badge';
-import { DataGrid } from '../../components/ui2/mui-datagrid';
+import { useFundRepository } from '../../../hooks/useFundRepository';
+import { Fund } from '../../../models/fund.model';
+import { Card, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import { Input } from '../../../components/ui2/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
+import { Badge } from '../../../components/ui2/badge';
+import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import { GridColDef } from '@mui/x-data-grid';
 import { Plus, Search, Loader2 } from 'lucide-react';
 
