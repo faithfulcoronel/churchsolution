@@ -99,18 +99,6 @@ function GivingAddEdit() {
   const entryRecords = entryResponse?.data || [];
   const isDisabled = isEditMode && header && header.status !== 'draft';
 
-  if (
-    isLoading &&
-    (!accountsData || !fundsData || !categoriesData || !sourcesData ||
-      (isEditMode && !header))
-  ) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   useEffect(() => {
     if (isEditMode && header) {
       setHeaderData({
@@ -145,6 +133,18 @@ function GivingAddEdit() {
       })),
     );
   }, [sources, categories]);
+
+  if (
+    isLoading &&
+    (!accountsData || !fundsData || !categoriesData || !sourcesData ||
+      (isEditMode && !header))
+  ) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const handleEntryChange = (index: number, field: keyof ContributionEntry, value: any) => {
     const newEntries = [...entries];
