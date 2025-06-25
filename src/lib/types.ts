@@ -10,6 +10,7 @@ export const TYPES = {
   IFundAdapter: 'IFundAdapter',
   IOfferingBatchAdapter: 'IOfferingBatchAdapter',
   IAuthUserAdapter: 'IAuthUserAdapter',
+  IErrorLogAdapter: 'IErrorLogAdapter',
   IMemberRepository: 'IMemberRepository',
   INotificationRepository: 'INotificationRepository',
   IAccountRepository: 'IAccountRepository',
@@ -23,7 +24,9 @@ export const TYPES = {
   ICategoryAdapter: 'ICategoryAdapter',
   ICategoryRepository: 'ICategoryRepository',
   IUserRepository: 'IUserRepository',
+  IErrorLogRepository: 'IErrorLogRepository',
   AuditService: 'AuditService',
+  ErrorLogService: 'ErrorLogService',
   GivingService: 'GivingService',
   ExpenseService: 'ExpenseService',
   IncomeExpenseTransactionService: 'IncomeExpenseTransactionService'

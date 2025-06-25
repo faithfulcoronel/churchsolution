@@ -33,6 +33,7 @@ import {
 } from '../adapters/offeringBatch.adapter';
 import { CategoryAdapter, type ICategoryAdapter } from '../adapters/category.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
+import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -66,10 +67,12 @@ import {
 } from '../repositories/offeringBatch.repository';
 import { CategoryRepository, type ICategoryRepository } from '../repositories/category.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
+import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { GivingService } from '../services/GivingService';
 import { ExpenseService } from '../services/ExpenseService';
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
+import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -123,6 +126,10 @@ container
   .bind<IAuthUserAdapter>(TYPES.IAuthUserAdapter)
   .to(AuthUserAdapter)
   .inSingletonScope();
+container
+  .bind<IErrorLogAdapter>(TYPES.IErrorLogAdapter)
+  .to(ErrorLogAdapter)
+  .inSingletonScope();
 
 // Register services
 container
@@ -140,6 +147,10 @@ container
 container
   .bind<IncomeExpenseTransactionService>(TYPES.IncomeExpenseTransactionService)
   .to(IncomeExpenseTransactionService)
+  .inSingletonScope();
+container
+  .bind<ErrorLogService>(TYPES.ErrorLogService)
+  .to(SupabaseErrorLogService)
   .inSingletonScope();
 
 // Register repositories
@@ -192,6 +203,10 @@ container
 container
   .bind<IUserRepository>(TYPES.IUserRepository)
   .to(UserRepository)
+  .inSingletonScope();
+container
+  .bind<IErrorLogRepository>(TYPES.IErrorLogRepository)
+  .to(ErrorLogRepository)
   .inSingletonScope();
 
 export { container };
