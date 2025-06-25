@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
+import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
@@ -11,11 +12,32 @@ function GivingList() {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const { useQuery } = useFinancialTransactionHeaderRepository();
-  const { data: result, isLoading } = useQuery({
-    order: { column: 'transaction_date', ascending: false },
+  const { useQuery: useEntryQuery } = useIncomeExpenseTransactionRepository();
+  const { useQuery: useHeaderQuery } = useFinancialTransactionHeaderRepository();
+
+  const { data: entryResult, isLoading: entriesLoading } = useEntryQuery({
+    filters: { transaction_type: { operator: 'eq', value: 'income' } },
   });
-  const headers = result?.data || [];
+
+  const headerIds = React.useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (entryResult?.data || [])
+            .map((e: any) => e.header_id)
+            .filter((id: string | null) => !!id)
+        )
+      ),
+    [entryResult]
+  );
+
+  const { data: headerResult, isLoading: headerLoading } = useHeaderQuery({
+    filters: { id: { operator: 'isAnyOf', value: headerIds } },
+    order: { column: 'transaction_date', ascending: false },
+    enabled: headerIds.length > 0,
+  });
+  const headers = headerResult?.data || [];
+  const isLoading = entriesLoading || headerLoading;
 
   const columns: GridColDef[] = [
     { field: 'transaction_date', headerName: 'Date', flex: 1, minWidth: 120 },
