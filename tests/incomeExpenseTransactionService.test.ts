@@ -89,5 +89,41 @@ describe('IncomeExpenseTransactionService', () => {
       expect.objectContaining({ header_id: 'h1' })
     );
   });
-});
 
+
+  it('maps multiple entries to balanced transactions', async () => {
+    const entries: IncomeExpenseEntry[] = [
+      { ...baseEntry, transaction_type: 'income' },
+      {
+        accounts_account_id: 'acc2',
+        fund_id: 'f2',
+        category_id: 'c2',
+        source_id: 's2',
+        amount: 20,
+        source_account_id: 'sa2',
+        category_account_id: 'ca2',
+        transaction_type: 'expense'
+      }
+    ];
+    await service.create(header, entries);
+
+    expect(headerRepo.createWithTransactions).toHaveBeenCalledTimes(1);
+    const [, tx] = (headerRepo.createWithTransactions as any).mock.calls[0];
+    expect(tx).toHaveLength(4);
+    expect(tx[0]).toEqual(
+      expect.objectContaining({ account_id: 'sa1', debit: 10, credit: 0 })
+    );
+    expect(tx[1]).toEqual(
+      expect.objectContaining({ account_id: 'ca1', debit: 0, credit: 10 })
+    );
+    expect(tx[2]).toEqual(
+      expect.objectContaining({ account_id: 'ca2', debit: 20, credit: 0 })
+    );
+    expect(tx[3]).toEqual(
+      expect.objectContaining({ account_id: 'sa2', debit: 0, credit: 20 })
+    );
+    const totalDebit = tx.reduce((s: number, t: any) => s + t.debit, 0);
+    const totalCredit = tx.reduce((s: number, t: any) => s + t.credit, 0);
+    expect(totalDebit).toBe(totalCredit);
+  });
+});
