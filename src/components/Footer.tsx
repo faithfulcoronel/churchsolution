@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, FileText, Shield } from 'lucide-react';
-import Modal from './Modal';
+import { Modal } from './ui2/modal';
 
 function Footer() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
