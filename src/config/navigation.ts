@@ -108,9 +108,9 @@ export const navigation: NavItem[] = [
             icon: Wallet,
           },
           {
-            name: 'Journal Entries',
-            href: '/finances/journal-entry',
-            icon: FileText,
+            name: 'Transactions',
+            href: '/finances/transactions',
+            icon: History,
           },
         ],
       },
