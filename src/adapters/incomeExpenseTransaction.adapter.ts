@@ -45,10 +45,10 @@ export class IncomeExpenseTransactionAdapter
   ];
 
   public async getByHeaderId(headerId: string): Promise<IncomeExpenseTransaction[]> {
-    const query = await this.buildSecureQuery({});
-    const { data, error } = await query.eq('header_id', headerId);
-    if (error) throw error;
-    return data || [];
+    const result = await this.fetch({
+      filters: { header_id: { operator: 'eq', value: headerId } }
+    });
+    return result.data;
   }
 
   protected override async onAfterCreate(data: IncomeExpenseTransaction): Promise<void> {
