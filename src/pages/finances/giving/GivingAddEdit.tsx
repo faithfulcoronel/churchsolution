@@ -56,10 +56,7 @@ function GivingAddEdit() {
     headerLoading ||
     entryLoading;
 
-  const accounts = React.useMemo(
-    () => accountsData?.data || [],
-    [accountsData?.data],
-  );
+  const accounts = accountsData?.data || [];
   const funds = React.useMemo(
     () => fundsData?.data || [],
     [fundsData?.data],
