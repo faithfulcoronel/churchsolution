@@ -83,6 +83,11 @@ export const navigation: NavItem[] = [
         icon: Wallet,
       },
       {
+        name: 'Expenses',
+        href: '/finances/expenses',
+        icon: CreditCard,
+      },
+      {
         name: 'Giving',
         href: '/finances/giving',
         icon: Heart,

@@ -21,6 +21,9 @@ const Statements = React.lazy(() => import('./Statements'));
 const GivingList = React.lazy(() => import('./giving/GivingList'));
 const GivingAddEdit = React.lazy(() => import('./giving/GivingAddEdit'));
 const GivingProfile = React.lazy(() => import('./giving/GivingProfile'));
+const ExpenseList = React.lazy(() => import('./expenses/ExpenseList'));
+const ExpenseAddEdit = React.lazy(() => import('./expenses/ExpenseAddEdit'));
+const ExpenseProfile = React.lazy(() => import('./expenses/ExpenseProfile'));
 
 function LoadingSpinner() {
   return (
@@ -63,6 +66,10 @@ function Finances() {
         <Route path="funds/add" element={<FundAddEdit />} />
         <Route path="funds/:id/edit" element={<FundAddEdit />} />
         <Route path="funds/:id" element={<FundProfile />} />
+        <Route path="expenses" element={<ExpenseList />} />
+        <Route path="expenses/add" element={<ExpenseAddEdit />} />
+        <Route path="expenses/:id/edit" element={<ExpenseAddEdit />} />
+        <Route path="expenses/:id" element={<ExpenseProfile />} />
         <Route path="giving" element={<GivingList />} />
         <Route path="giving/add" element={<GivingAddEdit />} />
         <Route path="giving/:id/edit" element={<GivingAddEdit />} />
