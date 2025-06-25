@@ -145,6 +145,17 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     );
   }, [sources, categories]);
 
+  const totalAmount = React.useMemo(() => entries.reduce((sum, e) => sum + Number(e.amount || 0), 0), [entries]);
+
+  const categoryTotals = React.useMemo(() => {
+    const totals: Record<string, number> = {};
+    entries.forEach(e => {
+      const name = categories.find(c => c.id === e.category_id)?.name || 'Uncategorized';
+      totals[name] = (totals[name] || 0) + Number(e.amount || 0);
+    });
+    return totals;
+  }, [entries, categories]);
+
   if (
     isLoading &&
     (!accountsData || !fundsData || !categoriesData || !sourcesData || (isEditMode && !header))
@@ -188,17 +199,6 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     newEntries.splice(index, 1);
     setEntries(newEntries);
   };
-
-  const totalAmount = React.useMemo(() => entries.reduce((sum, e) => sum + Number(e.amount || 0), 0), [entries]);
-
-  const categoryTotals = React.useMemo(() => {
-    const totals: Record<string, number> = {};
-    entries.forEach(e => {
-      const name = categories.find(c => c.id === e.category_id)?.name || 'Uncategorized';
-      totals[name] = (totals[name] || 0) + Number(e.amount || 0);
-    });
-    return totals;
-  }, [entries, categories]);
 
   const basePath = transactionType === 'income' ? 'giving' : 'expenses';
 
