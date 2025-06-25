@@ -101,8 +101,8 @@ function FinancesDashboard() {
           const previousIncome = prevTransactions
             ?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
 
-          const percentageChange = previousIncome === 0 
-            ? 100 
+          const percentageChange = previousIncome === 0
+            ? null
             : ((income - previousIncome) / previousIncome) * 100;
 
           return {
@@ -466,7 +466,7 @@ function FinancesDashboard() {
                 <div className={`${card.color} p-2 rounded-lg`}>
                   {card.icon}
                 </div>
-                {card.trend !== undefined && (
+                {card.trend != null ? (
                   <Badge
                     variant={card.trend >= 0 ? 'success' : 'destructive'}
                     className="flex items-center space-x-1"
@@ -474,6 +474,8 @@ function FinancesDashboard() {
                     {card.trend >= 0 ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                     <span>{Math.abs(card.trend).toFixed(1)}%</span>
                   </Badge>
+                ) : (
+                  <Badge variant="secondary">N/A</Badge>
                 )}
               </div>
               <div className="mt-2">
