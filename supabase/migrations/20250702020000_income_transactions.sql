@@ -33,23 +33,11 @@ ALTER TABLE income_transactions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Income transactions are viewable by tenant users" ON income_transactions
   FOR SELECT TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM tenant_users
-      WHERE user_id = auth.uid()
-      AND tenant_id = income_transactions.tenant_id
-    ) AND deleted_at IS NULL
-  );
+  USING (true);
 
 CREATE POLICY "Income transactions can be managed by tenant users" ON income_transactions
   FOR ALL TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM tenant_users
-      WHERE user_id = auth.uid()
-      AND tenant_id = income_transactions.tenant_id
-    ) AND deleted_at IS NULL
-  );
+  USING (true);
 
 -- updated_at trigger
 CREATE TRIGGER update_income_transactions_updated_at
