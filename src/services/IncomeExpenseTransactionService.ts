@@ -33,6 +33,7 @@ export class IncomeExpenseTransactionService {
   ) {
     return lines.flatMap((line) => {
       const base = {
+        type: line.transaction_type,
         accounts_account_id: line.accounts_account_id,
         fund_id: line.fund_id,
         source_id: line.source_id,
