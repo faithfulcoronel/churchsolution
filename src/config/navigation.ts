@@ -18,6 +18,11 @@ export interface NavItem {
   icon: LucideIcon;
   permission?: string | null;
   submenu?: NavItem[];
+  /**
+   * When true the nav item is marked active only when the current path
+   * exactly matches the item's href.
+   */
+  exact?: boolean;
 }
 
 export const navigation: NavItem[] = [
@@ -70,6 +75,7 @@ export const navigation: NavItem[] = [
             name: 'Dashboard',
             href: '/finances',
             icon: BarChart3,
+            exact: true,
           },
           {
             name: 'Reports',
