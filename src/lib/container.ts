@@ -71,8 +71,6 @@ import { UserRepository, type IUserRepository } from '../repositories/user.repos
 import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
 import { FinanceDashboardRepository, type IFinanceDashboardRepository } from '../repositories/financeDashboard.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
-import { GivingService } from '../services/GivingService';
-import { ExpenseService } from '../services/ExpenseService';
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
 import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
 import { TYPES } from './types';
@@ -141,14 +139,6 @@ container
 container
   .bind<AuditService>(TYPES.AuditService)
   .to(SupabaseAuditService)
-  .inSingletonScope();
-container
-  .bind<GivingService>(TYPES.GivingService)
-  .to(GivingService)
-  .inSingletonScope();
-container
-  .bind<ExpenseService>(TYPES.ExpenseService)
-  .to(ExpenseService)
   .inSingletonScope();
 container
   .bind<IncomeExpenseTransactionService>(TYPES.IncomeExpenseTransactionService)

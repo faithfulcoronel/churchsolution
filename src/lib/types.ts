@@ -29,7 +29,5 @@ export const TYPES = {
   IFinanceDashboardRepository: 'IFinanceDashboardRepository',
   AuditService: 'AuditService',
   ErrorLogService: 'ErrorLogService',
-  GivingService: 'GivingService',
-  ExpenseService: 'ExpenseService',
   IncomeExpenseTransactionService: 'IncomeExpenseTransactionService'
 };
