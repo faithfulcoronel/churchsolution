@@ -5,7 +5,9 @@ import type { IIncomeExpenseTransactionAdapter } from '../adapters/incomeExpense
 import { NotificationService } from '../services/NotificationService';
 import { IncomeExpenseTransactionValidator } from '../validators/incomeExpenseTransaction.validator';
 
-export interface IIncomeExpenseTransactionRepository extends BaseRepository<IncomeExpenseTransaction> {}
+export interface IIncomeExpenseTransactionRepository extends BaseRepository<IncomeExpenseTransaction> {
+  getByHeaderId(headerId: string): Promise<IncomeExpenseTransaction[]>;
+}
 
 @injectable()
 export class IncomeExpenseTransactionRepository
@@ -56,5 +58,11 @@ export class IncomeExpenseTransactionRepository
       formatted.reference = formatted.reference.trim();
     }
     return formatted;
+  }
+
+  public async getByHeaderId(headerId: string): Promise<IncomeExpenseTransaction[]> {
+    return (
+      this.adapter as unknown as IIncomeExpenseTransactionAdapter
+    ).getByHeaderId(headerId);
   }
 }

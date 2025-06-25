@@ -29,6 +29,7 @@ export class IncomeExpenseTransactionAdapter
     fund_id,
     source_id,
     account_id,
+    header_id,
     created_by,
     updated_by,
     created_at,
@@ -42,6 +43,13 @@ export class IncomeExpenseTransactionAdapter
     { table: 'financial_sources', foreignKey: 'source_id', select: ['id','name','source_type'] },
     { table: 'accounts', foreignKey: 'account_id', select: ['id','name'] }
   ];
+
+  public async getByHeaderId(headerId: string): Promise<IncomeExpenseTransaction[]> {
+    const query = await this.buildSecureQuery({});
+    const { data, error } = await query.eq('header_id', headerId);
+    if (error) throw error;
+    return data || [];
+  }
 
   protected override async onAfterCreate(data: IncomeExpenseTransaction): Promise<void> {
     await this.auditService.logAuditEvent('create', 'income_expense_transaction', data.id, data);

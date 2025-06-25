@@ -26,4 +26,5 @@ export interface IncomeExpenseTransaction extends BaseModel {
   source?: FinancialSource;
   account_id: string | null;
   account?: Account;
+  header_id: string | null;
 }

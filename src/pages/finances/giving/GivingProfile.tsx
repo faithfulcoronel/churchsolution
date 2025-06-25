@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
+import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import { Card, CardContent, CardHeader } from '../../../components/ui2/card';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import { GridColDef } from '@mui/x-data-grid';
@@ -9,7 +10,8 @@ import BackButton from '../../../components/BackButton';
 
 function GivingProfile() {
   const { id } = useParams<{ id: string }>();
-  const { useQuery, getTransactionEntries } = useFinancialTransactionHeaderRepository();
+  const { useQuery } = useFinancialTransactionHeaderRepository();
+  const { getByHeaderId } = useIncomeExpenseTransactionRepository();
   const { data: headerData, isLoading: headerLoading } = useQuery({
     filters: { id: { operator: 'eq', value: id } },
     enabled: !!id,
@@ -22,21 +24,20 @@ function GivingProfile() {
   useEffect(() => {
     const loadEntries = async () => {
       if (id) {
-        const data = await getTransactionEntries(id);
+        const data = await getByHeaderId(id);
         setEntries(data || []);
         setLoading(false);
       }
     };
     loadEntries();
-  }, [id, getTransactionEntries]);
+  }, [id, getByHeaderId]);
 
   const columns: GridColDef[] = [
-    { field: 'account_holder', headerName: 'Account', flex: 1, minWidth: 150, valueGetter: p => p.row.account_holder?.name },
+    { field: 'account', headerName: 'Account', flex: 1, minWidth: 150, valueGetter: p => p.row.account?.name },
     { field: 'fund', headerName: 'Fund', flex: 1, minWidth: 120, valueGetter: p => p.row.fund?.name },
     { field: 'category', headerName: 'Category', flex: 1, minWidth: 120, valueGetter: p => p.row.category?.name },
     { field: 'source', headerName: 'Source', flex: 1, minWidth: 120, valueGetter: p => p.row.source?.name },
-    { field: 'debit', headerName: 'Debit', flex: 1, minWidth: 100 },
-    { field: 'credit', headerName: 'Credit', flex: 1, minWidth: 100 },
+    { field: 'amount', headerName: 'Amount', flex: 1, minWidth: 100 },
   ];
 
   if (headerLoading || loading) {
