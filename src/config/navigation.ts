@@ -128,6 +128,7 @@ export const navigation: NavItem[] = [
             name: 'Accounts',
             href: '/accounts',
             icon: Building2,
+            exact: true,
           },
           {
             name: 'Financial Sources',
