@@ -9,8 +9,7 @@ import { useAccountRepository } from '../../../hooks/useAccountRepository';
 import { useFundRepository } from '../../../hooks/useFundRepository';
 import { useCategoryRepository } from '../../../hooks/useCategoryRepository';
 import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
-import { useGivingService } from '../../../hooks/useGivingService';
-import { useExpenseService } from '../../../hooks/useExpenseService';
+import { useIncomeExpenseService } from '../../../hooks/useIncomeExpenseService';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import BackButton from '../../../components/BackButton';
@@ -37,13 +36,11 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   const navigate = useNavigate();
   const isEditMode = !!id;
 
-  const givingSvc = useGivingService();
-  const expenseSvc = useExpenseService();
+  const svc = useIncomeExpenseService(transactionType);
 
-  const createBatch = transactionType === 'income' ? givingSvc.createGivingBatch : expenseSvc.createExpenseBatch;
-  const updateBatch = transactionType === 'income' ? givingSvc.updateGivingBatch : expenseSvc.updateExpenseBatch;
-  const createMutation = transactionType === 'income' ? givingSvc.createMutation : expenseSvc.createMutation;
-  const updateMutation = transactionType === 'income' ? givingSvc.updateMutation : expenseSvc.updateMutation;
+  const createBatch = svc.createBatch;
+  const updateBatch = svc.updateBatch;
+  const { createMutation, updateMutation } = svc;
 
   const { useQuery: useHeaderQuery } = useFinancialTransactionHeaderRepository();
   const { useQuery: useIeQuery } = useIncomeExpenseTransactionRepository();
