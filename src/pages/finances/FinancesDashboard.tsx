@@ -27,10 +27,6 @@ import {
   PieChart,
   BarChart3,
   LineChart,
-  Target,
-  Award,
-  Users2,
-  CreditCard,
   Layers,
   ChevronRight,
 } from 'lucide-react';
