@@ -86,7 +86,7 @@ function GivingProfile() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between mb-6">
-        <BackButton fallbackPath="/finances/giving" label="Back to Giving" />
+        <BackButton fallbackPath="/finances/giving" label="Back to Donations" />
         {header.status === 'draft' && (
           <Button
             variant="outline"

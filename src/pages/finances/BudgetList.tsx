@@ -185,7 +185,7 @@ function BudgetList() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/finances" label="Back to Finances" />
+        <BackButton fallbackPath="/finances" label="Back to Accounting" />
       </div>
 
       <div className="sm:flex sm:items-center">

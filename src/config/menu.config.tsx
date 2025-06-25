@@ -12,7 +12,7 @@ export const MENU_SIDEBAR: TMenuConfig = [
     path: '/members'
   },
   {
-    title: 'Finances',
+    title: 'Accounting',
     icon: 'finance',
     path: '/finances'
   },

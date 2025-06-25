@@ -49,7 +49,7 @@ function GivingList() {
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-foreground">Giving</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Donations</h1>
           <p className="mt-2 text-sm text-muted-foreground">Manage contribution batches.</p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
