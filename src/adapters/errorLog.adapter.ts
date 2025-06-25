@@ -19,6 +19,8 @@ export class ErrorLogAdapter
     context,
     created_at,
     tenant_id,
-    created_by
+    created_by,
+    updated_at,
+    updated_by
   `;
 }
