@@ -14,7 +14,7 @@ const useMenuCurrentItem = (
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
 
-      if (item.path && matchPath(pathname, item.path)) {
+      if (item.path && matchPath(item.path, pathname)) {
         return item ?? null;
       } else if (item.children) {
         const childItem = findCurrentItem(item.children as TMenuConfig);

@@ -11,7 +11,7 @@ const useMenuBreadcrumbs = (pathname: string, items: TMenuConfig | null): TMenuB
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
 
-      if (item.path && matchPath(pathname, item.path)) {
+      if (item.path && matchPath(item.path, pathname)) {
         return [
           {
             title: item.title,
