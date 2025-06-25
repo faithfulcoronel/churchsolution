@@ -24,5 +24,6 @@ export const TYPES = {
   ICategoryRepository: 'ICategoryRepository',
   IUserRepository: 'IUserRepository',
   AuditService: 'AuditService',
-  GivingService: 'GivingService'
+  GivingService: 'GivingService',
+  ExpenseService: 'ExpenseService'
 };
