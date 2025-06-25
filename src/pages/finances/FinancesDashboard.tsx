@@ -419,12 +419,12 @@ function FinancesDashboard() {
               {
                 label: 'Bulk Income Entry',
                 icon: <TrendingUp className="h-4 w-4" />,
-                onClick: () => navigate('/finances/transactions/bulk-income')
+                onClick: () => navigate('/finances/transactions/add?type=income')
               },
               {
                 label: 'Bulk Expense Entry',
                 icon: <TrendingDown className="h-4 w-4" />,
-                onClick: () => navigate('/finances/transactions/bulk-expense')
+                onClick: () => navigate('/finances/transactions/add?type=expense')
               }
             ]}
           >
@@ -717,7 +717,7 @@ function FinancesDashboard() {
                   </CardContent>
                 </Card>
               </Link>
-              <Link to="/finances/transactions/bulk-income">
+              <Link to="/finances/transactions/add?type=income">
                 <Card className="hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -731,7 +731,7 @@ function FinancesDashboard() {
                   </CardContent>
                 </Card>
               </Link>
-              <Link to="/finances/transactions/bulk-expense">
+              <Link to="/finances/transactions/add?type=expense">
                 <Card className="hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
