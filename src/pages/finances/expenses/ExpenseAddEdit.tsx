@@ -101,6 +101,8 @@ function ExpenseAddEdit() {
   const entryRecords = entryResponse?.data || [];
   const isDisabled = isEditMode && header && header.status !== 'draft';
 
+  const { currency } = useCurrencyStore();
+
   useEffect(() => {
     if (isEditMode && header) {
       setHeaderData({
@@ -180,8 +182,6 @@ function ExpenseAddEdit() {
     newEntries.splice(index, 1);
     setEntries(newEntries);
   };
-
-  const { currency } = useCurrencyStore();
 
   const totalAmount = React.useMemo(
     () => entries.reduce((sum, e) => sum + Number(e.amount || 0), 0),
