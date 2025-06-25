@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useChartOfAccountRepository } from '../../hooks/useChartOfAccountRepository';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import { Input } from '../../components/ui2/input';
-import { Badge } from '../../components/ui2/badge';
-import { TreeView, TreeItem } from '../../components/ui2/treeview';
+import { useChartOfAccountRepository } from '../../../hooks/useChartOfAccountRepository';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import { Input } from '../../../components/ui2/input';
+import { Badge } from '../../../components/ui2/badge';
+import { TreeView, TreeItem } from '../../../components/ui2/treeview';
 import { 
   Plus, 
   Search, 
@@ -17,14 +17,14 @@ import {
   AlertTriangle,
   BookOpen
 } from 'lucide-react';
-import { ChartOfAccount } from '../../models/chartOfAccount.model';
+import { ChartOfAccount } from '../../../models/chartOfAccount.model';
 import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '../../components/ui2/select';
+} from '../../../components/ui2/select';
 
 function ChartOfAccountList() {
   const navigate = useNavigate();

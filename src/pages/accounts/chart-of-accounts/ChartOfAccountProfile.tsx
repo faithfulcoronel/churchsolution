@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useChartOfAccountRepository } from '../../hooks/useChartOfAccountRepository';
-import { useAccountingReports } from '../../hooks/useAccountingReports';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Badge } from '../../components/ui2/badge';
-import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
-import { DataGrid } from '../../components/ui2/mui-datagrid';
+import { useChartOfAccountRepository } from '../../../hooks/useChartOfAccountRepository';
+import { useAccountingReports } from '../../../hooks/useAccountingReports';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Badge } from '../../../components/ui2/badge';
+import { DateRangePickerField } from '../../../components/ui2/date-range-picker-field';
+import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui2/alert-dialog';
+} from '../../../components/ui2/alert-dialog';
 import { 
   BookOpen,
   Pencil, 
@@ -34,8 +34,8 @@ import {
   Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
+import { useCurrencyStore } from '../../../stores/currencyStore';
+import { formatCurrency } from '../../../utils/currency';
 import { GridColDef } from '@mui/x-data-grid';
 
 function ChartOfAccountProfile() {

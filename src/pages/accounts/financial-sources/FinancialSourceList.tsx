@@ -1,27 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAccountRepository } from '../../hooks/useAccountRepository';
-import { Account } from '../../models/account.model';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import { Input } from '../../components/ui2/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
-import { Badge } from '../../components/ui2/badge';
-import { DataGrid } from '../../components/ui2/mui-datagrid';
-import {
-  Plus,
-  Search,
-  Building2,
-  User,
-  Loader2,
-  Mail,
-  Phone,
-  CheckCircle2,
-  XCircle,
-} from 'lucide-react';
+import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
+import { FinancialSource } from '../../../models/financialSource.model';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import { Input } from '../../../components/ui2/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
+import { Badge } from '../../../components/ui2/badge';
+import { DataGrid } from '../../../components/ui2/mui-datagrid';
+import { Plus, Search, Ban as Bank, Wallet, Globe, Loader2, CheckCircle2, XCircle, CreditCard } from 'lucide-react';
 import { GridColDef } from '@mui/x-data-grid';
 
-function AccountList() {
+function FinancialSourceList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -29,59 +19,65 @@ function AccountList() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   
-  const { useQuery: useAccountsQuery } = useAccountRepository();
+  const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
   
-  // Get accounts
-  const { data: result, isLoading } = useAccountsQuery();
-  const accounts = result?.data || [];
+  // Get sources
+  const { data: result, isLoading } = useSourcesQuery();
+  const sources = result?.data || [];
   
-  // Filter accounts
-  const filteredAccounts = accounts.filter((account: Account) => {
+  // Filter sources
+  const filteredSources = sources.filter((source: FinancialSource) => {
     const matchesSearch = 
-      account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (account.description && account.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (account.account_number && account.account_number.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (account.email && account.email.toLowerCase().includes(searchTerm.toLowerCase()));
+      source.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (source.description && source.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (source.account_number && source.account_number.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesType = typeFilter === 'all' || account.account_type === typeFilter;
+    const matchesType = typeFilter === 'all' || source.source_type === typeFilter;
     const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'active' && account.is_active) || 
-      (statusFilter === 'inactive' && !account.is_active);
+      (statusFilter === 'active' && source.is_active) || 
+      (statusFilter === 'inactive' && !source.is_active);
     
     return matchesSearch && matchesType && matchesStatus;
   });
 
+  const getSourceTypeIcon = (type: string) => {
+    switch (type) {
+      case 'bank':
+        return <Bank className="h-5 w-5 text-primary mr-2" />;
+      case 'cash':
+        return <Wallet className="h-5 w-5 text-success mr-2" />;
+      case 'online':
+        return <Globe className="h-5 w-5 text-info mr-2" />;
+      default:
+        return <CreditCard className="h-5 w-5 text-warning mr-2" />;
+    }
+  };
+
   const columns: GridColDef[] = [
     {
       field: 'name',
-      headerName: 'Account Name',
+      headerName: 'Source Name',
       flex: 2,
       minWidth: 200,
       renderCell: (params) => (
         <div className="flex items-center">
-          {params.row.account_type === 'organization' ? (
-            <Building2 className="h-5 w-5 text-primary mr-2" />
-          ) : (
-            <User className="h-5 w-5 text-success mr-2" />
-          )}
+          {getSourceTypeIcon(params.row.source_type)}
           <span className="font-medium">{params.value}</span>
         </div>
       ),
     },
     {
-      field: 'account_number',
-      headerName: 'Account Number',
-      flex: 1,
-      minWidth: 150,
-    },
-    {
-      field: 'account_type',
+      field: 'source_type',
       headerName: 'Type',
       flex: 1,
       minWidth: 120,
       renderCell: (params) => (
         <Badge 
-          variant={params.value === 'organization' ? 'primary' : 'success'}
+          variant={
+            params.value === 'bank' ? 'primary' : 
+            params.value === 'cash' ? 'success' : 
+            params.value === 'online' ? 'info' : 'secondary'
+          }
           className="capitalize"
         >
           {params.value}
@@ -89,32 +85,16 @@ function AccountList() {
       ),
     },
     {
-      field: 'email',
-      headerName: 'Email',
+      field: 'account_number',
+      headerName: 'Account Number',
       flex: 1.5,
-      minWidth: 180,
-      renderCell: (params) => (
-        params.value ? (
-          <div className="flex items-center">
-            <Mail className="h-4 w-4 text-muted-foreground mr-2" />
-            <span>{params.value}</span>
-          </div>
-        ) : null
-      ),
+      minWidth: 150,
     },
     {
-      field: 'phone',
-      headerName: 'Phone',
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params) => (
-        params.value ? (
-          <div className="flex items-center">
-            <Phone className="h-4 w-4 text-muted-foreground mr-2" />
-            <span>{params.value}</span>
-          </div>
-        ) : null
-      ),
+      field: 'description',
+      headerName: 'Description',
+      flex: 2,
+      minWidth: 200,
     },
     {
       field: 'is_active',
@@ -143,7 +123,7 @@ function AccountList() {
   ];
 
   const handleRowClick = (params: any) => {
-    navigate(`/accounts/${params.id}`);
+    navigate(`/accounts/sources/${params.id}`);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -159,19 +139,19 @@ function AccountList() {
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-foreground">Accounts</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Financial Sources</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Manage organization and personal accounts for financial tracking.
+            Manage financial sources for tracking income and expenses.
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <Link to="/accounts/add">
+          <Link to="/accounts/sources/add">
             <Button
               variant="default"
               className="flex items-center"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Account
+              Add Source
             </Button>
           </Link>
         </div>
@@ -180,7 +160,7 @@ function AccountList() {
       <div className="mt-6 sm:flex sm:items-center sm:justify-between">
         <div className="relative max-w-xs">
           <Input
-            placeholder="Search accounts..."
+            placeholder="Search sources..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             icon={<Search />}
@@ -198,8 +178,10 @@ function AccountList() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="organization">Organization</SelectItem>
-                <SelectItem value="person">Person</SelectItem>
+                <SelectItem value="bank">Bank</SelectItem>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="online">Online</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -232,8 +214,8 @@ function AccountList() {
             ) : (
               <DataGrid
                 columns={columns}
-                data={filteredAccounts}
-                totalRows={filteredAccounts.length}
+                data={filteredSources}
+                totalRows={filteredSources.length}
                 loading={isLoading}
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
@@ -246,21 +228,6 @@ function AccountList() {
                 disableDensitySelector={false}
                 page={page}
                 pageSize={pageSize}
-                slots={{
-                  toolbar: () => (
-                    <div className="flex justify-between items-center p-4">
-                      <h3 className="text-lg font-semibold">Accounts</h3>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate('/accounts/add')}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Account
-                      </Button>
-                    </div>
-                  ),
-                }}
               />
             )}
           </CardContent>
@@ -270,4 +237,4 @@ function AccountList() {
   );
 }
 
-export default AccountList;
+export default FinancialSourceList;

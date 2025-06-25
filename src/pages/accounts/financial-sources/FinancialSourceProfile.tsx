@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useFinancialSourceRepository } from '../../hooks/useFinancialSourceRepository';
+import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Badge } from '../../components/ui2/badge';
+import { supabase } from '../../../lib/supabase';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Badge } from '../../../components/ui2/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +16,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui2/alert-dialog';
+} from '../../../components/ui2/alert-dialog';
 import { Ban as Bank, Wallet, Globe, CreditCard, FileText, Pencil, Trash2, Loader2, CheckCircle2, XCircle, Hash, DollarSign, AlertTriangle } from 'lucide-react';
 
 // Maximum number of retries for delete operation

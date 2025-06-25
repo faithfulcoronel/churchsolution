@@ -4,15 +4,15 @@ import { Card, CardContent } from '../../components/ui2/card';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load account components
-const AccountList = React.lazy(() => import('./AccountList'));
-const AccountAddEdit = React.lazy(() => import('./AccountAddEdit'));
-const AccountProfile = React.lazy(() => import('./AccountProfile'));
-const FinancialSourceList = React.lazy(() => import('./FinancialSourceList'));
-const FinancialSourceAddEdit = React.lazy(() => import('./FinancialSourceAddEdit'));
-const FinancialSourceProfile = React.lazy(() => import('./FinancialSourceProfile'));
-const ChartOfAccountList = React.lazy(() => import('./ChartOfAccountList'));
-const ChartOfAccountAddEdit = React.lazy(() => import('./ChartOfAccountAddEdit'));
-const ChartOfAccountProfile = React.lazy(() => import('./ChartOfAccountProfile'));
+const AccountList = React.lazy(() => import('./account/AccountList'));
+const AccountAddEdit = React.lazy(() => import('./account/AccountAddEdit'));
+const AccountProfile = React.lazy(() => import('./account/AccountProfile'));
+const FinancialSourceList = React.lazy(() => import('./financial-sources/FinancialSourceList'));
+const FinancialSourceAddEdit = React.lazy(() => import('./financial-sources/FinancialSourceAddEdit'));
+const FinancialSourceProfile = React.lazy(() => import('./financial-sources/FinancialSourceProfile'));
+const ChartOfAccountList = React.lazy(() => import('./chart-of-accounts/ChartOfAccountList'));
+const ChartOfAccountAddEdit = React.lazy(() => import('./chart-of-accounts/ChartOfAccountAddEdit'));
+const ChartOfAccountProfile = React.lazy(() => import('./chart-of-accounts/ChartOfAccountProfile'));
 
 function LoadingSpinner() {
   return (
