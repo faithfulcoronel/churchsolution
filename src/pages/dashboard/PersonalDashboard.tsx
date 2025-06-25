@@ -257,7 +257,7 @@ function PersonalDashboard() {
   ];
 
   // Prepare chart data
-  const contributionChartData = {
+  const contributionChartData = React.useMemo(() => ({
     series: [{
       name: 'Contributions',
       data: monthlyTrends?.map(m => m.contributions) || []
@@ -308,12 +308,12 @@ function PersonalDashboard() {
         }
       }
     }
-  };
+  }), [monthlyTrends, currency]);
 
   // Calculate total for percentages
   const totalContributions = contributionStats?.categoryBreakdown.reduce((sum, [, amount]) => sum + amount, 0) || 0;
 
-  const categoryChartData = {
+  const categoryChartData = React.useMemo(() => ({
     series: contributionStats?.categoryBreakdown.map(([, amount]) => amount) || [],
     options: {
       chart: {
@@ -342,7 +342,7 @@ function PersonalDashboard() {
         }
       }
     }
-  };
+  }), [contributionStats, currency]);
 
   return (
     <div className="space-y-6">
