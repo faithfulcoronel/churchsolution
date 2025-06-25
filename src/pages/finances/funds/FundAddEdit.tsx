@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFundRepository } from '../../hooks/useFundRepository';
-import { Fund, FundType } from '../../models/fund.model';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Input } from '../../components/ui2/input';
-import { Textarea } from '../../components/ui2/textarea';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
+import { useFundRepository } from '../../../hooks/useFundRepository';
+import { Fund, FundType } from '../../../models/fund.model';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Input } from '../../../components/ui2/input';
+import { Textarea } from '../../../components/ui2/textarea';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
 
 import { Save, Loader2, AlertCircle } from 'lucide-react';
 

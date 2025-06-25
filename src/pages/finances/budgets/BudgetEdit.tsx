@@ -1,28 +1,40 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// src/pages/finances/BudgetEdit.tsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Input } from '../../components/ui2/input';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Combobox } from '../../components/ui2/combobox';
-import { DatePickerInput } from '../../components/ui2/date-picker';
-import { Textarea } from '../../components/ui2/textarea';
+import { supabase } from '../../../lib/supabase';
+import { useMessageStore } from '../../../components/MessageHandler';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Input } from '../../../components/ui2/input';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Combobox } from '../../../components/ui2/combobox';
+import { DatePickerInput } from '../../../components/ui2/date-picker';
+import { Textarea } from '../../../components/ui2/textarea';
 import {
   Save,
   Loader2,
   AlertCircle,
 } from 'lucide-react';
 
-function BudgetAdd() {
+type Budget = {
+  id: string;
+  name: string;
+  amount: number;
+  start_date: string;
+  end_date: string;
+  category_id: string;
+  description: string | null;
+};
+
+function BudgetEdit() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { currency } = useCurrencyStore();
+  const { addMessage } = useMessageStore();
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Budget>({
+    id: '',
     name: '',
     amount: 0,
     category_id: '',
@@ -39,6 +51,22 @@ function BudgetAdd() {
       if (error) throw error;
       return data?.[0];
     },
+  });
+
+  // Get budget data
+  const { data: budget, isLoading: budgetLoading } = useQuery({
+    queryKey: ['budget', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('budgets')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data as Budget;
+    },
+    enabled: !!id,
   });
 
   // Get budget categories
@@ -59,27 +87,45 @@ function BudgetAdd() {
     enabled: !!currentTenant?.id,
   });
 
-  const addBudgetMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      const { data: newBudget, error } = await supabase
+  useEffect(() => {
+    if (budget) {
+      setFormData(budget);
+    }
+  }, [budget]);
+
+  const updateBudgetMutation = useMutation({
+    mutationFn: async (data: Budget) => {
+      const { error } = await supabase
         .from('budgets')
-        .insert([{
-          ...data,
-          tenant_id: currentTenant?.id,
-          created_by: (await supabase.auth.getUser()).data.user?.id,
-        }])
-        .select()
-        .single();
+        .update({
+          name: data.name,
+          amount: data.amount,
+          category_id: data.category_id,
+          description: data.description,
+          start_date: data.start_date,
+          end_date: data.end_date,
+        })
+        .eq('id', id);
 
       if (error) throw error;
-      return newBudget;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
-      navigate('/finances/budgets');
+      queryClient.invalidateQueries({ queryKey: ['budget', id] });
+      addMessage({
+        type: 'success',
+        text: 'Budget updated successfully',
+        duration: 3000,
+      });
+      navigate(`/finances/budgets/${id}`);
     },
     onError: (error: Error) => {
       setError(error.message);
+      addMessage({
+        type: 'error',
+        text: error.message,
+        duration: 5000,
+      });
     },
   });
 
@@ -97,20 +143,10 @@ function BudgetAdd() {
     }
 
     try {
-      await addBudgetMutation.mutateAsync(formData);
+      await updateBudgetMutation.mutateAsync(formData);
     } catch (error) {
-      console.error('Error adding budget:', error);
+      console.error('Error updating budget:', error);
     }
-  };
-
-  const handleInputChange = (
-    field: keyof typeof formData,
-    value: string | number
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: field === 'amount' ? Number(value) : value,
-    }));
   };
 
   const categoryOptions = React.useMemo(() => 
@@ -121,17 +157,25 @@ function BudgetAdd() {
     [categories]
   );
 
+  if (budgetLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/finances/budgets" label="Back to Budgets" />
+        <BackButton fallbackPath={`/finances/budgets/${id}`} label="Back to Budget" />
       </div>
 
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-medium text-foreground">Add New Budget</h3>
+          <h3 className="text-lg font-medium text-foreground">Edit Budget</h3>
           <p className="text-sm text-muted-foreground">
-            Create a new budget allocation
+            Update budget details and allocation
           </p>
         </CardHeader>
 
@@ -143,7 +187,7 @@ function BudgetAdd() {
                   label="Budget Name"
                   required
                   value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="e.g., Youth Ministry 2025"
                 />
               </div>
@@ -152,7 +196,7 @@ function BudgetAdd() {
                 <Combobox
                   options={categoryOptions}
                   value={formData.category_id}
-                  onChange={(value) => handleInputChange('category_id', value)}
+                  onChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
                   placeholder="Select Category"
                 />
               </div>
@@ -160,9 +204,10 @@ function BudgetAdd() {
               <div>
                 <Input
                   type="number"
+                  label="Amount"
                   required
                   value={formData.amount || ''}
-                  onChange={(e) => handleInputChange('amount', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, amount: Number(e.target.value) }))}
                   min={0}
                   step="0.01"
                   placeholder="Enter the amount (0.00)"
@@ -173,10 +218,10 @@ function BudgetAdd() {
                 <DatePickerInput
                   label="Start Date"
                   value={formData.start_date ? new Date(formData.start_date) : undefined}
-                  onChange={(date) => handleInputChange(
-                    'start_date',
-                    date?.toISOString().split('T')[0] || ''
-                  )}
+                  onChange={(date) => setFormData(prev => ({
+                    ...prev,
+                    start_date: date?.toISOString().split('T')[0] || ''
+                  }))}
                 />
               </div>
 
@@ -184,18 +229,18 @@ function BudgetAdd() {
                 <DatePickerInput
                   label="End Date"
                   value={formData.end_date ? new Date(formData.end_date) : undefined}
-                  onChange={(date) => handleInputChange(
-                    'end_date',
-                    date?.toISOString().split('T')[0] || ''
-                  )}
+                  onChange={(date) => setFormData(prev => ({
+                    ...prev,
+                    end_date: date?.toISOString().split('T')[0] || ''
+                  }))}
                 />
               </div>
 
               <div className="sm:col-span-2">
                 <Textarea
                   label="Description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  value={formData.description || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   rows={3}
                   placeholder="Enter budget details..."
                 />
@@ -217,23 +262,23 @@ function BudgetAdd() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate('/finances/budgets')}
+                onClick={() => navigate(`/finances/budgets/${id}`)}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={addBudgetMutation.isPending}
+                disabled={updateBudgetMutation.isPending}
               >
-                {addBudgetMutation.isPending ? (
+                {updateBudgetMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adding...
+                    Saving...
                   </>
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Add Budget
+                    Save Changes
                   </>
                 )}
               </Button>
@@ -245,4 +290,4 @@ function BudgetAdd() {
   );
 }
 
-export default BudgetAdd;
+export default BudgetEdit;

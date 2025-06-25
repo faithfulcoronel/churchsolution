@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFundRepository } from '../../hooks/useFundRepository';
+import { useFundRepository } from '../../../hooks/useFundRepository';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Badge } from '../../components/ui2/badge';
-import { Tabs } from '../../components/ui2/tabs';
+import { supabase } from '../../../lib/supabase';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Badge } from '../../../components/ui2/badge';
+import { Tabs } from '../../../components/ui2/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui2/alert-dialog';
+} from '../../../components/ui2/alert-dialog';
 import {
   DollarSign,
   Pencil,

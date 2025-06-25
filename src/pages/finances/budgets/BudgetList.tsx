@@ -2,18 +2,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../../lib/supabase';
 import { format } from 'date-fns';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Input } from '../../components/ui2/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/ui2/select';
-import { Badge } from '../../components/ui2/badge';
-import { Progress } from '../../components/ui2/progress';
-import { useMessageStore } from '../../components/MessageHandler';
+import { useCurrencyStore } from '../../../stores/currencyStore';
+import { formatCurrency } from '../../../utils/currency';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Input } from '../../../components/ui2/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
+import { Badge } from '../../../components/ui2/badge';
+import { Progress } from '../../../components/ui2/progress';
+import { useMessageStore } from '../../../components/MessageHandler';
 import {
   Plus,
   Search,
