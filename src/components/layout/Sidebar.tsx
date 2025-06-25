@@ -143,6 +143,14 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   };
 
   // Auto-expand submenus when searching
+  const areSetsEqual = (a: Set<string>, b: Set<string>) => {
+    if (a.size !== b.size) return false;
+    for (const item of a) {
+      if (!b.has(item)) return false;
+    }
+    return true;
+  };
+
   React.useEffect(() => {
     if (searchTerm) {
       const names = new Set<string>();
@@ -157,7 +165,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       };
 
       collect(filteredNavigation);
-      setOpenSubmenus(names);
+      setOpenSubmenus((prev) => {
+        if (areSetsEqual(prev, names)) return prev;
+        return names;
+      });
     }
   }, [searchTerm, filteredNavigation]);
 
@@ -201,6 +212,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     setOpenSubmenus((prev) => {
       const newSet = new Set(prev);
       activeNames.forEach((name) => newSet.add(name));
+      if (areSetsEqual(prev, newSet)) return prev;
       return newSet;
     });
   }, [location.pathname, navigation]);
