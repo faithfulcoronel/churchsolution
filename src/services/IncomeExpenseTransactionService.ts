@@ -79,6 +79,7 @@ export class IncomeExpenseTransactionService {
   private buildEntry(
     header: Partial<FinancialTransactionHeader>,
     line: IncomeExpenseEntry,
+    headerId: string,
   ) {
     return {
       transaction_type: line.transaction_type,
@@ -91,6 +92,7 @@ export class IncomeExpenseTransactionService {
       fund_id: line.fund_id,
       source_id: line.source_id,
       account_id: line.accounts_account_id,
+      header_id: headerId,
     };
   }
 
@@ -102,7 +104,7 @@ export class IncomeExpenseTransactionService {
     const result = await this.headerRepo.createWithTransactions(header, transactions);
 
     for (const line of lines) {
-      await this.ieRepo.create(this.buildEntry(header, line));
+      await this.ieRepo.create(this.buildEntry(header, line, result.id));
     }
 
     return result;
@@ -117,7 +119,7 @@ export class IncomeExpenseTransactionService {
     const result = await this.headerRepo.updateWithTransactions(id, header, transactions);
 
     for (const line of lines) {
-      await this.ieRepo.create(this.buildEntry(header, line));
+      await this.ieRepo.create(this.buildEntry(header, line, id));
     }
 
     return result;

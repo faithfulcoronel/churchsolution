@@ -73,6 +73,7 @@ describe('IncomeExpenseTransactionService', () => {
       fund_id: 'f1',
       source_id: 's1',
       account_id: 'acc1',
+      header_id: 'h1',
     });
   });
 
@@ -84,7 +85,9 @@ describe('IncomeExpenseTransactionService', () => {
     const [, , tx] = (headerRepo.updateWithTransactions as any).mock.calls[0];
     expect(tx[0].debit).toBe(10);
     expect(tx[1].credit).toBe(10);
-    expect(ieRepo.create).toHaveBeenCalled();
+    expect(ieRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ header_id: 'h1' })
+    );
   });
 });
 
