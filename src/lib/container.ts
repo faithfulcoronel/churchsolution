@@ -69,6 +69,7 @@ import { UserRepository, type IUserRepository } from '../repositories/user.repos
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { GivingService } from '../services/GivingService';
 import { ExpenseService } from '../services/ExpenseService';
+import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -135,6 +136,10 @@ container
 container
   .bind<ExpenseService>(TYPES.ExpenseService)
   .to(ExpenseService)
+  .inSingletonScope();
+container
+  .bind<IncomeExpenseTransactionService>(TYPES.IncomeExpenseTransactionService)
+  .to(IncomeExpenseTransactionService)
   .inSingletonScope();
 
 // Register repositories
