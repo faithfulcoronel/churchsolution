@@ -27,6 +27,7 @@ const mappingRepo = {
       credit_transaction_id: 'c1',
     },
   ]),
+  getByHeaderId: vi.fn().mockResolvedValue([]),
   delete: vi.fn().mockResolvedValue(undefined),
 } as unknown as IIncomeExpenseTransactionMappingRepository;
 
@@ -156,5 +157,32 @@ describe('IncomeExpenseTransactionService', () => {
     expect(headerRepo.delete).toHaveBeenCalledWith('h1');
     expect(ieRepo.delete).toHaveBeenCalledWith('t1');
     expect(mappingRepo.delete).toHaveBeenCalledWith('m1');
+  });
+
+  it('updates batches with additional lines', async () => {
+    mappingRepo.getByHeaderId.mockResolvedValue([
+      {
+        id: 'm1',
+        transaction_id: 't1',
+        transaction_header_id: 'h1',
+        debit_transaction_id: 'd1',
+        credit_transaction_id: 'c1',
+      }
+    ]);
+
+    const entries: IncomeExpenseEntry[] = [
+      { ...baseEntry, transaction_type: 'income' },
+      { ...baseEntry, transaction_type: 'expense' }
+    ];
+
+    await service.updateBatch('h1', header, entries);
+
+    expect(mappingRepo.getByHeaderId).toHaveBeenCalledWith('h1');
+    expect(ftRepo.delete).toHaveBeenCalledWith('d1');
+    expect(ftRepo.delete).toHaveBeenCalledWith('c1');
+    expect(ieRepo.delete).toHaveBeenCalledWith('t1');
+    expect(mappingRepo.delete).toHaveBeenCalledWith('m1');
+    expect(ftRepo.create).toHaveBeenCalledTimes(4);
+    expect(mappingRepo.create).toHaveBeenCalledTimes(2);
   });
 });

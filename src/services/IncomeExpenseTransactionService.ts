@@ -164,6 +164,51 @@ export class IncomeExpenseTransactionService {
     return { id: mapping.transaction_header_id } as any;
   }
 
+  public async updateBatch(
+    headerId: string,
+    header: Partial<FinancialTransactionHeader>,
+    lines: IncomeExpenseEntry[],
+  ) {
+    const mappings = await this.mappingRepo.getByHeaderId(headerId);
+
+    await this.headerRepo.update(headerId, header);
+
+    for (const m of mappings) {
+      if (m.debit_transaction_id) {
+        await this.ftRepo.delete(m.debit_transaction_id);
+      }
+      if (m.credit_transaction_id) {
+        await this.ftRepo.delete(m.credit_transaction_id);
+      }
+      await this.ieRepo.delete(m.transaction_id);
+      await this.mappingRepo.delete(m.id);
+    }
+
+    for (const line of lines) {
+      const [debitData, creditData] = this.buildTransactions(
+        header,
+        line,
+        headerId,
+      );
+
+      const debitTx = await this.ftRepo.create(debitData);
+      const creditTx = await this.ftRepo.create(creditData);
+
+      const ie = await this.ieRepo.create(
+        this.buildEntry(header, line, headerId),
+      );
+
+      await this.mappingRepo.create({
+        transaction_id: ie.id,
+        transaction_header_id: headerId,
+        debit_transaction_id: debitTx.id,
+        credit_transaction_id: creditTx.id,
+      });
+    }
+
+    return { id: headerId } as any;
+  }
+
   public async delete(transactionId: string) {
     const mapping = (await this.mappingRepo.getByTransactionId(transactionId))[0];
 
