@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { 
-  User, 
-  Users, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  Edit, 
-  Trash2, 
-  ArrowLeft,
+import { useMemberRepository } from '../../hooks/useMemberRepository';
+import {
+  User,
+  Users,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Edit,
+  Trash2,
   Cake,
   Heart,
   Loader2,
   AlertTriangle,
   FileText
 } from 'lucide-react';
+import BackButton from '../../components/BackButton';
 
 // UI Components
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '../../components/ui2/card';
@@ -45,55 +44,25 @@ import NotesTab from './tabs/NotesTab';
 function MemberProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { useQuery, useDelete } = useMemberRepository();
   const [activeTab, setActiveTab] = useState('basic');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch member data
-  const { data: member, isLoading, error } = useQuery({
-    queryKey: ['member', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('members')
-        .select(`
-          *,
-          membership_categories:membership_category_id(id, name, code),
-          status_categories:status_category_id(id, name, code)
-        `)
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      return data;
+  // Fetch member data using repository
+  const { data: result, isLoading, error } = useQuery({
+    filters: {
+      id: {
+        operator: 'eq',
+        value: id
+      }
     },
     enabled: !!id
   });
 
+  const member = result?.data?.[0];
+
   // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      setIsDeleting(true);
-      const { error } = await supabase
-        .from('members')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id);
-      
-      if (error) throw error;
-      return true;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['members'] });
-      navigate('/members');
-    },
-    onError: (error) => {
-      console.error('Error deleting member:', error);
-      setIsDeleting(false);
-    },
-    onSettled: () => {
-      setDeleteDialogOpen(false);
-    }
-  });
+  const deleteMemberMutation = useDelete();
 
   // Get member initials for avatar fallback
   const getInitials = (firstName: string, lastName: string) => {
@@ -121,9 +90,7 @@ function MemberProfile() {
           <AlertTriangle className="h-12 w-12 text-warning mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">Member Not Found</h3>
           <p className="text-muted-foreground mb-6">The member you're looking for doesn't exist or has been removed.</p>
-          <Button onClick={() => navigate('/members')}>
-            Go Back to Members
-          </Button>
+          <BackButton fallbackPath="/members" label="Go Back to Members" />
         </CardContent>
       </Card>
     );
@@ -132,14 +99,7 @@ function MemberProfile() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/members')}
-          className="flex items-center"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Members
-        </Button>
+        <BackButton fallbackPath="/members" label="Back to Members" />
         
         <div className="flex space-x-3">
           <Button
@@ -299,16 +259,20 @@ function MemberProfile() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMemberMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.preventDefault();
-                deleteMutation.mutate();
+                if (id) {
+                  await deleteMemberMutation.mutateAsync(id);
+                  setDeleteDialogOpen(false);
+                  navigate('/members');
+                }
               }}
-              disabled={isDeleting}
+              disabled={deleteMemberMutation.isPending}
             >
-              {isDeleting ? (
+              {deleteMemberMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Deleting...

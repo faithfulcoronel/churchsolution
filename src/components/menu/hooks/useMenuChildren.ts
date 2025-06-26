@@ -10,7 +10,7 @@ const useMenuChildren = (
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
 
-      if (item.path && matchPath(pathname, item.path)) {
+      if (item.path && matchPath(item.path, pathname)) {
         return true;
       } else if (item.children) {
         if (hasActiveChild(item.children as TMenuConfig)) {
@@ -43,7 +43,7 @@ const useMenuChildren = (
         if (children) {
           return children;
         }
-      } else if (level === currentLevel && item.path && matchPath(pathname, item.path)) {
+      } else if (level === currentLevel && item.path && matchPath(item.path, pathname)) {
         // If it's a leaf node and matches the path, return the current items
         return items;
       }

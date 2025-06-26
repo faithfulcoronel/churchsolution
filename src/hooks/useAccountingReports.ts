@@ -156,9 +156,9 @@ export function useAccountingReports() {
             p_account_id: accountId,
             p_end_date: endDate
           });
-          
+
           if (error) throw error;
-          return data || 0;
+          return data?.balance ?? 0;
         } catch (error) {
           console.error(`Error fetching balance for account ${accountId}:`, error);
           addMessage({
@@ -203,7 +203,6 @@ export function useAccountingReports() {
             .eq('account_id', accountId)
             .gte('date', start)
             .lte('date', end)
-            .is('deleted_at', null)
             .order('date', { ascending: true });
           
           if (error) throw error;

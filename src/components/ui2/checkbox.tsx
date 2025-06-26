@@ -20,7 +20,7 @@ const sizeClasses = {
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   CheckboxProps
->(({ className, size = 'md', label, error, helperText, ...props }, ref) => (
+>(({ className, size = 'md', label, required, error, helperText, ...props }, ref) => (
   <div className="relative flex items-start">
     <div className="flex items-center h-5">
       <CheckboxPrimitive.Root
@@ -31,6 +31,7 @@ const Checkbox = React.forwardRef<
           error && 'border-destructive',
           className
         )}
+        aria-required={required ? true : undefined}
         {...props}
       >
         <CheckboxPrimitive.Indicator
@@ -46,14 +47,15 @@ const Checkbox = React.forwardRef<
         {label && (
           <label
             htmlFor={props.id}
-            className={cn(
-              'font-medium text-foreground dark:text-gray-300',
-              props.disabled && 'opacity-50'
-            )}
-          >
+          className={cn(
+            'font-medium text-foreground dark:text-gray-300',
+            props.disabled && 'opacity-50'
+          )}
+        >
             {label}
-          </label>
-        )}
+            {required && <span className="text-destructive ml-1">*</span>}
+        </label>
+      )}
         {(helperText || error) && (
           <p className={cn(
             'text-sm',

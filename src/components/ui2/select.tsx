@@ -52,6 +52,7 @@ const SelectTrigger = React.forwardRef<
         id={id}
         disabled={disabled}
         aria-invalid={error ? 'true' : undefined}
+        aria-required={required ? true : undefined}
         aria-describedby={
           error || helperText ? `${id}-description` : undefined
         }

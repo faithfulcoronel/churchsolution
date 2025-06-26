@@ -47,35 +47,86 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     [hasPermission]
   );
 
-  // Filter navigation items based on search term
+  const renderItem = (item: NavItem, level = 0) => {
+    const hasChildren = item.submenu && item.submenu.length > 0;
+    const padding = level === 0 ? 'px-3' : level === 1 ? 'pl-11 pr-3' : 'pl-16 pr-3';
+
+    if (hasChildren) {
+      return (
+        <div key={item.name}>
+          <button
+            onClick={() => toggleSubmenu(item.name)}
+            className={`
+              w-full group flex items-center justify-between rounded-lg ${padding} py-2 text-sm font-medium
+              transition-colors duration-200
+              ${isNavItemActive(item)
+                ? 'bg-primary text-white'
+                : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                ? 'bg-primary/20 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
+            `}
+          >
+            <div className="flex items-center">
+              <item.icon
+                className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}
+              />
+              <span className="ml-3">{item.name}</span>
+            </div>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${isSubmenuOpen(item.name) ? 'rotate-180' : ''}`}
+            />
+          </button>
+          <div
+            className={`mt-1 space-y-1 transition-all duration-200 ${isSubmenuOpen(item.name) ? 'max-h-96' : 'max-h-0 overflow-hidden'}`}
+          >
+            {item.submenu!.map((sub) => renderItem(sub, level + 1))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={item.name}
+        to={item.href || ''}
+        className={`
+          group flex items-center rounded-lg ${padding} py-2 text-sm font-medium
+          transition-colors duration-200
+          ${isNavItemActive(item)
+            ? 'bg-primary text-white'
+            : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            ? 'bg-primary/20 text-white'
+            : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
+        `}
+      >
+        <item.icon
+          className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}
+        />
+        {item.name}
+      </Link>
+    );
+  };
+
+  // Recursively filter navigation items based on search term
   const filteredNavigation = useMemo(() => {
     if (!searchTerm) return navigation;
 
     const searchLower = searchTerm.toLowerCase();
-    
-    return navigation.filter(item => {
-      // Check if main item matches
-      const mainItemMatches = item.name.toLowerCase().includes(searchLower);
-      
-      // Check if any submenu items match
-      const submenuMatches = item.submenu?.some(
-        subitem => subitem.name.toLowerCase().includes(searchLower)
-      );
 
-      // Show item if either main item or any submenu items match
-      return mainItemMatches || submenuMatches;
-    }).map(item => {
-      // If item has submenu, filter submenu items too
-      if (item.submenu) {
-        return {
-          ...item,
-          submenu: item.submenu.filter(
-            subitem => subitem.name.toLowerCase().includes(searchLower) || item.name.toLowerCase().includes(searchLower)
-          )
-        };
-      }
-      return item;
-    });
+    const filterItems = (items: NavItem[]): NavItem[] =>
+      items
+        .map((item) => {
+          const matches = item.name.toLowerCase().includes(searchLower);
+          const children = item.submenu ? filterItems(item.submenu) : undefined;
+
+          if (matches || (children && children.length > 0)) {
+            return { ...item, submenu: children };
+          }
+          return matches ? { ...item, submenu: children } : null;
+        })
+        .filter((item): item is NavItem => item !== null);
+
+    return filterItems(navigation);
   }, [navigation, searchTerm]);
 
   // Handle submenu toggle
@@ -92,14 +143,32 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   };
 
   // Auto-expand submenus when searching
+  const areSetsEqual = (a: Set<string>, b: Set<string>) => {
+    if (a.size !== b.size) return false;
+    for (const item of a) {
+      if (!b.has(item)) return false;
+    }
+    return true;
+  };
+
   React.useEffect(() => {
     if (searchTerm) {
-      // Open all submenus that have matching items
-      const matchingSubmenus = filteredNavigation
-        .filter(item => item.submenu?.length > 0)
-        .map(item => item.name);
-      
-      setOpenSubmenus(new Set(matchingSubmenus));
+      const names = new Set<string>();
+
+      const collect = (items: NavItem[]) => {
+        items.forEach((item) => {
+          if (item.submenu && item.submenu.length > 0) {
+            names.add(item.name);
+            collect(item.submenu);
+          }
+        });
+      };
+
+      collect(filteredNavigation);
+      setOpenSubmenus((prev) => {
+        if (areSetsEqual(prev, names)) return prev;
+        return names;
+      });
     }
   }, [searchTerm, filteredNavigation]);
 
@@ -109,14 +178,16 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   };
 
   const isNavItemActive = React.useCallback(
-    (item: NavItem) => {
+    (item: NavItem): boolean => {
       if (item.href) {
-        return location.pathname.startsWith(item.href);
+        if (item.exact) {
+          return location.pathname === item.href;
+        }
+        if (location.pathname === item.href) return true;
+        return location.pathname.startsWith(`${item.href}/`);
       }
       if (item.submenu) {
-        return item.submenu.some((sub) =>
-          location.pathname.startsWith(sub.href)
-        );
+        return item.submenu.some((sub) => isNavItemActive(sub));
       }
       return false;
     },
@@ -125,24 +196,28 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
 
   // Auto-expand submenu based on current path
   React.useEffect(() => {
-    const currentPath = location.pathname;
-    
-    navigation.forEach(item => {
-      if (item.submenu) {
-        const hasActiveChild = item.submenu.some(subitem => 
-          currentPath.startsWith(subitem.href)
-        );
-        
-        if (hasActiveChild) {
-          setOpenSubmenus(prev => {
-            const newOpenSubmenus = new Set(prev);
-            newOpenSubmenus.add(item.name);
-            return newOpenSubmenus;
-          });
+    const activeNames = new Set<string>();
+
+    const collectActive = (items: NavItem[], parents: string[] = []) => {
+      items.forEach((item) => {
+        if (isNavItemActive(item)) {
+          parents.forEach((p) => activeNames.add(p));
         }
-      }
+        if (item.submenu) {
+          collectActive(item.submenu, [...parents, item.name]);
+        }
+      });
+    };
+
+    collectActive(navigation);
+
+    setOpenSubmenus((prev) => {
+      const newSet = new Set(prev);
+      activeNames.forEach((name) => newSet.add(name));
+      if (areSetsEqual(prev, newSet)) return prev;
+      return newSet;
     });
-  }, [location.pathname]);
+  }, [location.pathname, navigation]);
 
   return (
     <>
@@ -187,96 +262,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
           {/* Navigation - Scrollable Area */}
           <Scrollable className="flex-1 py-4" shadow={false}>
             <nav className="space-y-1">
-              {filteredNavigation.map((item) => (
-                <div key={item.name}>
-                  {item.submenu ? (
-                    <div>
-                      <button
-                        onClick={() => toggleSubmenu(item.name)}
-                        className={`
-                          w-full group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium
-                          transition-colors duration-200
-                          ${isNavItemActive(item)
-                            ? 'bg-primary text-white'
-                            : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
-                            ? 'bg-primary/20 text-white'
-                            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                          }
-                        `}
-                      >
-                        <div className="flex items-center">
-                          <item.icon className={`
-                            h-5 w-5 flex-shrink-0 transition-colors
-                            ${isNavItemActive(item)
-                              ? 'text-white'
-                              : 'text-gray-400 group-hover:text-white'
-                            }
-                          `} />
-                          <span className="ml-3">{item.name}</span>
-                        </div>
-                        <ChevronDown className={`
-                          h-4 w-4 transition-transform duration-200
-                          ${isSubmenuOpen(item.name) ? 'rotate-180' : ''}
-                        `} />
-                      </button>
-                      
-                      <div className={`
-                        mt-1 space-y-1 transition-all duration-200
-                        ${isSubmenuOpen(item.name) ? 'max-h-96' : 'max-h-0 overflow-hidden'}
-                      `}>
-                        {item.submenu.map((subitem) => (
-                          <Link
-                            key={subitem.name}
-                            to={subitem.href}
-                            className={`
-                              group flex items-center rounded-lg pl-11 pr-3 py-2 text-sm font-medium
-                              transition-colors duration-200
-                              ${location.pathname.startsWith(subitem.href)
-                                ? 'bg-primary text-white'
-                                : searchTerm && subitem.name.toLowerCase().includes(searchTerm.toLowerCase())
-                                ? 'bg-primary/20 text-white'
-                                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                              }
-                            `}
-                          >
-                            <subitem.icon className={`
-                              mr-3 h-4 w-4 flex-shrink-0 transition-colors
-                              ${location.pathname.startsWith(subitem.href)
-                                ? 'text-white'
-                                : 'text-gray-400 group-hover:text-white'
-                              }
-                            `} />
-                            {subitem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <Link
-                      to={item.href || ''}
-                      className={`
-                        group flex items-center rounded-lg px-3 py-2 text-sm font-medium
-                        transition-colors duration-200
-                        ${isNavItemActive(item)
-                          ? 'bg-primary text-white'
-                          : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
-                          ? 'bg-primary/20 text-white'
-                          : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                        }
-                      `}
-                    >
-                      <item.icon className={`
-                        mr-3 h-5 w-5 flex-shrink-0 transition-colors
-                        ${isNavItemActive(item)
-                          ? 'text-white'
-                          : 'text-gray-400 group-hover:text-white'
-                        }
-                      `} />
-                      {item.name}
-                    </Link>
-                  )}
-                </div>
-              ))}
+              {filteredNavigation.map((item) => renderItem(item))}
 
               {/* No results message */}
               {filteredNavigation.length === 0 && (

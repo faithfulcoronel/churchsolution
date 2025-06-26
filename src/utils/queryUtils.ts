@@ -70,7 +70,7 @@ export class QueryUtils {
         case 'contains':
           return query.ilike(key, `%${value}%`);
         case 'notContains':
-          return query.not('ilike', key, `%${value}%`);
+          return query.not(key, 'ilike', `%${value}%`);
         case 'startsWith':
           return query.ilike(key, `${value}%`);
         case 'endsWith':
@@ -78,7 +78,7 @@ export class QueryUtils {
         case 'isEmpty':
           return query.is(key, null);
         case 'isNotEmpty':
-          return query.not('is', key, null);
+          return query.not(key, 'is', null);
         case 'isAnyOf':
           return query.in(key, Array.isArray(value) ? value : [value]);
         case 'between':
@@ -128,7 +128,7 @@ export class QueryUtils {
   private async buildSecureQuery<T>(
     table: string,
     options: QueryOptions = {}
-  ): Promise<PostgrestFilterBuilder<any, any, T[]>> {
+  ): Promise<{ query: PostgrestFilterBuilder<any, any, T[]> }> {
     // Get current tenant
     const tenantId = await tenantUtils.getTenantId();
     if (!tenantId) {
@@ -173,7 +173,7 @@ export class QueryUtils {
       query = query.range(start, start + pageSize - 1);
     }
 
-    return query;
+    return { query };
   }
 
   /**
@@ -188,7 +188,7 @@ export class QueryUtils {
         return { data: [], count: null };
       }
 
-      const query = await this.buildSecureQuery<T>(table, options);
+      const { query } = await this.buildSecureQuery<T>(table, options);
       const { data, error, count } = await query;
 
       if (error) {
@@ -212,7 +212,7 @@ export class QueryUtils {
     options: Omit<QueryOptions, 'pagination'> = {}
   ): Promise<T | null> {
     try {
-      const query = await this.buildSecureQuery<T>(table, options);
+      const { query } = await this.buildSecureQuery<T>(table, options);
       const { data, error } = await query
         .eq('id', id)
         .is('deleted_at', null)
@@ -422,7 +422,7 @@ export class QueryUtils {
     filters: Record<string, any>
   ): Promise<boolean> {
     try {
-      const query = await this.buildSecureQuery(table, { filters });
+      const { query } = await this.buildSecureQuery(table, { filters });
       const { count, error } = await query.select('*', { count: 'exact', head: true });
 
       if (error) {

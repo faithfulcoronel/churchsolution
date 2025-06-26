@@ -75,6 +75,10 @@ function PersonalDashboard() {
               category:category_id (
                 name,
                 type
+              ),
+              fund:fund_id (
+                name,
+                code
               )
             `)
             .eq('member_id', memberData.id)
@@ -137,6 +141,10 @@ function PersonalDashboard() {
           category:category_id (
             name,
             type
+          ),
+          fund:fund_id (
+            name,
+            code
           )
         `)
         .eq('member_id', memberData.id)
@@ -155,6 +163,10 @@ function PersonalDashboard() {
           category:category_id (
             name,
             type
+          ),
+          fund:fund_id (
+            name,
+            code
           )
         `)
         .eq('member_id', memberData.id)
@@ -216,13 +228,17 @@ function PersonalDashboard() {
     );
   }
 
+  const lastTrend = monthlyTrends && monthlyTrends.length
+    ? monthlyTrends[monthlyTrends.length - 1]
+    : undefined;
+
   const cards = [
     {
       name: 'Monthly Contributions',
       value: formatCurrency(contributionStats?.monthlyTotal || 0, currency),
       icon: <TrendingUp className="text-emerald-500" />,
       color: 'bg-emerald-100 dark:bg-emerald-900/50',
-      trend: monthlyTrends?.[monthlyTrends.length - 1]?.percentageChange
+      trend: lastTrend?.percentageChange
     },
     {
       name: 'Yearly Contributions',
@@ -241,7 +257,7 @@ function PersonalDashboard() {
   ];
 
   // Prepare chart data
-  const contributionChartData = {
+  const contributionChartData = React.useMemo(() => ({
     series: [{
       name: 'Contributions',
       data: monthlyTrends?.map(m => m.contributions) || []
@@ -292,12 +308,12 @@ function PersonalDashboard() {
         }
       }
     }
-  };
+  }), [monthlyTrends, currency]);
 
   // Calculate total for percentages
   const totalContributions = contributionStats?.categoryBreakdown.reduce((sum, [, amount]) => sum + amount, 0) || 0;
 
-  const categoryChartData = {
+  const categoryChartData = React.useMemo(() => ({
     series: contributionStats?.categoryBreakdown.map(([, amount]) => amount) || [],
     options: {
       chart: {
@@ -326,7 +342,7 @@ function PersonalDashboard() {
         }
       }
     }
-  };
+  }), [contributionStats, currency]);
 
   return (
     <div className="space-y-6">

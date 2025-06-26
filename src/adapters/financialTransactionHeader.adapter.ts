@@ -15,6 +15,15 @@ export interface IFinancialTransactionHeaderAdapter
   voidTransaction(id: string, reason: string): Promise<void>;
   getTransactionEntries(headerId: string): Promise<any[]>;
   isTransactionBalanced(headerId: string): Promise<boolean>;
+  createWithTransactions(
+    data: Partial<FinancialTransactionHeader>,
+    transactions: any[],
+  ): Promise<FinancialTransactionHeader>;
+  updateWithTransactions(
+    id: string,
+    data: Partial<FinancialTransactionHeader>,
+    transactions: any[],
+  ): Promise<FinancialTransactionHeader>;
 }
 
 @injectable()
@@ -243,8 +252,12 @@ export class FinancialTransactionHeaderAdapter
         date,
         debit,
         credit,
+        fund_id,
+        fund:fund_id(id, name, type),
         account_id,
-        account:chart_of_accounts(id, code, name, account_type)
+        accounts_account_id,
+        account:chart_of_accounts(id, code, name, account_type),
+        account_holder:accounts(id, name)
       `
       )
       .eq('tenant_id', tenantId)
@@ -258,8 +271,74 @@ export class FinancialTransactionHeaderAdapter
     const { data, error } = await supabase.rpc('is_transaction_balanced', {
       p_header_id: headerId
     });
-    
+
     if (error) throw error;
     return data;
+  }
+
+  public async createWithTransactions(
+    data: Partial<FinancialTransactionHeader>,
+    transactions: any[],
+  ): Promise<FinancialTransactionHeader> {
+    const header = await super.create(data);
+    if (transactions && transactions.length) {
+      await this.insertTransactions(header.id, transactions);
+    }
+    return header;
+  }
+
+  public async updateWithTransactions(
+    id: string,
+    data: Partial<FinancialTransactionHeader>,
+    transactions: any[],
+  ): Promise<FinancialTransactionHeader> {
+    const header = await super.update(id, data);
+    await this.replaceTransactions(id, transactions);
+    return header;
+  }
+
+  private async insertTransactions(headerId: string, entries: any[]): Promise<void> {
+    const tenantId = await tenantUtils.getTenantId();
+    if (!tenantId) throw new Error('No tenant context found');
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    const rows = entries.map((e) => ({
+      ...e,
+      header_id: headerId,
+      tenant_id: tenantId,
+      created_by: userId,
+      updated_by: userId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
+    const { error } = await supabase
+      .from('financial_transactions')
+      .insert(rows);
+    if (error) throw error;
+  }
+
+  private async replaceTransactions(headerId: string, entries: any[]): Promise<void> {
+    const tenantId = await tenantUtils.getTenantId();
+    if (!tenantId) throw new Error('No tenant context found');
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    await supabase
+      .from('financial_transactions')
+      .delete()
+      .eq('header_id', headerId)
+      .eq('tenant_id', tenantId);
+    if (entries && entries.length) {
+      const rows = entries.map((e) => ({
+        ...e,
+        header_id: headerId,
+        tenant_id: tenantId,
+        created_by: userId,
+        updated_by: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
+      const { error } = await supabase
+        .from('financial_transactions')
+        .insert(rows);
+      if (error) throw error;
+    }
   }
 }

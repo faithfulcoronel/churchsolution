@@ -5,11 +5,11 @@ import { supabase } from '../../../lib/supabase';
 import { format } from 'date-fns';
 import { DataGrid } from '../../../components/ui2/data-grid';
 import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
 import { Badge } from '../../../components/ui2/badge';
 import { Container } from '../../../components/ui2/container';
 import {
   Plus,
-  ChevronLeft,
   Users,
   Heart,
   Edit2,
@@ -181,14 +181,7 @@ function FamilyRelationships() {
       <div className="space-y-6">
         {/* Back Button */}
         <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/members')}
-            className="flex items-center"
-          >
-            <ChevronLeft className="h-5 w-5 mr-2" />
-            Back to Members
-          </Button>
+          <BackButton fallbackPath="/members" label="Back to Members" />
 
           <Button
             variant="default"

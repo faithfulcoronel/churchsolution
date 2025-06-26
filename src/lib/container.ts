@@ -18,6 +18,23 @@ import {
   FinancialTransactionHeaderAdapter,
   type IFinancialTransactionHeaderAdapter
 } from '../adapters/financialTransactionHeader.adapter';
+import {
+  FinancialTransactionAdapter,
+  type IFinancialTransactionAdapter
+} from '../adapters/financialTransaction.adapter';
+import {
+  IncomeExpenseTransactionAdapter,
+  type IIncomeExpenseTransactionAdapter
+} from '../adapters/incomeExpenseTransaction.adapter';
+import { FundAdapter, type IFundAdapter } from '../adapters/fund.adapter';
+import {
+  OfferingBatchAdapter,
+  type IOfferingBatchAdapter,
+} from '../adapters/offeringBatch.adapter';
+import { CategoryAdapter, type ICategoryAdapter } from '../adapters/category.adapter';
+import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
+import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
+import { FinanceDashboardAdapter, type IFinanceDashboardAdapter } from '../adapters/financeDashboard.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -36,7 +53,26 @@ import {
   FinancialTransactionHeaderRepository,
   type IFinancialTransactionHeaderRepository
 } from '../repositories/financialTransactionHeader.repository';
+import {
+  FinancialTransactionRepository,
+  type IFinancialTransactionRepository
+} from '../repositories/financialTransaction.repository';
+import {
+  IncomeExpenseTransactionRepository,
+  type IIncomeExpenseTransactionRepository
+} from '../repositories/incomeExpenseTransaction.repository';
+import { FundRepository, type IFundRepository } from '../repositories/fund.repository';
+import {
+  OfferingBatchRepository,
+  type IOfferingBatchRepository,
+} from '../repositories/offeringBatch.repository';
+import { CategoryRepository, type ICategoryRepository } from '../repositories/category.repository';
+import { UserRepository, type IUserRepository } from '../repositories/user.repository';
+import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
+import { FinanceDashboardRepository, type IFinanceDashboardRepository } from '../repositories/financeDashboard.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
+import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
+import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -66,11 +102,51 @@ container
   .bind<IFinancialTransactionHeaderAdapter>(TYPES.IFinancialTransactionHeaderAdapter)
   .to(FinancialTransactionHeaderAdapter)
   .inSingletonScope();
+container
+  .bind<IFinancialTransactionAdapter>(TYPES.IFinancialTransactionAdapter)
+  .to(FinancialTransactionAdapter)
+  .inSingletonScope();
+container
+  .bind<IIncomeExpenseTransactionAdapter>(TYPES.IIncomeExpenseTransactionAdapter)
+  .to(IncomeExpenseTransactionAdapter)
+  .inSingletonScope();
+container
+  .bind<IFundAdapter>(TYPES.IFundAdapter)
+  .to(FundAdapter)
+  .inSingletonScope();
+container
+  .bind<ICategoryAdapter>(TYPES.ICategoryAdapter)
+  .to(CategoryAdapter)
+  .inSingletonScope();
+container
+  .bind<IOfferingBatchAdapter>(TYPES.IOfferingBatchAdapter)
+  .to(OfferingBatchAdapter)
+  .inSingletonScope();
+container
+  .bind<IAuthUserAdapter>(TYPES.IAuthUserAdapter)
+  .to(AuthUserAdapter)
+  .inSingletonScope();
+container
+  .bind<IErrorLogAdapter>(TYPES.IErrorLogAdapter)
+  .to(ErrorLogAdapter)
+  .inSingletonScope();
+container
+  .bind<IFinanceDashboardAdapter>(TYPES.IFinanceDashboardAdapter)
+  .to(FinanceDashboardAdapter)
+  .inSingletonScope();
 
 // Register services
 container
   .bind<AuditService>(TYPES.AuditService)
   .to(SupabaseAuditService)
+  .inSingletonScope();
+container
+  .bind<IncomeExpenseTransactionService>(TYPES.IncomeExpenseTransactionService)
+  .to(IncomeExpenseTransactionService)
+  .inSingletonScope();
+container
+  .bind<ErrorLogService>(TYPES.ErrorLogService)
+  .to(SupabaseErrorLogService)
   .inSingletonScope();
 
 // Register repositories
@@ -99,6 +175,38 @@ container
     TYPES.IFinancialTransactionHeaderRepository
   )
   .to(FinancialTransactionHeaderRepository)
+  .inSingletonScope();
+container
+  .bind<IFundRepository>(TYPES.IFundRepository)
+  .to(FundRepository)
+  .inSingletonScope();
+container
+  .bind<ICategoryRepository>(TYPES.ICategoryRepository)
+  .to(CategoryRepository)
+  .inSingletonScope();
+container
+  .bind<IFinancialTransactionRepository>(TYPES.IFinancialTransactionRepository)
+  .to(FinancialTransactionRepository)
+  .inSingletonScope();
+container
+  .bind<IIncomeExpenseTransactionRepository>(TYPES.IIncomeExpenseTransactionRepository)
+  .to(IncomeExpenseTransactionRepository)
+  .inSingletonScope();
+container
+  .bind<IOfferingBatchRepository>(TYPES.IOfferingBatchRepository)
+  .to(OfferingBatchRepository)
+  .inSingletonScope();
+container
+  .bind<IUserRepository>(TYPES.IUserRepository)
+  .to(UserRepository)
+  .inSingletonScope();
+container
+  .bind<IErrorLogRepository>(TYPES.IErrorLogRepository)
+  .to(ErrorLogRepository)
+  .inSingletonScope();
+container
+  .bind<IFinanceDashboardRepository>(TYPES.IFinanceDashboardRepository)
+  .to(FinanceDashboardRepository)
   .inSingletonScope();
 
 export { container };

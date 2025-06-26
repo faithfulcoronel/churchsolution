@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { UserCog, Shield, Building2, Tag } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
-import { Card } from '../../components/ui/Card';
+import { Card } from '../../components/ui2/card';
 
 // Import admin pages
 import Users from './Users';
@@ -89,7 +89,7 @@ function Administration() {
               <Route path="users/*" element={<Users />} />
               <Route path="roles/*" element={<Roles />} />
               <Route path="church" element={<ChurchSettings />} />
-              <Route path="categories" element={<Categories />} />
+              <Route path="categories/*" element={<Categories />} />
               <Route path="*" element={<Navigate to={adminTabs[0]?.href.split('/').pop() || 'users'} replace />} />
             </Routes>
           </div>

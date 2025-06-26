@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog';
+} from '@/components/ui2/dialog';
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
 

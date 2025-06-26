@@ -13,7 +13,7 @@ import { useLanguage } from '@/i18n';
 import { ModalShareProfile } from '../modals/share-profile';
 import { ModalGiveAward } from '../modals/give-award';
 import { ModalReportUser } from '../modals/report-user';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger } from '@/components/ui2/dialog';
 
 const NavbarDropdown = () => {
   const itemRef = useRef<any>(null);

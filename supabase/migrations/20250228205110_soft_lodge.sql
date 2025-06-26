@@ -1,7 +1,8 @@
 -- Drop existing function
 DROP FUNCTION IF EXISTS handle_new_tenant_registration(uuid, text, text, text, text, text, text);
 
--- Create improved function with proper validation and error handling
+-- Categories created for new tenants are now linked to their default
+-- chart of accounts.
 CREATE OR REPLACE FUNCTION handle_new_tenant_registration(
   p_user_id uuid,
   p_tenant_name text,
@@ -136,29 +137,75 @@ BEGIN
     (new_tenant_id, 'member_status', 'removed', 'Removed', true, p_user_id),
     (new_tenant_id, 'member_status', 'donor', 'Donor', true, p_user_id);
 
-  -- Create income transaction categories
-  INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
-  VALUES
-    (new_tenant_id, 'income_transaction', 'tithe', 'Tithe', true, p_user_id),
-    (new_tenant_id, 'income_transaction', 'first_fruit_offering', 'First Fruit Offering', true, p_user_id),
-    (new_tenant_id, 'income_transaction', 'love_offering', 'Love Offering', true, p_user_id),
-    (new_tenant_id, 'income_transaction', 'mission_offering', 'Mission Offering', true, p_user_id),
-    (new_tenant_id, 'income_transaction', 'mission_pledge', 'Mission Pledge', true, p_user_id),
-    (new_tenant_id, 'income_transaction', 'building_offering', 'Building Offering', true, p_user_id),
-    (new_tenant_id, 'income_transaction', 'lot_offering', 'Lot Offering', true, p_user_id),
-    (new_tenant_id, 'income_transaction', 'other', 'Other Income', true, p_user_id);
+  -- Create income transaction categories linked to default accounts
+  INSERT INTO categories (
+    tenant_id,
+    type,
+    code,
+    name,
+    chart_of_account_id,
+    is_system,
+    created_by
+  ) VALUES
+    (new_tenant_id, 'income_transaction', 'tithe', 'Tithe',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '4101' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'income_transaction', 'first_fruit_offering', 'First Fruit Offering',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '4102' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'income_transaction', 'love_offering', 'Love Offering',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '4201' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'income_transaction', 'mission_offering', 'Mission Offering',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '4202' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'income_transaction', 'mission_pledge', 'Mission Pledge',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '4202' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'income_transaction', 'building_offering', 'Building Offering',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '4203' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'income_transaction', 'lot_offering', 'Lot Offering',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '4204' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'income_transaction', 'other', 'Other Income',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '4700' LIMIT 1),
+      true, p_user_id);
 
-  -- Create expense transaction categories
-  INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
-  VALUES
-    (new_tenant_id, 'expense_transaction', 'ministry_expense', 'Ministry Expense', true, p_user_id),
-    (new_tenant_id, 'expense_transaction', 'payroll', 'Payroll', true, p_user_id),
-    (new_tenant_id, 'expense_transaction', 'utilities', 'Utilities', true, p_user_id),
-    (new_tenant_id, 'expense_transaction', 'maintenance', 'Maintenance', true, p_user_id),
-    (new_tenant_id, 'expense_transaction', 'events', 'Events', true, p_user_id),
-    (new_tenant_id, 'expense_transaction', 'missions', 'Missions', true, p_user_id),
-    (new_tenant_id, 'expense_transaction', 'education', 'Education', true, p_user_id),
-    (new_tenant_id, 'expense_transaction', 'other', 'Other Expense', true, p_user_id);
+  -- Create expense transaction categories linked to default accounts
+  INSERT INTO categories (
+    tenant_id,
+    type,
+    code,
+    name,
+    chart_of_account_id,
+    is_system,
+    created_by
+  ) VALUES
+    (new_tenant_id, 'expense_transaction', 'ministry_expense', 'Ministry Expense',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '5100' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'expense_transaction', 'payroll', 'Payroll',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '5200' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'expense_transaction', 'utilities', 'Utilities',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '5301' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'expense_transaction', 'maintenance', 'Maintenance',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '5302' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'expense_transaction', 'events', 'Events',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '5500' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'expense_transaction', 'missions', 'Missions',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '5106' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'expense_transaction', 'education', 'Education',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '5600' LIMIT 1),
+      true, p_user_id),
+    (new_tenant_id, 'expense_transaction', 'other', 'Other Expense',
+      (SELECT id FROM chart_of_accounts WHERE tenant_id = new_tenant_id AND code = '5900' LIMIT 1),
+      true, p_user_id);
 
   -- Create budget categories
   INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
@@ -212,5 +259,5 @@ $$;
 GRANT EXECUTE ON FUNCTION handle_new_tenant_registration(uuid, text, text, text, text, text, text) TO authenticated;
 
 -- Add helpful comment
-COMMENT ON FUNCTION handle_new_tenant_registration IS 
-  'Creates a new tenant with proper validation, transaction handling, user role assignment, and category initialization';
+COMMENT ON FUNCTION handle_new_tenant_registration IS
+  'Creates a new tenant with proper validation, transaction handling, user role assignment, category initialization, and links categories to default chart of accounts';

@@ -12,10 +12,17 @@ export function useBaseRepository<T extends BaseModel>(
   const queryClient = useQueryClient();
 
   const useQuery = (options: QueryOptions = {}) => {
+    // Serialize query options except for the "enabled" flag to ensure
+    // a stable query key across renders. Without this, passing inline
+    // objects would create new query keys on every render and trigger
+    // unnecessary re-fetching.
+    const { enabled, ...rest } = options;
+    const serializedOptions = JSON.stringify(rest);
     return useReactQuery({
-      queryKey: [queryKey, options],
+      queryKey: [queryKey, serializedOptions],
       queryFn: () => repository.find(options),
       staleTime: 5 * 60 * 1000, // 5 minutes
+      enabled: enabled ?? true,
     });
   };
 
@@ -27,7 +34,7 @@ export function useBaseRepository<T extends BaseModel>(
                      relations?: Record<string, any[]>,
                      fieldsToRemove?: string[]
                    }) => {
-        return repository.create(data, relations);
+        return repository.create(data, relations, fieldsToRemove);
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [queryKey] });

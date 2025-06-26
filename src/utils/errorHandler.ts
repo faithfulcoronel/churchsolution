@@ -1,4 +1,7 @@
 import { type NotifyErrorOptions } from '../hooks/useNotifications';
+import { container } from '../lib/container';
+import { TYPES } from '../lib/types';
+import type { ErrorLogService } from '../services/ErrorLogService';
 
 // Error types
 type ErrorType = 'auth' | 'database' | 'network' | 'validation' | 'unknown';
@@ -56,6 +59,9 @@ function logError(error: any, context?: Record<string, any>) {
   if (import.meta.env.DEV) {
     console.error('Error Details:', errorDetails);
   }
+
+  const service = container.get<ErrorLogService>(TYPES.ErrorLogService);
+  service.logError(errorDetails.message, errorDetails.stack, errorDetails);
 }
 
 // Main error handler function - now returns error info instead of showing notification

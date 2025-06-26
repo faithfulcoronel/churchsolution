@@ -232,9 +232,9 @@ export function useChartOfAccounts() {
             p_account_id: accountId,
             p_end_date: asOfDate || new Date().toISOString().split('T')[0]
           });
-          
+
           if (error) throw error;
-          return data;
+          return data?.balance ?? 0;
         } catch (error) {
           console.error(`Error fetching balance for account ${accountId}:`, error);
           addMessage({
