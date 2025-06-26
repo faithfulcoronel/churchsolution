@@ -12,12 +12,12 @@ export interface IFinancialTransactionHeaderRepository
   createWithTransactions(
     data: Partial<FinancialTransactionHeader>,
     transactions: any[],
-  ): Promise<FinancialTransactionHeader>;
+  ): Promise<{ header: FinancialTransactionHeader; transactions: any[] }>;
   updateWithTransactions(
     id: string,
     data: Partial<FinancialTransactionHeader>,
     transactions: any[],
-  ): Promise<FinancialTransactionHeader>;
+  ): Promise<{ header: FinancialTransactionHeader; transactions: any[] }>;
 }
 
 @injectable()
@@ -78,26 +78,26 @@ export class FinancialTransactionHeaderRepository
   public async createWithTransactions(
     data: Partial<FinancialTransactionHeader>,
     transactions: any[],
-  ): Promise<FinancialTransactionHeader> {
+  ): Promise<{ header: FinancialTransactionHeader; transactions: any[] }> {
     const processed = await this.beforeCreate(data);
-    const created = await (
+    const result = await (
       this.adapter as unknown as IFinancialTransactionHeaderAdapter
     ).createWithTransactions(processed, transactions);
-    await this.afterCreate(created);
-    return created;
+    await this.afterCreate(result.header);
+    return result;
   }
 
   public async updateWithTransactions(
     id: string,
     data: Partial<FinancialTransactionHeader>,
     transactions: any[],
-  ): Promise<FinancialTransactionHeader> {
+  ): Promise<{ header: FinancialTransactionHeader; transactions: any[] }> {
     const processed = await this.beforeUpdate(id, data);
-    const updated = await (
+    const result = await (
       this.adapter as unknown as IFinancialTransactionHeaderAdapter
     ).updateWithTransactions(id, processed, transactions);
-    await this.afterUpdate(updated);
-    return updated;
+    await this.afterUpdate(result.header);
+    return result;
   }
 
   // Private helper methods
