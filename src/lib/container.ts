@@ -26,6 +26,10 @@ import {
   IncomeExpenseTransactionAdapter,
   type IIncomeExpenseTransactionAdapter
 } from '../adapters/incomeExpenseTransaction.adapter';
+import {
+  IncomeExpenseTransactionMappingAdapter,
+  type IIncomeExpenseTransactionMappingAdapter
+} from '../adapters/incomeExpenseTransactionMapping.adapter';
 import { FundAdapter, type IFundAdapter } from '../adapters/fund.adapter';
 import {
   OfferingBatchAdapter,
@@ -61,6 +65,10 @@ import {
   IncomeExpenseTransactionRepository,
   type IIncomeExpenseTransactionRepository
 } from '../repositories/incomeExpenseTransaction.repository';
+import {
+  IncomeExpenseTransactionMappingRepository,
+  type IIncomeExpenseTransactionMappingRepository
+} from '../repositories/incomeExpenseTransactionMapping.repository';
 import { FundRepository, type IFundRepository } from '../repositories/fund.repository';
 import {
   OfferingBatchRepository,
@@ -109,6 +117,12 @@ container
 container
   .bind<IIncomeExpenseTransactionAdapter>(TYPES.IIncomeExpenseTransactionAdapter)
   .to(IncomeExpenseTransactionAdapter)
+  .inSingletonScope();
+container
+  .bind<IIncomeExpenseTransactionMappingAdapter>(
+    TYPES.IIncomeExpenseTransactionMappingAdapter
+  )
+  .to(IncomeExpenseTransactionMappingAdapter)
   .inSingletonScope();
 container
   .bind<IFundAdapter>(TYPES.IFundAdapter)
@@ -191,6 +205,12 @@ container
 container
   .bind<IIncomeExpenseTransactionRepository>(TYPES.IIncomeExpenseTransactionRepository)
   .to(IncomeExpenseTransactionRepository)
+  .inSingletonScope();
+container
+  .bind<IIncomeExpenseTransactionMappingRepository>(
+    TYPES.IIncomeExpenseTransactionMappingRepository
+  )
+  .to(IncomeExpenseTransactionMappingRepository)
   .inSingletonScope();
 container
   .bind<IOfferingBatchRepository>(TYPES.IOfferingBatchRepository)
