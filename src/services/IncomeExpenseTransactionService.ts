@@ -3,6 +3,8 @@ import type { FinancialTransactionHeader } from '../models/financialTransactionH
 import type { TransactionType } from '../models/financialTransaction.model';
 import type { IFinancialTransactionHeaderRepository } from '../repositories/financialTransactionHeader.repository';
 import type { IIncomeExpenseTransactionRepository } from '../repositories/incomeExpenseTransaction.repository';
+import type { IIncomeExpenseTransactionMappingRepository } from '../repositories/incomeExpenseTransactionMapping.repository';
+import type { IFinancialTransactionRepository } from '../repositories/financialTransaction.repository';
 import { TYPES } from '../lib/types';
 
 export interface IncomeExpenseEntry {
@@ -25,56 +27,60 @@ export class IncomeExpenseTransactionService {
     private headerRepo: IFinancialTransactionHeaderRepository,
     @inject(TYPES.IIncomeExpenseTransactionRepository)
     private ieRepo: IIncomeExpenseTransactionRepository,
+    @inject(TYPES.IIncomeExpenseTransactionMappingRepository)
+    private mappingRepo: IIncomeExpenseTransactionMappingRepository,
+    @inject(TYPES.IFinancialTransactionRepository)
+    private ftRepo: IFinancialTransactionRepository,
   ) {}
 
   private buildTransactions(
     header: Partial<FinancialTransactionHeader>,
-    lines: IncomeExpenseEntry[],
+    line: IncomeExpenseEntry,
+    headerId: string,
   ) {
-    return lines.flatMap((line) => {
-      const base = {
-        type: line.transaction_type,
-        accounts_account_id: line.accounts_account_id,
-        fund_id: line.fund_id,
-        source_id: line.source_id,
-        category_id: line.category_id,
-        date: header.transaction_date!,
-        description: header.description || '',
-        batch_id: line.batch_id ?? null,
-      } as any;
+    const base = {
+      type: line.transaction_type,
+      accounts_account_id: line.accounts_account_id,
+      fund_id: line.fund_id,
+      source_id: line.source_id,
+      category_id: line.category_id,
+      date: header.transaction_date!,
+      description: header.description || '',
+      batch_id: line.batch_id ?? null,
+      header_id: headerId,
+    } as any;
 
-      if (line.transaction_type === 'income') {
-        return [
-          {
-            ...base,
-            account_id: line.source_account_id,
-            debit: line.amount,
-            credit: 0,
-          },
-          {
-            ...base,
-            account_id: line.category_account_id,
-            debit: 0,
-            credit: line.amount,
-          },
-        ];
-      }
-
+    if (line.transaction_type === 'income') {
       return [
         {
           ...base,
-          account_id: line.category_account_id,
+          account_id: line.source_account_id,
           debit: line.amount,
           credit: 0,
         },
         {
           ...base,
-          account_id: line.source_account_id,
+          account_id: line.category_account_id,
           debit: 0,
           credit: line.amount,
         },
       ];
-    });
+    }
+
+    return [
+      {
+        ...base,
+        account_id: line.category_account_id,
+        debit: line.amount,
+        credit: 0,
+      },
+      {
+        ...base,
+        account_id: line.source_account_id,
+        debit: 0,
+        credit: line.amount,
+      },
+    ];
   }
 
   private buildEntry(
@@ -101,29 +107,76 @@ export class IncomeExpenseTransactionService {
     header: Partial<FinancialTransactionHeader>,
     lines: IncomeExpenseEntry[],
   ) {
-    const transactions = this.buildTransactions(header, lines);
-    const result = await this.headerRepo.createWithTransactions(header, transactions);
+    const headerRecord = await this.headerRepo.create(header);
 
     for (const line of lines) {
-      await this.ieRepo.create(this.buildEntry(header, line, result.id));
+      const [debitData, creditData] = this.buildTransactions(
+        header,
+        line,
+        headerRecord.id,
+      );
+
+      const debitTx = await this.ftRepo.create(debitData);
+      const creditTx = await this.ftRepo.create(creditData);
+
+      const ie = await this.ieRepo.create(
+        this.buildEntry(header, line, headerRecord.id),
+      );
+
+      await this.mappingRepo.create({
+        transaction_id: ie.id,
+        transaction_header_id: headerRecord.id,
+        debit_transaction_id: debitTx.id,
+        credit_transaction_id: creditTx.id,
+      });
     }
 
-    return result;
+    return headerRecord;
   }
 
   public async update(
-    id: string,
+    transactionId: string,
     header: Partial<FinancialTransactionHeader>,
-    lines: IncomeExpenseEntry[],
+    line: IncomeExpenseEntry,
   ) {
-    const transactions = this.buildTransactions(header, lines);
-    const result = await this.headerRepo.updateWithTransactions(id, header, transactions);
+    const mapping = (await this.mappingRepo.getByTransactionId(transactionId))[0];
 
-    for (const line of lines) {
-      await this.ieRepo.create(this.buildEntry(header, line, id));
+    await this.headerRepo.update(mapping.transaction_header_id, header);
+
+    const [debitData, creditData] = this.buildTransactions(
+      header,
+      line,
+      mapping.transaction_header_id,
+    );
+
+    if (mapping.debit_transaction_id) {
+      await this.ftRepo.update(mapping.debit_transaction_id, debitData);
+    }
+    if (mapping.credit_transaction_id) {
+      await this.ftRepo.update(mapping.credit_transaction_id, creditData);
     }
 
-    return result;
+    await this.ieRepo.update(
+      transactionId,
+      this.buildEntry(header, line, mapping.transaction_header_id),
+    );
+
+    return { id: mapping.transaction_header_id } as any;
+  }
+
+  public async delete(transactionId: string) {
+    const mapping = (await this.mappingRepo.getByTransactionId(transactionId))[0];
+
+    if (mapping.debit_transaction_id) {
+      await this.ftRepo.delete(mapping.debit_transaction_id);
+    }
+    if (mapping.credit_transaction_id) {
+      await this.ftRepo.delete(mapping.credit_transaction_id);
+    }
+
+    await this.headerRepo.delete(mapping.transaction_header_id);
+    await this.ieRepo.delete(transactionId);
+    await this.mappingRepo.delete(mapping.id);
   }
 }
 
