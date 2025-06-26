@@ -7,6 +7,7 @@ import { IncomeExpenseTransactionMappingValidator } from '../validators/incomeEx
 
 export interface IIncomeExpenseTransactionMappingRepository extends BaseRepository<IncomeExpenseTransactionMapping> {
   getByTransactionId(id: string): Promise<IncomeExpenseTransactionMapping[]>;
+  getByHeaderId(id: string): Promise<IncomeExpenseTransactionMapping[]>;
 }
 
 @injectable()
@@ -57,5 +58,13 @@ export class IncomeExpenseTransactionMappingRepository
     return (
       this.adapter as unknown as IIncomeExpenseTransactionMappingAdapter
     ).getByTransactionId(id);
+  }
+
+  public async getByHeaderId(
+    id: string
+  ): Promise<IncomeExpenseTransactionMapping[]> {
+    return (
+      this.adapter as unknown as IIncomeExpenseTransactionMappingAdapter
+    ).getByHeaderId(id);
   }
 }

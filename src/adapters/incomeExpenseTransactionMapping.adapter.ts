@@ -7,6 +7,7 @@ import { TYPES } from '../lib/types';
 
 export interface IIncomeExpenseTransactionMappingAdapter extends BaseAdapter<IncomeExpenseTransactionMapping> {
   getByTransactionId(id: string): Promise<IncomeExpenseTransactionMapping[]>;
+  getByHeaderId(id: string): Promise<IncomeExpenseTransactionMapping[]>;
 }
 
 @injectable()
@@ -47,6 +48,15 @@ export class IncomeExpenseTransactionMappingAdapter
   ): Promise<IncomeExpenseTransactionMapping[]> {
     const result = await this.fetch({
       filters: { transaction_id: { operator: 'eq', value: id } }
+    });
+    return result.data;
+  }
+
+  public async getByHeaderId(
+    id: string
+  ): Promise<IncomeExpenseTransactionMapping[]> {
+    const result = await this.fetch({
+      filters: { transaction_header_id: { operator: 'eq', value: id } }
     });
     return result.data;
   }

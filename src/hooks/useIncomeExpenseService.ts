@@ -26,7 +26,7 @@ export function useIncomeExpenseService(transactionType: TransactionType) {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, header, entries }: { id: string; header: Partial<FinancialTransactionHeader>; entries: IncomeExpenseEntryBase[] }) =>
-      service.update(id, header, entries.map(e => ({ ...e, transaction_type: transactionType }))),
+      service.updateBatch(id, header, entries.map(e => ({ ...e, transaction_type: transactionType }))),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
       NotificationService.showSuccess('Transaction updated successfully');
