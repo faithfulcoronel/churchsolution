@@ -159,7 +159,7 @@ describe('IncomeExpenseTransactionService', () => {
     expect(mappingRepo.delete).toHaveBeenCalledWith('m1');
   });
 
-  it('updates batches with additional lines', async () => {
+  it('updates batches by updating existing lines and creating new ones', async () => {
     mappingRepo.getByHeaderId.mockResolvedValue([
       {
         id: 'm1',
@@ -167,22 +167,38 @@ describe('IncomeExpenseTransactionService', () => {
         transaction_header_id: 'h1',
         debit_transaction_id: 'd1',
         credit_transaction_id: 'c1',
+      },
+      {
+        id: 'm2',
+        transaction_id: 't2',
+        transaction_header_id: 'h1',
+        debit_transaction_id: 'd2',
+        credit_transaction_id: 'c2',
       }
     ]);
 
     const entries: IncomeExpenseEntry[] = [
-      { ...baseEntry, transaction_type: 'income' },
+      { id: 't1', ...baseEntry, amount: 15, transaction_type: 'income' },
       { ...baseEntry, transaction_type: 'expense' }
     ];
 
     await service.updateBatch('h1', header, entries);
 
     expect(mappingRepo.getByHeaderId).toHaveBeenCalledWith('h1');
-    expect(ftRepo.delete).toHaveBeenCalledWith('d1');
-    expect(ftRepo.delete).toHaveBeenCalledWith('c1');
-    expect(ieRepo.delete).toHaveBeenCalledWith('t1');
-    expect(mappingRepo.delete).toHaveBeenCalledWith('m1');
-    expect(ftRepo.create).toHaveBeenCalledTimes(4);
-    expect(mappingRepo.create).toHaveBeenCalledTimes(2);
+
+    // removed line t2 should be deleted
+    expect(ftRepo.delete).toHaveBeenCalledWith('d2');
+    expect(ftRepo.delete).toHaveBeenCalledWith('c2');
+    expect(ieRepo.delete).toHaveBeenCalledWith('t2');
+    expect(mappingRepo.delete).toHaveBeenCalledWith('m2');
+
+    // existing line t1 should be updated
+    expect(ftRepo.update).toHaveBeenCalledWith('d1', expect.any(Object));
+    expect(ftRepo.update).toHaveBeenCalledWith('c1', expect.any(Object));
+    expect(ieRepo.update).toHaveBeenCalledWith('t1', expect.any(Object));
+
+    // new line should create new records
+    expect(ftRepo.create).toHaveBeenCalledTimes(2);
+    expect(mappingRepo.create).toHaveBeenCalledTimes(1);
   });
 });

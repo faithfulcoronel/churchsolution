@@ -18,6 +18,7 @@ import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
 
 interface Entry {
+  id?: string;
   accounts_account_id: string;
   fund_id: string;
   category_id: string;
@@ -123,6 +124,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     if (isEditMode && entryRecords.length > 0) {
       setEntries(
         entryRecords.map((e: any) => ({
+          id: e.id,
           accounts_account_id: e.account_id || '',
           fund_id: e.fund_id || '',
           category_id: e.category_id || '',

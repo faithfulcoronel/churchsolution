@@ -8,6 +8,7 @@ import type { IFinancialTransactionRepository } from '../repositories/financialT
 import { TYPES } from '../lib/types';
 
 export interface IncomeExpenseEntry {
+  id?: string;
   transaction_type: TransactionType;
   accounts_account_id: string | null;
   fund_id: string | null;
@@ -173,37 +174,61 @@ export class IncomeExpenseTransactionService {
 
     await this.headerRepo.update(headerId, header);
 
+    const mappingByTxId = new Map(
+      mappings.map(m => [m.transaction_id, m]),
+    );
+    const incomingIds = new Set(
+      lines.map(l => l.id).filter((id): id is string => !!id),
+    );
+
     for (const m of mappings) {
-      if (m.debit_transaction_id) {
-        await this.ftRepo.delete(m.debit_transaction_id);
+      if (!incomingIds.has(m.transaction_id)) {
+        if (m.debit_transaction_id) {
+          await this.ftRepo.delete(m.debit_transaction_id);
+        }
+        if (m.credit_transaction_id) {
+          await this.ftRepo.delete(m.credit_transaction_id);
+        }
+        await this.ieRepo.delete(m.transaction_id);
+        await this.mappingRepo.delete(m.id);
       }
-      if (m.credit_transaction_id) {
-        await this.ftRepo.delete(m.credit_transaction_id);
-      }
-      await this.ieRepo.delete(m.transaction_id);
-      await this.mappingRepo.delete(m.id);
     }
 
     for (const line of lines) {
+      const existing = line.id ? mappingByTxId.get(line.id) : undefined;
       const [debitData, creditData] = this.buildTransactions(
         header,
         line,
         headerId,
       );
 
-      const debitTx = await this.ftRepo.create(debitData);
-      const creditTx = await this.ftRepo.create(creditData);
+      if (existing) {
+        if (existing.debit_transaction_id) {
+          await this.ftRepo.update(existing.debit_transaction_id, debitData);
+        }
+        if (existing.credit_transaction_id) {
+          await this.ftRepo.update(existing.credit_transaction_id, creditData);
+        }
 
-      const ie = await this.ieRepo.create(
-        this.buildEntry(header, line, headerId),
-      );
+        await this.ieRepo.update(
+          existing.transaction_id,
+          this.buildEntry(header, line, headerId),
+        );
+      } else {
+        const debitTx = await this.ftRepo.create(debitData);
+        const creditTx = await this.ftRepo.create(creditData);
 
-      await this.mappingRepo.create({
-        transaction_id: ie.id,
-        transaction_header_id: headerId,
-        debit_transaction_id: debitTx.id,
-        credit_transaction_id: creditTx.id,
-      });
+        const ie = await this.ieRepo.create(
+          this.buildEntry(header, line, headerId),
+        );
+
+        await this.mappingRepo.create({
+          transaction_id: ie.id,
+          transaction_header_id: headerId,
+          debit_transaction_id: debitTx.id,
+          credit_transaction_id: creditTx.id,
+        });
+      }
     }
 
     return { id: headerId } as any;
