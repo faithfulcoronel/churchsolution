@@ -50,7 +50,7 @@ function ChurchBranding() {
           <Building2 className="h-5 w-5 text-primary-600" />
         </div>
       )}
-      <div className="ml-2 min-w-0">
+      <div className="ml-2 min-w-0 hidden lg:block">
         <h1 
           ref={nameRef}
           className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate group relative"
