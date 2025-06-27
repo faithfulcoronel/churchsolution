@@ -18,6 +18,7 @@ function ChurchBranding() {
   // Create refs for checking text truncation
   const nameRef = React.useRef<HTMLHeadingElement>(null);
   const [isNameTruncated, setIsNameTruncated] = React.useState(false);
+  const [imageError, setImageError] = React.useState(false);
 
   // Check for truncation on mount and window resize
   React.useEffect(() => {
@@ -39,11 +40,12 @@ function ChurchBranding() {
 
   return (
     <div className="flex items-center w-full">
-      {tenant?.profile_picture_url ? (
+      {tenant?.profile_picture_url && !imageError ? (
         <img
           src={tenant.profile_picture_url}
           alt={tenant.name}
           className="h-8 w-8 rounded object-cover bg-white dark:bg-gray-700"
+          onError={() => setImageError(true)}
         />
       ) : (
         <div className="h-8 w-8 rounded bg-primary-100 flex items-center justify-center">
@@ -54,7 +56,7 @@ function ChurchBranding() {
         <div className="ml-2 min-w-0 hidden lg:block">
           <h1
             ref={nameRef}
-            className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate group relative max-w-[10rem]"
+            className="text-lg font-semibold text-gray-900 dark:text-gray-100 group relative max-w-[10rem] lg:max-w-none lg:overflow-visible lg:text-clip"
             title={isNameTruncated ? tenant?.name : undefined}
           >
           {tenant?.name || 'Church Admin'}
