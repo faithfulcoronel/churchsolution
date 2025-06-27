@@ -13,6 +13,8 @@ import {
   Crown,
   Sparkles,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Search,
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
@@ -20,9 +22,16 @@ import { navigation as baseNavigation, NavItem } from '../../config/navigation';
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
 }
 
-function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
+function Sidebar({
+  sidebarOpen,
+  setSidebarOpen,
+  collapsed,
+  setCollapsed,
+}: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
@@ -49,16 +58,23 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
 
   const renderItem = (item: NavItem, level = 0) => {
     const hasChildren = item.submenu && item.submenu.length > 0;
-    const padding = level === 0 ? 'px-3' : level === 1 ? 'pl-11 pr-3' : 'pl-16 pr-3';
+    const padding = collapsed
+      ? 'px-3'
+      : level === 0
+        ? 'px-3'
+        : level === 1
+          ? 'pl-11 pr-3'
+          : 'pl-16 pr-3';
 
     if (hasChildren) {
       return (
         <div key={item.name}>
           <button
             onClick={() => toggleSubmenu(item.name)}
+            title={collapsed ? item.name : undefined}
             className={`
               w-full group flex items-center justify-between rounded-lg ${padding} py-2 text-sm font-medium
-              transition-colors duration-200
+              transition-colors duration-200 ${collapsed ? 'justify-center' : ''}
               ${isNavItemActive(item)
                 ? 'bg-primary text-white'
                 : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -70,17 +86,21 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
               <item.icon
                 className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}
               />
-              <span className="ml-3">{item.name}</span>
+              {!collapsed && <span className="ml-3">{item.name}</span>}
             </div>
-            <ChevronDown
-              className={`h-4 w-4 transition-transform duration-200 ${isSubmenuOpen(item.name) ? 'rotate-180' : ''}`}
-            />
+            {!collapsed && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform duration-200 ${isSubmenuOpen(item.name) ? 'rotate-180' : ''}`}
+              />
+            )}
           </button>
-          <div
-            className={`mt-1 space-y-1 transition-all duration-200 ${isSubmenuOpen(item.name) ? 'max-h-96' : 'max-h-0 overflow-hidden'}`}
-          >
-            {item.submenu!.map((sub) => renderItem(sub, level + 1))}
-          </div>
+          {!collapsed && (
+            <div
+              className={`mt-1 space-y-1 transition-all duration-200 ${isSubmenuOpen(item.name) ? 'max-h-96' : 'max-h-0 overflow-hidden'}`}
+            >
+              {item.submenu!.map((sub) => renderItem(sub, level + 1))}
+            </div>
+          )}
         </div>
       );
     }
@@ -89,9 +109,10 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       <Link
         key={item.name}
         to={item.href || ''}
+        title={collapsed ? item.name : undefined}
         className={`
           group flex items-center rounded-lg ${padding} py-2 text-sm font-medium
-          transition-colors duration-200
+          transition-colors duration-200 ${collapsed ? 'justify-center' : ''}
           ${isNavItemActive(item)
             ? 'bg-primary text-white'
             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -100,9 +121,9 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
         `}
       >
         <item.icon
-          className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}
+          className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-gray-400 group-hover:text-white'} ${collapsed ? '' : 'mr-3'}`}
         />
-        {item.name}
+        {!collapsed && item.name}
       </Link>
     );
   };
@@ -131,7 +152,8 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
 
   // Handle submenu toggle
   const toggleSubmenu = (itemName: string) => {
-    setOpenSubmenus(prev => {
+    if (collapsed) return;
+    setOpenSubmenus((prev) => {
       const newOpenSubmenus = new Set(prev);
       if (newOpenSubmenus.has(itemName)) {
         newOpenSubmenus.delete(itemName);
@@ -152,7 +174,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   };
 
   React.useEffect(() => {
-    if (searchTerm) {
+    if (searchTerm && !collapsed) {
       const names = new Set<string>();
 
       const collect = (items: NavItem[]) => {
@@ -172,8 +194,15 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     }
   }, [searchTerm, filteredNavigation]);
 
+  React.useEffect(() => {
+    if (collapsed) {
+      setOpenSubmenus(new Set());
+    }
+  }, [collapsed]);
+
   // Check if a submenu is open
   const isSubmenuOpen = (itemName: string) => {
+    if (collapsed) return false;
     return openSubmenus.has(itemName);
   };
 
@@ -232,12 +261,16 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
       />
 
       {/* Sidebar */}
-      <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 flex flex-col
-        transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0
-      `}>
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-50 bg-gray-900 flex flex-col
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+          w-64 ${collapsed ? 'lg:w-16' : 'lg:w-64'}
+          transition-all
+        `}
+      >
         <div className="flex flex-col h-full px-2">
           {/* Logo */}
           <div className="flex-shrink-0 h-16 flex items-center justify-center px-4">
@@ -247,20 +280,22 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
           </div>
 
           {/* Search Bar */}
-          <div className="px-2 py-4">
-            <Input
-              placeholder="Search menu..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              icon={<Search className="h-4 w-4" />}
-              className="bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500 focus:border-primary focus:ring-primary"
-            />
-          </div>
+          {!collapsed && (
+            <div className="px-2 py-4">
+              <Input
+                placeholder="Search menu..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                icon={<Search className="h-4 w-4" />}
+                className="bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500 focus:border-primary focus:ring-primary"
+              />
+            </div>
+          )}
 
-          <Separator className="bg-gray-800" />
+          {!collapsed && <Separator className="bg-gray-800" />}
 
           {/* Navigation - Scrollable Area */}
-          <Scrollable className="flex-1 py-4" shadow={false}>
+          <Scrollable className={`flex-1 ${collapsed ? 'py-2' : 'py-4'}`} shadow={false}>
             <nav className="space-y-1">
               {filteredNavigation.map((item) => renderItem(item))}
 
@@ -276,65 +311,77 @@ function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
           {/* Bottom Section - Fixed */}
           <div className="flex-shrink-0 border-t border-gray-800 p-4 space-y-4">
             {/* Subscribe Button */}
-            <Link 
-              to="/settings/subscription" 
-              className="block"
-              aria-label="Manage Subscription"
-            >
-              <div className={`
-                relative overflow-hidden rounded-xl group
-                transition-all duration-300
-                hover:shadow-2xl hover:-translate-y-1
-                ${tenant?.subscription_tier === 'free'
-                  ? 'bg-gradient-to-r from-primary-600 to-primary-400'
-                  : 'bg-gradient-to-r from-primary-700 to-primary-500'
-                }
-              `}>
-                {/* Animated Background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-30 blur-lg animate-pulse" />
+            {!collapsed && (
+              <Link
+                to="/settings/subscription"
+                className="block"
+                aria-label="Manage Subscription"
+              >
+                <div className={`
+                  relative overflow-hidden rounded-xl group
+                  transition-all duration-300
+                  hover:shadow-2xl hover:-translate-y-1
+                  ${tenant?.subscription_tier === 'free'
+                    ? 'bg-gradient-to-r from-primary-600 to-primary-400'
+                    : 'bg-gradient-to-r from-primary-700 to-primary-500'
+                  }
+                `}>
+                  {/* Animated Background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-30 blur-lg animate-pulse" />
 
-                {/* Content */}
-                <div className="relative p-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Crown className={`
-                      h-5 w-5 text-white
-                      ${tenant?.subscription_tier === 'free' ? 'animate-pulse' : ''}
-                    `} />
-                    <div>
-                      <p className="text-white font-semibold">
-                        {tenant?.subscription_tier === 'free' ? 'Subscribe Now' : 'Upgrade Plan'}
-                      </p>
-                      <p className="text-xs text-white/80">
-                        {tenant?.subscription_tier === 'free' ? 'Unlock premium features' : 'Explore more features'}
-                      </p>
+                  {/* Content */}
+                  <div className="relative p-4 flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Crown className={`
+                        h-5 w-5 text-white
+                        ${tenant?.subscription_tier === 'free' ? 'animate-pulse' : ''}
+                      `} />
+                      <div>
+                        <p className="text-white font-semibold">
+                          {tenant?.subscription_tier === 'free' ? 'Subscribe Now' : 'Upgrade Plan'}
+                        </p>
+                        <p className="text-xs text-white/80">
+                          {tenant?.subscription_tier === 'free' ? 'Unlock premium features' : 'Explore more features'}
+                        </p>
+                      </div>
                     </div>
+                    <Sparkles className="h-5 w-5 text-white opacity-75 group-hover:opacity-100" />
                   </div>
-                  <Sparkles className="h-5 w-5 text-white opacity-75 group-hover:opacity-100" />
-                </div>
 
-                {/* Animated Border */}
-                {tenant?.subscription_tier === 'free' && (
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-white to-yellow-400 animate-[shimmer_2s_infinite_linear]" />
-                )}
-              </div>
-            </Link>
+                  {/* Animated Border */}
+                  {tenant?.subscription_tier === 'free' && (
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-white to-yellow-400 animate-[shimmer_2s_infinite_linear]" />
+                  )}
+                </div>
+              </Link>
+            )}
 
             {/* Settings Button */}
             <Button
               variant="ghost"
               className={`
-                w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800
+                w-full ${collapsed ? 'justify-center' : 'justify-start'} text-gray-300 hover:text-white hover:bg-gray-800
                 ${location.pathname.startsWith('/settings') ? 'bg-primary text-white' : ''}
               `}
               onClick={() => navigate('/settings')}
             >
-              <SettingsIcon className={`h-5 w-5 mr-2 ${location.pathname.startsWith('/settings') ? 'text-white' : ''}`} />
-              Settings
-              {tenant?.subscription_tier === 'free' && (
+              <SettingsIcon className={`h-5 w-5 ${collapsed ? '' : 'mr-2'} ${location.pathname.startsWith('/settings') ? 'text-white' : ''}`} />
+              {!collapsed && 'Settings'}
+              {!collapsed && tenant?.subscription_tier === 'free' && (
                 <Badge variant="primary" className="ml-auto">
                   Free
                 </Badge>
               )}
+            </Button>
+
+            {/* Collapse Button */}
+            <Button
+              variant="ghost"
+              className={`w-full ${collapsed ? 'justify-center' : 'justify-start'} text-gray-300 hover:text-white hover:bg-gray-800`}
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5 mr-2" />}
+              {!collapsed && 'Collapse'}
             </Button>
           </div>
         </div>

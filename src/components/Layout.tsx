@@ -6,6 +6,7 @@ import Footer from './Footer';
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
   
   // Check if current page is settings
@@ -14,10 +15,17 @@ function Layout() {
   return (
     <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        collapsed={sidebarCollapsed}
+        setCollapsed={setSidebarCollapsed}
+      />
 
       {/* Main content wrapper */}
-      <div className="flex-1 flex flex-col min-h-screen lg:pl-64 pb-24">
+      <div
+        className={`flex-1 flex flex-col min-h-screen pb-24 transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}
+      >
         {/* Top navigation */}
         <Topbar setSidebarOpen={setSidebarOpen} />
 
