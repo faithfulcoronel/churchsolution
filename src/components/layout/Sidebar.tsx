@@ -302,7 +302,7 @@ function Sidebar({
               alt="StewardTrack Logo"
               className="h-8"
             />
-            <div className="flex items-center space-x-1">
+            <div className="hidden lg:flex items-center space-x-1">
               <Button
                 variant="ghost"
                 size="icon"
