@@ -39,7 +39,8 @@ type Transaction = {
   id: string;
   type: 'income' | 'expense';
   category_id: string;
-  amount: number;
+  debit: number;
+  credit: number;
   description: string;
   date: string;
   member?: {
@@ -98,7 +99,13 @@ function BudgetProfile() {
       const { data, error } = await supabase
         .from('financial_transactions')
         .select(`
-          *,
+          id,
+          type,
+          category_id,
+          debit,
+          credit,
+          description,
+          date,
           member:member_id (
             first_name,
             last_name
@@ -136,7 +143,11 @@ function BudgetProfile() {
     return matchesSearch && matchesType && matchesCategory;
   });
 
-  const totalExpenses = transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+  const totalExpenses =
+    transactions?.reduce(
+      (sum, t) => sum + Number(t.debit || 0) - Number(t.credit || 0),
+      0
+    ) || 0;
   const remainingBudget = budget ? budget.amount - totalExpenses : 0;
   const usagePercentage = budget ? (totalExpenses / budget.amount) * 100 : 0;
 
@@ -332,7 +343,7 @@ function BudgetProfile() {
                             : 'text-destructive'
                         }
                       >
-                        {formatCurrency(transaction.amount, currency)}
+                        {formatCurrency(transaction.debit - transaction.credit, currency)}
                       </span>
                     </td>
                   </tr>
