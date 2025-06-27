@@ -112,13 +112,29 @@ export class BaseAdapter<T extends BaseModel> {
       }
     };
 
-    if (Array.isArray(filter)) {
-      return query.or(
-        filter.map(f => `${key}.${f.operator}.${f.value}`).join(',')
-      );
-    } else {
-      return applyFilter(filter.operator, filter.value, filter.valueTo);
+    if (key === 'or') {
+      if (Array.isArray(filter)) {
+        return query.or(
+          filter
+            .map(f =>
+              f.field
+                ? `${f.field}.${f.operator}.${f.value}`
+                : `${key}.${f.operator}.${f.value}`
+            )
+            .join(',')
+        );
+      } else if (typeof filter === 'string') {
+        return query.or(filter);
+      } else if (filter?.field) {
+        return query.or(`${filter.field}.${filter.operator}.${filter.value}`);
+      }
     }
+
+    if (Array.isArray(filter)) {
+      return query.or(filter.map(f => `${key}.${f.operator}.${f.value}`).join(','));
+    }
+
+    return applyFilter(filter.operator, filter.value, filter.valueTo);
   }
 
   protected buildRelationshipQuery(relationships: QueryOptions['relationships'] = []): string {
