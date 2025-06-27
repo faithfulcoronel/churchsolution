@@ -15,10 +15,11 @@ export function useIncomeExpenseService(transactionType: TransactionType) {
   const createMutation = useMutation({
     mutationFn: ({ header, entries }: { header: Partial<FinancialTransactionHeader>; entries: IncomeExpenseEntryBase[] }) =>
       service.create(header, entries.map(e => ({ ...e, transaction_type: transactionType }))),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
-      NotificationService.showSuccess('Transaction created successfully');
-    },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
+        queryClient.invalidateQueries({ queryKey: ['income_expense_transactions'] });
+        NotificationService.showSuccess('Transaction created successfully');
+      },
     onError: (error: Error) => {
       NotificationService.showError(error.message, 5000);
     }
@@ -27,10 +28,11 @@ export function useIncomeExpenseService(transactionType: TransactionType) {
   const updateMutation = useMutation({
     mutationFn: ({ id, header, entries }: { id: string; header: Partial<FinancialTransactionHeader>; entries: IncomeExpenseEntryBase[] }) =>
       service.updateBatch(id, header, entries.map(e => ({ ...e, transaction_type: transactionType }))),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
-      NotificationService.showSuccess('Transaction updated successfully');
-    },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
+        queryClient.invalidateQueries({ queryKey: ['income_expense_transactions'] });
+        NotificationService.showSuccess('Transaction updated successfully');
+      },
     onError: (error: Error) => {
       NotificationService.showError(error.message, 5000);
     }
