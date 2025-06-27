@@ -191,6 +191,11 @@ export function DataGrid({
     [theme]
   );
 
+  React.useEffect(() => {
+    const lastPage = Math.max(0, Math.ceil(totalRows / pageSize) - 1);
+    if (page > lastPage) onPageChange?.(lastPage);
+  }, [totalRows, pageSize, page]);
+
   // Handle pagination changes
   const handlePaginationModelChange = (model: GridPaginationModel) => {
     onPageChange?.(model.page);
