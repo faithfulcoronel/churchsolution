@@ -22,18 +22,23 @@ function FundList() {
 
   const { data: result, isLoading, error } = useFundsQuery({
     pagination: { page: page + 1, pageSize },
+    filters: {
+      ...(searchTerm
+        ? {
+            or: [
+              { field: 'code', operator: 'ilike', value: `%${searchTerm}%` },
+              { field: 'name', operator: 'ilike', value: `%${searchTerm}%` },
+              { field: 'description', operator: 'ilike', value: `%${searchTerm}%` },
+            ],
+          }
+        : {}),
+      ...(typeFilter !== 'all'
+        ? { type: { operator: 'eq', value: typeFilter } }
+        : {}),
+    },
   });
   const funds = result?.data || [];
-
-  const filteredFunds = funds.filter((fund: Fund) => {
-    const search = searchTerm.toLowerCase();
-    const matchesSearch =
-      fund.code.toLowerCase().includes(search) ||
-      fund.name.toLowerCase().includes(search) ||
-      (fund.description ? fund.description.toLowerCase().includes(search) : false);
-    const matchesType = typeFilter === 'all' || fund.type === typeFilter;
-    return matchesSearch && matchesType;
-  });
+  const totalCount = result?.count;
 
   const columns: GridColDef[] = [
     {
@@ -128,8 +133,8 @@ function FundList() {
             ) : (
               <DataGrid<Fund>
                 columns={columns}
-                data={filteredFunds}
-                totalRows={filteredFunds.length}
+                data={funds}
+                totalRows={totalCount ?? 0}
                 loading={isLoading}
                 error={error instanceof Error ? error.message : undefined}
                 onPageChange={handlePageChange}
