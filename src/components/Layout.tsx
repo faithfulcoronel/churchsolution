@@ -44,7 +44,7 @@ function Layout() {
         </main>
 
         {/* Footer */}
-        <Footer />
+        <Footer sidebarCollapsed={sidebarCollapsed} />
       </div>
     </div>
   );
