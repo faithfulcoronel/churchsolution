@@ -32,7 +32,7 @@ function AccountList() {
   const { useQuery: useAccountsQuery } = useAccountRepository();
   
   // Get accounts
-  const { data: result, isLoading } = useAccountsQuery();
+  const { data: result, isLoading, error } = useAccountsQuery();
   const accounts = result?.data || [];
   
   // Filter accounts
@@ -235,6 +235,7 @@ function AccountList() {
                 data={filteredAccounts}
                 totalRows={filteredAccounts.length}
                 loading={isLoading}
+                error={error instanceof Error ? error.message : undefined}
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
                 getRowId={(row) => row.id}

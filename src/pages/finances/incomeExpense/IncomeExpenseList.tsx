@@ -19,7 +19,11 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
   const { useQuery: useEntryQuery } = useIncomeExpenseTransactionRepository();
   const { useQuery: useHeaderQuery } = useFinancialTransactionHeaderRepository();
 
-  const { data: entryResult, isLoading: entriesLoading } = useEntryQuery({
+  const {
+    data: entryResult,
+    isLoading: entriesLoading,
+    error: entriesError,
+  } = useEntryQuery({
     filters: { transaction_type: { operator: 'eq', value: transactionType } },
   });
 
@@ -35,7 +39,11 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
     [entryResult]
   );
 
-  const { data: headerResult, isLoading: headerLoading } = useHeaderQuery({
+  const {
+    data: headerResult,
+    isLoading: headerLoading,
+    error: headerError,
+  } = useHeaderQuery({
     filters: { id: { operator: 'isAnyOf', value: headerIds } },
     order: { column: 'transaction_date', ascending: false },
     enabled: headerIds.length > 0,
@@ -80,6 +88,13 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
               data={headers}
               totalRows={headers.length}
               loading={isLoading}
+              error={
+                entriesError instanceof Error
+                  ? entriesError.message
+                  : headerError instanceof Error
+                    ? headerError.message
+                    : undefined
+              }
               onPageChange={setPage}
               onPageSizeChange={setPageSize}
               getRowId={(row) => row.id}
