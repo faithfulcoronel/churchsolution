@@ -186,6 +186,10 @@ function FundProfile() {
             <CardContent className="pt-0">
               <dl className="divide-y divide-border">
                 <div className="py-3 grid grid-cols-3 gap-4">
+                  <dt className="text-sm font-medium text-muted-foreground">Code</dt>
+                  <dd className="text-sm text-foreground col-span-2">{fund.code}</dd>
+                </div>
+                <div className="py-3 grid grid-cols-3 gap-4">
                   <dt className="text-sm font-medium text-muted-foreground">Name</dt>
                   <dd className="text-sm text-foreground col-span-2">{fund.name}</dd>
                 </div>

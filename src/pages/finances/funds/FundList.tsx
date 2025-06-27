@@ -28,6 +28,7 @@ function FundList() {
   const filteredFunds = funds.filter((fund: Fund) => {
     const search = searchTerm.toLowerCase();
     const matchesSearch =
+      fund.code.toLowerCase().includes(search) ||
       fund.name.toLowerCase().includes(search) ||
       (fund.description ? fund.description.toLowerCase().includes(search) : false);
     const matchesType = typeFilter === 'all' || fund.type === typeFilter;
@@ -35,6 +36,12 @@ function FundList() {
   });
 
   const columns: GridColDef[] = [
+    {
+      field: 'code',
+      headerName: 'Code',
+      flex: 1,
+      minWidth: 100,
+    },
     {
       field: 'name',
       headerName: 'Fund Name',

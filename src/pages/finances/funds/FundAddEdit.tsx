@@ -9,7 +9,7 @@ import { Button } from '../../../components/ui2/button';
 import BackButton from '../../../components/BackButton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
 
-import { Save, Loader2, AlertCircle } from 'lucide-react';
+import { Save, Loader2, AlertCircle, Hash } from 'lucide-react';
 
 function FundAddEdit() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +19,7 @@ function FundAddEdit() {
   const { useQuery: useFundQuery, useCreate, useUpdate } = useFundRepository();
 
   const [formData, setFormData] = useState<Partial<Fund>>({
+    code: '',
     name: '',
     description: '',
     type: 'unrestricted',
@@ -46,6 +47,11 @@ function FundAddEdit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!formData.code?.trim()) {
+      setError('Fund code is required');
+      return;
+    }
 
     if (!formData.name?.trim()) {
       setError('Fund name is required');
@@ -91,7 +97,17 @@ function FundAddEdit() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
+              <div>
+                <Input
+                  label="Code"
+                  required
+                  value={formData.code || ''}
+                  onChange={(e) => handleInputChange('code', e.target.value)}
+                  placeholder="Enter fund code"
+                  icon={<Hash className="h-4 w-4" />}
+                />
+              </div>
+              <div>
                 <Input
                   label="Fund Name"
                   required
