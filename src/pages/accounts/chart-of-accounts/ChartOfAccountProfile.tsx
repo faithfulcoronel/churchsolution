@@ -59,7 +59,11 @@ function ChartOfAccountProfile() {
   
   // Get account details
   const { useQuery, useDelete } = useChartOfAccountRepository();
-  const { data: accountData, isLoading: isAccountLoading } = useQuery({
+  const {
+    data: accountData,
+    isLoading: isAccountLoading,
+    error: accountError,
+  } = useQuery({
     filters: {
       id: {
         operator: 'eq',
@@ -80,13 +84,21 @@ function ChartOfAccountProfile() {
   
   // Get account balance
   const { useAccountBalance, useAccountTransactions } = useAccountingReports();
-  const { data: balance, isLoading: isBalanceLoading } = useAccountBalance(
+  const {
+    data: balance,
+    isLoading: isBalanceLoading,
+    error: balanceError,
+  } = useAccountBalance(
     id || '', 
     dateRange.to.toISOString().split('T')[0]
   );
   
   // Get account transactions
-  const { data: transactions, isLoading: isTransactionsLoading } = useAccountTransactions(
+  const {
+    data: transactions,
+    isLoading: isTransactionsLoading,
+    error: transactionsError,
+  } = useAccountTransactions(
     id || '',
     dateRange.from.toISOString().split('T')[0],
     dateRange.to.toISOString().split('T')[0]
@@ -535,6 +547,11 @@ function ChartOfAccountProfile() {
             columns={columns}
             data={transactionRows}
             loading={isTransactionsLoading}
+            error={
+              transactionsError instanceof Error
+                ? transactionsError.message
+                : undefined
+            }
             totalRows={transactionRows.length}
             autoHeight
             getRowId={(row) => row.id}

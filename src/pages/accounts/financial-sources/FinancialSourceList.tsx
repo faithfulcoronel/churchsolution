@@ -22,7 +22,7 @@ function FinancialSourceList() {
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
   
   // Get sources
-  const { data: result, isLoading } = useSourcesQuery();
+  const { data: result, isLoading, error } = useSourcesQuery();
   const sources = result?.data || [];
   
   // Filter sources
@@ -217,6 +217,7 @@ function FinancialSourceList() {
                 data={filteredSources}
                 totalRows={filteredSources.length}
                 loading={isLoading}
+                error={error instanceof Error ? error.message : undefined}
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
                 getRowId={(row) => row.id}

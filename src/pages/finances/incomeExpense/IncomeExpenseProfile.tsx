@@ -18,7 +18,11 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
   const navigate = useNavigate();
   const { useQuery } = useFinancialTransactionHeaderRepository();
   const { getByHeaderId } = useIncomeExpenseTransactionRepository();
-  const { data: headerData, isLoading: headerLoading } = useQuery({
+  const {
+    data: headerData,
+    isLoading: headerLoading,
+    error: headerError,
+  } = useQuery({
     filters: { id: { operator: 'eq', value: id } },
     enabled: !!id,
   });
@@ -26,13 +30,22 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
 
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [entriesError, setEntriesError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadEntries = async () => {
       if (id) {
-        const data = await getByHeaderId(id);
-        setEntries(data || []);
-        setLoading(false);
+        try {
+          const data = await getByHeaderId(id);
+          setEntries(data || []);
+        } catch (err) {
+          console.error('Error loading entries:', err);
+          setEntriesError(
+            err instanceof Error ? err.message : 'Failed to load entries'
+          );
+        } finally {
+          setLoading(false);
+        }
       }
     };
     loadEntries();
@@ -124,6 +137,9 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
             data={entries}
             totalRows={entries.length}
             loading={loading}
+            error={
+              entriesError ?? (headerError instanceof Error ? headerError.message : undefined)
+            }
             autoHeight
           />
         </CardContent>

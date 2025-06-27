@@ -90,7 +90,7 @@ function TransactionList() {
   const updateMutation = useUpdate();
   const { hasPermission } = usePermissions();
   
-  const { data: result, isLoading } = useQuery({
+  const { data: result, isLoading, error } = useQuery({
     filters: {
       transaction_date: {
         operator: 'between',
@@ -475,6 +475,7 @@ function TransactionList() {
             data={filteredTransactions}
             totalRows={filteredTransactions.length}
             loading={isLoading}
+            error={error instanceof Error ? error.message : undefined}
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
             getRowId={(row) => row.id}

@@ -20,7 +20,7 @@ function FundList() {
 
   const { useQuery: useFundsQuery } = useFundRepository();
 
-  const { data: result, isLoading } = useFundsQuery({
+  const { data: result, isLoading, error } = useFundsQuery({
     pagination: { page: page + 1, pageSize },
   });
   const funds = result?.data || [];
@@ -131,6 +131,7 @@ function FundList() {
                 data={filteredFunds}
                 totalRows={filteredFunds.length}
                 loading={isLoading}
+                error={error instanceof Error ? error.message : undefined}
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
                 onRowClick={handleRowClick}

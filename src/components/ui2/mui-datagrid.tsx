@@ -6,6 +6,7 @@ import {
   GridPaginationModel,
   GridSortModel,
   GridToolbar,
+  GridOverlay,
 } from '@mui/x-data-grid';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
@@ -145,6 +146,16 @@ const StyledDataGrid = styled(MuiDataGrid)(({ theme }) => ({
   },
 }));
 
+function ErrorOverlay({ message }: { message?: string }) {
+  return (
+    <GridOverlay>
+      <div className="p-4 text-destructive text-sm text-center w-full">
+        {message || 'An error occurred while loading data.'}
+      </div>
+    </GridOverlay>
+  );
+}
+
 export function DataGrid({
   data = [],
   totalRows = 0,
@@ -195,14 +206,17 @@ export function DataGrid({
         disableColumnFilter={false}
         disableColumnSelector={false}
         disableDensitySelector={false}
+        error={!!error}
         slots={{
           toolbar: GridToolbar,
+          ...(error ? { errorOverlay: ErrorOverlay } : {}),
         }}
         slotProps={{
           toolbar: {
             showQuickFilter: true,
             quickFilterProps: { debounceMs: 500 },
           },
+          ...(error ? { errorOverlay: { message: error } } : {}),
         }}
         onPaginationModelChange={handlePaginationModelChange}
         onSortModelChange={onSortChange}

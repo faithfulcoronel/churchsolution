@@ -40,7 +40,7 @@ function MemberList() {
   const { useQuery, useDelete } = useMemberRepository();
 
   // Get members with repository
-  const { data: result, isLoading } = useQuery({
+  const { data: result, isLoading, error } = useQuery({
     pagination: {
       page: page + 1, // MUI Data Grid uses 0-based pages
       pageSize,
@@ -226,6 +226,7 @@ function MemberList() {
             columns={columns}
             totalRows={result?.count || 0}
             loading={isLoading}
+            error={error instanceof Error ? error.message : undefined}
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
             onSortChange={setSortModel}
