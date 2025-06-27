@@ -27,6 +27,7 @@ export interface DataGridProps<T> extends Omit<MuiDataGridProps<T>, 'rows'> {
   pageSizeOptions?: number[];
   loading?: boolean;
   error?: string;
+  paginationMode?: 'client' | 'server';
 }
 
 // Style the DataGrid to match our theme
@@ -133,6 +134,7 @@ export function DataGrid<T>({
   pageSizeOptions = [5, 10, 25, 50, 100],
   loading = false,
   error,
+  paginationMode = 'server',
   columns,
   ...props
 }: DataGridProps<T>) {
@@ -179,7 +181,7 @@ export function DataGrid<T>({
         rowCount={totalRows}
         loading={loading}
         pageSizeOptions={pageSizeOptions}
-        paginationMode="server"
+        paginationMode={paginationMode}
         sortingMode="server"
         filterMode="server"
         disableColumnFilter={false}

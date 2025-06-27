@@ -101,6 +101,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
               getRowId={(row) => row.id}
               onRowClick={(params) => navigate(`/finances/${basePath}/${params.id}`)}
               autoHeight
+              paginationMode="client"
               page={page}
               pageSize={pageSize}
             />
