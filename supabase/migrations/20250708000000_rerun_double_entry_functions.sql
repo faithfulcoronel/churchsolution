@@ -21,6 +21,7 @@ COMMENT ON FUNCTION refresh_offering_batch_total(uuid) IS
   'Recalculates the total amount for the specified offering batch';
 
 -- Ensure restricted fund balances use debit and credit
+DROP TRIGGER IF EXISTS check_fund_balance_trigger ON financial_transactions;
 DROP FUNCTION IF EXISTS check_fund_balance();
 CREATE OR REPLACE FUNCTION check_fund_balance()
 RETURNS TRIGGER AS $$
@@ -61,7 +62,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS check_fund_balance_trigger ON financial_transactions;
 CREATE TRIGGER check_fund_balance_trigger
 BEFORE INSERT OR UPDATE ON financial_transactions
 FOR EACH ROW EXECUTE FUNCTION check_fund_balance();
