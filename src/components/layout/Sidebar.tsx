@@ -15,6 +15,8 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Pin,
+  PinOff,
   Search,
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
@@ -24,6 +26,8 @@ interface SidebarProps {
   setSidebarOpen: (open: boolean) => void;
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
+  pinned: boolean;
+  setPinned: (pinned: boolean) => void;
 }
 
 function Sidebar({
@@ -31,12 +35,23 @@ function Sidebar({
   setSidebarOpen,
   collapsed,
   setCollapsed,
+  pinned,
+  setPinned,
 }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Collapse sidebar when unpinned
+  React.useEffect(() => {
+    if (pinned) {
+      setCollapsed(false);
+    } else {
+      setCollapsed(true);
+    }
+  }, [pinned, setCollapsed]);
 
   // Get current tenant
   const { data: tenant } = useQuery({
@@ -270,12 +285,48 @@ function Sidebar({
           w-64 ${collapsed ? 'lg:w-16' : 'lg:w-64'}
           transition-all
         `}
+        onMouseEnter={() => {
+          if (!pinned) {
+            setCollapsed(false);
+          }
+        }}
+        onMouseLeave={() => {
+          if (!pinned) {
+            setCollapsed(true);
+          }
+        }}
       >
         <div className="flex flex-col h-full px-2">
-          {/* Logo */}
-          <div className="flex-shrink-0 h-16 flex items-center justify-center px-4">
-            <div className="flex items-center space-x-2">
-              <img src="/logo_long.svg" alt="StewardTrack Logo with name"/>
+          {/* Logo and controls */}
+          <div className="flex-shrink-0 h-16 flex items-center justify-between px-4">
+            <img
+              src={collapsed ? '/logo_square.svg' : '/logo_long.svg'}
+              alt="StewardTrack Logo"
+              className="h-8"
+            />
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setPinned(!pinned)}
+                title={pinned ? 'Unpin sidebar' : 'Pin sidebar'}
+              >
+                {pinned ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />}
+              </Button>
+              {pinned && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCollapsed(!collapsed)}
+                  title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                >
+                  {collapsed ? (
+                    <ChevronRight className="h-5 w-5" />
+                  ) : (
+                    <ChevronLeft className="h-5 w-5" />
+                  )}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -374,15 +425,6 @@ function Sidebar({
               )}
             </Button>
 
-            {/* Collapse Button */}
-            <Button
-              variant="ghost"
-              className={`w-full ${collapsed ? 'justify-center' : 'justify-start'} text-gray-300 hover:text-white hover:bg-gray-800`}
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5 mr-2" />}
-              {!collapsed && 'Collapse'}
-            </Button>
           </div>
         </div>
       </aside>
