@@ -50,12 +50,13 @@ function ChurchBranding() {
           <Building2 className="h-5 w-5 text-primary-600" />
         </div>
       )}
-      <div className="ml-2 min-w-0">
-        <h1 
-          ref={nameRef}
-          className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate group relative"
-          title={isNameTruncated ? tenant?.name : undefined}
-        >
+        {/* Hide church name on small and medium screens */}
+        <div className="ml-2 min-w-0 hidden lg:block">
+          <h1
+            ref={nameRef}
+            className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate group relative max-w-[10rem]"
+            title={isNameTruncated ? tenant?.name : undefined}
+          >
           {tenant?.name || 'Church Admin'}
           {isNameTruncated && (
             <div className="absolute left-0 -bottom-1 translate-y-full invisible group-hover:visible bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-100 text-sm py-1 px-2 rounded shadow-lg whitespace-nowrap z-50">
