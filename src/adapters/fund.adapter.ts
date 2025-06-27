@@ -20,6 +20,7 @@ export class FundAdapter
 
   protected defaultSelect = `
     id,
+    code,
     name,
     description,
     type,
