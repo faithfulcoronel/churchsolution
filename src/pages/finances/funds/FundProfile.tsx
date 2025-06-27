@@ -56,7 +56,8 @@ function FundProfile() {
         .select(`
           id,
           type,
-          amount,
+          debit,
+          credit,
           date,
           description,
           category:category_id (name)
@@ -185,6 +186,10 @@ function FundProfile() {
             <CardContent className="pt-0">
               <dl className="divide-y divide-border">
                 <div className="py-3 grid grid-cols-3 gap-4">
+                  <dt className="text-sm font-medium text-muted-foreground">Code</dt>
+                  <dd className="text-sm text-foreground col-span-2">{fund.code}</dd>
+                </div>
+                <div className="py-3 grid grid-cols-3 gap-4">
                   <dt className="text-sm font-medium text-muted-foreground">Name</dt>
                   <dd className="text-sm text-foreground col-span-2">{fund.name}</dd>
                 </div>
@@ -257,9 +262,9 @@ function FundProfile() {
                           </td>
                           <td className="px-6 py-4 text-sm text-foreground">{transaction.description}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                            <span className={transaction.type === 'income' ? 'text-success' : 'text-destructive'}>
-                              {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
-                            </span>
+                          <span className={transaction.type === 'income' ? 'text-success' : 'text-destructive'}>
+                              {transaction.type === 'income' ? '+' : '-'}${(transaction.debit - transaction.credit).toFixed(2)}
+                          </span>
                           </td>
                         </tr>
                       ))}

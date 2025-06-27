@@ -247,7 +247,6 @@ export class FinancialTransactionHeaderAdapter
         `
         id,
         type,
-        amount,
         description,
         date,
         debit,

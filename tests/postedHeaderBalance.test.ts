@@ -3,10 +3,10 @@ import { isTransactionsBalanced } from '../src/utils/accounting';
 
 describe('posted transaction headers', () => {
   const sample = [
-    { header_id: 'h1', debit: 100, credit: 0, fund_id: 'f1', batch_id: 'b1', amount: 100 },
-    { header_id: 'h1', debit: 0, credit: 100, fund_id: 'f1', batch_id: 'b1', amount: -100 },
-    { header_id: 'h2', debit: 50, credit: 0, fund_id: 'f2', batch_id: 'b2', amount: 50 },
-    { header_id: 'h2', debit: 0, credit: 50, fund_id: 'f2', batch_id: 'b2', amount: -50 }
+    { header_id: 'h1', debit: 100, credit: 0, fund_id: 'f1', batch_id: 'b1' },
+    { header_id: 'h1', debit: 0, credit: 100, fund_id: 'f1', batch_id: 'b1' },
+    { header_id: 'h2', debit: 50, credit: 0, fund_id: 'f2', batch_id: 'b2' },
+    { header_id: 'h2', debit: 0, credit: 50, fund_id: 'f2', batch_id: 'b2' }
   ];
 
   it('ensures each posted header is balanced', () => {
@@ -28,7 +28,8 @@ describe('posted transaction headers', () => {
   it('aggregates totals by batch after migration', () => {
     const batchTotals: Record<string, number> = {};
     for (const t of sample) {
-      batchTotals[t.batch_id] = (batchTotals[t.batch_id] ?? 0) + (t.amount ?? 0);
+      batchTotals[t.batch_id] =
+        (batchTotals[t.batch_id] ?? 0) + (t.debit || 0) - (t.credit || 0);
     }
     expect(batchTotals['b1']).toBe(0);
     expect(batchTotals['b2']).toBe(0);

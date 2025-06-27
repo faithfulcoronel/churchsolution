@@ -22,7 +22,6 @@ export class FinancialTransactionAdapter
   protected defaultSelect = `
     id,
     type,
-    amount,
     description,
     date,
     budget_id,

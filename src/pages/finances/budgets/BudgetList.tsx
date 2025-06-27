@@ -95,13 +95,17 @@ function BudgetList() {
         (budgets || []).map(async (budget) => {
           const { data: transactions, error: transactionsError } = await supabase
             .from('financial_transactions')
-            .select('amount')
+            .select('debit, credit')
             .eq('budget_id', budget.id)
             .eq('type', 'expense');
 
           if (transactionsError) throw transactionsError;
 
-          const used_amount = transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+          const used_amount =
+            transactions?.reduce(
+              (sum, t) => sum + Number(t.debit || 0) - Number(t.credit || 0),
+              0
+            ) || 0;
           const transaction_count = transactions?.length || 0;
 
           return {
