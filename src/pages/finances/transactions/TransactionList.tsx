@@ -9,6 +9,7 @@ import { Input } from '../../../components/ui2/input';
 import { DateRangePickerField } from '../../../components/ui2/date-range-picker-field';
 import { Badge } from '../../../components/ui2/badge';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
+import { FinancialTransactionHeader } from '../../../models/financialTransactionHeader.model';
 import { 
   Plus, 
   Search, 
@@ -470,7 +471,7 @@ function TransactionList() {
           </CardHeader>
           
           <CardContent className="p-0">
-          <DataGrid
+          <DataGrid<FinancialTransactionHeader>
             columns={columns}
             data={filteredTransactions}
             totalRows={filteredTransactions.length}

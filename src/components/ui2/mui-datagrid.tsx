@@ -13,8 +13,8 @@ import { useTheme } from '@mui/material/styles';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 // Extend the MUI DataGrid props to include our custom props
-export interface DataGridProps extends Omit<MuiDataGridProps, 'rows'> {
-  data?: any[];
+export interface DataGridProps<T> extends Omit<MuiDataGridProps<T>, 'rows'> {
+  data?: T[];
   totalRows?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
@@ -156,7 +156,7 @@ function ErrorOverlay({ message }: { message?: string }) {
   );
 }
 
-export function DataGrid({
+export function DataGrid<T>({
   data = [],
   totalRows = 0,
   onPageChange,
@@ -170,7 +170,7 @@ export function DataGrid({
   error,
   columns,
   ...props
-}: DataGridProps) {
+}: DataGridProps<T>) {
   const theme = useTheme();
 
   // Create a custom theme that inherits from the current theme.

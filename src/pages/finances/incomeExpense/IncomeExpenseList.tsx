@@ -5,6 +5,7 @@ import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeE
 import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
+import { FinancialTransactionHeader } from '../../../models/financialTransactionHeader.model';
 import { GridColDef } from '@mui/x-data-grid';
 import { Plus } from 'lucide-react';
 
@@ -83,7 +84,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       <div className="mt-6">
         <Card className="dark:bg-slate-800">
           <CardContent className="p-0">
-            <DataGrid
+            <DataGrid<FinancialTransactionHeader>
               columns={columns}
               data={headers}
               totalRows={headers.length}

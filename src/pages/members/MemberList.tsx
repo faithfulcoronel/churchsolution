@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GridColDef, GridValueGetterParams, GridFilterModel, GridSortModel } from '@mui/x-data-grid';
 import { useMemberRepository } from '../../hooks/useMemberRepository';
+import { Member } from '../../models/member.model';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
 import { DataGrid } from '../../components/ui2/mui-datagrid';
 import { Button } from '../../components/ui2/button';
@@ -221,7 +222,7 @@ function MemberList() {
 
       <Card className="mt-6">
         <div style={{ height: 600, width: '100%' }}>
-          <DataGrid
+          <DataGrid<Member>
             data={result?.data || []}
             columns={columns}
             totalRows={result?.count || 0}

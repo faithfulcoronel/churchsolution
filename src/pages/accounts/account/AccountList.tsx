@@ -230,7 +230,7 @@ function AccountList() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <DataGrid
+              <DataGrid<Account>
                 columns={columns}
                 data={filteredAccounts}
                 totalRows={filteredAccounts.length}

@@ -5,6 +5,7 @@ import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeE
 import { Card, CardContent, CardHeader } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
+import { IncomeExpenseTransaction } from '../../../models/incomeExpenseTransaction.model';
 import { GridColDef } from '@mui/x-data-grid';
 import { Loader2, Edit } from 'lucide-react';
 import BackButton from '../../../components/BackButton';
@@ -132,7 +133,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
           <h3 className="text-lg font-medium">Entries</h3>
         </CardHeader>
         <CardContent className="p-0">
-          <DataGrid
+          <DataGrid<IncomeExpenseTransaction>
             columns={columns}
             data={entries}
             totalRows={entries.length}
