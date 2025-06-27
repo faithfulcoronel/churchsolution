@@ -150,7 +150,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
         };
       })
     );
-  }, [sources, categories]);
+  }, [sources, categories, entryRecords]);
 
   const totalAmount = React.useMemo(() => entries.reduce((sum, e) => sum + Number(e.amount || 0), 0), [entries]);
 
