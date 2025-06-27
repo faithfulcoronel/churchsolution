@@ -1,4 +1,6 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
+import { inputVariants } from './input';
 import {
   DataGrid as MuiDataGrid,
   DataGridProps as MuiDataGridProps,
@@ -33,17 +35,19 @@ const StyledDataGrid = styled(MuiDataGrid)(({ theme }) => ({
   backgroundColor: 'var(--background)',
   color: 'var(--foreground)',
   fontFamily: 'var(--font-sans)',
+  borderRadius: 'var(--radius)',
+  boxShadow: 'var(--tw-card-box-shadow)',
 
   '& .MuiDataGrid-main': {
     backgroundColor: 'var(--background)',
   },
 
   '& .MuiDataGrid-columnHeaders': {
-    backgroundColor: 'var(--muted)',
+    backgroundColor: 'var(--secondary)',
     borderBottom: '1px solid var(--border)',
-    color: 'var(--muted-foreground)',
+    color: 'var(--secondary-foreground)',
     fontSize: '0.875rem',
-    fontWeight: 500,
+    fontWeight: 600,
   },
 
   '& .MuiDataGrid-cell': {
@@ -57,9 +61,10 @@ const StyledDataGrid = styled(MuiDataGrid)(({ theme }) => ({
       backgroundColor: 'var(--muted)',
     },
     '&.Mui-selected': {
-      backgroundColor: 'var(--accent)',
+      backgroundColor: 'var(--primary)',
+      color: 'var(--primary-foreground)',
       '&:hover': {
-        backgroundColor: 'var(--accent)',
+        backgroundColor: 'var(--primary)',
       },
     },
   },
@@ -85,20 +90,6 @@ const StyledDataGrid = styled(MuiDataGrid)(({ theme }) => ({
       },
     },
     
-    '& .MuiInputBase-root': {
-      color: 'var(--foreground)',
-      backgroundColor: 'var(--background)',
-      borderColor: 'var(--border)',
-      
-      '&:hover': {
-        borderColor: 'var(--ring)',
-      },
-      
-      '&.Mui-focused': {
-        borderColor: 'var(--ring)',
-        boxShadow: '0 0 0 2px var(--ring)',
-      },
-    },
   },
 
   '& .MuiDataGrid-columnSeparator': {
@@ -117,33 +108,7 @@ const StyledDataGrid = styled(MuiDataGrid)(({ theme }) => ({
     color: 'var(--muted-foreground)',
   },
 
-  // Customize the quick filter input
-  '& .MuiDataGrid-toolbarQuickFilter': {
-    '& .MuiInputBase-root': {
-      backgroundColor: 'var(--background)',
-      border: '1px solid var(--border)',
-      borderRadius: '0.375rem',
-      
-      '&:hover': {
-        borderColor: 'var(--ring)',
-      },
-      
-      '&.Mui-focused': {
-        borderColor: 'var(--ring)',
-        boxShadow: '0 0 0 2px var(--ring)',
-      },
-    },
-    '& .MuiInputBase-input': {
-      padding: '0.5rem 0.75rem',
-      fontSize: '0.875rem',
-      color: 'var(--foreground)',
-      
-      '&::placeholder': {
-        color: 'var(--muted-foreground)',
-        opacity: 1,
-      },
-    },
-  },
+  // Quick filter input inherits shared input styles via className
 }));
 
 function ErrorOverlay({ message }: { message?: string }) {
@@ -172,6 +137,10 @@ export function DataGrid<T>({
   ...props
 }: DataGridProps<T>) {
   const theme = useTheme();
+  const quickFilterClass = React.useMemo(
+    () => cn(inputVariants({ size: 'sm' })),
+    []
+  );
 
   // Create a custom theme that inherits from the current theme.
   // Memoize the theme to avoid unnecessary recalculations.
@@ -224,7 +193,10 @@ export function DataGrid<T>({
         slotProps={{
           toolbar: {
             showQuickFilter: true,
-            quickFilterProps: { debounceMs: 500 },
+            quickFilterProps: {
+              debounceMs: 500,
+              InputProps: { className: quickFilterClass },
+            },
           },
           ...(error ? { errorOverlay: { message: error } } : {}),
         }}
