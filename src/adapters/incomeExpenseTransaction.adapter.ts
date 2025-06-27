@@ -39,7 +39,7 @@ export class IncomeExpenseTransactionAdapter
   protected defaultRelationships: QueryOptions['relationships'] = [
     { table: 'members', foreignKey: 'member_id', select: ['id','first_name','last_name','email'] },
     { table: 'categories', foreignKey: 'category_id', select: ['id','code','name'] },
-    { table: 'funds', foreignKey: 'fund_id', select: ['id','name','type'] },
+    { table: 'funds', foreignKey: 'fund_id', select: ['id','code','name','type'] },
     { table: 'financial_sources', foreignKey: 'source_id', select: ['id','name','source_type'] },
     { table: 'accounts', foreignKey: 'account_id', select: ['id','name'] }
   ];

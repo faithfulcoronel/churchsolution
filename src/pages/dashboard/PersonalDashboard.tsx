@@ -71,7 +71,8 @@ function PersonalDashboard() {
             .from('financial_transactions')
             .select(`
               type,
-              amount,
+              debit,
+              credit,
               category:category_id (
                 name,
                 type
@@ -87,21 +88,28 @@ function PersonalDashboard() {
 
           if (error) throw error;
 
-          const contributions = transactions
-            ?.filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+          const contributions =
+            transactions
+              ?.filter(t => t.type === 'income')
+              .reduce(
+                (sum, t) => sum + Number(t.debit || 0) - Number(t.credit || 0),
+                0
+              ) || 0;
 
           const previousMonth = subMonths(start, 1);
           const { data: prevTransactions } = await supabase
             .from('financial_transactions')
-            .select('type, amount')
+            .select('type, debit, credit')
             .eq('member_id', memberData.id)
             .gte('date', format(startOfDay(startOfMonth(previousMonth)), 'yyyy-MM-dd'))
             .lte('date', format(endOfDay(endOfMonth(previousMonth)), 'yyyy-MM-dd'))
             .eq('type', 'income');
 
-          const previousContributions = prevTransactions
-            ?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+          const previousContributions =
+            prevTransactions?.reduce(
+              (sum, t) => sum + Number(t.debit || 0) - Number(t.credit || 0),
+              0
+            ) || 0;
 
           const percentageChange = previousContributions === 0 
             ? 100 
@@ -137,7 +145,8 @@ function PersonalDashboard() {
         .from('financial_transactions')
         .select(`
           type,
-          amount,
+          debit,
+          credit,
           category:category_id (
             name,
             type
@@ -159,7 +168,8 @@ function PersonalDashboard() {
         .from('financial_transactions')
         .select(`
           type,
-          amount,
+          debit,
+          credit,
           category:category_id (
             name,
             type
@@ -179,15 +189,26 @@ function PersonalDashboard() {
       // Calculate category breakdowns
       const categoryTotals = yearlyTransactions?.reduce((acc, t) => {
         const categoryName = t.category?.name || 'Uncategorized';
-        acc[categoryName] = (acc[categoryName] || 0) + Number(t.amount);
+        acc[categoryName] =
+          (acc[categoryName] || 0) +
+          Number(t.debit || 0) -
+          Number(t.credit || 0);
         return acc;
       }, {} as Record<string, number>);
 
       const sortedCategories = Object.entries(categoryTotals || {})
         .sort(([, a], [, b]) => b - a);
 
-      const yearlyTotal = yearlyTransactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-      const monthlyTotal = monthlyTransactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+      const yearlyTotal =
+        yearlyTransactions?.reduce(
+          (sum, t) => sum + Number(t.debit || 0) - Number(t.credit || 0),
+          0
+        ) || 0;
+      const monthlyTotal =
+        monthlyTransactions?.reduce(
+          (sum, t) => sum + Number(t.debit || 0) - Number(t.credit || 0),
+          0
+        ) || 0;
 
       // Calculate average contribution
       const averageContribution = yearlyTransactions?.length 
