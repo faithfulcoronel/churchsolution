@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, AlignJustify, Bell, User } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { Button } from '../ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui2/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui2/dropdown-menu';
@@ -12,9 +12,10 @@ import NotificationDropdown from './NotificationDropdown';
 
 interface TopbarProps {
   setSidebarOpen: (open: boolean) => void;
+  sidebarCollapsed: boolean;
 }
 
-function Topbar({ setSidebarOpen }: TopbarProps) {
+function Topbar({ setSidebarOpen, sidebarCollapsed }: TopbarProps) {
   const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
   const { settings, handleThemeToggle } = useThemeSwitcher();
@@ -25,7 +26,9 @@ function Topbar({ setSidebarOpen }: TopbarProps) {
   };
 
   return (
-    <header className="fixed top-0 inset-x-0 w-full z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+    <header
+      className={`fixed top-0 inset-x-0 w-full z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:pr-8 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}
+    >
       {/* Sidebar toggle, only on mobile */}
       <button
         type="button"
