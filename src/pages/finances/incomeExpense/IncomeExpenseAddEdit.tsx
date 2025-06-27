@@ -139,11 +139,16 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
 
   useEffect(() => {
     setEntries(prev =>
-      prev.map(e => ({
-        ...e,
-        source_account_id: sources.find(s => s.id === e.source_id)?.account_id || null,
-        category_account_id: categories.find(c => c.id === e.category_id)?.chart_of_account_id || null,
-      }))
+      prev.map(e => {
+        const sourceAccount = sources.find(s => s.id === e.source_id)?.account_id;
+        const categoryAccount = categories.find(c => c.id === e.category_id)?.chart_of_account_id;
+
+        return {
+          ...e,
+          source_account_id: sourceAccount ?? e.source_account_id,
+          category_account_id: categoryAccount ?? e.category_account_id,
+        };
+      })
     );
   }, [sources, categories]);
 
