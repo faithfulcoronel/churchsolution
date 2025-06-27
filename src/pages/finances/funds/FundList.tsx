@@ -126,7 +126,7 @@ function FundList() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <DataGrid
+              <DataGrid<Fund>
                 columns={columns}
                 data={filteredFunds}
                 totalRows={filteredFunds.length}

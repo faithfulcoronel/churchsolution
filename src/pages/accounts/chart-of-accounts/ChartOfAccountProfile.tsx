@@ -8,6 +8,7 @@ import BackButton from '../../../components/BackButton';
 import { Badge } from '../../../components/ui2/badge';
 import { DateRangePickerField } from '../../../components/ui2/date-range-picker-field';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
+import { FinancialTransaction } from '../../../models/financialTransaction.model';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -543,7 +544,7 @@ function ChartOfAccountProfile() {
         </CardHeader>
         
         <CardContent>
-          <DataGrid
+          <DataGrid<FinancialTransaction>
             columns={columns}
             data={transactionRows}
             loading={isTransactionsLoading}

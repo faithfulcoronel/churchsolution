@@ -212,7 +212,7 @@ function FinancialSourceList() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <DataGrid
+              <DataGrid<FinancialSource>
                 columns={columns}
                 data={filteredSources}
                 totalRows={filteredSources.length}
