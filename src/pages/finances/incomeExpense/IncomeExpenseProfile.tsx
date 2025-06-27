@@ -142,6 +142,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
               entriesError ?? (headerError instanceof Error ? headerError.message : undefined)
             }
             autoHeight
+            paginationMode="client"
           />
         </CardContent>
       </Card>

@@ -488,6 +488,7 @@ function TransactionList() {
               )
             }
             autoHeight
+            paginationMode="client"
             disableColumnMenu={false}
             disableColumnFilter={false}
             disableColumnSelector={false}

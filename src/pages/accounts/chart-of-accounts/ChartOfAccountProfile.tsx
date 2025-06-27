@@ -560,6 +560,7 @@ function ChartOfAccountProfile() {
               enabled: true,
               fileName: `account_${account.code}_transactions`,
             }}
+            paginationMode="client"
             pageSize={10}
             page={0}
             pageSizeOptions={[5, 10, 25, 50, 100]}

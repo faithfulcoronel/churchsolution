@@ -223,6 +223,7 @@ function FinancialSourceList() {
                 getRowId={(row) => row.id}
                 onRowClick={(params) => handleRowClick(params)}
                 autoHeight
+                paginationMode="client"
                 disableColumnMenu={false}
                 disableColumnFilter={false}
                 disableColumnSelector={false}
