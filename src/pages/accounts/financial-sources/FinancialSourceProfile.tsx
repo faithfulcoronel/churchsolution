@@ -58,7 +58,8 @@ function FinancialSourceProfile() {
         .select(`
           id,
           type,
-          amount,
+          debit,
+          credit,
           date,
           description,
           category:category_id (name),
@@ -350,7 +351,7 @@ function FinancialSourceProfile() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
                           <span className={transaction.type === 'income' ? 'text-success' : 'text-destructive'}>
                             {transaction.type === 'income' ? '+' : '-'}
-                            ${transaction.amount.toFixed(2)}
+                            ${(transaction.debit - transaction.credit).toFixed(2)}
                           </span>
                         </td>
                       </tr>
