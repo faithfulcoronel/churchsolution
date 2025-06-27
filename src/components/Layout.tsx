@@ -7,6 +7,7 @@ import Footer from './Footer';
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarPinned, setSidebarPinned] = useState(true);
   const location = useLocation();
   
   // Check if current page is settings
@@ -20,6 +21,8 @@ function Layout() {
         setSidebarOpen={setSidebarOpen}
         collapsed={sidebarCollapsed}
         setCollapsed={setSidebarCollapsed}
+        pinned={sidebarPinned}
+        setPinned={setSidebarPinned}
       />
 
       {/* Main content wrapper */}
