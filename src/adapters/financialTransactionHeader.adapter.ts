@@ -300,18 +300,15 @@ export class FinancialTransactionHeaderAdapter
     const tenantId = await tenantUtils.getTenantId();
     if (!tenantId) throw new Error('No tenant context found');
     const userId = (await supabase.auth.getUser()).data.user?.id;
-    const rows = entries.map((e) => {
-      const { amount, ...tx } = e;
-      return {
-        ...tx,
-        header_id: headerId,
-        tenant_id: tenantId,
-        created_by: userId,
-        updated_by: userId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-    });
+    const rows = entries.map((e) => ({
+      ...e,
+      header_id: headerId,
+      tenant_id: tenantId,
+      created_by: userId,
+      updated_by: userId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
     const { error } = await supabase
       .from('financial_transactions')
       .insert(rows);
@@ -328,18 +325,15 @@ export class FinancialTransactionHeaderAdapter
       .eq('header_id', headerId)
       .eq('tenant_id', tenantId);
     if (entries && entries.length) {
-      const rows = entries.map((e) => {
-        const { amount, ...tx } = e;
-        return {
-          ...tx,
-          header_id: headerId,
-          tenant_id: tenantId,
-          created_by: userId,
-          updated_by: userId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-      });
+      const rows = entries.map((e) => ({
+        ...e,
+        header_id: headerId,
+        tenant_id: tenantId,
+        created_by: userId,
+        updated_by: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
       const { error } = await supabase
         .from('financial_transactions')
         .insert(rows);
