@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && echo '✅ Running Supabase migration' && npx supabase db push --project-ref $SUPABASE_PROJECT_REF --db-url $SUPABASE_DB_URL",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run",
-    "vercel:postinstall": "echo '✅ Running Supabase migration' && npx supabase db push --project-ref $SUPABASE_PROJECT_REF --db-url $SUPABASE_DB_URL"
+    "test": "vitest run"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
