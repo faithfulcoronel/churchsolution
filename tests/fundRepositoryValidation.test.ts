@@ -25,6 +25,20 @@ describe('FundRepository validation', () => {
     ).rejects.toThrow('Invalid fund type');
   });
 
+  it('throws error for missing fund code', async () => {
+    const repo = new TestFundRepository({} as IFundAdapter);
+    await expect(
+      repo.runBeforeCreate({ name: 'Test Fund', code: '' } as any)
+    ).rejects.toThrow('Fund code is required');
+  });
+
+  it('throws error for invalid fund code', async () => {
+    const repo = new TestFundRepository({} as IFundAdapter);
+    await expect(
+      repo.runBeforeCreate({ name: 'Test Fund', code: '$$' } as any)
+    ).rejects.toThrow('Invalid fund code');
+  });
+
   it('formats data on create', async () => {
     const repo = new TestFundRepository({} as IFundAdapter);
     const data = await repo.runBeforeCreate({ name: '  My Fund ', description: '  Desc  ', type: 'restricted' });
