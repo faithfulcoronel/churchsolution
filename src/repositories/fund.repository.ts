@@ -37,6 +37,7 @@ export class FundRepository
   private formatFundData(data: Partial<Fund>): Partial<Fund> {
     return {
       ...data,
+      code: data.code?.trim().toUpperCase(),
       name: data.name?.trim(),
       description: data.description?.trim(),
     };
