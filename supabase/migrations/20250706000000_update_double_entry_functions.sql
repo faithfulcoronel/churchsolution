@@ -141,6 +141,9 @@ SELECT
   jsonb_object_agg(category_name, total) FILTER (WHERE type = 'income') AS income_by_category,
   jsonb_object_agg(category_name, total) FILTER (WHERE type = 'expense') AS expenses_by_category
 FROM tx
+WHERE tenant_id = (
+  SELECT tenant_id FROM tenant_users WHERE user_id = auth.uid()
+)
 GROUP BY tenant_id;
 
 COMMENT ON VIEW finance_monthly_stats IS 'Aggregated financial statistics for the current month per tenant';
@@ -163,6 +166,9 @@ SELECT
   ) AS balance
 FROM funds f
 LEFT JOIN financial_transactions t ON t.fund_id = f.id
+WHERE f.tenant_id = (
+  SELECT tenant_id FROM tenant_users WHERE user_id = auth.uid()
+)
 GROUP BY f.tenant_id, f.id, f.name;
 
 COMMENT ON VIEW fund_balances_view IS 'Current running balance for each fund';

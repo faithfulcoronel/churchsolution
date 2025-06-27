@@ -1,14 +1,14 @@
--- Views and RLS for finance dashboard metrics
+-- Restrict finance views to the current tenant
 
--- Monthly income and expense totals with percentage change compared to previous month
+-- Monthly income and expense trends
 DROP VIEW IF EXISTS finance_monthly_trends CASCADE;
 CREATE VIEW finance_monthly_trends AS
 WITH monthly AS (
   SELECT
     tenant_id,
     date_trunc('month', date)::date AS month,
-    SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS income,
-    SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS expenses
+    SUM(CASE WHEN type = 'income' THEN credit ELSE 0 END) AS income,
+    SUM(CASE WHEN type = 'expense' THEN debit ELSE 0 END) AS expenses
   FROM financial_transactions
   GROUP BY tenant_id, date_trunc('month', date)
 )
@@ -32,20 +32,25 @@ ORDER BY month;
 
 COMMENT ON VIEW finance_monthly_trends IS 'Monthly income and expense totals with percentage change from the previous month for each tenant';
 
--- Current month stats: income, expenses, active budgets and category totals
+-- Aggregated monthly stats
 DROP VIEW IF EXISTS finance_monthly_stats CASCADE;
 CREATE VIEW finance_monthly_stats AS
 WITH tx AS (
   SELECT
     ft.tenant_id,
-    ft.transaction_type AS type,
-    coalesce(c.name, 'Uncategorized') AS category_name,
-    SUM(ft.amount) AS total
-  FROM income_expense_transactions ft
+    ft.type AS type,
+    COALESCE(c.name, 'Uncategorized') AS category_name,
+    SUM(
+      CASE
+        WHEN ft.type = 'income' THEN ft.credit
+        WHEN ft.type = 'expense' THEN ft.debit
+        ELSE 0
+      END
+    ) AS total
+  FROM financial_transactions ft
   LEFT JOIN categories c ON c.id = ft.category_id
-  WHERE date_trunc('month', ft.transaction_date) = date_trunc('month', CURRENT_DATE)
-    AND ft.deleted_at IS NULL
-  GROUP BY ft.tenant_id, ft.transaction_type, c.name
+  WHERE date_trunc('month', ft.date) = date_trunc('month', CURRENT_DATE)
+  GROUP BY ft.tenant_id, ft.type, c.name
 )
 SELECT
   tenant_id,
@@ -67,7 +72,7 @@ GROUP BY tenant_id;
 
 COMMENT ON VIEW finance_monthly_stats IS 'Aggregated financial statistics for the current month per tenant';
 
--- Fund balances
+-- Fund balances view
 DROP VIEW IF EXISTS fund_balances_view CASCADE;
 CREATE VIEW fund_balances_view AS
 SELECT
@@ -75,11 +80,17 @@ SELECT
   f.id,
   f.name,
   COALESCE(
-    SUM(CASE WHEN t.transaction_type = 'income' THEN t.amount ELSE -t.amount END),
+    SUM(
+      CASE
+        WHEN t.type = 'income' THEN t.credit
+        WHEN t.type = 'expense' THEN -t.debit
+        ELSE COALESCE(t.credit,0) - COALESCE(t.debit,0)
+      END
+    ),
     0
   ) AS balance
 FROM funds f
-LEFT JOIN income_expense_transactions t ON t.fund_id = f.id AND t.deleted_at IS NULL
+LEFT JOIN financial_transactions t ON t.fund_id = f.id
 WHERE f.tenant_id = (
   SELECT tenant_id FROM tenant_users WHERE user_id = auth.uid()
 )

@@ -23,6 +23,9 @@ SELECT
     2
   ) AS percentage_change
 FROM monthly
+WHERE tenant_id = (
+  SELECT tenant_id FROM tenant_users WHERE user_id = auth.uid()
+)
 ORDER BY month;
 
 COMMENT ON VIEW finance_monthly_trends IS 'Monthly income and expense totals with percentage change from the previous month for each tenant';
