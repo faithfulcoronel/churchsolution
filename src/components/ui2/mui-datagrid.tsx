@@ -162,18 +162,23 @@ export function DataGrid({
 }: DataGridProps) {
   const theme = useTheme();
 
-  // Create a custom theme that inherits from the current theme
-  const customTheme = createTheme(theme, {
-    components: {
-      MuiDataGrid: {
-        styleOverrides: {
-          root: {
-            border: 'none',
+  // Create a custom theme that inherits from the current theme.
+  // Memoize the theme to avoid unnecessary recalculations.
+  const customTheme = React.useMemo(
+    () =>
+      createTheme(theme, {
+        components: {
+          MuiDataGrid: {
+            styleOverrides: {
+              root: {
+                border: 'none',
+              },
+            },
           },
         },
-      },
-    },
-  });
+      }),
+    [theme]
+  );
 
   // Handle pagination changes
   const handlePaginationModelChange = (model: GridPaginationModel) => {
