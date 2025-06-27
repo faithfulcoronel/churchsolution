@@ -2,17 +2,50 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { IncomeExpenseTransactionService, IncomeExpenseEntry } from '../src/services/IncomeExpenseTransactionService';
 import type { IFinancialTransactionHeaderRepository } from '../src/repositories/financialTransactionHeader.repository';
 import type { IIncomeExpenseTransactionRepository } from '../src/repositories/incomeExpenseTransaction.repository';
+import type { IIncomeExpenseTransactionMappingRepository } from '../src/repositories/incomeExpenseTransactionMapping.repository';
+import type { IFinancialTransactionRepository } from '../src/repositories/financialTransaction.repository';
 
 const headerRepo = {
-  createWithTransactions: vi.fn().mockResolvedValue({ id: 'h1' }),
-  updateWithTransactions: vi.fn().mockResolvedValue({ id: 'h1' }),
+  create: vi.fn().mockResolvedValue({ id: 'h1' }),
+  update: vi.fn().mockResolvedValue({}),
+  delete: vi.fn().mockResolvedValue(undefined),
 } as unknown as IFinancialTransactionHeaderRepository;
 
 const ieRepo = {
-  create: vi.fn().mockResolvedValue(null),
+  create: vi.fn().mockResolvedValue({ id: 't1' }),
+  update: vi.fn().mockResolvedValue({}),
+  delete: vi.fn().mockResolvedValue(undefined),
 } as unknown as IIncomeExpenseTransactionRepository;
 
-const service = new IncomeExpenseTransactionService(headerRepo, ieRepo);
+const mappingRepo = {
+  create: vi.fn().mockResolvedValue({}),
+  getByTransactionId: vi.fn().mockResolvedValue([
+    {
+      id: 'm1',
+      transaction_header_id: 'h1',
+      debit_transaction_id: 'd1',
+      credit_transaction_id: 'c1',
+    },
+  ]),
+  getByHeaderId: vi.fn().mockResolvedValue([]),
+  delete: vi.fn().mockResolvedValue(undefined),
+} as unknown as IIncomeExpenseTransactionMappingRepository;
+
+const ftRepo = {
+  create: vi.fn()
+    .mockResolvedValueOnce({ id: 'd1' })
+    .mockResolvedValueOnce({ id: 'c1' })
+    .mockResolvedValue({ id: 'x' }),
+  update: vi.fn().mockResolvedValue({}),
+  delete: vi.fn().mockResolvedValue(undefined),
+} as unknown as IFinancialTransactionRepository;
+
+const service = new IncomeExpenseTransactionService(
+  headerRepo,
+  ieRepo,
+  mappingRepo,
+  ftRepo,
+);
 
 const header = { transaction_date: '2025-06-01', description: 'Test' };
 const baseEntry = {
@@ -34,64 +67,38 @@ describe('IncomeExpenseTransactionService', () => {
     const entry: IncomeExpenseEntry = { ...baseEntry, transaction_type: 'income' };
     await service.create(header, [entry]);
 
-    expect(headerRepo.createWithTransactions).toHaveBeenCalledTimes(1);
-    const [, tx] = (headerRepo.createWithTransactions as any).mock.calls[0];
-    expect(tx).toEqual([
-      {
-        type: 'income',
-        accounts_account_id: 'acc1',
-        fund_id: 'f1',
-        source_id: 's1',
-        category_id: 'c1',
-        date: '2025-06-01',
-        description: 'Test',
-        batch_id: null,
-        account_id: 'sa1',
-        debit: 10,
-        credit: 0,
-      },
-      {
-        type: 'income',
-        accounts_account_id: 'acc1',
-        fund_id: 'f1',
-        source_id: 's1',
-        category_id: 'c1',
-        date: '2025-06-01',
-        description: 'Test',
-        batch_id: null,
-        account_id: 'ca1',
-        debit: 0,
-        credit: 10,
-      },
-    ]);
-    expect(ieRepo.create).toHaveBeenCalledWith({
-      transaction_type: 'income',
-      transaction_date: '2025-06-01',
-      amount: 10,
-      description: 'Test',
-      reference: null,
-      member_id: null,
-      category_id: 'c1',
-      fund_id: 'f1',
-      source_id: 's1',
-      account_id: 'acc1',
-      header_id: 'h1',
+    expect(headerRepo.create).toHaveBeenCalledTimes(1);
+    expect(ftRepo.create).toHaveBeenCalledTimes(2);
+    const [firstTx, secondTx] = ftRepo.create.mock.calls;
+    expect(firstTx[0]).toEqual(
+      expect.objectContaining({ account_id: 'sa1', debit: 10 })
+    );
+    expect(secondTx[0]).toEqual(
+      expect.objectContaining({ account_id: 'ca1', credit: 10 })
+    );
+    expect(ieRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ header_id: 'h1' })
+    );
+    expect(mappingRepo.create).toHaveBeenCalledWith({
+      transaction_id: 't1',
+      transaction_header_id: 'h1',
+      debit_transaction_id: 'd1',
+      credit_transaction_id: 'c1',
     });
   });
 
   it('creates expense transactions and records on update', async () => {
     const entry: IncomeExpenseEntry = { ...baseEntry, transaction_type: 'expense' };
-    await service.update('h1', header, [entry]);
+    await service.update('t1', header, entry);
 
-    expect(headerRepo.updateWithTransactions).toHaveBeenCalledTimes(1);
-    const [, , tx] = (headerRepo.updateWithTransactions as any).mock.calls[0];
-    expect(tx[0]).toEqual(
-      expect.objectContaining({ type: 'expense', debit: 10 })
-    );
-    expect(tx[1]).toEqual(
-      expect.objectContaining({ type: 'expense', credit: 10 })
-    );
-    expect(ieRepo.create).toHaveBeenCalledWith(
+    expect(mappingRepo.getByTransactionId).toHaveBeenCalledWith('t1');
+    expect(headerRepo.update).toHaveBeenCalledWith('h1', header);
+    expect(ftRepo.update).toHaveBeenCalledTimes(2);
+    const [dCall, cCall] = ftRepo.update.mock.calls;
+    expect(dCall[0]).toBe('d1');
+    expect(cCall[0]).toBe('c1');
+    expect(ieRepo.update).toHaveBeenCalledWith(
+      't1',
       expect.objectContaining({ header_id: 'h1' })
     );
   });
@@ -113,23 +120,85 @@ describe('IncomeExpenseTransactionService', () => {
     ];
     await service.create(header, entries);
 
-    expect(headerRepo.createWithTransactions).toHaveBeenCalledTimes(1);
-    const [, tx] = (headerRepo.createWithTransactions as any).mock.calls[0];
-    expect(tx).toHaveLength(4);
-    expect(tx[0]).toEqual(
-      expect.objectContaining({ account_id: 'sa1', type: 'income', debit: 10 })
+    expect(headerRepo.create).toHaveBeenCalledTimes(1);
+    expect(ftRepo.create).toHaveBeenCalledTimes(4);
+    const txCalls = ftRepo.create.mock.calls;
+    expect(txCalls[0][0]).toEqual(
+      expect.objectContaining({ account_id: 'sa1', debit: 10 })
     );
-    expect(tx[1]).toEqual(
-      expect.objectContaining({ account_id: 'ca1', type: 'income', credit: 10 })
+    expect(txCalls[1][0]).toEqual(
+      expect.objectContaining({ account_id: 'ca1', credit: 10 })
     );
-    expect(tx[2]).toEqual(
-      expect.objectContaining({ account_id: 'ca2', type: 'expense', debit: 20 })
+    expect(txCalls[2][0]).toEqual(
+      expect.objectContaining({ account_id: 'ca2', debit: 20 })
     );
-    expect(tx[3]).toEqual(
-      expect.objectContaining({ account_id: 'sa2', type: 'expense', credit: 20 })
+    expect(txCalls[3][0]).toEqual(
+      expect.objectContaining({ account_id: 'sa2', credit: 20 })
     );
-    const totalDebit = tx.reduce((s: number, t: any) => s + t.debit, 0);
-    const totalCredit = tx.reduce((s: number, t: any) => s + t.credit, 0);
+    const totals = txCalls.reduce(
+      (tot, [t]) => {
+        tot.debit += t.debit;
+        tot.credit += t.credit;
+        return tot;
+      },
+      { debit: 0, credit: 0 }
+    );
+    const totalDebit = totals.debit;
+    const totalCredit = totals.credit;
     expect(totalDebit).toBe(totalCredit);
+  });
+
+  it('deletes entries with mapping', async () => {
+    await service.delete('t1');
+
+    expect(mappingRepo.getByTransactionId).toHaveBeenCalledWith('t1');
+    expect(ftRepo.delete).toHaveBeenCalledWith('d1');
+    expect(ftRepo.delete).toHaveBeenCalledWith('c1');
+    expect(headerRepo.delete).toHaveBeenCalledWith('h1');
+    expect(ieRepo.delete).toHaveBeenCalledWith('t1');
+    expect(mappingRepo.delete).toHaveBeenCalledWith('m1');
+  });
+
+  it('updates batches by updating existing lines and creating new ones', async () => {
+    mappingRepo.getByHeaderId.mockResolvedValue([
+      {
+        id: 'm1',
+        transaction_id: 't1',
+        transaction_header_id: 'h1',
+        debit_transaction_id: 'd1',
+        credit_transaction_id: 'c1',
+      },
+      {
+        id: 'm2',
+        transaction_id: 't2',
+        transaction_header_id: 'h1',
+        debit_transaction_id: 'd2',
+        credit_transaction_id: 'c2',
+      }
+    ]);
+
+    const entries: IncomeExpenseEntry[] = [
+      { id: 't1', ...baseEntry, amount: 15, transaction_type: 'income' },
+      { ...baseEntry, transaction_type: 'expense' }
+    ];
+
+    await service.updateBatch('h1', header, entries);
+
+    expect(mappingRepo.getByHeaderId).toHaveBeenCalledWith('h1');
+
+    // removed line t2 should be deleted
+    expect(ftRepo.delete).toHaveBeenCalledWith('d2');
+    expect(ftRepo.delete).toHaveBeenCalledWith('c2');
+    expect(ieRepo.delete).toHaveBeenCalledWith('t2');
+    expect(mappingRepo.delete).toHaveBeenCalledWith('m2');
+
+    // existing line t1 should be updated
+    expect(ftRepo.update).toHaveBeenCalledWith('d1', expect.any(Object));
+    expect(ftRepo.update).toHaveBeenCalledWith('c1', expect.any(Object));
+    expect(ieRepo.update).toHaveBeenCalledWith('t1', expect.any(Object));
+
+    // new line should create new records
+    expect(ftRepo.create).toHaveBeenCalledTimes(2);
+    expect(mappingRepo.create).toHaveBeenCalledTimes(1);
   });
 });

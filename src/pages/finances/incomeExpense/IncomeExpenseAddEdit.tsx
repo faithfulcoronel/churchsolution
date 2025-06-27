@@ -18,6 +18,7 @@ import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
 
 interface Entry {
+  id?: string;
   accounts_account_id: string;
   fund_id: string;
   category_id: string;
@@ -123,6 +124,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     if (isEditMode && entryRecords.length > 0) {
       setEntries(
         entryRecords.map((e: any) => ({
+          id: e.id,
           accounts_account_id: e.account_id || '',
           fund_id: e.fund_id || '',
           category_id: e.category_id || '',
@@ -137,13 +139,18 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
 
   useEffect(() => {
     setEntries(prev =>
-      prev.map(e => ({
-        ...e,
-        source_account_id: sources.find(s => s.id === e.source_id)?.account_id || null,
-        category_account_id: categories.find(c => c.id === e.category_id)?.chart_of_account_id || null,
-      }))
+      prev.map(e => {
+        const sourceAccount = sources.find(s => s.id === e.source_id)?.account_id;
+        const categoryAccount = categories.find(c => c.id === e.category_id)?.chart_of_account_id;
+
+        return {
+          ...e,
+          source_account_id: sourceAccount ?? e.source_account_id,
+          category_account_id: categoryAccount ?? e.category_account_id,
+        };
+      })
     );
-  }, [sources, categories]);
+  }, [sources, categories, entryRecords]);
 
   const totalAmount = React.useMemo(() => entries.reduce((sum, e) => sum + Number(e.amount || 0), 0), [entries]);
 

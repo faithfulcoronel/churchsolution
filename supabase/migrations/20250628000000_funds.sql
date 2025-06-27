@@ -34,7 +34,7 @@ CREATE POLICY "Funds are viewable by tenant users" ON funds
 
 CREATE POLICY "Funds can be managed by tenant admins" ON funds
   FOR ALL TO authenticated
-  USING (true)
+  USING (true);
 
 CREATE TRIGGER update_funds_updated_at
 BEFORE UPDATE ON funds

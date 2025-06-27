@@ -18,12 +18,12 @@ export interface IFinancialTransactionHeaderAdapter
   createWithTransactions(
     data: Partial<FinancialTransactionHeader>,
     transactions: any[],
-  ): Promise<FinancialTransactionHeader>;
+  ): Promise<{ header: FinancialTransactionHeader; transactions: any[] }>;
   updateWithTransactions(
     id: string,
     data: Partial<FinancialTransactionHeader>,
     transactions: any[],
-  ): Promise<FinancialTransactionHeader>;
+  ): Promise<{ header: FinancialTransactionHeader; transactions: any[] }>;
 }
 
 @injectable()
@@ -279,25 +279,26 @@ export class FinancialTransactionHeaderAdapter
   public async createWithTransactions(
     data: Partial<FinancialTransactionHeader>,
     transactions: any[],
-  ): Promise<FinancialTransactionHeader> {
+  ): Promise<{ header: FinancialTransactionHeader; transactions: any[] }> {
     const header = await super.create(data);
+    let inserted: any[] = [];
     if (transactions && transactions.length) {
-      await this.insertTransactions(header.id, transactions);
+      inserted = await this.insertTransactions(header.id, transactions);
     }
-    return header;
+    return { header, transactions: inserted };
   }
 
   public async updateWithTransactions(
     id: string,
     data: Partial<FinancialTransactionHeader>,
     transactions: any[],
-  ): Promise<FinancialTransactionHeader> {
+  ): Promise<{ header: FinancialTransactionHeader; transactions: any[] }> {
     const header = await super.update(id, data);
-    await this.replaceTransactions(id, transactions);
-    return header;
+    const inserted = await this.replaceTransactions(id, transactions);
+    return { header, transactions: inserted };
   }
 
-  private async insertTransactions(headerId: string, entries: any[]): Promise<void> {
+  private async insertTransactions(headerId: string, entries: any[]): Promise<any[]> {
     const tenantId = await tenantUtils.getTenantId();
     if (!tenantId) throw new Error('No tenant context found');
     const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -310,13 +311,15 @@ export class FinancialTransactionHeaderAdapter
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }));
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('financial_transactions')
-      .insert(rows);
+      .insert(rows)
+      .select();
     if (error) throw error;
+    return data || [];
   }
 
-  private async replaceTransactions(headerId: string, entries: any[]): Promise<void> {
+  private async replaceTransactions(headerId: string, entries: any[]): Promise<any[]> {
     const tenantId = await tenantUtils.getTenantId();
     if (!tenantId) throw new Error('No tenant context found');
     const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -325,6 +328,7 @@ export class FinancialTransactionHeaderAdapter
       .delete()
       .eq('header_id', headerId)
       .eq('tenant_id', tenantId);
+    let inserted: any[] = [];
     if (entries && entries.length) {
       const rows = entries.map((e) => ({
         ...e,
@@ -335,10 +339,13 @@ export class FinancialTransactionHeaderAdapter
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }));
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('financial_transactions')
-        .insert(rows);
+        .insert(rows)
+        .select();
       if (error) throw error;
+      inserted = data || [];
     }
+    return inserted;
   }
 }
