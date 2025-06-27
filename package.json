@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "vercel:postinstall": "npx supabase db push --project-ref $SUPABASE_PROJECT_REF --db-url $SUPABASE_DB_URL"
+    "vercel:postinstall": "echo '✅ Running Supabase migration' && npx supabase db push --project-ref $SUPABASE_PROJECT_REF --db-url $SUPABASE_DB_URL"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
