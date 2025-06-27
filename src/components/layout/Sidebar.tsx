@@ -15,8 +15,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Pin,
-  PinOff,
   Search,
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
@@ -309,24 +307,14 @@ function Sidebar({
                 variant="ghost"
                 size="icon"
                 onClick={() => setPinned(!pinned)}
-                title={pinned ? 'Unpin sidebar' : 'Pin sidebar'}
+                title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
               >
-                {pinned ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />}
+                {pinned ? (
+                  <ChevronLeft className="h-5 w-5" />
+                ) : (
+                  <ChevronRight className="h-5 w-5" />
+                )}
               </Button>
-              {pinned && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCollapsed(!collapsed)}
-                  title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                >
-                  {collapsed ? (
-                    <ChevronRight className="h-5 w-5" />
-                  ) : (
-                    <ChevronLeft className="h-5 w-5" />
-                  )}
-                </Button>
-              )}
             </div>
           </div>
 
