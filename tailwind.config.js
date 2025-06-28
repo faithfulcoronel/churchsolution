@@ -118,7 +118,7 @@ module.exports = {
                 default: '#00A261',
                 active: '#01BF73',
                 light: '#1F2623',
-                clarity: 'rgba(0, 162, 97, 0.20);',
+                clarity: 'rgba(0, 162, 97, 0.20)',
                 inverse: '#ffffff'
               },
               info: {
@@ -410,7 +410,7 @@ module.exports = {
         },
         'collapsible-up': {
           from: { height: 'var(--radix-collapsible-content-height)' },
-          to: { height: 'o' }
+          to: { height: '0' }
         }
       },
       animation: {
