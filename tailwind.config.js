@@ -496,14 +496,14 @@ module.exports = {
         container: {
           fixed: {
             px: {
-              DEFAULT: theme('spacing')['6'],
+              DEFAULT: theme('spacing')['4'],
               xl: theme('spacing')['7.5']
             },
             'max-width': theme('screens.xl')
           },
           fluid: {
             px: {
-              DEFAULT: theme('spacing')['6'],
+              DEFAULT: theme('spacing')['4'],
               xl: theme('spacing')['7.5']
             }
           }
