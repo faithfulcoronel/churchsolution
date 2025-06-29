@@ -38,7 +38,7 @@ function ChurchBranding() {
   }, [tenant?.name]);
 
   return (
-    <div className="flex items-center w-full">
+    <div className="flex items-center w-full lg:pl-12">
       {tenant?.profile_picture_url ? (
         <img
           src={tenant.profile_picture_url}
