@@ -180,6 +180,7 @@ function CategoryList({ categoryType, title, description }: CategoryListProps) {
           </CardContent>
         </Card>
       </div>
+      </div>
     );
 }
 
