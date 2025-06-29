@@ -138,6 +138,7 @@ export function DataGrid<T>({
   paginationMode = 'server',
   showQuickFilter = false,
   columns,
+  showQuickFilter = true,
   ...props
 }: DataGridProps<T>) {
   const theme = useTheme();
