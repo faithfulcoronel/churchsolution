@@ -2,17 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategoryRepository } from '../../../hooks/useCategoryRepository';
 import { Category, CategoryType } from '../../../models/category.model';
-import {
-  Card,
-  CardHeader,
-  CardContent
-} from '../../../components/ui2/card';
+import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { Input } from '../../../components/ui2/input';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import type { GridColDef } from '@mui/x-data-grid';
 import { Badge } from '../../../components/ui2/badge';
-import { Plus, Eye, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Loader2, Search } from 'lucide-react';
 
 interface CategoryListProps {
   categoryType: CategoryType;
@@ -138,56 +134,53 @@ function CategoryList({ categoryType, title, description }: CategoryListProps) {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h3 className="text-lg font-medium">Categories</h3>
-            </div>
-            <div className="w-full sm:w-auto">
-              <Input
-                placeholder="Search categories..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm"
+      <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="w-full sm:max-w-xs">
+          <Input
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon={<Search className="h-4 w-4" />}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <Card>
+          <CardContent className="p-0">
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : filteredCategories.length > 0 ? (
+              <DataGrid<Category>
+                columns={columns}
+                data={filteredCategories}
+                totalRows={filteredCategories.length}
+                loading={isLoading}
+                error={error instanceof Error ? error.message : undefined}
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+                getRowId={(row) => row.id}
+                onRowClick={(params) => navigate(`${params.row.id}`)}
+                autoHeight
+                paginationMode="client"
               />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : filteredCategories.length > 0 ? (
-            <DataGrid<Category>
-              columns={columns}
-              data={filteredCategories}
-              totalRows={filteredCategories.length}
-              loading={isLoading}
-              error={error instanceof Error ? error.message : undefined}
-              page={page}
-              pageSize={pageSize}
-              onPageChange={setPage}
-              onPageSizeChange={setPageSize}
-              getRowId={(row) => row.id}
-              onRowClick={(params) => navigate(`${params.row.id}`)}
-              autoHeight
-              paginationMode="client"
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8">
-              <p className="text-muted-foreground mb-4">No categories found</p>
-              <Button onClick={() => navigate('add')}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Category
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8">
+                <p className="text-muted-foreground mb-4">No categories found</p>
+                <Button onClick={() => navigate('add')}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Category
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
 }
 
 export default CategoryList;
