@@ -495,9 +495,8 @@ function TransactionList() {
             disableDensitySelector={false}
             page={page}
             pageSize={pageSize}
-            toolbar={{
-              showQuickFilter: true,
-              quickFilterProps: { debounceMs: 500 },
+            slotProps={{
+              toolbar: { showQuickFilter: false },
             }}
           />
           </CardContent>
