@@ -15,6 +15,7 @@ import {
   Pin,
   PinOff,
   Search,
+  ChevronDown
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
 
@@ -101,7 +102,7 @@ function Sidebar({
               {!collapsed && <span className="ml-3">{item.name}</span>}
             </div>
             {!collapsed && (
-              <Pin
+              <ChevronDown
                 className={`h-4 w-4 transition-transform duration-200 ${isSubmenuOpen(item.name) ? 'rotate-180' : ''}`}
               />
             )}
