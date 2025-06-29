@@ -28,6 +28,7 @@ export interface DataGridProps<T> extends Omit<MuiDataGridProps<T>, 'rows'> {
   loading?: boolean;
   error?: string;
   paginationMode?: 'client' | 'server';
+  showQuickFilter?: boolean;
 }
 
 // Style the DataGrid to match our theme
@@ -136,6 +137,7 @@ export function DataGrid<T>({
   error,
   paginationMode = 'server',
   columns,
+  showQuickFilter = true,
   ...props
 }: DataGridProps<T>) {
   const theme = useTheme();
@@ -194,7 +196,7 @@ export function DataGrid<T>({
         }}
         slotProps={{
           toolbar: {
-            showQuickFilter: true,
+            showQuickFilter,
             quickFilterProps: {
               debounceMs: 500,
               InputProps: { className: quickFilterClass },
