@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCategoryRepository } from '../../../hooks/useCategoryRepository';
-import { useChartOfAccountRepository } from '../../../hooks/useChartOfAccountRepository';
+import { useChartOfAccounts } from '../../../hooks/useChartOfAccounts';
 import { Category, CategoryType } from '../../../models/category.model';
 import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
 import { Input } from '../../../components/ui2/input';
 import { Button } from '../../../components/ui2/button';
 import { Textarea } from '../../../components/ui2/textarea';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
+import { Combobox } from '../../../components/ui2/combobox';
 import { Switch } from '../../../components/ui2/switch';
 import BackButton from '../../../components/BackButton';
 import { Save, Loader2, Tag } from 'lucide-react';
@@ -23,7 +23,7 @@ function CategoryAddEdit({ categoryType, basePath }: CategoryAddEditProps) {
   const isEditMode = !!id;
 
   const { useQuery, useCreate, useUpdate } = useCategoryRepository();
-  const { useQuery: useAccountsQuery } = useChartOfAccountRepository();
+  const { useAccountOptions } = useChartOfAccounts();
 
   const [formData, setFormData] = useState<Partial<Category>>({
     type: categoryType,
@@ -41,7 +41,13 @@ function CategoryAddEdit({ categoryType, basePath }: CategoryAddEditProps) {
     enabled: isEditMode
   });
 
-  const { data: accountsData } = useAccountsQuery();
+  const accountTypeFilter =
+    categoryType === 'income_transaction'
+      ? 'revenue'
+      : categoryType === 'expense_transaction'
+        ? 'expense'
+        : undefined;
+  const { data: accountOptions, isLoading: isAccountsLoading } = useAccountOptions(accountTypeFilter);
 
   useEffect(() => {
     if (isEditMode && categoryData?.data?.[0]) {
@@ -134,22 +140,20 @@ function CategoryAddEdit({ categoryType, basePath }: CategoryAddEditProps) {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Chart of Account</label>
-                <Select
-                  value={formData.chart_of_account_id || undefined}
-                  onValueChange={(v) => handleInputChange('chart_of_account_id', v || null)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select account" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={undefined}>None</SelectItem>
-                    {accountsData?.data.map(acc => (
-                      <SelectItem key={acc.id} value={acc.id}>
-                        {acc.code} - {acc.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {isAccountsLoading ? (
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Loading accounts...</span>
+                  </div>
+                ) : (
+                  <Combobox
+                    options={accountOptions || []}
+                    value={formData.chart_of_account_id || ''}
+                    onChange={(v) => handleInputChange('chart_of_account_id', v || null)}
+                    placeholder="Select account"
+                    className="w-full"
+                  />
+                )}
               </div>
               <div>
                 <Input
