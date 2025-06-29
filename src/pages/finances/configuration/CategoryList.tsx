@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategoryRepository } from '../../../hooks/useCategoryRepository';
-import { CategoryType } from '../../../models/category.model';
+import { Category, CategoryType } from '../../../models/category.model';
 import {
   Card,
   CardHeader,
@@ -9,14 +9,8 @@ import {
 } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { Input } from '../../../components/ui2/input';
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell
-} from '../../../components/ui2/table';
+import { DataGrid } from '../../../components/ui2/mui-datagrid';
+import type { GridColDef } from '@mui/x-data-grid';
 import { Badge } from '../../../components/ui2/badge';
 import { Plus, Eye, Edit, Trash2, Loader2 } from 'lucide-react';
 
@@ -29,9 +23,11 @@ interface CategoryListProps {
 function CategoryList({ categoryType, title, description }: CategoryListProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const { useQuery, useDelete } = useCategoryRepository();
-  const { data: result, isLoading } = useQuery({
+  const { data: result, isLoading, error } = useQuery({
     filters: { type: { operator: 'eq', value: categoryType } }
   });
   const categories = result?.data || [];
@@ -52,6 +48,82 @@ function CategoryList({ categoryType, title, description }: CategoryListProps) {
       }
     }
   };
+
+  const columns: GridColDef[] = [
+    { field: 'code', headerName: 'Code', flex: 1, minWidth: 120 },
+    { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
+    {
+      field: 'description',
+      headerName: 'Description',
+      flex: 2,
+      minWidth: 200,
+    },
+    {
+      field: 'is_active',
+      headerName: 'Status',
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => (
+        <Badge variant={params.value ? 'success' : 'secondary'}>
+          {params.value ? 'Active' : 'Inactive'}
+        </Badge>
+      ),
+    },
+    { field: 'sort_order', headerName: 'Order', flex: 1, minWidth: 100, type: 'number' },
+    {
+      field: 'account',
+      headerName: 'Account',
+      flex: 2,
+      minWidth: 180,
+      valueGetter: (params) =>
+        params.row.chart_of_accounts
+          ? `${params.row.chart_of_accounts.code} - ${params.row.chart_of_accounts.name}`
+          : '-',
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <div className="flex justify-end gap-2 w-full">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`${params.row.id}`);
+            }}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`${params.row.id}/edit`);
+            }}
+            disabled={params.row.is_system}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(params.row.id);
+            }}
+            disabled={params.row.is_system}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -88,52 +160,21 @@ function CategoryList({ categoryType, title, description }: CategoryListProps) {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : filteredCategories.length > 0 ? (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[120px]">Code</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="hidden md:table-cell">Description</TableHead>
-                    <TableHead className="w-[120px]">Status</TableHead>
-                    <TableHead className="w-[120px]">Order</TableHead>
-                    <TableHead className="w-[180px]">Account</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCategories.map(cat => (
-                    <TableRow key={cat.id}>
-                      <TableCell className="font-medium">{cat.code}</TableCell>
-                      <TableCell>{cat.name}</TableCell>
-                      <TableCell className="hidden md:table-cell">{cat.description || '-'}</TableCell>
-                      <TableCell>
-                        <Badge variant={cat.is_active ? 'success' : 'secondary'}>
-                          {cat.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{cat.sort_order}</TableCell>
-                      <TableCell>
-                        {cat.chart_of_accounts ? `${cat.chart_of_accounts.code} - ${cat.chart_of_accounts.name}` : '-'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => navigate(`${cat.id}`)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => navigate(`${cat.id}/edit`)} disabled={cat.is_system}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(cat.id)} disabled={cat.is_system}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <DataGrid<Category>
+              columns={columns}
+              data={filteredCategories}
+              totalRows={filteredCategories.length}
+              loading={isLoading}
+              error={error instanceof Error ? error.message : undefined}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              getRowId={(row) => row.id}
+              onRowClick={(params) => navigate(`${params.row.id}`)}
+              autoHeight
+              paginationMode="client"
+            />
           ) : (
             <div className="flex flex-col items-center justify-center py-8">
               <p className="text-muted-foreground mb-4">No categories found</p>
