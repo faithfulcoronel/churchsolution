@@ -9,6 +9,7 @@ import {
   CreditCard,
   History,
   Wallet,
+  Tag,
   LucideIcon,
 } from 'lucide-react';
 
@@ -139,6 +140,22 @@ export const navigation: NavItem[] = [
             name: 'Chart of Accounts',
             href: '/accounts/chart-of-accounts',
             icon: FileText,
+          },
+        ],
+      },
+      {
+        name: 'Configuration',
+        icon: Tag,
+        submenu: [
+          {
+            name: 'Donation Categories',
+            href: '/finances/configuration/donation-categories',
+            icon: Tag,
+          },
+          {
+            name: 'Expense Categories',
+            href: '/finances/configuration/expense-categories',
+            icon: Tag,
           },
         ],
       },

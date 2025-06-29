@@ -20,6 +20,9 @@ const Statements = React.lazy(() => import('./Statements'));
 const IncomeExpenseList = React.lazy(() => import('./incomeExpense/IncomeExpenseList'));
 const IncomeExpenseAddEdit = React.lazy(() => import('./incomeExpense/IncomeExpenseAddEdit'));
 const IncomeExpenseProfile = React.lazy(() => import('./incomeExpense/IncomeExpenseProfile'));
+const CategoryList = React.lazy(() => import('./configuration/CategoryList'));
+const CategoryAddEdit = React.lazy(() => import('./configuration/CategoryAddEdit'));
+const CategoryProfile = React.lazy(() => import('./configuration/CategoryProfile'));
 
 function LoadingSpinner() {
   return (
@@ -62,6 +65,50 @@ function Finances() {
         <Route path="funds/add" element={<FundAddEdit />} />
         <Route path="funds/:id/edit" element={<FundAddEdit />} />
         <Route path="funds/:id" element={<FundProfile />} />
+        <Route
+          path="configuration/donation-categories"
+          element={
+            <CategoryList
+              categoryType="income_transaction"
+              title="Donation Categories"
+              description="Manage donation categories."
+            />
+          }
+        />
+        <Route
+          path="configuration/donation-categories/add"
+          element={<CategoryAddEdit categoryType="income_transaction" basePath="/finances/configuration/donation-categories" />}
+        />
+        <Route
+          path="configuration/donation-categories/:id/edit"
+          element={<CategoryAddEdit categoryType="income_transaction" basePath="/finances/configuration/donation-categories" />}
+        />
+        <Route
+          path="configuration/donation-categories/:id"
+          element={<CategoryProfile basePath="/finances/configuration/donation-categories" />}
+        />
+        <Route
+          path="configuration/expense-categories"
+          element={
+            <CategoryList
+              categoryType="expense_transaction"
+              title="Expense Categories"
+              description="Manage expense categories."
+            />
+          }
+        />
+        <Route
+          path="configuration/expense-categories/add"
+          element={<CategoryAddEdit categoryType="expense_transaction" basePath="/finances/configuration/expense-categories" />}
+        />
+        <Route
+          path="configuration/expense-categories/:id/edit"
+          element={<CategoryAddEdit categoryType="expense_transaction" basePath="/finances/configuration/expense-categories" />}
+        />
+        <Route
+          path="configuration/expense-categories/:id"
+          element={<CategoryProfile basePath="/finances/configuration/expense-categories" />}
+        />
         <Route path="expenses" element={<IncomeExpenseList transactionType="expense" />} />
         <Route path="expenses/add" element={<IncomeExpenseAddEdit transactionType="expense" />} />
         <Route path="expenses/:id/edit" element={<IncomeExpenseAddEdit transactionType="expense" />} />
