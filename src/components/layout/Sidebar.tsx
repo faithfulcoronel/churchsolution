@@ -12,9 +12,8 @@ import {
   Settings as SettingsIcon,
   Crown,
   Sparkles,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
+  Pin,
+  PinOff,
   Search,
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
@@ -102,7 +101,7 @@ function Sidebar({
               {!collapsed && <span className="ml-3">{item.name}</span>}
             </div>
             {!collapsed && (
-              <ChevronDown
+              <Pin
                 className={`h-4 w-4 transition-transform duration-200 ${isSubmenuOpen(item.name) ? 'rotate-180' : ''}`}
               />
             )}
@@ -280,7 +279,7 @@ function Sidebar({
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
-          w-64 ${collapsed ? 'lg:w-16' : 'lg:w-64'}
+          w-64 ${collapsed ? 'lg:w-20' : 'lg:w-64'}
           transition-all
         `}
         onMouseEnter={() => {
@@ -300,21 +299,24 @@ function Sidebar({
             <img
               src={collapsed ? '/logo_square.svg' : '/logo_long.svg'}
               alt="StewardTrack Logo"
-              className="h-8"
+              className={collapsed ? 'h-20' : 'h-12'}
             />
             <div className="hidden lg:flex items-center space-x-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setPinned(!pinned)}
-                title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
-              >
-                {pinned ? (
-                  <ChevronLeft className="h-5 w-5" />
-                ) : (
-                  <ChevronRight className="h-5 w-5" />
-                )}
-              </Button>
+              {!collapsed && (
+                <Button
+                  variant="light"
+                  size="icon"
+                  onClick={() => setPinned(!pinned)}
+                  title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
+                  className="bg-gray-800 text-gray-300"
+                >
+                  {pinned ? (
+                    <Pin className="h-5 w-5" />
+                  ) : (
+                    <PinOff className="h-5 w-5" />
+                  )}
+                </Button>
+              )}
             </div>
           </div>
 
