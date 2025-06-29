@@ -6,19 +6,16 @@ import { supabase } from '../../../lib/supabase';
 import { format } from 'date-fns';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
-import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import BackButton from '../../../components/BackButton';
 import { Input } from '../../../components/ui2/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
 import { Badge } from '../../../components/ui2/badge';
-import { Progress } from '../../../components/ui2/progress';
 import { useMessageStore } from '../../../components/MessageHandler';
 import {
   Plus,
   Search,
-  Filter,
-  PiggyBank,
   Loader2,
   Edit2,
   Trash2,
@@ -34,6 +31,8 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from '@/components/ui2/alert-dialog';
+import { DataGrid } from '../../../components/ui2/mui-datagrid';
+import { GridColDef } from '@mui/x-data-grid';
 
 function BudgetList() {
   const navigate = useNavigate();
@@ -44,6 +43,8 @@ function BudgetList() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deletingBudgetId, setDeletingBudgetId] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   // Get current tenant
   const { data: currentTenant } = useQuery({
@@ -186,6 +187,109 @@ function BudgetList() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  const columns: GridColDef[] = [
+    {
+      field: 'name',
+      headerName: 'Name',
+      flex: 2,
+      minWidth: 180,
+    },
+    {
+      field: 'category',
+      headerName: 'Category',
+      flex: 1,
+      minWidth: 150,
+      valueGetter: params => params.row.category?.name,
+    },
+    {
+      field: 'amount',
+      headerName: 'Amount',
+      flex: 1,
+      minWidth: 120,
+      valueFormatter: params => formatCurrency(params.value, currency),
+    },
+    {
+      field: 'used_amount',
+      headerName: 'Used',
+      flex: 1,
+      minWidth: 120,
+      valueFormatter: params => formatCurrency(params.value || 0, currency),
+    },
+    {
+      field: 'start_date',
+      headerName: 'Start Date',
+      flex: 1,
+      minWidth: 130,
+      valueGetter: params => new Date(params.row.start_date),
+      renderCell: params => format(new Date(params.row.start_date), 'MMM d, yyyy'),
+    },
+    {
+      field: 'end_date',
+      headerName: 'End Date',
+      flex: 1,
+      minWidth: 130,
+      valueGetter: params => new Date(params.row.end_date),
+      renderCell: params => format(new Date(params.row.end_date), 'MMM d, yyyy'),
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      flex: 1,
+      minWidth: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: params => {
+        const start = new Date(params.row.start_date);
+        const end = new Date(params.row.end_date);
+        const isActive = start <= today && end >= today;
+        const isUpcoming = start > today;
+        return (
+          <Badge variant={isActive ? 'success' : isUpcoming ? 'primary' : 'secondary'}>
+            {isActive ? 'Active' : isUpcoming ? 'Upcoming' : 'Expired'}
+          </Badge>
+        );
+      },
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: params => (
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={e => {
+              e.stopPropagation();
+              navigate(`/finances/budgets/${params.row.id}/edit`);
+            }}
+          >
+            <Edit2 className="h-4 w-4" />
+          </Button>
+          {params.row.transaction_count === 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={e => {
+                e.stopPropagation();
+                handleDelete(params.row);
+              }}
+              disabled={deletingBudgetId === params.row.id}
+            >
+              {deletingBudgetId === params.row.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 text-destructive" />
+              )}
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
@@ -261,141 +365,31 @@ function BudgetList() {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : filteredBudgets && filteredBudgets.length > 0 ? (
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredBudgets.map((budget) => {
-            const startDate = new Date(budget.start_date);
-            const endDate = new Date(budget.end_date);
-            const isActive = startDate <= today && endDate >= today;
-            const isUpcoming = startDate > today;
-            const percentage = ((budget.used_amount || 0) / budget.amount) * 100;
-
-            return (
-              <Card
-                key={budget.id}
-                className="h-full hover:shadow-lg transition-shadow duration-200"
-              >
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-shrink-0">
-                      <PiggyBank className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          navigate(`/finances/budgets/${budget.id}/edit`);
-                        }}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      {budget.transaction_count === 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDelete(budget);
-                          }}
-                          disabled={deletingBudgetId === budget.id}
-                        >
-                          {deletingBudgetId === budget.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <Link to={`/finances/budgets/${budget.id}`}>
-                      <dl>
-                        <dt className="truncate text-sm font-medium text-muted-foreground">
-                          {budget.name}
-                        </dt>
-                        <dd className="flex items-baseline">
-                          <div className="text-2xl font-semibold text-foreground">
-                            {formatCurrency(budget.amount, currency)}
-                          </div>
-                          <div className="ml-2">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                isActive
-                                  ? 'bg-success/10 text-success'
-                                  : isUpcoming
-                                  ? 'bg-primary/10 text-primary'
-                                  : 'bg-muted text-muted-foreground'
-                              }`}
-                            >
-                              {isActive ? 'Active' : isUpcoming ? 'Upcoming' : 'Expired'}
-                            </span>
-                          </div>
-                        </dd>
-                      </dl>
-
-                      <div className="mt-4">
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span>Used: {formatCurrency(budget.used_amount || 0, currency)}</span>
-                          <span>{percentage.toFixed(1)}%</span>
-                        </div>
-                        <div className="mt-1 relative">
-                          <Progress
-                            value={percentage}
-                            variant={
-                              percentage > 90
-                                ? 'destructive'
-                                : percentage > 70
-                                ? 'warning'
-                                : 'success'
-                            }
-                          />
-                        </div>
-
-                        <div className="mt-4 text-sm text-muted-foreground">
-                          <div className="flex justify-between">
-                            <span>Start Date:</span>
-                            <span>{format(startDate, 'MMM d, yyyy')}</span>
-                          </div>
-                          <div className="flex justify-between mt-1">
-                            <span>End Date:</span>
-                            <span>{format(endDate, 'MMM d, yyyy')}</span>
-                          </div>
-                        </div>
-
-                        {budget.description && (
-                          <div className="mt-4 text-sm text-muted-foreground">
-                            <p className="line-clamp-2">{budget.description}</p>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ) : (
-        <Card className="mt-6">
-          <CardContent className="text-center py-8">
-            <p className="text-sm text-muted-foreground">
-              {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all'
-                ? 'No budgets found matching your search criteria'
-                : 'No budgets found. Add your first budget by clicking the "Add Budget" button above.'}
-            </p>
+      <div className="mt-6">
+        <Card>
+          <CardContent className="p-0">
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <DataGrid<any>
+                columns={columns}
+                data={filteredBudgets || []}
+                totalRows={(filteredBudgets || []).length}
+                loading={isLoading}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+                getRowId={(row) => row.id}
+                onRowClick={(params) => navigate(`/finances/budgets/${params.row.id}`)}
+                page={page}
+                pageSize={pageSize}
+                paginationMode="client"
+              />
+            )}
           </CardContent>
         </Card>
-      )}
+      </div>
 
       <AlertDialog open={!!deletingBudgetId} onOpenChange={() => setDeletingBudgetId(null)}>
         <AlertDialogContent>
