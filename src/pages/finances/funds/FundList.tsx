@@ -148,6 +148,7 @@ function FundList() {
                 getRowId={(row) => row.id}
                 page={page}
                 pageSize={pageSize}
+                showQuickFilter={false}
               />
             )}
           </CardContent>
