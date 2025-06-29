@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { format } from 'date-fns';
-import { DataGrid } from '../../../components/ui2/data-grid';
+import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import { Button } from '../../../components/ui2/button';
+import { Input } from '../../../components/ui2/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../components/ui2/select';
 import BackButton from '../../../components/BackButton';
 import { Badge } from '../../../components/ui2/badge';
 import { Container } from '../../../components/ui2/container';
@@ -12,10 +14,12 @@ import {
   Plus,
   Users,
   Heart,
+  Search,
   Edit2,
   Trash2,
   Loader2,
 } from 'lucide-react';
+import { GridColDef } from '@mui/x-data-grid';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -51,6 +55,10 @@ type FamilyRelationship = {
 function FamilyRelationships() {
   const navigate = useNavigate();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   // Get current tenant
   const { data: currentTenant } = useQuery({
@@ -110,71 +118,105 @@ function FamilyRelationships() {
     enabled: !!currentTenant?.id,
   });
 
-  const columns = [
+  const columns: GridColDef[] = [
     {
-      accessorKey: 'member',
-      header: 'Member',
-      cell: ({ row }) => (
+      field: 'member',
+      headerName: 'Member',
+      flex: 1.5,
+      minWidth: 150,
+      valueGetter: (params) =>
+        `${params.row.member.first_name} ${params.row.member.last_name}`,
+      renderCell: (params) => (
         <div className="flex items-center space-x-2">
           <Users className="h-4 w-4 text-primary" />
           <span>
-            {row.original.member.first_name} {row.original.member.last_name}
+            {params.row.member.first_name} {params.row.member.last_name}
           </span>
         </div>
       ),
     },
     {
-      accessorKey: 'relationship',
-      header: 'Relationship',
-      cell: ({ row }) => (
+      field: 'relationship',
+      headerName: 'Relationship',
+      flex: 1.5,
+      minWidth: 150,
+      valueGetter: (params) => params.row.category.name,
+      renderCell: (params) => (
         <div className="flex items-center space-x-2">
           <Heart className="h-4 w-4 text-primary" />
-          <Badge variant="secondary">
-            {row.original.category.name}
-          </Badge>
+          <Badge variant="secondary">{params.row.category.name}</Badge>
         </div>
       ),
     },
     {
-      accessorKey: 'related_member',
-      header: 'Related Member',
-      cell: ({ row }) => (
+      field: 'related_member',
+      headerName: 'Related Member',
+      flex: 1.5,
+      minWidth: 150,
+      valueGetter: (params) =>
+        `${params.row.related_member.first_name} ${params.row.related_member.last_name}`,
+      renderCell: (params) => (
         <div className="flex items-center space-x-2">
           <Users className="h-4 w-4 text-primary" />
           <span>
-            {row.original.related_member.first_name} {row.original.related_member.last_name}
+            {params.row.related_member.first_name} {params.row.related_member.last_name}
           </span>
         </div>
       ),
     },
     {
-      accessorKey: 'created_at',
-      header: 'Created',
-      cell: ({ row }) => format(new Date(row.original.created_at), 'MMM d, yyyy'),
+      field: 'created_at',
+      headerName: 'Created',
+      flex: 1,
+      minWidth: 120,
+      valueGetter: (params) => new Date(params.row.created_at),
+      renderCell: (params) =>
+        format(new Date(params.row.created_at), 'MMM d, yyyy'),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/members/family/${params.row.id}/edit`);
+            }}
+          >
+            <Edit2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeletingId(params.row.id);
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      ),
     },
   ];
 
-  const filterFields = [
-    {
-      id: 'member',
-      label: 'Member',
-      type: 'text' as const,
-    },
-    {
-      id: 'relationship_category_id',
-      label: 'Relationship Type',
-      type: 'select' as const,
-      options: categories?.map(c => ({
-        value: c.id,
-        label: c.name
-      })) || [],
-    },
-    {
-      id: 'related_member',
-      label: 'Related Member',
-      type: 'text' as const,
-    },
-  ];
+  const filteredRelationships = (relationships || []).filter((rel) => {
+    const search = searchTerm.toLowerCase();
+    const memberName = `${rel.member.first_name} ${rel.member.last_name}`.toLowerCase();
+    const relatedName = `${rel.related_member.first_name} ${rel.related_member.last_name}`.toLowerCase();
+    const matchesSearch =
+      memberName.includes(search) || relatedName.includes(search);
+    const matchesType =
+      typeFilter === 'all' || rel.relationship_category_id === typeFilter;
+    return matchesSearch && matchesType;
+  });
+
 
   return (
     <Container>
@@ -201,47 +243,54 @@ function FamilyRelationships() {
           </p>
         </div>
 
+        <div className="mt-6 sm:flex sm:items-center sm:justify-between">
+          <div className="relative max-w-xs">
+            <Input
+              placeholder="Search relationships..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              icon={<Search />}
+            />
+          </div>
+
+          <div className="relative mt-4 sm:mt-0">
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {categories?.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {/* Data Grid */}
-        <DataGrid
+        <DataGrid<FamilyRelationship>
           columns={columns}
-          data={relationships || []}
+          data={filteredRelationships}
+          totalRows={filteredRelationships.length}
           loading={isLoading}
-          filterFields={filterFields}
-          onRowClick={(row) => navigate(`/members/family/${row.id}`)}
-          rowActions={(row) => (
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/members/family/${row.id}/edit`);
-                }}
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeletingId(row.id);
-                }}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          )}
-          pagination={{
-            pageSize: 10,
-            pageSizeOptions: [5, 10, 20, 50, 100],
+          onRowClick={(params) => navigate(`/members/family/${params.row.id}`)}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(0);
           }}
-          exportOptions={{
-            enabled: true,
-            fileName: 'family-relationships',
-            pdf: true,
-            excel: true,
-          }}
+          page={page}
+          pageSize={pageSize}
+          getRowId={(row) => row.id}
+          autoHeight
+          paginationMode="client"
+          disableColumnMenu={false}
+          disableColumnFilter={false}
+          disableColumnSelector={false}
+          disableDensitySelector={false}
         />
 
         {/* Delete Confirmation Dialog */}
