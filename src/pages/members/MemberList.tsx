@@ -7,6 +7,7 @@ import { SubscriptionGate } from '../../components/SubscriptionGate';
 import { DataGrid } from '../../components/ui2/mui-datagrid';
 import { Button } from '../../components/ui2/button';
 import { Badge } from '../../components/ui2/badge';
+import { Input } from '../../components/ui2/input';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -26,6 +27,7 @@ import {
   Phone,
   Calendar,
   Users,
+  Search,
 } from 'lucide-react';
 import { Card } from '../../components/ui2/card';
 
@@ -36,11 +38,29 @@ function MemberList() {
   const [pageSize, setPageSize] = useState(10);
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [filterModel, setFilterModel] = useState<GridFilterModel>({});
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Use the member repository hook
   const { useQuery, useDelete } = useMemberRepository();
 
   // Get members with repository
+  const filters = filterModel.items?.reduce((acc, filter) => ({
+    ...acc,
+    [filter.field]: {
+      operator: filter.operator.toLowerCase(),
+      value: filter.value
+    }
+  }), {} as Record<string, any>) || {};
+
+  if (searchTerm) {
+    filters.or = [
+      { field: 'first_name', operator: 'contains', value: searchTerm },
+      { field: 'last_name', operator: 'contains', value: searchTerm },
+      { field: 'preferred_name', operator: 'contains', value: searchTerm },
+      { field: 'email', operator: 'contains', value: searchTerm },
+    ];
+  }
+
   const { data: result, isLoading, error } = useQuery({
     pagination: {
       page: page + 1, // MUI Data Grid uses 0-based pages
@@ -50,13 +70,7 @@ function MemberList() {
       column: sortModel[0].field,
       ascending: sortModel[0].sort === 'asc'
     } : undefined,
-    filters: filterModel.items?.reduce((acc, filter) => ({
-      ...acc,
-      [filter.field]: {
-        operator: filter.operator.toLowerCase(),
-        value: filter.value
-      }
-    }), {})
+    filters,
   });
 
   // Delete member mutation
@@ -220,6 +234,15 @@ function MemberList() {
         </div>
       </div>
 
+      <div className="mt-6 w-full sm:max-w-xs">
+        <Input
+          placeholder="Search members..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          icon={<Search className="h-4 w-4" />}
+        />
+      </div>
+
       <Card className="mt-6">
         <div style={{ height: 600, width: '100%' }}>
           <DataGrid<Member>
@@ -236,6 +259,7 @@ function MemberList() {
             page={page}
             pageSize={pageSize}
             disableRowSelectionOnClick
+            slotProps={{ toolbar: { showQuickFilter: false } }}
           />
         </div>
       </Card>
