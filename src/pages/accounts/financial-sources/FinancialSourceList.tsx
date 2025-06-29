@@ -230,6 +230,7 @@ function FinancialSourceList() {
                 disableDensitySelector={false}
                 page={page}
                 pageSize={pageSize}
+                showQuickFilter={false}
               />
             )}
           </CardContent>
