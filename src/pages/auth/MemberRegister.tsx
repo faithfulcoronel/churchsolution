@@ -12,7 +12,8 @@ function MemberRegister() {
   const navigate = useNavigate();
   const { addMessage } = useMessageStore();
   const [tenants, setTenants] = useState<ComboboxOption[]>([]);
-  const [loadingTenants, setLoadingTenants] = useState(true);
+  const [loadingTenants, setLoadingTenants] = useState(false);
+  const [tenantSearch, setTenantSearch] = useState('');
   const [form, setForm] = useState({
     tenantId: '',
     firstName: '',
@@ -25,21 +26,35 @@ function MemberRegister() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchTenants() {
-      // use public view so registration works without auth
+    if (!tenantSearch) {
+      setTenants([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      setLoadingTenants(true);
       const { data, error } = await supabase
         .from('public_tenants')
         .select('id, name')
-        .order('name');
-      if (error) {
-        console.error('Error fetching tenants', error);
-      } else {
-        setTenants((data || []).map(t => ({ value: t.id, label: t.name })));
+        .ilike('name', `%${tenantSearch}%`)
+        .order('name')
+        .limit(10);
+      if (!controller.signal.aborted) {
+        if (error) {
+          console.error('Error fetching tenants', error);
+        } else {
+          setTenants((data || []).map(t => ({ value: t.id, label: t.name })));
+        }
+        setLoadingTenants(false);
       }
-      setLoadingTenants(false);
-    }
-    fetchTenants();
-  }, []);
+    }, 300);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeout);
+    };
+  }, [tenantSearch]);
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -125,7 +140,8 @@ function MemberRegister() {
                   options={tenants}
                   value={form.tenantId}
                   onChange={v => handleChange('tenantId', v)}
-                  placeholder={loadingTenants ? 'Loading churches...' : 'Select your church'}
+                  placeholder="Search your church"
+                  onSearchChange={setTenantSearch}
                   disabled={loadingTenants}
                 />
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
