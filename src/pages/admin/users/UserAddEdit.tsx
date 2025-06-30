@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../../lib/supabase';
 import { Save, Loader2, UserPlus } from 'lucide-react';
-import BackButton from '../../components/BackButton';
-import { useUserRepository } from '../../hooks/useUserRepository';
-import { Input } from '../../components/ui2/input';
-import { Checkbox } from '../../components/ui2/checkbox';
-import { Button } from '../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { useUserRepository } from '../../../hooks/useUserRepository';
+import { Input } from '../../../components/ui2/input';
+import { Checkbox } from '../../../components/ui2/checkbox';
+import { Button } from '../../../components/ui2/button';
 
 type UserFormData = {
   email: string;

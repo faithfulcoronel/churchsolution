@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useUserRepository } from '../../hooks/useUserRepository';
+import { useUserRepository } from '../../../hooks/useUserRepository';
 import { Loader2, Edit2 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-import BackButton from '../../components/BackButton';
-import { Button } from '../../components/ui2/button';
+import { supabase } from '../../../lib/supabase';
+import BackButton from '../../../components/BackButton';
+import { Button } from '../../../components/ui2/button';
 
 function UserProfile() {
   const { id } = useParams<{ id: string }>();

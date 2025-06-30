@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { useRoleRepository } from '../../hooks/useRoleRepository';
-import { NotificationService } from '../../services/NotificationService';
+import { supabase } from '../../../lib/supabase';
+import { useRoleRepository } from '../../../hooks/useRoleRepository';
+import { NotificationService } from '../../../services/NotificationService';
 import { Save, Loader2, Shield } from 'lucide-react';
-import BackButton from '../../components/BackButton';
+import BackButton from '../../../components/BackButton';
 
 type Permission = {
   id: string;

@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { Card, CardContent } from '../../components/ui2/card';
+import { Card, CardContent } from '../../../components/ui2/card';
 import { Loader2 } from 'lucide-react';
 
 const CategoryList = React.lazy(() => import('./CategoryList'));
