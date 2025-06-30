@@ -14,5 +14,13 @@ export function useSourceRecentTransactionRepository() {
     });
   };
 
-  return { useRecentTransactions };
+  const useSourceBalance = (accountId: string) => {
+    return useQuery({
+      queryKey: ['source-balance', accountId],
+      queryFn: () => repo.getBalance(accountId),
+      enabled: !!accountId,
+    });
+  };
+
+  return { useRecentTransactions, useSourceBalance };
 }
