@@ -6,6 +6,11 @@ import { useRoleRepository } from '../../../hooks/useRoleRepository';
 import { NotificationService } from '../../../services/NotificationService';
 import { Save, Loader2, Shield } from 'lucide-react';
 import BackButton from '../../../components/BackButton';
+import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
+import { Input } from '../../../components/ui2/input';
+import { Textarea } from '../../../components/ui2/textarea';
+import { Checkbox } from '../../../components/ui2/checkbox';
+import { Button } from '../../../components/ui2/button';
 
 type Permission = {
   id: string;
@@ -165,110 +170,80 @@ function RoleAddEdit() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-      <BackButton fallbackPath="/administration/roles" label="Back to Roles" />
+        <BackButton fallbackPath="/administration/roles" label="Back to Roles" />
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            {id ? 'Edit Role' : 'Create New Role'}
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {id
-              ? 'Update role details and permission assignments'
-              : 'Define a new role and assign permissions'}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="border-t border-gray-200">
-          <div className="px-4 py-5 sm:px-6">
+      <form onSubmit={handleSubmit}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center">
+              <Shield className="h-6 w-6 text-primary mr-2" />
+              <h3 className="text-lg font-medium text-foreground">
+                {id ? 'Edit Role' : 'Create New Role'}
+              </h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {id
+                ? 'Update role details and permission assignments'
+                : 'Define a new role and assign permissions'}
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
             <div className="grid grid-cols-1 gap-y-6 gap-x-4">
               <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Role Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
+                <Input
+                  label="Role Name"
                   required
                   value={formData.name}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                 />
               </div>
-
               <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700"
-                >
+                <label className="block text-sm font-medium mb-1.5 text-foreground">
                   Description
                 </label>
-                <textarea
-                  name="description"
-                  id="description"
-                  rows={3}
+                <Textarea
                   value={formData.description}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, description: e.target.value }))
                   }
-                  className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  rows={3}
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Permissions
-                </label>
+                <label className="block text-sm font-medium text-foreground">Permissions</label>
                 <div className="mt-4 space-y-6">
                   {Object.entries(groupedPermissions).map(([module, modulePermissions]) => (
                     <div key={module} className="space-y-2">
                       <div className="flex items-center">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           id={`module-${module}`}
-                          checked={modulePermissions.every((p) =>
-                            formData.permissions.includes(p.id)
-                          )}
-                          onChange={() => handleModuleToggle(module)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          checked={modulePermissions.every((p) => formData.permissions.includes(p.id))}
+                          onCheckedChange={() => handleModuleToggle(module)}
                         />
-                        <label
-                          htmlFor={`module-${module}`}
-                          className="ml-3 text-sm font-medium text-gray-700"
-                        >
-                          {module.charAt(0).toUpperCase() + module.slice(1)}
+                        <label htmlFor={`module-${module}`} className="ml-2 text-sm font-medium capitalize">
+                          {module}
                         </label>
                       </div>
                       <div className="ml-7 space-y-2">
                         {modulePermissions.map((permission) => (
-                          <div key={permission.id} className="flex items-start">
-                            <div className="flex items-center h-5">
-                              <input
-                                type="checkbox"
-                                id={`permission-${permission.id}`}
-                                checked={formData.permissions.includes(permission.id)}
-                                onChange={() => handlePermissionToggle(permission.id)}
-                                className="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded"
-                              />
-                            </div>
-                            <div className="ml-3 text-sm">
-                              <label
-                                htmlFor={`permission-${permission.id}`}
-                                className="font-medium text-gray-700"
-                              >
+                          <div key={permission.id} className="flex items-start space-x-2">
+                            <Checkbox
+                              id={`permission-${permission.id}`}
+                              checked={formData.permissions.includes(permission.id)}
+                              onCheckedChange={() => handlePermissionToggle(permission.id)}
+                              size="sm"
+                            />
+                            <div className="text-sm">
+                              <label htmlFor={`permission-${permission.id}`} className="font-medium text-foreground">
                                 {permission.name}
                               </label>
                               {permission.description && (
-                                <p className="text-gray-500">
+                                <p className="text-muted-foreground">
                                   {permission.description}
                                 </p>
                               )}
@@ -281,36 +256,27 @@ function RoleAddEdit() {
                 </div>
               </div>
             </div>
-
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => navigate('/administration/roles')}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={createRoleMutation.isPending || updateRoleMutation.isPending}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-              >
-                {createRoleMutation.isPending || updateRoleMutation.isPending ? (
-                  <>
-                    <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="-ml-1 mr-2 h-5 w-5" />
-                    {id ? 'Save Changes' : 'Create Role'}
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+          </CardContent>
+          <CardFooter className="flex justify-end space-x-3">
+            <Button type="button" variant="outline" onClick={() => navigate('/administration/roles')}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={createRoleMutation.isPending || updateRoleMutation.isPending}>
+              {createRoleMutation.isPending || updateRoleMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {id ? 'Save Changes' : 'Create Role'}
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
     </div>
   );
 }
