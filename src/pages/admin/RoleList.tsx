@@ -32,7 +32,7 @@ function RoleList() {
   };
 
   const handleEdit = (roleId: string) => {
-    navigate(`/settings/administration/roles/${roleId}/edit`);
+    navigate(`/administration/roles/${roleId}/edit`);
   };
 
   const filteredRoles = roles.filter((role) =>
@@ -52,7 +52,7 @@ function RoleList() {
         <PermissionGate permission="role.create">
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <Link
-              to="/settings/administration/roles/add"
+              to="/administration/roles/add"
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -153,7 +153,7 @@ function RoleList() {
           <PermissionGate permission="role.create">
             <div className="mt-6">
               <Link
-                to="/settings/administration/roles/add"
+                to="/administration/roles/add"
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 <Plus className="h-4 w-4 mr-2" />

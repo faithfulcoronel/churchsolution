@@ -17,6 +17,7 @@ const Settings = React.lazy(() => import('./pages/Settings'));
 const Members = React.lazy(() => import('./pages/members/Members'));
 const Finances = React.lazy(() => import('./pages/finances/Finances'));
 const Accounts = React.lazy(() => import('./pages/accounts/Accounts'));
+const Administration = React.lazy(() => import('./pages/admin/Administration'));
 const Layout = React.lazy(() => import('./components/Layout'));
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 
@@ -134,6 +135,7 @@ function App() {
                   <Route path="/members/*" element={<Members />} />
                   <Route path="/finances/*" element={<Finances />} />
                   <Route path="/accounts/*" element={<Accounts />} />
+                  <Route path="/administration/*" element={<Administration />} />
                   <Route path="/settings/*" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Route>

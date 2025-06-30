@@ -20,28 +20,28 @@ function Administration() {
       id: 'users',
       label: 'Users',
       icon: <UserCog className="h-5 w-5" />,
-      href: '/settings/administration/users',
+      href: '/administration/users',
       show: () => hasPermission('user.view')
     },
     {
       id: 'roles',
       label: 'Roles',
       icon: <Shield className="h-5 w-5" />,
-      href: '/settings/administration/roles',
+      href: '/administration/roles',
       show: () => hasPermission('role.view')
     },
     {
       id: 'permissions',
       label: 'Permissions',
       icon: <KeyRound className="h-5 w-5" />,
-      href: '/settings/administration/configuration/permissions',
+      href: '/administration/configuration/permissions',
       show: () => hasPermission('permission.view')
     },
     {
       id: 'church',
       label: 'Church Settings',
       icon: <Building2 className="h-5 w-5" />,
-      href: '/settings/administration/account-management/church',
+      href: '/administration/account-management/church',
       show: () => hasPermission('user.view')
     },
   ].filter(tab => !tab.show || tab.show());

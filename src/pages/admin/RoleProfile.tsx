@@ -25,7 +25,7 @@ function RoleProfile() {
     if (window.confirm('Are you sure you want to delete this role?')) {
       try {
         await deleteMutation.mutateAsync(id);
-        navigate('/settings/administration/roles');
+        navigate('/administration/roles');
       } catch (err) {
         console.error('Error deleting role', err);
       }
@@ -51,7 +51,7 @@ function RoleProfile() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/settings/administration/roles" label="Back to Roles" />
+        <BackButton fallbackPath="/administration/roles" label="Back to Roles" />
       </div>
 
       <Card className="mb-6">

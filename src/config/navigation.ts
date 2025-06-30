@@ -191,7 +191,7 @@ export const navigation: NavItem[] = [
   },
   {
     name: 'Administration',
-    href: '/settings/administration',
+    href: '/administration',
     icon: Shield,
     permission: 'user.view',
     submenu: [
@@ -201,7 +201,7 @@ export const navigation: NavItem[] = [
         submenu: [
           {
             name: 'Users',
-            href: '/settings/administration/users',
+            href: '/administration/users',
             icon: UserCog,
           },
           {
@@ -210,12 +210,12 @@ export const navigation: NavItem[] = [
             submenu: [
               {
                 name: 'Roles',
-                href: '/settings/administration/roles',
+                href: '/administration/roles',
                 icon: Shield,
               },
               {
                 name: 'Permissions',
-                href: '/settings/administration/permissions',
+                href: '/administration/permissions',
                 icon: Shield,
               },
             ],
@@ -228,7 +228,7 @@ export const navigation: NavItem[] = [
         submenu: [
           {
             name: 'Church Settings',
-            href: '/settings/administration/account-management/church',
+            href: '/administration/account-management/church',
             icon: Building2,
           },
         ],

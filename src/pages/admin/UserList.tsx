@@ -90,7 +90,7 @@ function Users() {
   };
 
   const handleEdit = (user: User) => {
-    navigate(`/settings/administration/users/${user.id}/edit`);
+    navigate(`/administration/users/${user.id}/edit`);
   };
 
   const filteredUsers = users?.filter((user) => {
@@ -113,7 +113,7 @@ function Users() {
         </div>
         <PermissionGate permission="user.create">
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <Link to="/settings/administration/users/add">
+            <Link to="/administration/users/add">
               <Button className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
                 Add User
