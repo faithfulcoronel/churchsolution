@@ -31,6 +31,7 @@ import {
   type IIncomeExpenseTransactionMappingAdapter
 } from '../adapters/incomeExpenseTransactionMapping.adapter';
 import { FundAdapter, type IFundAdapter } from '../adapters/fund.adapter';
+import { FundBalanceAdapter, type IFundBalanceAdapter } from '../adapters/fundBalance.adapter';
 import {
   OfferingBatchAdapter,
   type IOfferingBatchAdapter,
@@ -74,6 +75,7 @@ import {
   type IIncomeExpenseTransactionMappingRepository
 } from '../repositories/incomeExpenseTransactionMapping.repository';
 import { FundRepository, type IFundRepository } from '../repositories/fund.repository';
+import { FundBalanceRepository, type IFundBalanceRepository } from '../repositories/fundBalance.repository';
 import {
   OfferingBatchRepository,
   type IOfferingBatchRepository,
@@ -135,6 +137,10 @@ container
 container
   .bind<IFundAdapter>(TYPES.IFundAdapter)
   .to(FundAdapter)
+  .inSingletonScope();
+container
+  .bind<IFundBalanceAdapter>(TYPES.IFundBalanceAdapter)
+  .to(FundBalanceAdapter)
   .inSingletonScope();
 container
   .bind<ICategoryAdapter>(TYPES.ICategoryAdapter)
@@ -205,6 +211,10 @@ container
 container
   .bind<IFundRepository>(TYPES.IFundRepository)
   .to(FundRepository)
+  .inSingletonScope();
+container
+  .bind<IFundBalanceRepository>(TYPES.IFundBalanceRepository)
+  .to(FundBalanceRepository)
   .inSingletonScope();
 container
   .bind<ICategoryRepository>(TYPES.ICategoryRepository)
