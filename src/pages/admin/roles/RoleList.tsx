@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useRoleRepository } from '../../hooks/useRoleRepository';
-import { usePermissions } from '../../hooks/usePermissions';
-import PermissionGate from '../../components/PermissionGate';
+import { useRoleRepository } from '../../../hooks/useRoleRepository';
+import { usePermissions } from '../../../hooks/usePermissions';
+import PermissionGate from '../../../components/PermissionGate';
 import { Shield, Plus, Search, Edit2, Trash2, Loader2 } from 'lucide-react';
-import { Role } from '../../models/role.model';
+import { Role } from '../../../models/role.model';
 
 function RoleList() {
   const navigate = useNavigate();

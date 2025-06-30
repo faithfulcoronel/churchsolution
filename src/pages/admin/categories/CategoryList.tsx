@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCategoryRepository } from '../../hooks/useCategoryRepository';
-import { Category, CategoryType } from '../../models/category.model';
+import { useCategoryRepository } from '../../../hooks/useCategoryRepository';
+import { Category, CategoryType } from '../../../models/category.model';
 import {
   Card,
   CardHeader,
   CardContent
-} from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import { Input } from '../../components/ui2/input';
+} from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import { Input } from '../../../components/ui2/input';
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent
-} from '../../components/ui2/tabs';
+} from '../../../components/ui2/tabs';
 import {
   Table,
   TableHeader,
@@ -22,8 +22,8 @@ import {
   TableHead,
   TableBody,
   TableCell
-} from '../../components/ui2/table';
-import { Badge } from '../../components/ui2/badge';
+} from '../../../components/ui2/table';
+import { Badge } from '../../../components/ui2/badge';
 import { Plus, Eye, Edit, Trash2, Loader2 } from 'lucide-react';
 
 const categoryTypes: { value: CategoryType; label: string }[] = [

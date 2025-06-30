@@ -2,8 +2,8 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Import admin pages
-import Users from './Users';
-import Roles from './Roles';
+import Users from './users/Users';
+import Roles from './roles/Roles';
 import ChurchSettings from './account-management/ChurchSettings';
 import Permissions from './configuration/Permissions';
 

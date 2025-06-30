@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import PermissionGate from '../../components/PermissionGate';
-import { usePermissions } from '../../hooks/usePermissions';
+import PermissionGate from '../../../components/PermissionGate';
+import { usePermissions } from '../../../hooks/usePermissions';
 import {
   Plus,
   Edit2,
@@ -10,9 +10,9 @@ import {
   Search,
   Filter,
 } from 'lucide-react';
-import { useUserRepository } from '../../hooks/useUserRepository';
-import { supabase } from '../../lib/supabase';
-import { Input } from '../../components/ui2/input';
+import { useUserRepository } from '../../../hooks/useUserRepository';
+import { supabase } from '../../../lib/supabase';
+import { Input } from '../../../components/ui2/input';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -22,8 +22,8 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from '../../components/ui2/alert-dialog';
-import { Button } from '../../components/ui2/button';
+} from '../../../components/ui2/alert-dialog';
+import { Button } from '../../../components/ui2/button';
 import {
   Table,
   TableHeader,
@@ -31,7 +31,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
-} from '../../components/ui2/table';
+} from '../../../components/ui2/table';
 
 type User = {
   id: string;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useRoleRepository } from '../../hooks/useRoleRepository';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
-import { Button } from '../../components/ui2/button';
-import BackButton from '../../components/BackButton';
-import { Badge } from '../../components/ui2/badge';
+import { useRoleRepository } from '../../../hooks/useRoleRepository';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Button } from '../../../components/ui2/button';
+import BackButton from '../../../components/BackButton';
+import { Badge } from '../../../components/ui2/badge';
 import { Loader2, Shield, Pencil, Trash2 } from 'lucide-react';
 
 function RoleProfile() {
