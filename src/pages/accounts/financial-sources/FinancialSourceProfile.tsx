@@ -49,26 +49,24 @@ function FinancialSourceProfile() {
   
   const source = sourceData?.data?.[0];
   
-  // Fetch financial transactions for this source
+  // Fetch recent transactions aggregated by header for this source
   const { data: transactionsData, isLoading: transactionsLoading } = useQuery({
     queryKey: ['source-transactions', id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('financial_transactions')
+        .from('source_recent_transactions_view')
         .select(`
-          id,
-          type,
-          debit,
-          credit,
+          header_id,
+          source_id,
           date,
+          category,
           description,
-          category:category_id (name),
-          fund:fund_id (name, code)
+          amount
         `)
         .eq('source_id', id)
         .order('date', { ascending: false })
         .limit(5);
-        
+
       if (error) throw error;
       return data;
     },
@@ -331,27 +329,27 @@ function FinancialSourceProfile() {
                   </thead>
                   <tbody className="bg-background divide-y divide-border">
                     {transactionsData.map((transaction) => (
-                      <tr key={transaction.id} className="hover:bg-muted/50">
+                      <tr key={transaction.header_id} className="hover:bg-muted/50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                           {new Date(transaction.date).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Badge
-                            variant={transaction.type === 'income' ? 'success' : 'destructive'}
+                            variant={transaction.amount >= 0 ? 'success' : 'destructive'}
                           >
-                            {transaction.type}
+                            {transaction.amount >= 0 ? 'income' : 'expense'}
                           </Badge>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                          {transaction.category?.name || 'Uncategorized'}
+                          {transaction.category || 'Uncategorized'}
                         </td>
                         <td className="px-6 py-4 text-sm text-foreground">
                           {transaction.description}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                          <span className={transaction.type === 'income' ? 'text-success' : 'text-destructive'}>
-                            {transaction.type === 'income' ? '+' : '-'}
-                            ${(transaction.debit - transaction.credit).toFixed(2)}
+                          <span className={transaction.amount >= 0 ? 'text-success' : 'text-destructive'}>
+                            {transaction.amount >= 0 ? '+' : '-'}
+                            {Math.abs(transaction.amount).toFixed(2)}
                           </span>
                         </td>
                       </tr>
