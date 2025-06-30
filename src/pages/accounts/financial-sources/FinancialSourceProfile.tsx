@@ -50,27 +50,30 @@ function FinancialSourceProfile() {
   const source = sourceData?.data?.[0];
   
   // Fetch recent transactions aggregated by header for this source
+  const accountId = source?.account_id;
+
   const { data: transactionsData, isLoading: transactionsLoading } = useQuery({
-    queryKey: ['source-transactions', id],
+    queryKey: ['source-transactions', accountId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('source_recent_transactions_view')
         .select(`
           header_id,
           source_id,
+          account_id,
           date,
           category,
           description,
           amount
         `)
-        .eq('source_id', id)
+        .eq('account_id', accountId)
         .order('date', { ascending: false })
         .limit(5);
 
       if (error) throw error;
       return data;
     },
-    enabled: !!id
+    enabled: !!accountId
   });
   
   // Delete mutation
