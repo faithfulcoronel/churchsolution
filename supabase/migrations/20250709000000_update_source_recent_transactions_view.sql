@@ -17,7 +17,7 @@ SELECT
   h.description,
   CASE
     WHEN ft.debit > 0 THEN ft.debit
-    ELSE ft.credit
+    ELSE -ft.credit
   END AS amount
 FROM financial_transactions ft
 JOIN financial_transaction_headers h ON ft.header_id = h.id
