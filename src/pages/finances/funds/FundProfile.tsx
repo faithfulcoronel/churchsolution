@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFundRepository } from '../../../hooks/useFundRepository';
-import { useFundBalanceRepository } from '../../../hooks/useFundBalanceRepository';
 import { useSourceRecentTransactionRepository } from '../../../hooks/useSourceRecentTransactionRepository';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -42,7 +41,6 @@ function FundProfile() {
   const [retryCount, setRetryCount] = useState(0);
 
   const { useQuery: useFundQuery, useDelete } = useFundRepository();
-  const { useBalance } = useFundBalanceRepository();
   const { currency } = useCurrencyStore();
 
   const { data: fundData, isLoading } = useFundQuery({
@@ -52,9 +50,10 @@ function FundProfile() {
 
   const fund = fundData?.data?.[0];
 
-  const { data: balance, isLoading: balanceLoading } = useBalance(id || '');
+  const { useFundBalance, useRecentTransactionsByFund } =
+    useSourceRecentTransactionRepository();
 
-  const { useRecentTransactionsByFund } = useSourceRecentTransactionRepository();
+  const { data: balance, isLoading: balanceLoading } = useFundBalance(id || '');
 
   const { data: transactionsData, isLoading: transactionsLoading } =
     useRecentTransactionsByFund(id || '');

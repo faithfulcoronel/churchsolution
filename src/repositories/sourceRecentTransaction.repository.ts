@@ -7,6 +7,7 @@ export interface ISourceRecentTransactionRepository {
   getRecentTransactions(accountId: string, limit?: number): Promise<SourceRecentTransaction[]>;
   getRecentTransactionsByFund(fundId: string, limit?: number): Promise<SourceRecentTransaction[]>;
   getBalance(accountId: string): Promise<number>;
+  getBalanceByFund(fundId: string): Promise<number>;
 }
 
 @injectable()
@@ -46,6 +47,11 @@ export class SourceRecentTransactionRepository implements ISourceRecentTransacti
 
   async getBalance(accountId: string) {
     const amounts = await this.adapter.fetchBalance(accountId);
+    return amounts.reduce((sum: number, a: any) => sum + Number(a), 0);
+  }
+
+  async getBalanceByFund(fundId: string) {
+    const amounts = await this.adapter.fetchBalanceByFund(fundId);
     return amounts.reduce((sum: number, a: any) => sum + Number(a), 0);
   }
 }
