@@ -14,6 +14,11 @@ import { useUserRepository } from '../../../hooks/useUserRepository';
 import { supabase } from '../../../lib/supabase';
 import { Input } from '../../../components/ui2/input';
 import {
+  Card,
+  CardHeader,
+  CardContent,
+} from '../../../components/ui2/card';
+import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogHeader,
@@ -32,6 +37,7 @@ import {
   TableRow,
   TableCell,
 } from '../../../components/ui2/table';
+import { Badge } from '../../../components/ui2/badge';
 
 type User = {
   id: string;
@@ -103,116 +109,111 @@ function Users() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Users</h1>
-          <p className="mt-2 text-sm text-gray-700">
+    <div className="w-full px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Users</h1>
+          <p className="text-muted-foreground">
             A list of all users in your church including their roles and permissions.
           </p>
         </div>
         <PermissionGate permission="user.create">
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <Link to="/administration/users/add">
-              <Button className="flex items-center">
-                <Plus className="h-4 w-4 mr-2" />
-                Add User
-              </Button>
-            </Link>
-          </div>
+          <Link to="/administration/users/add">
+            <Button className="flex items-center">
+              <Plus className="h-4 w-4 mr-2" />
+              Add User
+            </Button>
+          </Link>
         </PermissionGate>
       </div>
 
-      <div className="mt-6">
-        <div className="relative max-w-xs">
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search users..."
-            icon={<Search className="h-5 w-5" />}
-          />
-        </div>
+      <div className="max-w-xs">
+        <Input
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search users..."
+          icon={<Search className="h-5 w-5" />}
+        />
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
-        </div>
-      ) : filteredUsers && filteredUsers.length > 0 ? (
-        <Table className="mt-8">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Roles</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Last Sign In</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredUsers.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {rolesMap[user.id]?.map((name, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
-                      >
-                        {name}
-                      </span>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {new Date(user.created_at).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  {user.last_sign_in_at
-                    ? new Date(user.last_sign_in_at).toLocaleDateString()
-                    : 'Never'}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
-                    <PermissionGate permission="user.edit">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(user)}
-                        icon={<Edit2 className="h-4 w-4" />}
-                      />
-                    </PermissionGate>
-                    <PermissionGate permission="user.delete">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(user)}
-                        disabled={deleteUserMutation.isPending}
-                        icon={
-                          deleteUserMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )
-                        }
-                      />
-                    </PermissionGate>
-                  </div>
-                </TableCell>
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : filteredUsers && filteredUsers.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Roles</TableHead>
+                  <TableHead>Created At</TableHead>
+                  <TableHead>Last Sign In</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {rolesMap[user.id]?.map((name, index) => (
+                          <Badge key={index} variant="secondary">
+                            {name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {user.last_sign_in_at
+                        ? new Date(user.last_sign_in_at).toLocaleDateString()
+                        : 'Never'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                      <PermissionGate permission="user.edit">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(user)}
+                          icon={<Edit2 className="h-4 w-4" />}
+                        />
+                      </PermissionGate>
+                      <PermissionGate permission="user.delete">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(user)}
+                          disabled={deleteUserMutation.isPending}
+                          icon={
+                            deleteUserMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )
+                          }
+                        />
+                      </PermissionGate>
+                      </div>
+                    </TableCell>
               </TableRow>
             ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <div className="text-center py-8 bg-white shadow sm:rounded-lg mt-8">
-          <p className="text-sm text-gray-500">
-            {searchTerm
-              ? 'No users found matching your search criteria'
-              : 'No users found. Add your first user by clicking the "Add User" button above.'}
-          </p>
-        </div>
-      )}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="py-8 text-center text-muted-foreground">
+              {searchTerm
+                ? 'No users found matching your search criteria'
+                : 'No users found. Add your first user by clicking the "Add User" button above.'}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
         <AlertDialogContent>

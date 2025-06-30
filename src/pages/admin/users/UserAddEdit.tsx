@@ -8,6 +8,7 @@ import { useUserRepository } from '../../../hooks/useUserRepository';
 import { Input } from '../../../components/ui2/input';
 import { Checkbox } from '../../../components/ui2/checkbox';
 import { Button } from '../../../components/ui2/button';
+import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
 
 type UserFormData = {
   email: string;
@@ -94,25 +95,24 @@ const UserAddEdit = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
         <BackButton fallbackPath="/administration/users" label="Back to Users" />
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            {id ? 'Edit User' : 'Create New User'}
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {id
-              ? 'Update user details and role assignments'
-              : 'Add a new user to the system'}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="border-t border-gray-200">
-          <div className="px-4 py-5 sm:px-6">
+      <form onSubmit={handleSubmit}>
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-medium text-foreground">
+              {id ? 'Edit User' : 'Create New User'}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {id
+                ? 'Update user details and role assignments'
+                : 'Add a new user to the system'}
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input
@@ -155,7 +155,7 @@ const UserAddEdit = () => {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-foreground">
                   Roles
                 </label>
                 <div className="mt-2 space-y-2">
@@ -173,44 +173,44 @@ const UserAddEdit = () => {
                           }));
                         }}
                       />
-                      <label htmlFor={`role-${role.id}`} className="text-sm font-medium text-gray-700">
+                      <label htmlFor={`role-${role.id}`} className="text-sm font-medium text-foreground">
                         {role.name}
                       </label>
                     </div>
                   ))}
                 </div>
               </div>
+              </div>
             </div>
-
-            <div className="mt-6 flex justify-end space-x-3">
-              <Button variant="outline" type="button" onClick={() => navigate('/administration/users')}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createUserMutation.isPending || updateUserMutation.isPending}
-              >
-                {createUserMutation.isPending || updateUserMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : id ? (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Create User
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </form>
-      </div>
+          </CardContent>
+          <CardFooter className="flex justify-end space-x-3">
+            <Button variant="outline" type="button" onClick={() => navigate('/administration/users')}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createUserMutation.isPending || updateUserMutation.isPending}
+            >
+              {createUserMutation.isPending || updateUserMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : id ? (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
+              ) : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Create User
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
     </div>
   );
 };
