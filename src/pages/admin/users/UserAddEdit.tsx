@@ -180,7 +180,6 @@ const UserAddEdit = () => {
                   ))}
                 </div>
               </div>
-              </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-end space-x-3">
