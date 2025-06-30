@@ -13,7 +13,8 @@ const adapter: ISourceRecentTransactionAdapter = {
       description: 'desc',
       amount: '50'
     }
-  ]
+  ],
+  fetchBalance: async () => ['10', '-5', '20']
 } as any;
 
 describe('SourceRecentTransactionRepository mapping', () => {
@@ -30,5 +31,10 @@ describe('SourceRecentTransactionRepository mapping', () => {
       description: 'desc',
       amount: 50
     });
+  });
+
+  it('calculates balance correctly', async () => {
+    const total = await repo.getBalance('a1');
+    expect(total).toBe(25);
   });
 });

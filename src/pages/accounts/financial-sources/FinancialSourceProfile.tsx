@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
 import { useSourceRecentTransactionRepository } from '../../../hooks/useSourceRecentTransactionRepository';
+import { useCurrencyStore } from '../../../stores/currencyStore';
+import { formatCurrency } from '../../../utils/currency';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -35,7 +37,8 @@ function FinancialSourceProfile() {
   const [retryCount, setRetryCount] = useState(0);
 
   const { useQuery: useSourceQuery, useDelete } = useFinancialSourceRepository();
-  const { useRecentTransactions } = useSourceRecentTransactionRepository();
+  const { useRecentTransactions, useSourceBalance } = useSourceRecentTransactionRepository();
+  const { currency } = useCurrencyStore();
   
   // Fetch source data
   const { data: sourceData, isLoading } = useSourceQuery({
@@ -55,6 +58,9 @@ function FinancialSourceProfile() {
 
   const { data: transactionsData, isLoading: transactionsLoading } =
     useRecentTransactions(accountId || '');
+
+  const { data: sourceBalance, isLoading: balanceLoading } =
+    useSourceBalance(accountId || '');
   
   // Delete mutation
   const deleteMutation = useDelete();
@@ -197,9 +203,9 @@ function FinancialSourceProfile() {
       </Card>
       
       {/* Source Details */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Basic Information */}
-        <Card>
+        <Card className="md:col-span-2">
           <CardHeader>
             <h3 className="text-lg font-medium flex items-center">
               <FileText className="h-5 w-5 mr-2 text-primary" />
@@ -265,9 +271,33 @@ function FinancialSourceProfile() {
             </dl>
           </CardContent>
         </Card>
-        
-        {/* Recent Transactions */}
+
+        {/* Source Balance */}
         <Card>
+          <CardHeader>
+            <div className="flex items-center">
+              <DollarSign className="h-5 w-5 text-primary mr-2" />
+              <h3 className="text-lg font-medium">Source Balance</h3>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            {balanceLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="text-center">
+                <span className="text-2xl font-bold text-foreground">
+                  {formatCurrency(Math.abs(sourceBalance || 0), currency)}
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent Transactions */}
+        <Card className="md:col-span-3">
           <CardHeader>
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium flex items-center">

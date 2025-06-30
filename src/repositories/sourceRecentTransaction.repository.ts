@@ -5,6 +5,7 @@ import type { ISourceRecentTransactionAdapter } from '../adapters/sourceRecentTr
 
 export interface ISourceRecentTransactionRepository {
   getRecentTransactions(accountId: string, limit?: number): Promise<SourceRecentTransaction[]>;
+  getBalance(accountId: string): Promise<number>;
 }
 
 @injectable()
@@ -25,5 +26,10 @@ export class SourceRecentTransactionRepository implements ISourceRecentTransacti
       description: r.description ?? null,
       amount: Number(r.amount)
     }));
+  }
+
+  async getBalance(accountId: string) {
+    const amounts = await this.adapter.fetchBalance(accountId);
+    return amounts.reduce((sum: number, a: any) => sum + Number(a), 0);
   }
 }
