@@ -10,6 +10,8 @@ import {
   History,
   Wallet,
   Tag,
+  Shield,
+  UserCog,
   LucideIcon,
 } from 'lucide-react';
 
@@ -156,6 +158,41 @@ export const navigation: NavItem[] = [
             name: 'Expense Categories',
             href: '/finances/configuration/expense-categories',
             icon: Tag,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'Administration',
+    href: '/settings/administration',
+    icon: Shield,
+    permission: 'user.view',
+    submenu: [
+      {
+        name: 'User Management',
+        icon: UserCog,
+        submenu: [
+          {
+            name: 'Users',
+            href: '/settings/administration/users',
+            icon: UserCog,
+          },
+          {
+            name: 'Configuration',
+            icon: Tag,
+            submenu: [
+              {
+                name: 'Roles',
+                href: '/settings/administration/roles',
+                icon: Shield,
+              },
+              {
+                name: 'Permissions',
+                href: '/settings/administration/permissions',
+                icon: Shield,
+              },
+            ],
           },
         ],
       },
