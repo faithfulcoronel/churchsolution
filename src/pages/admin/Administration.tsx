@@ -41,7 +41,7 @@ function Administration() {
       id: 'church',
       label: 'Church Settings',
       icon: <Building2 className="h-5 w-5" />,
-      href: '/settings/administration/church',
+      href: '/settings/administration/account-management/church',
       show: () => hasPermission('user.view')
     },
   ].filter(tab => !tab.show || tab.show());
@@ -89,7 +89,7 @@ function Administration() {
               <Route path="users/*" element={<Users />} />
               <Route path="roles/*" element={<Roles />} />
               <Route path="configuration/permissions/*" element={<Permissions />} />
-              <Route path="church" element={<ChurchSettings />} />
+              <Route path="account-management/church" element={<ChurchSettings />} />
               <Route path="*" element={<Navigate to={adminTabs[0]?.href.split('/').pop() || 'users'} replace />} />
             </Routes>
           </div>
