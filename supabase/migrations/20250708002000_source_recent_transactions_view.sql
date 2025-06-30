@@ -4,17 +4,21 @@
 
 create materialized view source_recent_transactions_view as
 select
+  distinct on (h.id)
   h.id as header_id,
-  h.source_id,
+  ft.source_id,
   h.transaction_date as date,
-  coalesce(min(c.name), 'Uncategorized') as category,
+  coalesce(c.name, 'Uncategorized') as category,
   h.description,
-  sum(ft.credit) - sum(ft.debit) as amount
+  case
+    when ft.debit > 0 then ft.debit
+    else ft.credit
+  end as amount
 from financial_transactions ft
 join financial_transaction_headers h on ft.header_id = h.id
 left join categories c on ft.category_id = c.id
 where ft.source_id is not null
-group by h.id, h.source_id, h.transaction_date, h.description;
+order by h.id, ft.id;
 
 create index if not exists source_recent_transactions_view_source_date_idx
   on source_recent_transactions_view(source_id, date);
