@@ -2,19 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useMessageStore } from '../../components/MessageHandler';
-import { Card, CardHeader, CardContent } from '../../components/ui2/card';
+import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
 import { Separator } from '../../components/ui2/separator';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from '../../components/ui2/alert-dialog';
+import { Textarea } from '../../components/ui2/textarea';
 import {
   Building2,
   Mail,
@@ -24,6 +16,7 @@ import {
   MapPin,
   Globe,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 
 type RegistrationData = {
@@ -63,6 +56,9 @@ function Register() {
   });
 
   const validateForm = () => {
+    // Reset error
+    setError(null);
+
     // Email validation
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     if (!emailRegex.test(formData.email)) {
@@ -144,15 +140,15 @@ function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setError(null); 
 
     if (!validateForm()) {
       return;
     }
 
-    setLoading(true);
-
     try {
+      setLoading(true);
+
       // Create user account
       const { data: { user }, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
@@ -169,7 +165,7 @@ function Register() {
       if (!user) throw new Error('Failed to create user account');
 
       // Store registration data and navigate to onboarding
-      sessionStorage.setItem('registrationData', JSON.stringify({
+      const registrationData = {
         userId: user.id,
         email: formData.email,
         firstName: formData.firstName,
@@ -179,8 +175,10 @@ function Register() {
         address: formData.address,
         contactNumber: formData.contactNumber,
         churchEmail: formData.churchEmail,
-        website: formData.website,
-      }));
+        website: formData.website || null,
+      };
+      
+      sessionStorage.setItem('registrationData', JSON.stringify(registrationData));
 
       // Navigate to onboarding progress screen
       navigate('/onboarding');
@@ -194,12 +192,11 @@ function Register() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 bg-white">
+      {/* Left side - Registration Form */}
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-2xl mx-auto">
           <CardHeader className="text-center space-y-2">
-            <h2 className="text-3xl font-bold">
-              Register Your Church
-            </h2>
+            <h2 className="text-3xl font-bold">Register Your Church</h2>
             <p className="text-sm text-muted-foreground">
               Or{' '}
               <Link
@@ -224,7 +221,7 @@ function Register() {
                       value={formData.firstName}
                       onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
                       required
-                      icon={<User />}
+                      icon={<User className="h-4 w-4" />}
                     />
 
                     <Input
@@ -233,7 +230,7 @@ function Register() {
                       value={formData.lastName}
                       onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
                       required
-                      icon={<User />}
+                      icon={<User className="h-4 w-4" />}
                     />
                   </div>
 
@@ -244,7 +241,7 @@ function Register() {
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     required
-                    icon={<Mail />}
+                    icon={<Mail className="h-4 w-4" />}
                   />
 
                   <Input
@@ -254,7 +251,7 @@ function Register() {
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                     required
-                    icon={<Lock />}
+                    icon={<Lock className="h-4 w-4" />}
                     showPasswordToggle
                     helperText="Must be at least 8 characters with uppercase, lowercase, and numbers"
                   />
@@ -266,7 +263,7 @@ function Register() {
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     required
-                    icon={<Lock />}
+                    icon={<Lock className="h-4 w-4" />}
                     showPasswordToggle
                   />
                 </div>
@@ -284,46 +281,48 @@ function Register() {
                     value={formData.churchName}
                     onChange={(e) => setFormData(prev => ({ ...prev, churchName: e.target.value }))}
                     required
-                    icon={<Building2 />}
+                    icon={<Building2 className="h-4 w-4" />}
                   />
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Input
-                      name="subdomain"
-                      label="Subdomain"
-                      value={formData.subdomain}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') 
-                      }))}
-                      required
-                      pattern="(?:[a-z0-9]|-)+"
-                      icon={<Globe />}
-                      rightElement={
-                        <div className="px-3 py-2 bg-muted text-muted-foreground text-sm">
-                          .stewardtrack.com
-                        </div>
-                      }
-                      helperText="Only lowercase letters, numbers, and hyphens allowed"
-                    />
+                    <div className="relative">
+                      <Input
+                        name="subdomain"
+                        label="Subdomain"
+                        value={formData.subdomain}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') 
+                        }))}
+                        required
+                        pattern="(?:[a-z0-9]|-)+"
+                        icon={<Globe className="h-4 w-4" />}
+                        rightElement={
+                          <div className="px-3 py-2 bg-muted text-muted-foreground text-sm">
+                            .stewardtrack.com
+                          </div>
+                        }
+                        helperText="Only lowercase letters, numbers, and hyphens allowed"
+                      />
+                    </div>
 
                     <Input
                       name="website"
                       label="Church Website"
                       value={formData.website}
                       onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                      icon={<Globe />}
+                      icon={<Globe className="h-4 w-4" />}
                       placeholder="https://example.com"
                     />
                   </div>
 
-                  <Input
+                  <Textarea
                     name="address"
                     label="Church Address"
                     value={formData.address}
                     onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                     required
-                    icon={<MapPin />}
+                    rows={3}
                   />
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -333,7 +332,7 @@ function Register() {
                       value={formData.contactNumber}
                       onChange={(e) => setFormData(prev => ({ ...prev, contactNumber: e.target.value }))}
                       required
-                      icon={<Phone />}
+                      icon={<Phone className="h-4 w-4" />}
                     />
 
                     <Input
@@ -343,11 +342,22 @@ function Register() {
                       value={formData.churchEmail}
                       onChange={(e) => setFormData(prev => ({ ...prev, churchEmail: e.target.value }))}
                       required
-                      icon={<Mail />}
+                      icon={<Mail className="h-4 w-4" />}
                     />
                   </div>
                 </div>
               </div>
+
+              {error && (
+                <div className="rounded-lg bg-destructive/15 p-4">
+                  <div className="flex">
+                    <AlertCircle className="h-5 w-5 text-destructive" />
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-destructive">{error}</h3>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -362,6 +372,19 @@ function Register() {
               </Button>
             </form>
           </CardContent>
+          
+          <CardFooter className="flex justify-center border-t pt-6">
+            <p className="text-sm text-muted-foreground">
+              By registering, you agree to our{' '}
+              <Link to="/settings/terms" className="text-primary hover:underline">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link to="/settings/privacy" className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+            </p>
+          </CardFooter>
         </Card>
       </div>
 
@@ -369,56 +392,20 @@ function Register() {
       <div className="hidden lg:block relative w-0 flex-1">
         <img
           className="absolute inset-0 h-full w-full object-cover"
-          src="\landing_bg.svg"
+          src="/landing_bg.svg"
           alt="Church interior"
         />
         <div className="absolute inset-0 bg-primary-900 bg-opacity-50 backdrop-blur-sm"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="max-w-2xl mx-auto text-center text-white">
-            <h1 className="text-4xl font-bold mb-4">Welcome to Steward Track</h1>
-            <p className="text-xl">
-              Streamline your church administration with our comprehensive management solution
-            </p>
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-3xl mx-auto">
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">Member Management</h3>
-                <p className="text-sm text-gray-100">
-                  Efficiently manage your church members, track attendance, and maintain detailed profiles.
-                </p>
-              </div>
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">Financial Tools</h3>
-                <p className="text-sm text-gray-100">
-                  Track tithes, offerings, and expenses with our comprehensive financial management system.
-                </p>
-              </div>
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">Reporting & Analytics</h3>
-                <p className="text-sm text-gray-100">
-                  Generate detailed reports and gain insights into your church's growth and activities.
-                </p>
-              </div>
-            </div>
+          <div className="max-w-2xl mx-auto text-left text-white">
+            <img className="h-12" src="/logo_long.svg" alt="Logo" />
+            <br />
+            <h1 className="text-7xl font-bold mb-4">Making church</h1>
+            <h1 className="text-7xl font-bold mb-4">management</h1>
+            <h1 className="text-7xl font-bold mb-4">much easier.</h1>
           </div>
         </div>
       </div>
-
-      {/* Error Dialog */}
-      <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle variant="danger">
-              Registration Error
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {error}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogAction onClick={() => setError(null)}>
-            Try Again
-          </AlertDialogAction>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

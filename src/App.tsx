@@ -17,6 +17,7 @@ const Members = React.lazy(() => import('./pages/members/Members'));
 const Finances = React.lazy(() => import('./pages/finances/Finances'));
 const Accounts = React.lazy(() => import('./pages/accounts/Accounts'));
 const Layout = React.lazy(() => import('./components/Layout'));
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 
 
 // Error boundary component
@@ -105,6 +106,10 @@ function App() {
             <Routes>
               {/* Public routes */}
               <Route
+                path="/"
+                element={!user ? <LandingPage /> : <Navigate to="/dashboard" replace />}
+              />
+              <Route
                 path="/login"
                 element={!user ? <Login /> : <Navigate to="/dashboard" replace />}
               />
@@ -125,11 +130,10 @@ function App() {
                   <Route path="/finances/*" element={<Finances />} />
                   <Route path="/accounts/*" element={<Accounts />} />
                   <Route path="/settings/*" element={<Settings />} />
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Route>
               ) : (
-                <Route path="*" element={<Navigate to="/login" replace />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               )}
             </Routes>
             </React.Suspense>
