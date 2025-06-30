@@ -29,6 +29,7 @@ interface ComboboxProps {
   className?: string;
   disabled?: boolean;
   onKeyDown?: (e: React.KeyboardEvent) => void;
+  onSearchChange?: (value: string) => void;
 }
 
 export function Combobox({
@@ -40,6 +41,7 @@ export function Combobox({
   className,
   disabled = false,
   onKeyDown,
+  onSearchChange,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -96,7 +98,10 @@ export function Combobox({
           <CommandInput 
             placeholder={`Search ${placeholder.toLowerCase()}...`}
             value={searchQuery}
-            onValueChange={setSearchQuery}
+            onValueChange={(v) => {
+              setSearchQuery(v);
+              onSearchChange?.(v);
+            }}
             onKeyDown={handleKeyDown}
             className="h-9"
           />
