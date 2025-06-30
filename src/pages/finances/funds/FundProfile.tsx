@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFundRepository } from '../../../hooks/useFundRepository';
+import { useFundBalanceRepository } from '../../../hooks/useFundBalanceRepository';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
@@ -25,6 +26,8 @@ import {
   Loader2,
   AlertTriangle,
 } from 'lucide-react';
+import { useCurrencyStore } from '../../../stores/currencyStore';
+import { formatCurrency } from '../../../utils/currency';
 
 const MAX_RETRIES = 3;
 const INITIAL_DELAY = 1000;
@@ -40,6 +43,8 @@ function FundProfile() {
   const [retryCount, setRetryCount] = useState(0);
 
   const { useQuery: useFundQuery, useDelete } = useFundRepository();
+  const { useBalance } = useFundBalanceRepository();
+  const { currency } = useCurrencyStore();
 
   const { data: fundData, isLoading } = useFundQuery({
     filters: { id: { operator: 'eq', value: id } },
@@ -47,6 +52,8 @@ function FundProfile() {
   });
 
   const fund = fundData?.data?.[0];
+
+  const { data: balance, isLoading: balanceLoading } = useBalance(id || '');
 
   const { data: transactionsData, isLoading: transactionsLoading } = useQuery({
     queryKey: ['fund-transactions', id],
@@ -196,6 +203,16 @@ function FundProfile() {
                 <div className="py-3 grid grid-cols-3 gap-4">
                   <dt className="text-sm font-medium text-muted-foreground">Type</dt>
                   <dd className="text-sm text-foreground col-span-2 capitalize">{fund.type}</dd>
+                </div>
+                <div className="py-3 grid grid-cols-3 gap-4">
+                  <dt className="text-sm font-medium text-muted-foreground">Balance</dt>
+                  <dd className="text-sm text-foreground col-span-2">
+                    {balanceLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      formatCurrency(balance || 0, currency)
+                    )}
+                  </dd>
                 </div>
                 <div className="py-3 grid grid-cols-3 gap-4">
                   <dt className="text-sm font-medium text-muted-foreground">Description</dt>
