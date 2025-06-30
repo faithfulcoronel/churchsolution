@@ -39,6 +39,10 @@ import { CategoryAdapter, type ICategoryAdapter } from '../adapters/category.ada
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
 import { FinanceDashboardAdapter, type IFinanceDashboardAdapter } from '../adapters/financeDashboard.adapter';
+import {
+  SourceRecentTransactionAdapter,
+  type ISourceRecentTransactionAdapter
+} from '../adapters/sourceRecentTransaction.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -78,6 +82,10 @@ import { CategoryRepository, type ICategoryRepository } from '../repositories/ca
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
 import { FinanceDashboardRepository, type IFinanceDashboardRepository } from '../repositories/financeDashboard.repository';
+import {
+  SourceRecentTransactionRepository,
+  type ISourceRecentTransactionRepository
+} from '../repositories/sourceRecentTransaction.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
 import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
@@ -147,6 +155,10 @@ container
 container
   .bind<IFinanceDashboardAdapter>(TYPES.IFinanceDashboardAdapter)
   .to(FinanceDashboardAdapter)
+  .inSingletonScope();
+container
+  .bind<ISourceRecentTransactionAdapter>(TYPES.ISourceRecentTransactionAdapter)
+  .to(SourceRecentTransactionAdapter)
   .inSingletonScope();
 
 // Register services
@@ -227,6 +239,12 @@ container
 container
   .bind<IFinanceDashboardRepository>(TYPES.IFinanceDashboardRepository)
   .to(FinanceDashboardRepository)
+  .inSingletonScope();
+container
+  .bind<ISourceRecentTransactionRepository>(
+    TYPES.ISourceRecentTransactionRepository
+  )
+  .to(SourceRecentTransactionRepository)
   .inSingletonScope();
 
 export { container };

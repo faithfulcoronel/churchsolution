@@ -1,0 +1,29 @@
+import { injectable, inject } from 'inversify';
+import { TYPES } from '../lib/types';
+import type { SourceRecentTransaction } from '../models/sourceRecentTransaction.model';
+import type { ISourceRecentTransactionAdapter } from '../adapters/sourceRecentTransaction.adapter';
+
+export interface ISourceRecentTransactionRepository {
+  getRecentTransactions(accountId: string, limit?: number): Promise<SourceRecentTransaction[]>;
+}
+
+@injectable()
+export class SourceRecentTransactionRepository implements ISourceRecentTransactionRepository {
+  constructor(
+    @inject(TYPES.ISourceRecentTransactionAdapter)
+    private adapter: ISourceRecentTransactionAdapter
+  ) {}
+
+  async getRecentTransactions(accountId: string, limit = 5) {
+    const rows = await this.adapter.fetchRecent(accountId, limit);
+    return rows.map((r: any) => ({
+      header_id: r.header_id,
+      source_id: r.source_id,
+      account_id: r.account_id,
+      date: r.date,
+      category: r.category ?? null,
+      description: r.description ?? null,
+      amount: Number(r.amount)
+    }));
+  }
+}
