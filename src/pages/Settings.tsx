@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
-import { Settings as SettingsIcon, CreditCard, BarChart3, History, Shield } from 'lucide-react';
+import { Settings as SettingsIcon, CreditCard, BarChart3, History } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui2/tabs';
 
@@ -11,7 +11,6 @@ import Usage from './settings/Usage';
 import AuditLog from './settings/AuditLog';
 import Privacy from './settings/Privacy';
 import Terms from './settings/Terms';
-import Administration from './admin/Administration';
 
 function Settings() {
   const location = useLocation();
@@ -36,13 +35,6 @@ function Settings() {
       label: 'Subscription',
       icon: <CreditCard className="h-5 w-5 mr-2" />,
       href: '/settings/subscription'
-    },
-    {
-      id: 'administration',
-      label: 'Administration',
-      icon: <Shield className="h-5 w-5 mr-2" />,
-      href: '/settings/administration',
-      show: () => hasPermission('user.view') || hasPermission('role.view')
     },
     {
       id: 'audit-log',
@@ -99,7 +91,6 @@ function Settings() {
             <Route path="audit-log" element={<AuditLog />} />
             <Route path="privacy" element={<Privacy />} />
             <Route path="terms" element={<Terms />} />
-            <Route path="administration/*" element={<Administration />} />
             <Route path="*" element={<Navigate to="/settings" replace />} />
           </Routes>
         </div>

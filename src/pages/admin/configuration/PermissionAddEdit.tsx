@@ -46,10 +46,10 @@ function PermissionAddEdit() {
     try {
       if (isEditMode && id) {
         await updateMutation.mutateAsync({ id, data: formData });
-        navigate(`/settings/administration/configuration/permissions/${id}`);
+        navigate(`/administration/configuration/permissions/${id}`);
       } else {
         const result = await createMutation.mutateAsync({ data: formData });
-        navigate(`/settings/administration/configuration/permissions/${result.id}`);
+        navigate(`/administration/configuration/permissions/${result.id}`);
       }
     } catch (err) {
       console.error('Error saving permission:', err);
@@ -67,7 +67,7 @@ function PermissionAddEdit() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/settings/administration/configuration/permissions" label="Back to Permissions" />
+        <BackButton fallbackPath="/administration/configuration/permissions" label="Back to Permissions" />
       </div>
 
       <Card>
@@ -110,7 +110,7 @@ function PermissionAddEdit() {
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button type="button" variant="outline" onClick={() => navigate('/settings/administration/configuration/permissions')}>
+              <Button type="button" variant="outline" onClick={() => navigate('/administration/configuration/permissions')}>
                 Cancel
               </Button>
               <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

@@ -78,10 +78,10 @@ function CategoryAddEdit() {
     try {
       if (isEditMode) {
         await updateMutation.mutateAsync({ id: id!, data: formData });
-        navigate(`/settings/administration/categories/${id}`);
+        navigate(`/administration/categories/${id}`);
       } else {
         const result = await createMutation.mutateAsync({ data: formData });
-        navigate(`/settings/administration/categories/${result.id}`);
+        navigate(`/administration/categories/${result.id}`);
       }
     } catch (err) {
       setErrors(prev => ({ ...prev, general: err instanceof Error ? err.message : 'Error saving category' }));
@@ -99,7 +99,7 @@ function CategoryAddEdit() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/settings/administration/categories" label="Back to Categories" />
+        <BackButton fallbackPath="/administration/categories" label="Back to Categories" />
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -195,7 +195,7 @@ function CategoryAddEdit() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end space-x-3">
-            <Button type="button" variant="outline" onClick={() => navigate('/settings/administration/categories')}>
+            <Button type="button" variant="outline" onClick={() => navigate('/administration/categories')}>
               Cancel
             </Button>
             <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

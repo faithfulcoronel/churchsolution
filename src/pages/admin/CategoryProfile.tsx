@@ -25,7 +25,7 @@ function CategoryProfile() {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
         await deleteMutation.mutateAsync(id);
-        navigate('/settings/administration/categories');
+        navigate('/administration/categories');
       } catch (err) {
         console.error('Error deleting category', err);
       }
@@ -51,7 +51,7 @@ function CategoryProfile() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/settings/administration/categories" label="Back to Categories" />
+        <BackButton fallbackPath="/administration/categories" label="Back to Categories" />
       </div>
 
       <Card className="mb-6">

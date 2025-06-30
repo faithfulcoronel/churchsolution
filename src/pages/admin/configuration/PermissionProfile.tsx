@@ -24,7 +24,7 @@ function PermissionProfile() {
     if (window.confirm('Are you sure you want to delete this permission?')) {
       try {
         await deleteMutation.mutateAsync(id);
-        navigate('/settings/administration/configuration/permissions');
+        navigate('/administration/configuration/permissions');
       } catch (err) {
         console.error('Error deleting permission', err);
       }
@@ -50,7 +50,7 @@ function PermissionProfile() {
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/settings/administration/configuration/permissions" label="Back to Permissions" />
+        <BackButton fallbackPath="/administration/configuration/permissions" label="Back to Permissions" />
       </div>
 
       <Card className="mb-6">

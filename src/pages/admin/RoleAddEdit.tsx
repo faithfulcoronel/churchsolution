@@ -124,7 +124,7 @@ function RoleAddEdit() {
           await supabase.from('role_permissions').insert(assignments);
         }
       }
-        navigate('/settings/administration/roles');
+        navigate('/administration/roles');
     } catch (error) {
       console.error('Error saving role:', error);
       if (error instanceof Error) {
@@ -167,7 +167,7 @@ function RoleAddEdit() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-      <BackButton fallbackPath="/settings/administration/roles" label="Back to Roles" />
+      <BackButton fallbackPath="/administration/roles" label="Back to Roles" />
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -285,7 +285,7 @@ function RoleAddEdit() {
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => navigate('/settings/administration/roles')}
+                onClick={() => navigate('/administration/roles')}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Cancel
