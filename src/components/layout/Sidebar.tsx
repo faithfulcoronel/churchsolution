@@ -295,42 +295,34 @@ function Sidebar({
         }}
       >
         <div className="flex flex-col h-full px-2">
-          {/* Logo and controls */}
-          <div className="flex-shrink-0 h-16 flex items-center justify-between px-4">
+          {/* Logo */}
+          <div className="flex-shrink-0 h-16 flex items-center justify-center px-4">
             <img
               src={collapsed ? '/logo_square.svg' : '/logo_long.svg'}
               alt="StewardTrack Logo"
               className={collapsed ? 'h-20' : 'h-12'}
             />
-            <div className="hidden lg:flex items-center space-x-1">
-              {!collapsed && (
-                <Button
-                  variant="light"
-                  size="icon"
-                  onClick={() => setPinned(!pinned)}
-                  title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
-                  className="bg-gray-800 text-gray-300"
-                >
-                  {pinned ? (
-                    <Pin className="h-5 w-5" />
-                  ) : (
-                    <PinOff className="h-5 w-5" />
-                  )}
-                </Button>
-              )}
-            </div>
           </div>
 
           {/* Search Bar */}
           {!collapsed && (
-            <div className="px-2 py-4">
+            <div className="px-2 py-4 flex items-center space-x-2">
               <Input
                 placeholder="Search menu..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 icon={<Search className="h-4 w-4" />}
-                className="bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500 focus:border-primary focus:ring-primary"
+                className="flex-1 bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500 focus:border-primary focus:ring-primary"
               />
+              <Button
+                variant="light"
+                size="icon"
+                onClick={() => setPinned(!pinned)}
+                title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
+                className="hidden lg:flex bg-gray-800 text-gray-300 h-8 w-8"
+              >
+                {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
+              </Button>
             </div>
           )}
 
