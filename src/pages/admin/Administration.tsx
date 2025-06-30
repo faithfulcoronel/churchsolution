@@ -7,7 +7,7 @@ import { Card } from '../../components/ui2/card';
 // Import admin pages
 import Users from './Users';
 import Roles from './Roles';
-import ChurchSettings from './ChurchSettings';
+import ChurchSettings from './account-management/ChurchSettings';
 import Permissions from './configuration/Permissions';
 
 function Administration() {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { useMessageStore } from '../../components/MessageHandler';
+import { supabase } from '../../../lib/supabase';
+import { useMessageStore } from '../../../components/MessageHandler';
 import {
   Building2,
   Save,

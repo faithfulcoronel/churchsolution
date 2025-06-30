@@ -5,7 +5,7 @@ import Users from './Users';
 import Roles from './Roles';
 import RoleForm from './RoleForm';
 import DatabaseManagement from './DatabaseManagement';
-import ChurchSettings from './ChurchSettings';
+import ChurchSettings from './account-management/ChurchSettings';
 import Categories from './Categories';
 
 function Admin() {
