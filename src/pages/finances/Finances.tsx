@@ -109,6 +109,28 @@ function Finances() {
           path="configuration/expense-categories/:id"
           element={<CategoryProfile basePath="/finances/configuration/expense-categories" />}
         />
+        <Route
+          path="configuration/budget-categories"
+          element={
+            <CategoryList
+              categoryType="budget"
+              title="Budget Categories"
+              description="Manage budget categories."
+            />
+          }
+        />
+        <Route
+          path="configuration/budget-categories/add"
+          element={<CategoryAddEdit categoryType="budget" basePath="/finances/configuration/budget-categories" />}
+        />
+        <Route
+          path="configuration/budget-categories/:id/edit"
+          element={<CategoryAddEdit categoryType="budget" basePath="/finances/configuration/budget-categories" />}
+        />
+        <Route
+          path="configuration/budget-categories/:id"
+          element={<CategoryProfile basePath="/finances/configuration/budget-categories" />}
+        />
         <Route path="expenses" element={<IncomeExpenseList transactionType="expense" />} />
         <Route path="expenses/add" element={<IncomeExpenseAddEdit transactionType="expense" />} />
         <Route path="expenses/:id/edit" element={<IncomeExpenseAddEdit transactionType="expense" />} />
