@@ -7,7 +7,7 @@ import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import BackButton from '../../../components/BackButton';
 import { Badge } from '../../../components/ui2/badge';
-import { Tabs } from '../../../components/ui2/tabs';
+import { Tabs, TabsList, TabsTrigger } from '../../../components/ui2/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -150,16 +150,18 @@ function FundProfile() {
       </Card>
 
       <div className="mb-6">
-        <Tabs
-          tabs={[
-            { id: 'details', label: 'Fund Details', icon: <DollarSign className="h-5 w-5" /> },
-            { id: 'transactions', label: 'Transactions', icon: <DollarSign className="h-5 w-5" /> },
-          ]}
-          activeTab={activeTab}
-          onChange={setActiveTab}
-          variant="enclosed"
-          size="sm"
-        />
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList variant="enclosed" size="sm">
+            <TabsTrigger value="details" variant="enclosed" className="flex items-center">
+              <DollarSign className="h-5 w-5 mr-2" />
+              Fund Details
+            </TabsTrigger>
+            <TabsTrigger value="transactions" variant="enclosed" className="flex items-center">
+              <DollarSign className="h-5 w-5 mr-2" />
+              Transactions
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       <div className="space-y-6">
