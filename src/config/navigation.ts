@@ -222,6 +222,17 @@ export const navigation: NavItem[] = [
           },
         ],
       },
+      {
+        name: 'Account Management',
+        icon: Building2,
+        submenu: [
+          {
+            name: 'Church Settings',
+            href: '/settings/administration/account-management/church',
+            icon: Building2,
+          },
+        ],
+      },
     ],
   },
 ];
