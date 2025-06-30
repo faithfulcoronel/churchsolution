@@ -5,6 +5,7 @@ import type { ISourceRecentTransactionAdapter } from '../adapters/sourceRecentTr
 
 export interface ISourceRecentTransactionRepository {
   getRecentTransactions(accountId: string, limit?: number): Promise<SourceRecentTransaction[]>;
+  getRecentTransactionsByFund(fundId: string, limit?: number): Promise<SourceRecentTransaction[]>;
   getBalance(accountId: string): Promise<number>;
 }
 
@@ -21,6 +22,21 @@ export class SourceRecentTransactionRepository implements ISourceRecentTransacti
       header_id: r.header_id,
       source_id: r.source_id,
       account_id: r.account_id,
+      fund_id: r.fund_id ?? null,
+      date: r.date,
+      category: r.category ?? null,
+      description: r.description ?? null,
+      amount: Number(r.amount)
+    }));
+  }
+
+  async getRecentTransactionsByFund(fundId: string, limit = 5) {
+    const rows = await this.adapter.fetchRecentByFund(fundId, limit);
+    return rows.map((r: any) => ({
+      header_id: r.header_id,
+      source_id: r.source_id,
+      account_id: r.account_id,
+      fund_id: r.fund_id ?? null,
       date: r.date,
       category: r.category ?? null,
       description: r.description ?? null,

@@ -14,6 +14,14 @@ export function useSourceRecentTransactionRepository() {
     });
   };
 
+  const useRecentTransactionsByFund = (fundId: string, limit = 5) => {
+    return useQuery({
+      queryKey: ['fund-transactions', fundId, limit],
+      queryFn: () => repo.getRecentTransactionsByFund(fundId, limit),
+      enabled: !!fundId,
+    });
+  };
+
   const useSourceBalance = (accountId: string) => {
     return useQuery({
       queryKey: ['source-balance', accountId],
@@ -22,5 +30,5 @@ export function useSourceRecentTransactionRepository() {
     });
   };
 
-  return { useRecentTransactions, useSourceBalance };
+  return { useRecentTransactions, useRecentTransactionsByFund, useSourceBalance };
 }
