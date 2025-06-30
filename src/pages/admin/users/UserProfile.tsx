@@ -5,6 +5,8 @@ import { Loader2, Edit2 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import BackButton from '../../../components/BackButton';
 import { Button } from '../../../components/ui2/button';
+import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
+import { Badge } from '../../../components/ui2/badge';
 
 function UserProfile() {
   const { id } = useParams<{ id: string }>();
@@ -37,10 +39,9 @@ function UserProfile() {
 
   if (error || !user) {
     return (
-      <div className="text-center py-8">
-        <p className="text-sm text-gray-500">User not found.</p>
-        <BackButton fallbackPath="/administration/users" label="Back to Users" />
-      </div>
+      <Card>
+        <CardContent className="py-12 text-center">User not found.</CardContent>
+      </Card>
     );
   }
 
@@ -48,46 +49,51 @@ function UserProfile() {
     <div className="max-w-3xl mx-auto space-y-6">
       <BackButton fallbackPath="/administration/users" label="Back to Users" />
 
-      <div className="bg-white shadow sm:rounded-lg p-6 space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{user.email}</h2>
-          <Button variant="outline" onClick={() => navigate(`/administration/users/${id}/edit`)} className="flex items-center">
-            <Edit2 className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">First Name</p>
-            <p className="font-medium">{user.raw_user_meta_data?.first_name || '-'}</p>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-foreground">{user.email}</h2>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/administration/users/${id}/edit`)}
+              className="flex items-center"
+            >
+              <Edit2 className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
           </div>
-          <div>
-            <p className="text-sm text-gray-500">Last Name</p>
-            <p className="font-medium">{user.raw_user_meta_data?.last_name || '-'}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Created</p>
-            <p className="font-medium">{new Date(user.created_at).toLocaleDateString()}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Last Sign In</p>
-            <p className="font-medium">{user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Never'}</p>
-          </div>
-          <div className="sm:col-span-2">
-            <p className="text-sm text-gray-500">Roles</p>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {roles.map((name, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
-                >
-                  {name}
-                </span>
-              ))}
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">First Name</p>
+              <p className="font-medium text-foreground">{user.raw_user_meta_data?.first_name || '-'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Last Name</p>
+              <p className="font-medium text-foreground">{user.raw_user_meta_data?.last_name || '-'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Created</p>
+              <p className="font-medium text-foreground">{new Date(user.created_at).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Last Sign In</p>
+              <p className="font-medium text-foreground">{user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Never'}</p>
+            </div>
+            <div className="sm:col-span-2">
+              <p className="text-sm text-muted-foreground">Roles</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {roles.map((name, i) => (
+                  <Badge key={i} variant="secondary">
+                    {name}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
