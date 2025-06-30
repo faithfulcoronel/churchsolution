@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
+import { useRoleRepository } from '../../hooks/useRoleRepository';
 import { usePermissions } from '../../hooks/usePermissions';
 import PermissionGate from '../../components/PermissionGate';
-import { useMessageStore } from '../../components/MessageHandler';
 import {
   Shield,
   Plus,
@@ -13,79 +11,23 @@ import {
   Trash2,
   Loader2,
 } from 'lucide-react';
+import { Role } from '../../models/role.model';
 
-type Role = {
-  id: string;
-  name: string;
-  description: string | null;
-  permissions: {
-    permission: {
-      id: string;
-      code: string;
-      name: string;
-      description: string | null;
-      module: string;
-    };
-  }[];
-};
 
 function Roles() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const { addMessage } = useMessageStore();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: roles, isLoading } = useQuery({
-    queryKey: ['roles-with-permissions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('roles')
-        .select(`
-          *,
-          permissions:role_permissions (
-            permission:permissions (
-              id,
-              code,
-              name,
-              description,
-              module
-            )
-          )
-        `)
-        .order('name');
+  const { useQuery, useDelete } = useRoleRepository();
 
-      if (error) throw error;
-      return data as Role[];
-    },
+  const { data: result, isLoading } = useQuery({
+    order: { column: 'name' },
     enabled: hasPermission('role.view'),
   });
+  const roles = (result?.data as Role[]) || [];
 
-  const deleteRoleMutation = useMutation({
-    mutationFn: async (roleId: string) => {
-      const { error } = await supabase
-        .from('roles')
-        .delete()
-        .eq('id', roleId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['roles-with-permissions'] });
-      addMessage({
-        type: 'success',
-        text: 'Role deleted successfully',
-        duration: 3000,
-      });
-    },
-    onError: (error: Error) => {
-      addMessage({
-        type: 'error',
-        text: error.message,
-        duration: 5000,
-      });
-    },
-  });
+  const deleteRoleMutation = useDelete();
 
   const handleDelete = async (roleId: string) => {
     if (window.confirm('Are you sure you want to delete this role?')) {
@@ -101,7 +43,7 @@ function Roles() {
     navigate(`/admin/roles/${roleId}/edit`);
   };
 
-  const filteredRoles = roles?.filter((role) =>
+  const filteredRoles = roles.filter((role) =>
     role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     role.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );

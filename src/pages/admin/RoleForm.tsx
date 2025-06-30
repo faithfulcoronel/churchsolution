@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
-import { useMessageStore } from '../../components/MessageHandler';
+import { useRoleRepository } from '../../hooks/useRoleRepository';
+import { NotificationService } from '../../services/NotificationService';
 import { Save, Loader2, Shield } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 
@@ -26,8 +27,7 @@ type Role = {
 function RoleForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { addMessage } = useMessageStore();
+  const { useQuery: useRoleQuery, useCreate, useUpdate } = useRoleRepository();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -35,33 +35,14 @@ function RoleForm() {
   });
 
   // Fetch role data if editing
-  const { data: role, isLoading: roleLoading } = useQuery({
-    queryKey: ['role', id],
-    queryFn: async () => {
-      if (!id) return null;
-
-      const { data, error } = await supabase
-        .from('roles')
-        .select(`
-          *,
-          permissions:role_permissions (
-            permission:permissions (
-              id,
-              code,
-              name,
-              description,
-              module
-            )
-          )
-        `)
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      return data as Role;
-    },
+  const {
+    data: roleResult,
+    isLoading: roleLoading,
+  } = useRoleQuery({
+    filters: { id: { operator: 'eq', value: id } },
     enabled: !!id,
   });
+  const role = roleResult?.data?.[0] as Role | undefined;
 
   // Fetch all available permissions
   const { data: permissions } = useQuery({
@@ -96,138 +77,59 @@ function RoleForm() {
     }
   }, [role]);
 
-  const createRoleMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      // Create the role
-      const { data: newRole, error: roleError } = await supabase
-        .from('roles')
-        .insert([{
-          name: data.name.toLowerCase(),
-          description: data.description || null,
-        }])
-        .select()
-        .single();
-
-      if (roleError) throw roleError;
-
-      // Get current user for created_by field
-      const currentUser = (await supabase.auth.getUser()).data.user;
-
-      // Assign permissions to the role
-      if (data.permissions.length > 0) {
-        const permissionAssignments = data.permissions.map((permissionId) => ({
-          role_id: newRole.id,
-          permission_id: permissionId,
-          created_by: currentUser?.id,
-        }));
-
-        const { error: permissionsError } = await supabase
-          .from('role_permissions')
-          .insert(permissionAssignments);
-
-        if (permissionsError) throw permissionsError;
-      }
-
-      return newRole;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['roles'] });
-      addMessage({
-        type: 'success',
-        text: 'Role created successfully',
-        duration: 3000,
-      });
-      navigate('/admin/roles');
-    },
-    onError: (error: Error) => {
-      addMessage({
-        type: 'error',
-        text: error.message,
-        duration: 5000,
-      });
-    },
-  });
-
-  const updateRoleMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      if (!id) return;
-
-      // Get current user for created_by field
-      const currentUser = (await supabase.auth.getUser()).data.user;
-
-      // Update role details
-      const { error: roleError } = await supabase
-        .from('roles')
-        .update({
-          name: data.name.toLowerCase(),
-          description: data.description || null,
-        })
-        .eq('id', id);
-
-      if (roleError) throw roleError;
-
-      // Update role permissions
-      // First, remove existing permissions
-      const { error: deleteError } = await supabase
-        .from('role_permissions')
-        .delete()
-        .eq('role_id', id);
-
-      if (deleteError) throw deleteError;
-
-      // Then add new permissions
-      if (data.permissions.length > 0) {
-        const permissionAssignments = data.permissions.map((permissionId) => ({
-          role_id: id,
-          permission_id: permissionId,
-          created_by: currentUser?.id,
-        }));
-
-        const { error: permissionsError } = await supabase
-          .from('role_permissions')
-          .insert(permissionAssignments);
-
-        if (permissionsError) throw permissionsError;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['roles'] });
-      addMessage({
-        type: 'success',
-        text: 'Role updated successfully',
-        duration: 3000,
-      });
-      navigate('/admin/roles');
-    },
-    onError: (error: Error) => {
-      addMessage({
-        type: 'error',
-        text: error.message,
-        duration: 5000,
-      });
-    },
-  });
+  const createRoleMutation = useCreate();
+  const updateRoleMutation = useUpdate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name) {
-      addMessage({
-        type: 'error',
-        text: 'Role name is required',
-        duration: 5000,
-      });
+
+    if (!formData.name.trim()) {
+      NotificationService.showError('Role name is required', 5000);
       return;
     }
 
     try {
       if (id) {
-        await updateRoleMutation.mutateAsync(formData);
+        const user = (await supabase.auth.getUser()).data.user;
+        await updateRoleMutation.mutateAsync({
+          id,
+          data: {
+            name: formData.name.toLowerCase(),
+            description: formData.description || null,
+          },
+        });
+        await supabase.from('role_permissions').delete().eq('role_id', id);
+        if (formData.permissions.length > 0) {
+          const assignments = formData.permissions.map(pid => ({
+            role_id: id,
+            permission_id: pid,
+            created_by: user?.id,
+          }));
+          await supabase.from('role_permissions').insert(assignments);
+        }
       } else {
-        await createRoleMutation.mutateAsync(formData);
+        const role = await createRoleMutation.mutateAsync({
+          data: {
+            name: formData.name.toLowerCase(),
+            description: formData.description || null,
+          },
+        });
+        if (role && formData.permissions.length > 0) {
+          const user = (await supabase.auth.getUser()).data.user;
+          const assignments = formData.permissions.map(pid => ({
+            role_id: (role as any).id,
+            permission_id: pid,
+            created_by: user?.id,
+          }));
+          await supabase.from('role_permissions').insert(assignments);
+        }
       }
+      navigate('/admin/roles');
     } catch (error) {
       console.error('Error saving role:', error);
+      if (error instanceof Error) {
+        NotificationService.showError(error.message, 5000);
+      }
     }
   };
 
