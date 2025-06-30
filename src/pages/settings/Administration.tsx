@@ -7,7 +7,7 @@ import { Card } from '../../components/ui2/card';
 // Import admin pages
 import Users from '../admin/Users';
 import Roles from '../admin/Roles';
-import ChurchSettings from '../admin/ChurchSettings';
+import ChurchSettings from '../admin/account-management/ChurchSettings';
 
 function Administration() {
   const location = useLocation();
