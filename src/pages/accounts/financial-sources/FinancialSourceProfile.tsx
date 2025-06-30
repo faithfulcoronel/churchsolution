@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { supabase } from '../../../lib/supabase';
+import { useSourceRecentTransactionRepository } from '../../../hooks/useSourceRecentTransactionRepository';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import BackButton from '../../../components/BackButton';
@@ -28,13 +28,14 @@ function FinancialSourceProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  
+
   const { useQuery: useSourceQuery, useDelete } = useFinancialSourceRepository();
+  const { useRecentTransactions } = useSourceRecentTransactionRepository();
   
   // Fetch source data
   const { data: sourceData, isLoading } = useSourceQuery({
@@ -52,29 +53,8 @@ function FinancialSourceProfile() {
   // Fetch recent transactions aggregated by header for this source
   const accountId = source?.account_id;
 
-  const { data: transactionsData, isLoading: transactionsLoading } = useQuery({
-    queryKey: ['source-transactions', accountId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('source_recent_transactions_view')
-        .select(`
-          header_id,
-          source_id,
-          account_id,
-          date,
-          category,
-          description,
-          amount
-        `)
-        .eq('account_id', accountId)
-        .order('date', { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!accountId
-  });
+  const { data: transactionsData, isLoading: transactionsLoading } =
+    useRecentTransactions(accountId || '');
   
   // Delete mutation
   const deleteMutation = useDelete();
