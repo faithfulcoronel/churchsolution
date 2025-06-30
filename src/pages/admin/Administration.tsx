@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { UserCog, Shield, Building2, Tag, KeyRound } from 'lucide-react';
+import { UserCog, Shield, Building2, KeyRound } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Card } from '../../components/ui2/card';
 
@@ -8,7 +8,6 @@ import { Card } from '../../components/ui2/card';
 import Users from './Users';
 import Roles from './Roles';
 import ChurchSettings from './ChurchSettings';
-import Categories from './Categories';
 import Permissions from './configuration/Permissions';
 
 function Administration() {
@@ -45,13 +44,6 @@ function Administration() {
       href: '/settings/administration/church',
       show: () => hasPermission('user.view')
     },
-    {
-      id: 'categories',
-      label: 'Categories',
-      icon: <Tag className="h-5 w-5" />,
-      href: '/settings/administration/categories',
-      show: () => hasPermission('user.view')
-    }
   ].filter(tab => !tab.show || tab.show());
 
   const currentPath = location.pathname;
@@ -98,7 +90,6 @@ function Administration() {
               <Route path="roles/*" element={<Roles />} />
               <Route path="configuration/permissions/*" element={<Permissions />} />
               <Route path="church" element={<ChurchSettings />} />
-              <Route path="categories/*" element={<Categories />} />
               <Route path="*" element={<Navigate to={adminTabs[0]?.href.split('/').pop() || 'users'} replace />} />
             </Routes>
           </div>

@@ -62,6 +62,27 @@ export const navigation: NavItem[] = [
         href: '/members/family',
         icon: Heart,
       },
+      {
+        name: 'Configuration',
+        icon: Tag,
+        submenu: [
+          {
+            name: 'Membership Types',
+            href: '/members/configuration/membership-types',
+            icon: Tag,
+          },
+          {
+            name: 'Membership Status',
+            href: '/members/configuration/membership-status',
+            icon: Tag,
+          },
+          {
+            name: 'Relationship Types',
+            href: '/members/configuration/relationship-types',
+            icon: Tag,
+          },
+        ],
+      },
     ],
   },
   {
@@ -157,6 +178,11 @@ export const navigation: NavItem[] = [
           {
             name: 'Expense Categories',
             href: '/finances/configuration/expense-categories',
+            icon: Tag,
+          },
+          {
+            name: 'Budget Categories',
+            href: '/finances/configuration/budget-categories',
             icon: Tag,
           },
         ],
