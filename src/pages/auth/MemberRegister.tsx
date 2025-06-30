@@ -26,8 +26,9 @@ function MemberRegister() {
 
   useEffect(() => {
     async function fetchTenants() {
+      // use public view so registration works without auth
       const { data, error } = await supabase
-        .from('tenants')
+        .from('public_tenants')
         .select('id, name')
         .order('name');
       if (error) {
