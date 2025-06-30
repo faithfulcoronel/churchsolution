@@ -8,6 +8,19 @@ const adapter: ISourceRecentTransactionAdapter = {
       header_id: 'h1',
       source_id: 's1',
       account_id: 'a1',
+      fund_id: 'f1',
+      date: '2025-06-01',
+      category: 'Tithe',
+      description: 'desc',
+      amount: '50'
+    }
+  ],
+  fetchRecentByFund: async () => [
+    {
+      header_id: 'h1',
+      source_id: 's1',
+      account_id: 'a1',
+      fund_id: 'f1',
       date: '2025-06-01',
       category: 'Tithe',
       description: 'desc',
@@ -26,6 +39,21 @@ describe('SourceRecentTransactionRepository mapping', () => {
       header_id: 'h1',
       source_id: 's1',
       account_id: 'a1',
+      fund_id: 'f1',
+      date: '2025-06-01',
+      category: 'Tithe',
+      description: 'desc',
+      amount: 50
+    });
+  });
+
+  it('maps rows by fund correctly', async () => {
+    const data = await repo.getRecentTransactionsByFund('f1');
+    expect(data[0]).toEqual({
+      header_id: 'h1',
+      source_id: 's1',
+      account_id: 'a1',
+      fund_id: 'f1',
       date: '2025-06-01',
       category: 'Tithe',
       description: 'desc',

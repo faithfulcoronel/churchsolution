@@ -16,6 +16,7 @@ export class SourceRecentTransactionAdapter {
           header_id,
           source_id,
           account_id,
+          fund_id,
           date,
           category,
           description,
@@ -23,6 +24,33 @@ export class SourceRecentTransactionAdapter {
         `
       )
       .eq('account_id', accountId)
+      .eq('tenant_id', tenantId)
+      .order('date', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async fetchRecentByFund(fundId: string, limit = 5) {
+    const tenantId = await tenantUtils.getTenantId();
+    if (!tenantId) throw new Error('No tenant context found');
+
+    const { data, error } = await supabase
+      .from('source_recent_transactions_view')
+      .select(
+        `
+          header_id,
+          source_id,
+          account_id,
+          fund_id,
+          date,
+          category,
+          description,
+          amount
+        `
+      )
+      .eq('fund_id', fundId)
       .eq('tenant_id', tenantId)
       .order('date', { ascending: false })
       .limit(limit);
