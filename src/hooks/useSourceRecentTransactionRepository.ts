@@ -30,5 +30,13 @@ export function useSourceRecentTransactionRepository() {
     });
   };
 
-  return { useRecentTransactions, useRecentTransactionsByFund, useSourceBalance };
+  const useFundBalance = (fundId: string) => {
+    return useQuery({
+      queryKey: ['fund-balance', fundId],
+      queryFn: () => repo.getBalanceByFund(fundId),
+      enabled: !!fundId,
+    });
+  };
+
+  return { useRecentTransactions, useRecentTransactionsByFund, useSourceBalance, useFundBalance };
 }

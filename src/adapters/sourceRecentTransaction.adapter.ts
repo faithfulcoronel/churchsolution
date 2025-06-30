@@ -72,6 +72,20 @@ export class SourceRecentTransactionAdapter {
     if (error) throw error;
     return (data || []).map((r: any) => r.amount);
   }
+
+  async fetchBalanceByFund(fundId: string) {
+    const tenantId = await tenantUtils.getTenantId();
+    if (!tenantId) throw new Error('No tenant context found');
+
+    const { data, error } = await supabase
+      .from('source_recent_transactions_view')
+      .select('amount')
+      .eq('fund_id', fundId)
+      .eq('tenant_id', tenantId);
+
+    if (error) throw error;
+    return (data || []).map((r: any) => r.amount);
+  }
 }
 
 export interface ISourceRecentTransactionAdapter
