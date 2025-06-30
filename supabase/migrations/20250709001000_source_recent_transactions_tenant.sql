@@ -27,13 +27,6 @@ JOIN financial_sources fs ON fs.account_id = ft.account_id
 WHERE fs.account_id IS NOT NULL
 ORDER BY h.id, ft.id;
 
--- Enable RLS and allow tenant users to view rows
-ALTER MATERIALIZED VIEW source_recent_transactions_view ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Source recent transactions are viewable by tenant users"
-  ON source_recent_transactions_view
-  FOR SELECT TO authenticated
-  USING (check_tenant_access(tenant_id));
-
 -- Recreate index for faster lookups
 CREATE INDEX IF NOT EXISTS source_recent_transactions_view_account_date_idx
   ON source_recent_transactions_view(account_id, date);
