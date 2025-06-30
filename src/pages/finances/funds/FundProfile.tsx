@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFundRepository } from '../../../hooks/useFundRepository';
 import { useFundBalanceRepository } from '../../../hooks/useFundBalanceRepository';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../../lib/supabase';
+import { useSourceRecentTransactionRepository } from '../../../hooks/useSourceRecentTransactionRepository';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import BackButton from '../../../components/BackButton';
@@ -55,28 +54,10 @@ function FundProfile() {
 
   const { data: balance, isLoading: balanceLoading } = useBalance(id || '');
 
-  const { data: transactionsData, isLoading: transactionsLoading } = useQuery({
-    queryKey: ['fund-transactions', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('financial_transactions')
-        .select(`
-          id,
-          type,
-          debit,
-          credit,
-          date,
-          description,
-          category:category_id (name)
-        `)
-        .eq('fund_id', id)
-        .order('date', { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!id,
-  });
+  const { useRecentTransactionsByFund } = useSourceRecentTransactionRepository();
+
+  const { data: transactionsData, isLoading: transactionsLoading } =
+    useRecentTransactionsByFund(id || '');
 
   const deleteMutation = useDelete();
 
@@ -264,23 +245,24 @@ function FundProfile() {
                       </tr>
                     </thead>
                     <tbody className="bg-background divide-y divide-border">
-                      {transactionsData.map((transaction) => (
-                        <tr key={transaction.id} className="hover:bg-muted/50">
+                    {transactionsData.map((transaction) => (
+                        <tr key={transaction.header_id} className="hover:bg-muted/50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                             {new Date(transaction.date).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge variant={transaction.type === 'income' ? 'success' : 'destructive'}>
-                              {transaction.type}
+                            <Badge variant={transaction.amount >= 0 ? 'success' : 'destructive'}>
+                              {transaction.amount >= 0 ? 'income' : 'expense'}
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                            {transaction.category?.name || 'Uncategorized'}
+                            {transaction.category || 'Uncategorized'}
                           </td>
                           <td className="px-6 py-4 text-sm text-foreground">{transaction.description}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                          <span className={transaction.type === 'income' ? 'text-success' : 'text-destructive'}>
-                              {transaction.type === 'income' ? '+' : '-'}${(transaction.debit - transaction.credit).toFixed(2)}
+                          <span className={transaction.amount >= 0 ? 'text-success' : 'text-destructive'}>
+                              {transaction.amount >= 0 ? '+' : '-'}
+                              {Math.abs(transaction.amount).toFixed(2)}
                           </span>
                           </td>
                         </tr>
