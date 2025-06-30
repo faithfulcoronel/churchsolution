@@ -10,6 +10,7 @@ import { handleError } from './utils/errorHandler';
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
 const Register = React.lazy(() => import('./pages/auth/Register'));
+const MemberRegister = React.lazy(() => import('./pages/auth/MemberRegister'));
 const ChurchOnboarding = React.lazy(() => import('./pages/onboarding/ChurchOnboarding'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Settings = React.lazy(() => import('./pages/Settings'));
@@ -116,6 +117,10 @@ function App() {
               <Route
                 path="/register"
                 element={!user ? <Register /> : <Navigate to="/dashboard" replace />}
+              />
+              <Route
+                path="/register-member"
+                element={!user ? <MemberRegister /> : <Navigate to="/dashboard" replace />}
               />
               <Route
                 path="/onboarding"

@@ -81,6 +81,13 @@ function Login() {
                   >
                     register your church
                   </Link>
+                  {' or '}
+                  <Link
+                    to="/register-member"
+                    className="font-medium text-primary hover:text-primary/90"
+                  >
+                    join your church
+                  </Link>
                 </>
               )}
             </p>
