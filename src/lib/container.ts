@@ -37,6 +37,7 @@ import {
   type IOfferingBatchAdapter,
 } from '../adapters/offeringBatch.adapter';
 import { CategoryAdapter, type ICategoryAdapter } from '../adapters/category.adapter';
+import { RoleAdapter, type IRoleAdapter } from '../adapters/role.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
 import { FinanceDashboardAdapter, type IFinanceDashboardAdapter } from '../adapters/financeDashboard.adapter';
@@ -81,6 +82,7 @@ import {
   type IOfferingBatchRepository,
 } from '../repositories/offeringBatch.repository';
 import { CategoryRepository, type ICategoryRepository } from '../repositories/category.repository';
+import { RoleRepository, type IRoleRepository } from '../repositories/role.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
 import { FinanceDashboardRepository, type IFinanceDashboardRepository } from '../repositories/financeDashboard.repository';
@@ -145,6 +147,10 @@ container
 container
   .bind<ICategoryAdapter>(TYPES.ICategoryAdapter)
   .to(CategoryAdapter)
+  .inSingletonScope();
+container
+  .bind<IRoleAdapter>(TYPES.IRoleAdapter)
+  .to(RoleAdapter)
   .inSingletonScope();
 container
   .bind<IOfferingBatchAdapter>(TYPES.IOfferingBatchAdapter)
@@ -219,6 +225,10 @@ container
 container
   .bind<ICategoryRepository>(TYPES.ICategoryRepository)
   .to(CategoryRepository)
+  .inSingletonScope();
+container
+  .bind<IRoleRepository>(TYPES.IRoleRepository)
+  .to(RoleRepository)
   .inSingletonScope();
 container
   .bind<IFinancialTransactionRepository>(TYPES.IFinancialTransactionRepository)

@@ -16,6 +16,7 @@ export * from './useFundRepository';
 export * from './useFundBalanceRepository';
 export * from './useOfferingBatchRepository';
 export * from './useCategoryRepository';
+export * from './useRoleRepository';
 export * from './useIncomeExpenseTransactionRepository';
 export * from './useFinanceDashboardData';
 export * from './useIncomeExpenseService';
