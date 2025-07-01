@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { categoryUtils } from '../../../utils/categoryUtils';
 import { format } from 'date-fns';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
@@ -59,18 +60,7 @@ function BudgetList() {
   // Get budget categories
   const { data: categories } = useQuery({
     queryKey: ['categories', 'budget', currentTenant?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .eq('type', 'budget')
-        .is('deleted_at', null)
-        .order('sort_order');
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => categoryUtils.getCategories('budget'),
     enabled: !!currentTenant?.id,
   });
 

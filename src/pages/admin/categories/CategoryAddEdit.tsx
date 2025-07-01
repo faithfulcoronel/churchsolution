@@ -30,7 +30,7 @@ function CategoryAddEdit() {
   const { useQuery, useCreate, useUpdate } = useCategoryRepository();
   const { useQuery: useAccountsQuery } = useChartOfAccountRepository();
 
-  const [formData, setFormData] = useState<Partial<Category>>({
+  const [formData, setFormData] = useState<{ type: CategoryType } & Partial<Category>>({
     type: (searchParams.get('type') as CategoryType) || 'membership',
     code: '',
     name: '',
@@ -54,7 +54,7 @@ function CategoryAddEdit() {
     }
   }, [isEditMode, categoryData]);
 
-  const handleInputChange = (field: keyof Category, value: any) => {
+  const handleInputChange = (field: keyof Category | 'type', value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));

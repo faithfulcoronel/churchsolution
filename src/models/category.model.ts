@@ -9,9 +9,8 @@ export type CategoryType =
   | 'budget'
   | 'relationship_type';
 
-export interface Category extends BaseModel {
+export interface BaseCategory extends BaseModel {
   id: string;
-  type: CategoryType;
   code: string;
   name: string;
   description: string | null;
@@ -21,3 +20,15 @@ export interface Category extends BaseModel {
   chart_of_account_id: string | null;
   chart_of_accounts?: ChartOfAccount;
 }
+
+export interface Category extends BaseCategory {
+  // Present for backward compatibility when querying legacy table
+  type?: CategoryType;
+}
+
+export interface MembershipCategory extends BaseCategory {}
+export interface MemberStatusCategory extends BaseCategory {}
+export interface IncomeTransactionCategory extends BaseCategory {}
+export interface ExpenseTransactionCategory extends BaseCategory {}
+export interface BudgetCategory extends BaseCategory {}
+export interface RelationshipTypeCategory extends BaseCategory {}
