@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Container } from '../container';
 import { Button } from '../button';
 import { Input } from '../input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from '../dropdown-menu';
@@ -22,10 +21,19 @@ function DataGridContent() {
     setGlobalFilter,
     table,
     className,
+    containerClassName,
+    fluid,
   } = useDataGrid<any, any>();
 
   return (
-    <Container className={cn('space-y-4', className)}>
+    <div
+      className={cn(
+        'space-y-4 w-full',
+        fluid ? '' : 'max-w-screen-xl mx-auto',
+        containerClassName,
+        className
+      )}
+    >
       {(title || description || toolbar || exportOptions.enabled) && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {(title || description) && (
@@ -92,7 +100,7 @@ function DataGridContent() {
 
       <DataGridTable />
       <DataGridPagination />
-    </Container>
+    </div>
   );
 }
 
