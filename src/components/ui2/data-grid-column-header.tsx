@@ -12,7 +12,7 @@ export function DataGridColumnHeader<TData, TValue>({ header }: DataGridColumnHe
   const column = header.column;
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 relative">
       <div
         className={cn(
           'flex items-center space-x-2',
@@ -33,6 +33,16 @@ export function DataGridColumnHeader<TData, TValue>({ header }: DataGridColumnHe
         )}
       </div>
       {column.getCanFilter() && <DataGridColumnFilter column={column} />}
+      {column.getCanResize() && (
+        <div
+          onMouseDown={header.getResizeHandler()}
+          onTouchStart={header.getResizeHandler()}
+          className={cn(
+            'absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none',
+            header.column.getIsResizing() && 'bg-primary/20'
+          )}
+        />
+      )}
     </div>
   );
 }
