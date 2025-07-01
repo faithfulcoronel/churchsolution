@@ -73,6 +73,7 @@ export interface DataTableProps<TData, TValue> {
     pdf?: boolean;
     excel?: boolean;
   };
+  quickFilterPlaceholder?: string;
 }
 
 export function DataGrid<TData, TValue>({
@@ -97,11 +98,13 @@ export function DataGrid<TData, TValue>({
     pdf: true,
     excel: true,
   },
+  quickFilterPlaceholder,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [globalFilter, setGlobalFilter] = React.useState('');
   const [openFilterMenus, setOpenFilterMenus] = React.useState<Record<string, boolean>>({});
   const [tempFilters, setTempFilters] = React.useState<Record<string, string>>({});
   const [pageIndex, setPageIndex] = React.useState(0);
@@ -116,11 +119,13 @@ export function DataGrid<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -303,6 +308,17 @@ export function DataGrid<TData, TValue>({
           )}
           <div className="flex items-center space-x-2">
             {toolbar}
+            {quickFilterPlaceholder && (
+              <Input
+                size="sm"
+                placeholder={quickFilterPlaceholder}
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                clearable
+                onClear={() => setGlobalFilter('')}
+                className="h-8"
+              />
+            )}
             {exportOptions.enabled && (
               <div className="flex items-center space-x-2">
                 {exportOptions.excel && (
