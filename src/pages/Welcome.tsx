@@ -7,6 +7,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui2/card';
 import { Button } from '../components/ui2/button';
 import { Building2, DollarSign, BarChart3, Users, Plus } from 'lucide-react';
+import { QuickAccessCard, Announcements } from '../components/welcome';
 
 function Welcome() {
   const { hasPermission } = usePermissions();
@@ -81,14 +82,12 @@ function Welcome() {
         {quickLinks
           .filter((q) => !q.permission || hasPermission(q.permission))
           .map((q) => (
-            <Link to={q.href} key={q.label}>
-              <Card className="hover:shadow-lg transition-shadow duration-200">
-                <CardContent className="p-4 flex items-center space-x-3">
-                  <q.icon className="h-6 w-6 text-primary" />
-                  <span className="font-medium text-foreground">{q.label}</span>
-                </CardContent>
-              </Card>
-            </Link>
+            <QuickAccessCard
+              key={q.label}
+              to={q.href}
+              icon={q.icon}
+              label={q.label}
+            />
           ))}
       </div>
 
@@ -106,13 +105,9 @@ function Welcome() {
       </div>
 
       {/* Announcement / Tip */}
-      <Card className="max-w-md">
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">
-            Tip: Use the sidebar to quickly navigate between modules.
-          </p>
-        </CardContent>
-      </Card>
+      <Announcements messages={[
+        'Tip: Use the sidebar to quickly navigate between modules.'
+      ]} />
     </div>
   );
 }
