@@ -1,6 +1,7 @@
 export const TYPES = {
   IMemberAdapter: 'IMemberAdapter',
   INotificationAdapter: 'INotificationAdapter',
+  IAnnouncementAdapter: 'IAnnouncementAdapter',
   IAccountAdapter: 'IAccountAdapter',
   IFinancialSourceAdapter: 'IFinancialSourceAdapter',
   IChartOfAccountAdapter: 'IChartOfAccountAdapter',
