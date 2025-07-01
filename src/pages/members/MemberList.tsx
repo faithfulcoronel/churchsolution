@@ -216,6 +216,7 @@ function MemberList() {
         <div style={{ height: 600, width: '100%' }}>
           <DataGrid<Member>
             data={result?.data || []}
+            recordCount={result?.count ?? 0}
             columns={columns}
             loading={isLoading}
             error={error instanceof Error ? error.message : undefined}
