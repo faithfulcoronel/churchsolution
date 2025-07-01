@@ -50,14 +50,19 @@ function Welcome() {
   ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-foreground">
-        {member ? `Welcome back, ${member.first_name}!` : 'Welcome!'}
-      </h1>
+    <div className="max-w-6xl mx-auto space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-4xl font-heading font-bold text-foreground">
+          {member ? `Welcome back, ${member.first_name}!` : 'Welcome!'}
+        </h1>
+        <p className="text-muted-foreground">
+          Here's a quick overview to get you started.
+        </p>
+      </div>
 
       {tenant && (
-        <Card className="max-w-md">
-          <CardHeader>
+        <Card className="max-w-md bg-muted">
+          <CardHeader className="p-4">
             <div className="flex items-center space-x-4">
               {tenant.logo_url && (
                 <img
@@ -67,7 +72,9 @@ function Welcome() {
                 />
               )}
               <div>
-                <CardTitle>{tenant.name}</CardTitle>
+                <CardTitle className="text-lg font-semibold">
+                  {tenant.name}
+                </CardTitle>
                 <CardDescription className="capitalize">
                   Plan: {tenant.subscription_tier}
                 </CardDescription>
@@ -78,30 +85,38 @@ function Welcome() {
       )}
 
       {/* Quick Access */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {quickLinks
-          .filter((q) => !q.permission || hasPermission(q.permission))
-          .map((q) => (
-            <QuickAccessCard
-              key={q.label}
-              to={q.href}
-              icon={q.icon}
-              label={q.label}
-            />
-          ))}
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold text-foreground">Quick Access</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {quickLinks
+            .filter((q) => !q.permission || hasPermission(q.permission))
+            .map((q) => (
+              <QuickAccessCard
+                key={q.label}
+                to={q.href}
+                icon={q.icon}
+                label={q.label}
+              />
+            ))}
+        </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3">
-        {quickActions
-          .filter((a) => !a.permission || hasPermission(a.permission))
-          .map((a) => (
-            <Link to={a.href} key={a.label}>
-              <Button variant="default" icon={<a.icon className="h-4 w-4" />}>
-                {a.label}
-              </Button>
-            </Link>
-          ))}
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold text-foreground">Quick Actions</h2>
+        <Card>
+          <CardContent className="p-4 flex flex-wrap gap-3">
+            {quickActions
+              .filter((a) => !a.permission || hasPermission(a.permission))
+              .map((a) => (
+                <Link to={a.href} key={a.label}>
+                  <Button variant="default" icon={<a.icon className="h-4 w-4" />}>
+                    {a.label}
+                  </Button>
+                </Link>
+              ))}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Announcement / Tip */}
