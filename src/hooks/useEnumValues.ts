@@ -6,22 +6,24 @@ export function useEnumValues() {
     queryKey: ['enum-membership-types'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .rpc('get_enum_values', { enum_name: 'membership_type' });
+        .from('membership_type')
+        .select('code');
 
       if (error) throw error;
-      return data as string[];
-    },
+      return (data as { code: string }[]).map((row) => row.code);
+    }
   });
 
   const { data: memberStatuses, isLoading: statusesLoading } = useQuery({
     queryKey: ['enum-member-statuses'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .rpc('get_enum_values', { enum_name: 'member_status' });
+        .from('membership_status')
+        .select('code');
 
       if (error) throw error;
-      return data as string[];
-    },
+      return (data as { code: string }[]).map((row) => row.code);
+    }
   });
 
   const formatEnumValue = (value: string) => {
