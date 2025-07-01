@@ -29,7 +29,7 @@ begin
   refresh materialized view concurrently source_recent_transactions_view;
   return null;
 end;
-$$ language plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 create trigger refresh_source_recent_transactions_view
 after insert or update or delete on financial_transactions
