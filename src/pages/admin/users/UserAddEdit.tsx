@@ -78,6 +78,12 @@ const UserAddEdit = () => {
       delete (payload as any).password;
     }
 
+    if (roles && roles.length) {
+      payload.roles = roles
+        .filter(r => formData.roles.includes(r.name))
+        .map(r => r.id);
+    }
+
     try {
       if (id) {
         await updateUserMutation.mutateAsync({ id, data: payload });
