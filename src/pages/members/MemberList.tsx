@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GridColDef, GridValueGetterParams, GridFilterModel, GridSortModel } from '@mui/x-data-grid';
+import { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
 import { useMemberRepository } from '../../hooks/useMemberRepository';
 import { Member } from '../../models/member.model';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
-import { DataGrid } from '../../components/ui2/mui-datagrid';
+import { DataGrid } from '../../components/ui2/data-grid';
 import { Button } from '../../components/ui2/button';
 import { Badge } from '../../components/ui2/badge';
-import { Input } from '../../components/ui2/input';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import {
   AlertDialog,
@@ -28,7 +27,6 @@ import {
   Phone,
   Calendar,
   Users,
-  Search,
 } from 'lucide-react';
 import { Card } from '../../components/ui2/card';
 
@@ -37,39 +35,38 @@ function MemberList() {
   const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortModel, setSortModel] = useState<GridSortModel>([]);
-  const [filterModel, setFilterModel] = useState<GridFilterModel>({});
-  const [searchTerm, setSearchTerm] = useState('');
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
 
   // Use the member repository hook
   const { useQuery, useDelete } = useMemberRepository();
 
   // Get members with repository
-  const filters = filterModel.items?.reduce((acc, filter) => ({
-    ...acc,
-    [filter.field]: {
-      operator: filter.operator.toLowerCase(),
-      value: filter.value
-    }
-  }), {} as Record<string, any>) || {};
+  const filters = columnFilters.reduce((acc, filter) => {
+    return {
+      ...acc,
+      [filter.id]: { operator: 'contains', value: filter.value }
+    };
+  }, {} as Record<string, any>);
 
-  if (searchTerm) {
+  if (globalFilter) {
     filters.or = [
-      { field: 'first_name', operator: 'contains', value: searchTerm },
-      { field: 'last_name', operator: 'contains', value: searchTerm },
-      { field: 'preferred_name', operator: 'contains', value: searchTerm },
-      { field: 'email', operator: 'contains', value: searchTerm },
+      { field: 'first_name', operator: 'contains', value: globalFilter },
+      { field: 'last_name', operator: 'contains', value: globalFilter },
+      { field: 'preferred_name', operator: 'contains', value: globalFilter },
+      { field: 'email', operator: 'contains', value: globalFilter },
     ];
   }
 
   const { data: result, isLoading, error } = useQuery({
     pagination: {
-      page: page + 1, // MUI Data Grid uses 0-based pages
+      page: page + 1, // Data grid uses 0-based pages
       pageSize,
     },
-    order: sortModel[0] ? {
-      column: sortModel[0].field,
-      ascending: sortModel[0].sort === 'asc'
+    order: sorting[0] ? {
+      column: sorting[0].id,
+      ascending: !sorting[0].desc,
     } : undefined,
     filters,
   });
@@ -92,140 +89,98 @@ function MemberList() {
     return statusColors[statusCode] || 'secondary';
   };
 
-  const columns: GridColDef[] = [
+  const columns: ColumnDef<Member>[] = [
     {
-      field: 'profile_picture_url',
-      headerName: '',
-      width: 80,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
+      id: 'profile_picture_url',
+      accessorKey: 'profile_picture_url',
+      header: '',
+      cell: ({ row }) => (
         <Avatar size="md">
-          {params.value ? (
-            <AvatarImage src={params.value} alt={`${params.row.first_name} ${params.row.last_name}`} />
+          {row.original.profile_picture_url ? (
+            <AvatarImage
+              src={row.original.profile_picture_url}
+              alt={`${row.original.first_name} ${row.original.last_name}`}
+            />
           ) : (
             <AvatarFallback>
-              {params.row.first_name?.charAt(0)}{params.row.last_name?.charAt(0)}
+              {row.original.first_name?.charAt(0)}
+              {row.original.last_name?.charAt(0)}
             </AvatarFallback>
           )}
         </Avatar>
-      )
+      ),
+      enableSorting: false,
+      enableColumnFilter: false,
     },
     {
-      field: 'first_name',
-      headerName: 'First Name',
-      flex: 1,
-      minWidth: 120,
+      accessorKey: 'first_name',
+      header: 'First Name',
     },
     {
-      field: 'last_name',
-      headerName: 'Last Name',
-      flex: 1,
-      minWidth: 120,
+      accessorKey: 'last_name',
+      header: 'Last Name',
     },
     {
-      field: 'preferred_name',
-      headerName: 'Preferred Name',
-      flex: 1,
-      minWidth: 120,
+      accessorKey: 'preferred_name',
+      header: 'Preferred Name',
     },
     {
-      field: 'email',
-      headerName: 'Email',
-      flex: 1,
-      minWidth: 200,
-      renderCell: (params) => (
+      accessorKey: 'email',
+      header: 'Email',
+      cell: ({ getValue }) => (
         <div className="flex items-center">
           <Mail className="h-4 w-4 text-muted-foreground mr-2" />
-          {params.value}
+          {getValue<string>()}
         </div>
       ),
     },
     {
-      field: 'contact_number',
-      headerName: 'Contact',
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params) => (
+      accessorKey: 'contact_number',
+      header: 'Contact',
+      cell: ({ getValue }) => (
         <div className="flex items-center">
           <Phone className="h-4 w-4 text-muted-foreground mr-2" />
-          {params.value}
+          {getValue<string>()}
         </div>
       ),
     },
     {
-      field: 'membership_status.name',
-      headerName: 'Status',
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params) => (
+      id: 'membership_status.name',
+      header: 'Status',
+      accessorFn: (row) => row.membership_status?.name,
+      cell: ({ row }) => (
         <div className="space-y-1">
-          <Badge variant={getStatusColor(params.row.membership_status?.code)}>
-            {params.row.membership_status?.name}
+          <Badge variant={getStatusColor(row.original.membership_status?.code)}>
+            {row.original.membership_status?.name}
           </Badge>
         </div>
       ),
-      valueGetter: (params: GridValueGetterParams) =>
-        `${params.row.membership_status?.name}`,
     },
     {
-      field: 'membership_date',
-      headerName: 'Member Since',
-      flex: 1,
-      minWidth: 120,
-      valueGetter: (params: GridValueGetterParams) => 
-        params.value ? new Date(params.value) : null,
-      renderCell: (params) => (
-        <div className="flex items-center">
-          <Users className="h-4 w-4 text-muted-foreground mr-2" />
-          {params.value ? new Date(params.value).toLocaleDateString() : ''}
-        </div>
-      ),
+      accessorKey: 'membership_date',
+      header: 'Member Since',
+      cell: ({ getValue }) => {
+        const value = getValue<string | null>();
+        return (
+          <div className="flex items-center">
+            <Users className="h-4 w-4 text-muted-foreground mr-2" />
+            {value ? new Date(value).toLocaleDateString() : ''}
+          </div>
+        );
+      },
     },
     {
-      field: 'birthday',
-      headerName: 'Birthday',
-      flex: 1,
-      minWidth: 120,
-      valueGetter: (params: GridValueGetterParams) => 
-        params.value ? new Date(params.value) : null,
-      renderCell: (params) => (
-        <div className="flex items-center">
-          <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
-          {params.value ? new Date(params.value).toLocaleDateString() : ''}
-        </div>
-      ),
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 120,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/members/${params.row.id}/edit`);
-            }}
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDeletingMemberId(params.row.id);
-            }}
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </div>
-      ),
+      accessorKey: 'birthday',
+      header: 'Birthday',
+      cell: ({ getValue }) => {
+        const value = getValue<string | null>();
+        return (
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
+            {value ? new Date(value).toLocaleDateString() : ''}
+          </div>
+        );
+      },
     },
   ];
 
@@ -253,32 +208,48 @@ function MemberList() {
         </div>
       </div>
 
-      <div className="mt-6 w-full sm:max-w-xs">
-        <Input
-          placeholder="Search members..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          icon={<Search className="h-4 w-4" />}
-        />
-      </div>
 
       <Card className="mt-6">
         <div style={{ height: 600, width: '100%' }}>
           <DataGrid<Member>
             data={result?.data || []}
             columns={columns}
-            totalRows={result?.count || 0}
             loading={isLoading}
             error={error instanceof Error ? error.message : undefined}
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
-            onSortChange={setSortModel}
-            onFilterChange={setFilterModel}
-            onRowClick={(params) => navigate(`/members/${params.row.id}`)}
-            page={page}
-            pageSize={pageSize}
-            disableRowSelectionOnClick
-            slotProps={{ toolbar: { showQuickFilter: false } }}
+            onSortingChange={setSorting}
+            onFilterChange={(f, g) => {
+              setColumnFilters(f);
+              setGlobalFilter(g);
+            }}
+            onRowClick={(row) => navigate(`/members/${row.id}`)}
+            rowActions={(row) => (
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/members/${row.id}/edit`);
+                  }}
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeletingMemberId(row.id);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            )}
+            pagination={{ pageSize }}
+            quickFilterPlaceholder="Search members..."
           />
         </div>
       </Card>
