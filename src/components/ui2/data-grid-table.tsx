@@ -16,7 +16,7 @@ export function DataGridTable() {
   } = useDataGrid<any, any>();
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -25,7 +25,7 @@ export function DataGridTable() {
                 <TableHead
                   key={header.id}
                   style={{ width: header.getSize() }}
-                  className="relative"
+                  className="relative bg-muted/50 dark:bg-gray-800/40"
                 >
                   {header.isPlaceholder ? null : <DataGridColumnHeader header={header} />}
                 </TableHead>
@@ -51,7 +51,7 @@ export function DataGridTable() {
                 onClick={() => onRowClick?.(row.original)}
                 className={cn(
                   onRowClick && 'cursor-pointer hover:bg-muted/50 transition-colors duration-200',
-                  'group'
+                  'group odd:bg-muted/5 dark:odd:bg-gray-800/40'
                 )}
               >
                 {row.getVisibleCells().map((cell) => (
