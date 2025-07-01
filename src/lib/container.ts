@@ -5,6 +5,10 @@ import {
   NotificationAdapter,
   type INotificationAdapter
 } from '../adapters/notification.adapter';
+import {
+  AnnouncementAdapter,
+  type IAnnouncementAdapter,
+} from '../adapters/announcement.adapter';
 import { AccountAdapter, type IAccountAdapter } from '../adapters/account.adapter';
 import {
   FinancialSourceAdapter,
@@ -107,6 +111,10 @@ container
 container
   .bind<INotificationAdapter>(TYPES.INotificationAdapter)
   .to(NotificationAdapter)
+  .inSingletonScope();
+container
+  .bind<IAnnouncementAdapter>(TYPES.IAnnouncementAdapter)
+  .to(AnnouncementAdapter)
   .inSingletonScope();
 container
   .bind<IAccountAdapter>(TYPES.IAccountAdapter)
