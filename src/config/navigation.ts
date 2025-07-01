@@ -13,6 +13,7 @@ import {
   Shield,
   UserCog,
   Bell,
+  LifeBuoy,
   LucideIcon,
 } from 'lucide-react';
 
@@ -40,6 +41,12 @@ export const navigation: NavItem[] = [
     name: 'Announcements',
     href: '/announcements',
     icon: Bell,
+    permission: null,
+  },
+  {
+    name: 'Support',
+    href: '/support',
+    icon: LifeBuoy,
     permission: null,
   },
   {
