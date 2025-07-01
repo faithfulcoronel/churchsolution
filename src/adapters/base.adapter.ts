@@ -142,7 +142,7 @@ export class BaseAdapter<T extends BaseModel> {
       const baseSelect = relationship.select?.join(',') || '*';
       
       if (!relationship.nestedRelationships?.length) {
-        return `${relationship.table}:${relationship.foreignKey}(${baseSelect})`;
+        return `${relationship.table}!${relationship.foreignKey}(${baseSelect})`;
       }
 
       const nestedSelects = relationship.nestedRelationships.map(nested => 
@@ -152,7 +152,7 @@ export class BaseAdapter<T extends BaseModel> {
         )
       );
 
-      return `${relationship.table}:${relationship.foreignKey}(${baseSelect},${nestedSelects.join(',')})`;
+      return `${relationship.table}!${relationship.foreignKey}(${baseSelect},${nestedSelects.join(',')})`;
     };
 
     return relationships.map(buildNestedSelect).join(',');
