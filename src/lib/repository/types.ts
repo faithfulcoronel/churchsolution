@@ -38,7 +38,6 @@ export interface QueryOptions {
   order?: {
     column: string;
     ascending?: boolean;
-    foreignTable?: string;
   };
   pagination?: {
     page: number;
