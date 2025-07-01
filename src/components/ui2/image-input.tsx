@@ -53,6 +53,11 @@ export const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
   }, ref) => {
     const [preview, setPreview] = useState<string | null>(value || null);
     const [isHovered, setIsHovered] = useState(false);
+
+    // Update preview when value prop changes (e.g. after data load)
+    React.useEffect(() => {
+      setPreview(value || null);
+    }, [value]);
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     const handleClick = () => {
