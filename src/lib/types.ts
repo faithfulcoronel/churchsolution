@@ -53,5 +53,6 @@ export const TYPES = {
   ErrorLogService: 'ErrorLogService',
   ActivityLogService: 'ActivityLogService',
   IncomeExpenseTransactionService: 'IncomeExpenseTransactionService',
-  AnnouncementService: 'AnnouncementService'
+  AnnouncementService: 'AnnouncementService',
+  DonationImportService: 'DonationImportService'
 };
