@@ -30,21 +30,10 @@ export interface NavItem {
 
 export const navigation: NavItem[] = [
   {
-    name: 'Dashboard',
+    name: 'Welcome',
+    href: '/welcome',
     icon: Home,
     permission: null,
-    submenu: [
-      {
-        name: 'Church Overview',
-        href: '/dashboard/church',
-        icon: Building2,
-      },
-      {
-        name: 'Personal Overview',
-        href: '/dashboard/personal',
-        icon: Users,
-      },
-    ],
   },
   {
     name: 'Members',
