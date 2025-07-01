@@ -91,37 +91,33 @@ function MemberList() {
 
   const columns: ColumnDef<Member>[] = [
     {
-      id: 'profile_picture_url',
-      accessorKey: 'profile_picture_url',
-      header: '',
-      cell: ({ row }) => (
-        <Avatar size="md">
-          {row.original.profile_picture_url && (
-            <AvatarImage
-              src={row.original.profile_picture_url}
-              alt={`${row.original.first_name} ${row.original.last_name}`}
-              crossOrigin="anonymous"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          )}
-          <AvatarFallback>
-            {row.original.first_name?.charAt(0)}
-            {row.original.last_name?.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
-      ),
-      enableSorting: false,
-      enableColumnFilter: false,
-    },
-    {
+      id: 'first_name',
       accessorKey: 'first_name',
-      header: 'First Name',
-    },
-    {
-      accessorKey: 'last_name',
-      header: 'Last Name',
+      header: 'Name',
+      cell: ({ row }) => (
+        <div className="flex items-center">
+          <Avatar size="md">
+            {row.original.profile_picture_url && (
+              <AvatarImage
+                src={row.original.profile_picture_url}
+                alt={`${row.original.first_name} ${row.original.last_name}`}
+                crossOrigin="anonymous"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            )}
+            <AvatarFallback>
+              {row.original.first_name?.charAt(0)}
+              {row.original.last_name?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="ml-2">
+            {row.original.first_name} {row.original.last_name}
+          </span>
+        </div>
+      ),
+      // sorting/filtering behave as before via accessorKey 'first_name'
     },
     {
       accessorKey: 'preferred_name',
