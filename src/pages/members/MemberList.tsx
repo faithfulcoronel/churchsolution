@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
 import { useQuery as useReactQuery } from '@tanstack/react-query';
@@ -56,42 +56,40 @@ function MemberList() {
       setColumnFilters(f);
       setSearchTerm(g);
     },
-    [setColumnFilters, setSearchTerm]
+    []
   );
 
-  // Use the member repository hook
   const { useQuery: useMembersQuery, useDelete } = useMemberRepository();
 
-  // Fetch membership status categories for filter
   const { data: statusCategories } = useReactQuery({
     queryKey: ['categories', 'member_status'],
     queryFn: () => categoryUtils.getCategories('member_status'),
   });
 
-  // Get members with repository
-  const filters = columnFilters.reduce((acc, filter) => {
-    return {
-      ...acc,
-      [filter.id]: { operator: 'contains', value: filter.value }
-    };
-  }, {} as Record<string, any>);
+  // ✅ Memoized filters to ensure query triggers properly
+  const filters = useMemo(() => {
+    const baseFilters = columnFilters.reduce((acc, filter) => {
+      return {
+        ...acc,
+        [filter.id]: { operator: 'contains', value: filter.value }
+      };
+    }, {} as Record<string, any>);
 
-  if (searchTerm) {
-    filters.or = [
-      { field: 'first_name', operator: 'contains', value: searchTerm },
-      { field: 'last_name', operator: 'contains', value: searchTerm },
-      { field: 'preferred_name', operator: 'contains', value: searchTerm },
-      { field: 'email', operator: 'contains', value: searchTerm },
-    ];
-  }
+    if (searchTerm) {
+      const escaped = searchTerm.replace(/[*]/g, ''); // remove unsafe wildcard
+      baseFilters.or = `first_name.ilike.*${escaped}*,last_name.ilike.*${escaped}*,preferred_name.ilike.*${escaped}*,email.ilike.*${escaped}*`;
+    }
 
-  if (statusFilter !== 'all') {
-    filters.membership_status_id = { operator: 'eq', value: statusFilter };
-  }
+    if (statusFilter !== 'all') {
+      baseFilters.membership_status_id = { operator: 'eq', value: statusFilter };
+    }
+
+    return baseFilters;
+  }, [columnFilters, searchTerm, statusFilter]);
 
   const { data: result, isLoading, error } = useMembersQuery({
     pagination: {
-      page: page + 1, // Data grid uses 0-based pages
+      page: page + 1,
       pageSize,
     },
     order: sorting[0] ? {
@@ -101,7 +99,6 @@ function MemberList() {
     filters,
   });
 
-  // Delete member mutation
   const deleteMemberMutation = useDelete();
 
   const getStatusColor = (statusCode: string) => {
@@ -115,7 +112,6 @@ function MemberList() {
       removed: 'destructive',
       donor: 'primary'
     };
-
     return statusColors[statusCode] || 'secondary';
   };
 
@@ -147,7 +143,6 @@ function MemberList() {
           </span>
         </div>
       ),
-      // sorting/filtering behave as before via accessorKey 'first_name'
     },
     {
       accessorKey: 'preferred_name',
@@ -225,10 +220,7 @@ function MemberList() {
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <SubscriptionGate type="member">
             <Link to="/members/add">
-              <Button
-                variant="default"
-                className="flex items-center"
-              >
+              <Button variant="default" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Member
               </Button>
@@ -236,7 +228,6 @@ function MemberList() {
           </SubscriptionGate>
         </div>
       </div>
-
 
       <div className="mt-6 sm:flex sm:items-center sm:justify-between">
         <div className="relative max-w-xs">
@@ -264,7 +255,6 @@ function MemberList() {
           </Select>
         </div>
       </div>
-
 
       <Card className="mt-6">
         <div style={{ height: 600, width: '100%' }}>
