@@ -1,4 +1,15 @@
+// src/components/ui2/data-grid.tsx
+
 import * as React from 'react';
+
+/**
+ * Opinionated wrapper around TanStack Table providing sorting, filtering,
+ * pagination and export controls.
+ *
+ * @prop onSortingChange - Called with the current sorting whenever it changes.
+ * @prop onFilterChange - Called with active filters and the global filter when they change.
+ * @prop onPageChange - Called with the new page index when pagination changes.
+ */
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -64,6 +75,14 @@ export interface DataTableProps<TData, TValue> {
     pageSize?: number;
     pageSizeOptions?: number[];
   };
+  /**
+   * Called whenever sorting changes.
+   */
+  onSortingChange?: (sorting: SortingState) => void;
+  /**
+   * Called whenever column or global filters change.
+   */
+  onFilterChange?: (filters: ColumnFiltersState, globalFilter: string) => void;
   onPageChange?: (pageIndex: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
   className?: string;
@@ -85,6 +104,8 @@ export function DataGrid<TData, TValue>({
   toolbar,
   rowActions,
   onRowClick,
+  onSortingChange,
+  onFilterChange,
   onPageChange,
   onPageSizeChange,
   pagination = {
@@ -110,6 +131,15 @@ export function DataGrid<TData, TValue>({
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(pagination.pageSize ?? 10);
   const pageSizeOptions = pagination.pageSizeOptions ?? [5, 10, 20, 50, 100];
+
+  // Notify parent components when sorting or filters change
+  React.useEffect(() => {
+    onSortingChange?.(sorting);
+  }, [sorting, onSortingChange]);
+
+  React.useEffect(() => {
+    onFilterChange?.(columnFilters, globalFilter);
+  }, [columnFilters, globalFilter, onFilterChange]);
 
   const table = useReactTable({
     data,
