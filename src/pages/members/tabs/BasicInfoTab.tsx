@@ -78,12 +78,12 @@ function BasicInfoTab({ member, onChange, mode = 'view' }: BasicInfoTabProps) {
             <dl className="space-y-4">
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Membership Type</dt>
-                <dd className="mt-1">{member.membership_categories?.name || 'Not specified'}</dd>
+                <dd className="mt-1">{member.membership_type?.name || 'Not specified'}</dd>
               </div>
               
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Status</dt>
-                <dd className="mt-1">{member.status_categories?.name || 'Not specified'}</dd>
+                <dd className="mt-1">{member.membership_status?.name || 'Not specified'}</dd>
               </div>
               
               {member.membership_date && (
@@ -179,8 +179,8 @@ function BasicInfoTab({ member, onChange, mode = 'view' }: BasicInfoTabProps) {
           </div>
           <div className="space-y-4">
             <Select
-              value={member.membership_category_id || ''}
-              onValueChange={value => onChange('membership_category_id', value)}
+              value={member.membership_type_id || ''}
+              onValueChange={value => onChange('membership_type_id', value)}
             >
               <SelectTrigger label="Membership Type">
                 <SelectValue placeholder="Select membership type" />
@@ -194,8 +194,8 @@ function BasicInfoTab({ member, onChange, mode = 'view' }: BasicInfoTabProps) {
               </SelectContent>
             </Select>
             <Select
-              value={member.status_category_id || ''}
-              onValueChange={value => onChange('status_category_id', value)}
+              value={member.membership_status_id || ''}
+              onValueChange={value => onChange('membership_status_id', value)}
             >
               <SelectTrigger label="Status">
                 <SelectValue placeholder="Select status" />

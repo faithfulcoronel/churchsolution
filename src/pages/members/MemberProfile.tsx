@@ -144,11 +144,11 @@ function MemberProfile() {
                   </h1>
                   
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {member.membership_categories && (
-                      <Badge variant="secondary">{member.membership_categories.name}</Badge>
+                    {member.membership_type && (
+                      <Badge variant="secondary">{member.membership_type.name}</Badge>
                     )}
-                    {member.status_categories && (
-                      <Badge variant="outline">{member.status_categories.name}</Badge>
+                    {member.membership_status && (
+                      <Badge variant="outline">{member.membership_status.name}</Badge>
                     )}
                     {member.envelope_number && (
                       <Badge variant="outline" className="bg-primary-50 text-primary border-primary-200">

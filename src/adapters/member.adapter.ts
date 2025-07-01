@@ -47,19 +47,19 @@ export class MemberAdapter
     prayer_requests,
     created_at,
     updated_at,
-    membership_category_id,
-    status_category_id
+    membership_type_id,
+    membership_status_id
   `;
 
   protected defaultRelationships: QueryOptions['relationships'] = [
     {
-      table: 'membership_categories',
-      foreignKey: 'membership_category_id',
+      table: 'membership_type',
+      foreignKey: 'membership_type_id',
       select: ['id', 'name', 'code']
     },
     {
-      table: 'status_categories',
-      foreignKey: 'status_category_id',
+      table: 'membership_status',
+      foreignKey: 'membership_status_id',
       select: ['id', 'name', 'code']
     }
   ];
