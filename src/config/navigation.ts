@@ -12,6 +12,7 @@ import {
   Tag,
   Shield,
   UserCog,
+  Bell,
   LucideIcon,
 } from 'lucide-react';
 
@@ -33,6 +34,12 @@ export const navigation: NavItem[] = [
     name: 'Welcome',
     href: '/welcome',
     icon: Home,
+    permission: null,
+  },
+  {
+    name: 'Announcements',
+    href: '/announcements',
+    icon: Bell,
     permission: null,
   },
   {

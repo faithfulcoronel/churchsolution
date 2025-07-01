@@ -285,11 +285,7 @@ function Welcome() {
               <Bell className="h-5 w-5 mr-2 text-primary" />
               Announcements
             </h2>
-            <Announcements messages={[
-              'Welcome to StewardTrack! Use the sidebar to quickly navigate between modules.',
-              'Need help? Check out our documentation or contact support from the settings page.',
-              'New feature: You can now export member reports to PDF format.'
-            ]} />
+            <Announcements />
           </div>
         </div>
       </div>
