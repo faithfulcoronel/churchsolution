@@ -10,6 +10,7 @@ import {
   History,
   Wallet,
   Tag,
+  Upload,
   Shield,
   UserCog,
   Bell,
@@ -124,6 +125,11 @@ export const navigation: NavItem[] = [
             name: 'Donations',
             href: '/finances/giving',
             icon: Heart,
+          },
+          {
+            name: 'Import Weekly Giving',
+            href: '/finances/giving/import',
+            icon: Upload,
           },
           {
             name: 'Expenses',
