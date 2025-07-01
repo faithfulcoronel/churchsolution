@@ -30,8 +30,8 @@ export interface CategoryDataProvider {
 class SupabaseCategoryDataProvider implements CategoryDataProvider {
   async fetchCategories(tenantId: string, type: CategoryType): Promise<Category[]> {
     const table = {
-      membership: 'membership_categories',
-      member_status: 'status_categories',
+      membership: 'membership_type',
+      member_status: 'membership_status',
       income_transaction: 'income_categories',
       expense_transaction: 'expense_categories',
       budget: 'budget_categories',

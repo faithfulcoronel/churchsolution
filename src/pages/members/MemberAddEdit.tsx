@@ -100,15 +100,15 @@ function MemberAddEdit() {
     
     try {
       if (id) {
-        await updateMemberMutation.mutateAsync({ 
-          id, 
+        await updateMemberMutation.mutateAsync({
+          id,
           data: formData,
-          fieldsToRemove: ['membership_categories', 'status_categories']
+          fieldsToRemove: ['membership_type', 'membership_status']
         });
       } else {
-        await createMemberMutation.mutateAsync({ 
+        await createMemberMutation.mutateAsync({
           data: formData,
-          fieldsToRemove: ['membership_categories', 'status_categories']
+          fieldsToRemove: ['membership_type', 'membership_status']
         });
       }
       navigate('/members/list');

@@ -8,8 +8,8 @@ export interface Member extends BaseModel {
   contact_number: string;
   address: string;
   email?: string;
-  membership_category_id: string;
-  status_category_id: string;
+  membership_type_id: string;
+  membership_status_id: string;
   membership_date: string | null;
   birthday: string | null;
   profile_picture_url: string | null;
@@ -28,12 +28,12 @@ export interface Member extends BaseModel {
   last_attendance_date?: string;
   pastoral_notes?: string;
   prayer_requests?: string[];
-  membership_categories?: {
+  membership_type?: {
     id: string;
     name: string;
     code: string;
   };
-  status_categories?: {
+  membership_status?: {
     id: string;
     name: string;
     code: string;

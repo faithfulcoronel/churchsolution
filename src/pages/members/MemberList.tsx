@@ -135,19 +135,19 @@ function MemberList() {
       ),
     },
     {
-      field: 'status_categories.name',
+      field: 'membership_status.name',
       headerName: 'Status',
       flex: 1,
       minWidth: 150,
       renderCell: (params) => (
         <div className="space-y-1">
-          <Badge variant={getStatusColor(params.row.status_categories?.code)}>
-            {params.row.status_categories?.name}
+          <Badge variant={getStatusColor(params.row.membership_status?.code)}>
+            {params.row.membership_status?.name}
           </Badge>
         </div>
       ),
-      valueGetter: (params: GridValueGetterParams) => 
-        `${params.row.status_categories?.name}`,
+      valueGetter: (params: GridValueGetterParams) =>
+        `${params.row.membership_status?.name}`,
     },
     {
       field: 'membership_date',
