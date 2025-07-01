@@ -21,7 +21,7 @@ CREATE POLICY "Users can upload profile pictures"
   WITH CHECK (
     bucket_id = 'profiles' AND
     (storage.foldername(name))[1] IN (
-      SELECT tenant_id::text FROM tenant_users WHERE user_id = auth.uid()
+      SELECT tu.tenant_id::text FROM tenant_users tu WHERE tu.user_id = auth.uid()
     )
   );
 
@@ -31,7 +31,7 @@ CREATE POLICY "Users can update profile pictures"
   USING (
     bucket_id = 'profiles' AND
     (storage.foldername(name))[1] IN (
-      SELECT tenant_id::text FROM tenant_users WHERE user_id = auth.uid()
+      SELECT tu.tenant_id::text FROM tenant_users tu WHERE tu.user_id = auth.uid()
     )
   );
 
@@ -41,7 +41,7 @@ CREATE POLICY "Users can delete profile pictures"
   USING (
     bucket_id = 'profiles' AND
     (storage.foldername(name))[1] IN (
-      SELECT tenant_id::text FROM tenant_users WHERE user_id = auth.uid()
+      SELECT tu.tenant_id::text FROM tenant_users tu WHERE tu.user_id = auth.uid()
     )
   );
 
