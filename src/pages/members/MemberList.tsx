@@ -96,17 +96,20 @@ function MemberList() {
       header: '',
       cell: ({ row }) => (
         <Avatar size="md">
-          {row.original.profile_picture_url ? (
+          {row.original.profile_picture_url && (
             <AvatarImage
               src={row.original.profile_picture_url}
               alt={`${row.original.first_name} ${row.original.last_name}`}
+              crossOrigin="anonymous"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
-          ) : (
-            <AvatarFallback>
-              {row.original.first_name?.charAt(0)}
-              {row.original.last_name?.charAt(0)}
-            </AvatarFallback>
           )}
+          <AvatarFallback>
+            {row.original.first_name?.charAt(0)}
+            {row.original.last_name?.charAt(0)}
+          </AvatarFallback>
         </Avatar>
       ),
       enableSorting: false,
