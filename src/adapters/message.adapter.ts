@@ -25,8 +25,11 @@ export class MessageAdapter
     sender_id,
     body,
     attachments,
+    created_by,
+    updated_by,
     created_at,
-    updated_at
+    updated_at,
+    deleted_at
   `;
 
   protected override async onAfterCreate(data: Message): Promise<void> {

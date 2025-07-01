@@ -25,13 +25,17 @@ CREATE TABLE IF NOT EXISTS messages (
   sender_id uuid REFERENCES auth.users(id),
   body text NOT NULL,
   attachments jsonb DEFAULT '[]'::jsonb,
+  created_by uuid REFERENCES auth.users(id),
+  updated_by uuid REFERENCES auth.users(id),
   created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  updated_at timestamptz DEFAULT now(),
+  deleted_at timestamptz
 );
 
 CREATE INDEX IF NOT EXISTS messages_thread_id_idx ON messages(thread_id);
 CREATE INDEX IF NOT EXISTS messages_tenant_id_idx ON messages(tenant_id);
 CREATE INDEX IF NOT EXISTS messages_created_at_idx ON messages(created_at);
+CREATE INDEX IF NOT EXISTS messages_deleted_at_idx ON messages(deleted_at);
 
 -- Enable RLS
 ALTER TABLE message_threads ENABLE ROW LEVEL SECURITY;
