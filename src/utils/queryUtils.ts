@@ -123,7 +123,7 @@ export class QueryUtils {
       const baseSelect = relationship.select?.join(',') || '*';
       
       if (!relationship.nestedRelationships?.length) {
-        return `${relationship.table}:${relationship.foreignKey}(${baseSelect})`;
+        return `${relationship.table}!${relationship.foreignKey}(${baseSelect})`;
       }
 
       const nestedSelects = relationship.nestedRelationships.map(nested => 
@@ -133,7 +133,7 @@ export class QueryUtils {
         )
       );
 
-      return `${relationship.table}:${relationship.foreignKey}(${baseSelect},${nestedSelects.join(',')})`;
+      return `${relationship.table}!${relationship.foreignKey}(${baseSelect},${nestedSelects.join(',')})`;
     };
 
     return relationships.map(buildNestedSelect).join(',');
