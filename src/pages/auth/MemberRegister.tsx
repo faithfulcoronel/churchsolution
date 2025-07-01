@@ -90,19 +90,36 @@ function MemberRegister() {
     if (!validate()) return;
     try {
       setSubmitting(true);
-      const { data, error: rpcError } = await supabase.rpc('register_member', {
-        p_email: form.email,
-        p_password: form.password,
-        p_tenant_id: form.tenantId,
-        p_first_name: form.firstName,
-        p_last_name: form.lastName,
+      const {
+        data: { user },
+        error: signUpError,
+      } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: { first_name: form.firstName, last_name: form.lastName },
+        },
       });
 
-      if (rpcError || !data) throw rpcError || new Error('Unable to register');
+      if (signUpError || !user)
+        throw signUpError || new Error('Unable to register');
+
+      const { error: rpcError, data } = await supabase.rpc(
+        'complete_member_registration',
+        {
+          p_user_id: user.id,
+          p_tenant_id: form.tenantId,
+          p_first_name: form.firstName,
+          p_last_name: form.lastName,
+        }
+      );
+
+      if (rpcError || !data)
+        throw rpcError || new Error('Unable to finish registration');
 
       sessionStorage.setItem(
         'memberOnboardingData',
-        JSON.stringify({ userId: (data as any).id })
+        JSON.stringify({ userId: user.id })
       );
 
       addMessage({
