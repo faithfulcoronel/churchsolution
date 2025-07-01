@@ -103,6 +103,7 @@ import {
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
 import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
+import { SupabaseAnnouncementService, type AnnouncementService } from '../services/AnnouncementService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -203,6 +204,10 @@ container
 container
   .bind<ErrorLogService>(TYPES.ErrorLogService)
   .to(SupabaseErrorLogService)
+  .inSingletonScope();
+container
+  .bind<AnnouncementService>(TYPES.AnnouncementService)
+  .to(SupabaseAnnouncementService)
   .inSingletonScope();
 
 // Register repositories

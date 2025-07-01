@@ -41,5 +41,6 @@ export const TYPES = {
   ISourceRecentTransactionRepository: 'ISourceRecentTransactionRepository',
   AuditService: 'AuditService',
   ErrorLogService: 'ErrorLogService',
-  IncomeExpenseTransactionService: 'IncomeExpenseTransactionService'
+  IncomeExpenseTransactionService: 'IncomeExpenseTransactionService',
+  AnnouncementService: 'AnnouncementService'
 };
