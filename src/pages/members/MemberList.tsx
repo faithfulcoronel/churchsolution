@@ -100,7 +100,6 @@ function MemberList() {
             <AvatarImage
               src={row.original.profile_picture_url}
               alt={`${row.original.first_name} ${row.original.last_name}`}
-              crossOrigin="anonymous"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}

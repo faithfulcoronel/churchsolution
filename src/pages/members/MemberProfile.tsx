@@ -120,7 +120,6 @@ function MemberProfile() {
                 <AvatarImage
                   src={member.profile_picture_url}
                   alt={`${member.first_name} ${member.last_name}`}
-                  crossOrigin="anonymous"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}

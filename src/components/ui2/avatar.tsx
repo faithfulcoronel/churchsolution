@@ -5,9 +5,6 @@ import { cn } from '@/lib/utils';
 import { BaseProps } from './types';
 
 interface AvatarProps extends BaseProps {
-  src?: string;
-  alt?: string;
-  fallback?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   shape?: 'circle' | 'square';
 }
@@ -20,7 +17,7 @@ const sizeClasses = {
 };
 
 const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
-  ({ className, src, alt, fallback, size = 'md', shape = 'circle', ...props }, ref) => (
+  ({ className, size = 'md', shape = 'circle', children, ...props }, ref) => (
     <AvatarPrimitive.Root
       ref={ref}
       className={cn(
@@ -31,21 +28,7 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
       )}
       {...props}
     >
-      <AvatarPrimitive.Image
-        src={src}
-        alt={alt || ''}
-        className="h-full w-full object-cover dark:border-gray-700"
-      />
-      <AvatarPrimitive.Fallback
-        className={cn(
-          'flex h-full w-full items-center justify-center bg-muted dark:bg-gray-700',
-          shape === 'circle' ? 'rounded-full' : 'rounded-lg',
-          'dark:text-gray-200'
-        )}
-        delayMs={600}
-      >
-        {fallback || alt?.charAt(0).toUpperCase() || '?'}
-      </AvatarPrimitive.Fallback>
+      {children}
     </AvatarPrimitive.Root>
   )
 );
