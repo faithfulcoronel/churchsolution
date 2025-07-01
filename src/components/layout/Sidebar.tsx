@@ -77,7 +77,11 @@ function Sidebar({
         ? 'px-3'
         : level === 1
           ? 'pl-11 pr-3'
-          : 'pl-16 pr-3';
+          : level === 2
+            ? 'pl-16 pr-3'
+            : level === 3
+              ? 'pl-20 pr-3'
+              : 'pl-24 pr-3';
 
     if (hasChildren) {
       return (
