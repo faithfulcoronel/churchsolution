@@ -10,7 +10,7 @@ export class UserValidator {
       throw new Error('Invalid email format');
     }
 
-    if (data.password !== undefined && data.password.length < 8) {
+    if (data.password && data.password.length < 8) {
       throw new Error('Password must be at least 8 characters long');
     }
   }
