@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
 import { useQuery as useReactQuery } from '@tanstack/react-query';
@@ -50,6 +50,14 @@ function MemberList() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  const handleFilterChange = useCallback(
+    (f: ColumnFiltersState, g: string) => {
+      setColumnFilters(f);
+      setSearchTerm(g);
+    },
+    [setColumnFilters, setSearchTerm]
+  );
 
   // Use the member repository hook
   const { useQuery: useMembersQuery, useDelete } = useMemberRepository();
@@ -269,10 +277,7 @@ function MemberList() {
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
             onSortingChange={setSorting}
-            onFilterChange={(f, g) => {
-              setColumnFilters(f);
-              setSearchTerm(g);
-            }}
+            onFilterChange={handleFilterChange}
             onRowClick={(row) => navigate(`/members/${row.id}`)}
             rowActions={(row) => (
               <div className="flex items-center space-x-2">
