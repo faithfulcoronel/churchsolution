@@ -294,6 +294,7 @@ function MemberList() {
               </div>
             )}
             pagination={{ pageSize }}
+            storageKey="member-list-grid"
           />
         </div>
       </Card>
