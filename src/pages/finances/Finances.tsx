@@ -23,6 +23,7 @@ const IncomeExpenseProfile = React.lazy(() => import('./incomeExpense/IncomeExpe
 const CategoryList = React.lazy(() => import('./configuration/CategoryList'));
 const CategoryAddEdit = React.lazy(() => import('./configuration/CategoryAddEdit'));
 const CategoryProfile = React.lazy(() => import('./configuration/CategoryProfile'));
+const WeeklyGivingImport = React.lazy(() => import('./WeeklyGivingImport'));
 
 function LoadingSpinner() {
   return (
@@ -137,6 +138,7 @@ function Finances() {
         <Route path="expenses/:id" element={<IncomeExpenseProfile transactionType="expense" />} />
         <Route path="giving" element={<IncomeExpenseList transactionType="income" />} />
         <Route path="giving/add" element={<IncomeExpenseAddEdit transactionType="income" />} />
+        <Route path="giving/import" element={<WeeklyGivingImport />} />
         <Route path="giving/:id/edit" element={<IncomeExpenseAddEdit transactionType="income" />} />
         <Route path="giving/:id" element={<IncomeExpenseProfile transactionType="income" />} />
         <Route path="reports" element={<Reports />} />
