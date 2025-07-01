@@ -63,7 +63,7 @@ export const navigation: NavItem[] = [
         icon: Heart,
       },
       {
-        name: 'Configuration',
+        name: 'Member Settings',
         icon: Tag,
         submenu: [
           {
@@ -96,7 +96,7 @@ export const navigation: NavItem[] = [
         icon: BarChart3,
         submenu: [
           {
-            name: 'Dashboard',
+            name: 'Finance Dashboard',
             href: '/finances',
             icon: BarChart3,
             exact: true,
@@ -114,7 +114,7 @@ export const navigation: NavItem[] = [
         ],
       },
       {
-        name: 'Transactions',
+        name: 'Transaction Center',
         icon: History,
         submenu: [
           {
@@ -138,18 +138,18 @@ export const navigation: NavItem[] = [
             icon: Wallet,
           },
           {
-            name: 'Transactions',
+            name: 'All Transactions',
             href: '/finances/transactions',
             icon: History,
           },
         ],
       },
       {
-        name: 'Accounts',
+        name: 'Financial Accounts',
         icon: Building2,
         submenu: [
           {
-            name: 'Accounts',
+            name: 'Account List',
             href: '/accounts',
             icon: Building2,
             exact: true,
@@ -167,7 +167,7 @@ export const navigation: NavItem[] = [
         ],
       },
       {
-        name: 'Configuration',
+        name: 'Finance Settings',
         icon: Tag,
         submenu: [
           {
@@ -205,7 +205,7 @@ export const navigation: NavItem[] = [
             icon: UserCog,
           },
           {
-            name: 'Configuration',
+            name: 'User Settings',
             icon: Tag,
             submenu: [
               {
