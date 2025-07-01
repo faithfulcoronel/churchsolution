@@ -1,6 +1,6 @@
 import React from 'react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 
 interface PDFRendererProps {
@@ -66,7 +66,7 @@ export function PDFRenderer({ title, content, footer, className = '' }: PDFRende
         // Handle table data
         if (section.content.type === PDFTable) {
           const { headers, data } = section.content.props;
-          (doc as any).autoTable({
+          autoTable(doc, {
             head: [headers],
             body: data,
             startY: yPos,
@@ -149,7 +149,7 @@ export function PDFRenderer({ title, content, footer, className = '' }: PDFRende
               }
             }
           });
-          yPos = (doc as any).lastAutoTable.finalY + 15;
+          yPos = doc.lastAutoTable.finalY + 15;
         }
       }
     });

@@ -14,7 +14,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
 export interface DataGridProps<TData, TValue> {
@@ -227,7 +227,7 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
       footStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
     } as any;
 
-    (doc as any).autoTable(tableOptions);
+    autoTable(doc, tableOptions);
     doc.save(`${exportOptions.fileName || 'export'}.pdf`);
   };
 
