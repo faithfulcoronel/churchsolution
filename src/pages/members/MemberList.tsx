@@ -8,6 +8,7 @@ import { DataGrid } from '../../components/ui2/mui-datagrid';
 import { Button } from '../../components/ui2/button';
 import { Badge } from '../../components/ui2/badge';
 import { Input } from '../../components/ui2/input';
+import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -92,6 +93,24 @@ function MemberList() {
   };
 
   const columns: GridColDef[] = [
+    {
+      field: 'profile_picture_url',
+      headerName: '',
+      width: 80,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Avatar size="md">
+          {params.value ? (
+            <AvatarImage src={params.value} alt={`${params.row.first_name} ${params.row.last_name}`} />
+          ) : (
+            <AvatarFallback>
+              {params.row.first_name?.charAt(0)}{params.row.last_name?.charAt(0)}
+            </AvatarFallback>
+          )}
+        </Avatar>
+      )
+    },
     {
       field: 'first_name',
       headerName: 'First Name',
