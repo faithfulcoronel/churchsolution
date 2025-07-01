@@ -22,7 +22,11 @@ export function DataGridTable() {
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
+                <TableHead
+                  key={header.id}
+                  style={{ width: header.getSize() }}
+                  className="relative"
+                >
                   {header.isPlaceholder ? null : <DataGridColumnHeader header={header} />}
                 </TableHead>
               ))}
@@ -51,7 +55,9 @@ export function DataGridTable() {
                 )}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  <TableCell key={cell.id} style={{ width: cell.column.getSize() }}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
                 ))}
                 {rowActions && (
                   <TableCell>
@@ -75,7 +81,7 @@ export function DataGridTable() {
             {table.getFooterGroups().map((footerGroup) => (
               <TableRow key={footerGroup.id}>
                 {footerGroup.headers.map((header) => (
-                  <TableCell key={header.id}>
+                  <TableCell key={header.id} style={{ width: header.column.getSize() }}>
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
                   </TableCell>
                 ))}

@@ -4,6 +4,8 @@ import {
   ColumnFiltersState,
   SortingState,
   VisibilityState,
+  ColumnSizingState,
+  ColumnSizingInfoState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -68,6 +70,10 @@ export interface DataGridContextValue<TData, TValue> {
   pageSizeOptions: number[];
   handlePageChange: (page: number) => void;
   handlePageSizeChange: (size: number) => void;
+  columnSizing: ColumnSizingState;
+  columnSizingInfo: ColumnSizingInfoState;
+  setColumnSizing: React.Dispatch<React.SetStateAction<ColumnSizingState>>;
+  setColumnSizingInfo: React.Dispatch<React.SetStateAction<ColumnSizingInfoState>>;
   title?: string;
   description?: string;
   toolbar?: React.ReactNode;
@@ -112,6 +118,8 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnSizing, setColumnSizing] = React.useState<ColumnSizingState>({});
+  const [columnSizingInfo, setColumnSizingInfo] = React.useState<ColumnSizingInfoState>({} as ColumnSizingInfoState);
   const [rowSelection, setRowSelection] = React.useState({});
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [openFilterMenus, setOpenFilterMenus] = React.useState<Record<string, boolean>>({});
@@ -119,6 +127,11 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(pagination.pageSize ?? 10);
   const pageSizeOptions = pagination.pageSizeOptions ?? [5, 10, 20, 50, 100];
+
+  const defaultColumn = React.useMemo(() => ({
+    size: 150,
+    minSize: 40,
+  }), []);
 
   React.useEffect(() => {
     onSortingChange?.(sorting);
@@ -131,14 +144,20 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
   const table = useReactTable({
     data,
     columns,
+    defaultColumn,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
       globalFilter,
+      columnSizing,
+      columnSizingInfo,
     },
     enableRowSelection: true,
+    columnResizeMode: 'onChange',
+    onColumnSizingChange: setColumnSizing,
+    onColumnSizingInfoChange: setColumnSizingInfo,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -305,6 +324,10 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     pageSizeOptions,
     handlePageChange,
     handlePageSizeChange,
+    columnSizing,
+    columnSizingInfo,
+    setColumnSizing,
+    setColumnSizingInfo,
     title,
     description,
     toolbar,
