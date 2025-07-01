@@ -43,6 +43,10 @@ export interface DataGridProps<TData, TValue> {
     excel?: boolean;
   };
   quickFilterPlaceholder?: string;
+  /** Optional class name for the internal container */
+  containerClassName?: string;
+  /** Whether the container should take the full width */
+  fluid?: boolean;
 }
 
 export interface DataGridContextValue<TData, TValue> {
@@ -72,6 +76,10 @@ export interface DataGridContextValue<TData, TValue> {
   setGlobalFilter: React.Dispatch<React.SetStateAction<string>>;
   quickFilterPlaceholder?: string;
   className?: string;
+  /** Optional class name for the internal container */
+  containerClassName?: string;
+  /** Whether the container should take the full width */
+  fluid?: boolean;
   handleExportPDF: () => void;
   handleExportExcel: () => void;
 }
@@ -95,6 +103,8 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     onPageSizeChange,
     pagination = { pageSize: 10, pageSizeOptions: [5, 10, 20, 50, 100] },
     className,
+    containerClassName,
+    fluid = false,
     exportOptions = { enabled: true, fileName: 'export', pdf: true, excel: true },
     quickFilterPlaceholder,
   } = props;
@@ -303,6 +313,8 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     setGlobalFilter,
     quickFilterPlaceholder,
     className,
+    containerClassName,
+    fluid,
     handleExportPDF,
     handleExportExcel,
   };
