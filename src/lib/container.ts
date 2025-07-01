@@ -55,6 +55,10 @@ import {
   NotificationRepository,
   type INotificationRepository
 } from '../repositories/notification.repository';
+import {
+  AnnouncementRepository,
+  type IAnnouncementRepository
+} from '../repositories/announcement.repository';
 import { AccountRepository, type IAccountRepository } from '../repositories/account.repository';
 import {
   FinancialSourceRepository,
@@ -209,6 +213,10 @@ container
 container
   .bind<INotificationRepository>(TYPES.INotificationRepository)
   .to(NotificationRepository)
+  .inSingletonScope();
+container
+  .bind<IAnnouncementRepository>(TYPES.IAnnouncementRepository)
+  .to(AnnouncementRepository)
   .inSingletonScope();
 container
   .bind<IAccountRepository>(TYPES.IAccountRepository)

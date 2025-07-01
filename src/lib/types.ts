@@ -18,6 +18,7 @@ export const TYPES = {
   IPermissionAdapter: 'IPermissionAdapter',
   IMemberRepository: 'IMemberRepository',
   INotificationRepository: 'INotificationRepository',
+  IAnnouncementRepository: 'IAnnouncementRepository',
   IAccountRepository: 'IAccountRepository',
   IFinancialSourceRepository: 'IFinancialSourceRepository',
   IChartOfAccountRepository: 'IChartOfAccountRepository',
