@@ -18,6 +18,7 @@ import {
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { getData, setData } from '@/utils/LocalStorage';
 
 export interface DataGridProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -49,6 +50,11 @@ export interface DataGridProps<TData, TValue> {
   containerClassName?: string;
   /** Whether the container should take the full width */
   fluid?: boolean;
+  /**
+   * Optional key used to store column sizing in localStorage.
+   * Provide a unique value per page to scope the cache.
+   */
+  storageKey?: string;
 }
 
 export interface DataGridContextValue<TData, TValue> {
@@ -120,6 +126,7 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     fluid = false,
     exportOptions: providedExportOptions,
     quickFilterPlaceholder,
+    storageKey,
   } = props;
 
   const exportOptions = { ...defaultExportOptions, ...providedExportOptions };
@@ -141,6 +148,20 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     size: 150,
     minSize: 40,
   }), []);
+
+  React.useEffect(() => {
+    if (!storageKey) return;
+    const saved = getData(`${storageKey}-columnSizing`);
+    if (saved && typeof saved === 'object') {
+      setColumnSizing(saved as ColumnSizingState);
+    }
+  }, [storageKey]);
+
+  React.useEffect(() => {
+    if (storageKey) {
+      setData(`${storageKey}-columnSizing`, columnSizing);
+    }
+  }, [storageKey, columnSizing]);
 
   React.useEffect(() => {
     onSortingChange?.(sorting);
