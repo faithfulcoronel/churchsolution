@@ -16,7 +16,7 @@ function Footer({ sidebarCollapsed }: FooterProps) {
   return (
     <>
       <footer
-        className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 py-4 px-6 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}
+        className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 py-4 px-6 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-72'}`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap space-y-2 sm:space-y-0">
           <div className="flex items-center space-x-4">

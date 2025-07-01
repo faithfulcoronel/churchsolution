@@ -646,7 +646,7 @@ module.exports = {
         style1: {
           sidebar: {
             width: {
-              desktop: '280px',
+              desktop: '288px',
               desktopCollapse: '80px',
               mobile: '280px'
             }
