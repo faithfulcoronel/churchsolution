@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
+import type { GridColDef, GridSortModel, GridFilterModel } from '@reui/data-grid';
 import { useMemberRepository } from '../../hooks/useMemberRepository';
 import { Member } from '../../models/member.model';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
@@ -35,27 +35,28 @@ function MemberList() {
   const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [sorting, setSorting] = useState<GridSortModel>([]);
+  const [filters, setFilters] = useState<GridFilterModel>({ items: [] });
 
   // Use the member repository hook
   const { useQuery, useDelete } = useMemberRepository();
 
   // Get members with repository
-  const filters = columnFilters.reduce((acc, filter) => {
+  const filterParams = filters.items.reduce((acc, item) => {
+    if (!item.value) return acc;
     return {
       ...acc,
-      [filter.id]: { operator: 'contains', value: filter.value }
+      [item.field]: { operator: 'contains', value: item.value },
     };
   }, {} as Record<string, any>);
 
-  if (globalFilter) {
-    filters.or = [
-      { field: 'first_name', operator: 'contains', value: globalFilter },
-      { field: 'last_name', operator: 'contains', value: globalFilter },
-      { field: 'preferred_name', operator: 'contains', value: globalFilter },
-      { field: 'email', operator: 'contains', value: globalFilter },
+  if (filters.quickFilterValues?.[0]) {
+    const q = filters.quickFilterValues[0];
+    filterParams.or = [
+      { field: 'first_name', operator: 'contains', value: q },
+      { field: 'last_name', operator: 'contains', value: q },
+      { field: 'preferred_name', operator: 'contains', value: q },
+      { field: 'email', operator: 'contains', value: q },
     ];
   }
 
@@ -64,11 +65,10 @@ function MemberList() {
       page: page + 1, // Data grid uses 0-based pages
       pageSize,
     },
-    order: sorting[0] ? {
-      column: sorting[0].id,
-      ascending: !sorting[0].desc,
-    } : undefined,
-    filters,
+    order: sorting[0]
+      ? { column: sorting[0].field, ascending: sorting[0].sort !== 'desc' }
+      : undefined,
+    filters: filterParams,
   });
 
   // Delete member mutation
@@ -89,78 +89,77 @@ function MemberList() {
     return statusColors[statusCode] || 'secondary';
   };
 
-  const columns: ColumnDef<Member>[] = [
+  const columns: GridColDef[] = [
     {
-      id: 'profile_picture_url',
-      accessorKey: 'profile_picture_url',
-      header: '',
-      cell: ({ row }) => (
+      field: 'profile_picture_url',
+      headerName: '',
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
         <Avatar size="md">
-          {row.original.profile_picture_url ? (
+          {params.row.profile_picture_url ? (
             <AvatarImage
-              src={row.original.profile_picture_url}
-              alt={`${row.original.first_name} ${row.original.last_name}`}
+              src={params.row.profile_picture_url}
+              alt={`${params.row.first_name} ${params.row.last_name}`}
             />
           ) : (
             <AvatarFallback>
-              {row.original.first_name?.charAt(0)}
-              {row.original.last_name?.charAt(0)}
+              {params.row.first_name?.charAt(0)}
+              {params.row.last_name?.charAt(0)}
             </AvatarFallback>
           )}
         </Avatar>
       ),
-      enableSorting: false,
-      enableColumnFilter: false,
     },
     {
-      accessorKey: 'first_name',
-      header: 'First Name',
+      field: 'first_name',
+      headerName: 'First Name',
     },
     {
-      accessorKey: 'last_name',
-      header: 'Last Name',
+      field: 'last_name',
+      headerName: 'Last Name',
     },
     {
-      accessorKey: 'preferred_name',
-      header: 'Preferred Name',
+      field: 'preferred_name',
+      headerName: 'Preferred Name',
     },
     {
-      accessorKey: 'email',
-      header: 'Email',
-      cell: ({ getValue }) => (
+      field: 'email',
+      headerName: 'Email',
+      renderCell: (params) => (
         <div className="flex items-center">
           <Mail className="h-4 w-4 text-muted-foreground mr-2" />
-          {getValue<string>()}
+          {params.value as string}
         </div>
       ),
     },
     {
-      accessorKey: 'contact_number',
-      header: 'Contact',
-      cell: ({ getValue }) => (
+      field: 'contact_number',
+      headerName: 'Contact',
+      renderCell: (params) => (
         <div className="flex items-center">
           <Phone className="h-4 w-4 text-muted-foreground mr-2" />
-          {getValue<string>()}
+          {params.value as string}
         </div>
       ),
     },
     {
-      id: 'membership_status.name',
-      header: 'Status',
-      accessorFn: (row) => row.membership_status?.name,
-      cell: ({ row }) => (
+      field: 'membership_status',
+      headerName: 'Status',
+      valueGetter: (params) => params.row.membership_status?.name,
+      renderCell: (params) => (
         <div className="space-y-1">
-          <Badge variant={getStatusColor(row.original.membership_status?.code)}>
-            {row.original.membership_status?.name}
+          <Badge variant={getStatusColor(params.row.membership_status?.code)}>
+            {params.row.membership_status?.name}
           </Badge>
         </div>
       ),
     },
     {
-      accessorKey: 'membership_date',
-      header: 'Member Since',
-      cell: ({ getValue }) => {
-        const value = getValue<string | null>();
+      field: 'membership_date',
+      headerName: 'Member Since',
+      renderCell: (params) => {
+        const value = params.value as string | null;
         return (
           <div className="flex items-center">
             <Users className="h-4 w-4 text-muted-foreground mr-2" />
@@ -170,10 +169,10 @@ function MemberList() {
       },
     },
     {
-      accessorKey: 'birthday',
-      header: 'Birthday',
-      cell: ({ getValue }) => {
-        const value = getValue<string | null>();
+      field: 'birthday',
+      headerName: 'Birthday',
+      renderCell: (params) => {
+        const value = params.value as string | null;
         return (
           <div className="flex items-center">
             <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
@@ -216,13 +215,14 @@ function MemberList() {
             columns={columns}
             loading={isLoading}
             error={error instanceof Error ? error.message : undefined}
+            page={page}
+            pageSize={pageSize}
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
-            onSortingChange={setSorting}
-            onFilterChange={(f, g) => {
-              setColumnFilters(f);
-              setGlobalFilter(g);
-            }}
+            sortingModel={sorting}
+            onSortingModelChange={setSorting}
+            filterModel={filters}
+            onFilterModelChange={setFilters}
             onRowClick={(row) => navigate(`/members/${row.id}`)}
             rowActions={(row) => (
               <div className="flex items-center space-x-2">
@@ -248,7 +248,6 @@ function MemberList() {
                 </Button>
               </div>
             )}
-            pagination={{ pageSize }}
             quickFilterPlaceholder="Search members..."
           />
         </div>
