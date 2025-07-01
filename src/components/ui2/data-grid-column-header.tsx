@@ -1,0 +1,38 @@
+import * as React from 'react';
+import { flexRender, Header } from '@tanstack/react-table';
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { DataGridColumnFilter } from './data-grid-column-filter';
+
+export interface DataGridColumnHeaderProps<TData, TValue> {
+  header: Header<TData, TValue>;
+}
+
+export function DataGridColumnHeader<TData, TValue>({ header }: DataGridColumnHeaderProps<TData, TValue>) {
+  const column = header.column;
+
+  return (
+    <div className="flex items-center space-x-2">
+      <div
+        className={cn(
+          'flex items-center space-x-2',
+          column.getCanSort() && 'cursor-pointer select-none'
+        )}
+        onClick={column.getToggleSortingHandler()}
+      >
+        {flexRender(column.columnDef.header, header.getContext())}
+        {column.getCanSort() && (
+          <span>
+            {{
+              asc: <ArrowUp className="h-4 w-4 dark:text-gray-300" />,
+              desc: <ArrowDown className="h-4 w-4 dark:text-gray-300" />,
+            }[column.getIsSorted() as string] ?? (
+              <ArrowUpDown className="h-4 w-4 dark:text-gray-400" />
+            )}
+          </span>
+        )}
+      </div>
+      {column.getCanFilter() && <DataGridColumnFilter column={column} />}
+    </div>
+  );
+}

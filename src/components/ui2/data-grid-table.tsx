@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { flexRender } from '@tanstack/react-table';
-import { ArrowUpDown, ArrowUp, ArrowDown, Filter, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from './table';
-import { Button } from './button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from './dropdown-menu';
-import { Input } from './input';
+import { DataGridColumnHeader } from './data-grid-column-header';
 import { cn } from '@/lib/utils';
 import { useDataGrid } from './data-grid/context';
 
@@ -15,12 +13,6 @@ export function DataGridTable() {
     loading,
     rowActions,
     onRowClick,
-    openFilterMenus,
-    setOpenFilterMenus,
-    tempFilters,
-    setTempFilters,
-    handleApplyFilter,
-    handleClearFilter,
   } = useDataGrid<any, any>();
 
   return (
@@ -31,89 +23,7 @@ export function DataGridTable() {
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}>
-                  {header.isPlaceholder ? null : (
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className={cn(
-                          'flex items-center space-x-2',
-                          header.column.getCanSort() && 'cursor-pointer select-none'
-                        )}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getCanSort() && (
-                          <span>
-                            {{
-                              asc: <ArrowUp className="h-4 w-4 dark:text-gray-300" />,
-                              desc: <ArrowDown className="h-4 w-4 dark:text-gray-300" />,
-                            }[header.column.getIsSorted() as string] ?? (
-                              <ArrowUpDown className="h-4 w-4 dark:text-gray-400" />
-                            )}
-                          </span>
-                        )}
-                      </div>
-                      {header.column.getCanFilter() && (
-                        <DropdownMenu
-                          open={openFilterMenus[header.id]}
-                          onOpenChange={(open) => {
-                            setOpenFilterMenus((prev) => ({ ...prev, [header.id]: open }));
-                            if (open) {
-                              setTempFilters((prev) => ({
-                                ...prev,
-                                [header.column.id]: (header.column.getFilterValue() as string) ?? '',
-                              }));
-                            }
-                          }}
-                        >
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={cn(
-                                'h-8 w-8 p-0',
-                                header.column.getIsFiltered() && 'text-primary dark:text-primary'
-                              )}
-                            >
-                              <Filter className="h-4 w-4 dark:text-gray-400" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" className="w-[200px] p-2">
-                            <div className="space-y-2">
-                              <Input
-                                placeholder={`Filter ${header.column.id}...`}
-                                value={tempFilters[header.column.id] ?? ''}
-                                onChange={(e) =>
-                                  setTempFilters((prev) => ({
-                                    ...prev,
-                                    [header.column.id]: e.target.value,
-                                  }))
-                                }
-                                className="h-8"
-                              />
-                              <div className="flex items-center justify-between space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleClearFilter(header.column.id)}
-                                  className="flex-1"
-                                >
-                                  Clear
-                                </Button>
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  onClick={() => handleApplyFilter(header.column.id)}
-                                  className="flex-1"
-                                >
-                                  Apply
-                                </Button>
-                              </div>
-                            </div>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </div>
-                  )}
+                  {header.isPlaceholder ? null : <DataGridColumnHeader header={header} />}
                 </TableHead>
               ))}
               {rowActions && <TableHead>Actions</TableHead>}
