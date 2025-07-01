@@ -26,6 +26,20 @@ export function useBaseRepository<T extends BaseModel>(
     });
   };
 
+  const useFindById = (
+    id: string,
+    options: Omit<QueryOptions, 'pagination'> = {}
+  ) => {
+    const { enabled, ...rest } = options;
+    const serializedOptions = JSON.stringify(rest);
+    return useReactQuery({
+      queryKey: [queryKey, id, serializedOptions],
+      queryFn: () => repository.findById(id, options),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      enabled: (enabled ?? true) && !!id,
+    });
+  };
+
   const useCreate = () => {
     return useMutation({
       mutationFn: ({ data, relations, fieldsToRemove }: 
@@ -82,6 +96,7 @@ export function useBaseRepository<T extends BaseModel>(
 
   return {
     useQuery,
+    useFindById,
     useCreate,
     useUpdate,
     useDelete,
