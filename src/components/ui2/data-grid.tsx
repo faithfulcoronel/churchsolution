@@ -49,6 +49,7 @@ import {
   X,
   Check,
 } from 'lucide-react';
+import { Pagination } from './pagination';
 
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -63,6 +64,8 @@ export interface DataTableProps<TData, TValue> {
     pageSize?: number;
     pageSizeOptions?: number[];
   };
+  onPageChange?: (pageIndex: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
   className?: string;
   exportOptions?: {
     enabled?: boolean;
@@ -81,6 +84,8 @@ export function DataGrid<TData, TValue>({
   toolbar,
   rowActions,
   onRowClick,
+  onPageChange,
+  onPageSizeChange,
   pagination = {
     pageSize: 10,
     pageSizeOptions: [5, 10, 20, 50, 100],
@@ -99,6 +104,9 @@ export function DataGrid<TData, TValue>({
   const [rowSelection, setRowSelection] = React.useState({});
   const [openFilterMenus, setOpenFilterMenus] = React.useState<Record<string, boolean>>({});
   const [tempFilters, setTempFilters] = React.useState<Record<string, string>>({});
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(pagination.pageSize ?? 10);
+  const pageSizeOptions = pagination.pageSizeOptions ?? [5, 10, 20, 50, 100];
 
   const table = useReactTable({
     data,
@@ -138,6 +146,19 @@ export function DataGrid<TData, TValue>({
       setTempFilters((prev) => ({ ...prev, [columnId]: '' }));
     }
     setOpenFilterMenus((prev) => ({ ...prev, [columnId]: false }));
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPageIndex(newPage);
+    table.setPageIndex(newPage);
+    onPageChange?.(newPage);
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    table.setPageSize(newSize);
+    handlePageChange(0);
+    onPageSizeChange?.(newSize);
   };
 
   const handleExportPDF = () => {
@@ -512,6 +533,17 @@ export function DataGrid<TData, TValue>({
           )}
         </Table>
       </div>
+      <Pagination
+        currentPage={pageIndex + 1}
+        totalPages={Math.max(1, Math.ceil(data.length / pageSize))}
+        onPageChange={(p) => handlePageChange(p - 1)}
+        itemsPerPage={pageSize}
+        totalItems={data.length}
+        onItemsPerPageChange={handlePageSizeChange}
+        showItemsPerPage
+        className="border-t"
+        size="sm"
+      />
     </Container>
   );
 }
