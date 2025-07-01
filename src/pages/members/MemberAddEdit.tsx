@@ -6,6 +6,8 @@ import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
 import BackButton, { performGoBack } from '../../components/BackButton';
 import { ImageInput } from '../../components/ui2/image-input';
+import { uploadProfilePicture } from '../../utils/storage';
+import { tenantUtils } from '../../utils/tenantUtils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
 import { Separator } from '../../components/ui2/separator';
 import {
@@ -45,6 +47,7 @@ function MemberAddEdit() {
     volunteer_roles: [],
     prayer_requests: [],
   });
+  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
 
   // Use member repository
   const { useQuery, useCreate, useUpdate } = useMemberRepository();
@@ -97,20 +100,34 @@ function MemberAddEdit() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
+      let memberId = id;
+      let savedMember: Member | null = null;
+
       if (id) {
-        await updateMemberMutation.mutateAsync({
+        savedMember = await updateMemberMutation.mutateAsync({
           id,
           data: formData,
           fieldsToRemove: ['membership_type', 'membership_status']
         });
       } else {
-        await createMemberMutation.mutateAsync({
+        savedMember = await createMemberMutation.mutateAsync({
           data: formData,
           fieldsToRemove: ['membership_type', 'membership_status']
         });
+        memberId = savedMember.id;
       }
+
+      if (profilePictureFile && memberId) {
+        const tenantId = await tenantUtils.getTenantId();
+        if (tenantId) {
+          const url = await uploadProfilePicture(profilePictureFile, tenantId, memberId);
+          await updateMemberMutation.mutateAsync({ id: memberId, data: { profile_picture_url: url } });
+          setFormData(prev => ({ ...prev, profile_picture_url: url }));
+        }
+      }
+
       navigate('/members/list');
     } catch (error) {
       console.error('Error saving member:', error);
@@ -127,6 +144,13 @@ function MemberAddEdit() {
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleProfilePictureChange = (file: File | null) => {
+    setProfilePictureFile(file);
+    if (!file) {
+      setFormData(prev => ({ ...prev, profile_picture_url: null }));
+    }
   };
 
   const mode = id ? 'edit' : 'add';
@@ -211,8 +235,9 @@ function MemberAddEdit() {
                 {/* Profile Picture */}
                 <div className="flex-shrink-0">
                   <ImageInput
-                    value={result?.data?.[0]?.profile_picture_url}
-                    onChange={() => {}}
+                    value={formData.profile_picture_url || undefined}
+                    onChange={handleProfilePictureChange}
+                    onRemove={() => handleProfilePictureChange(null)}
                     size="xl"
                     shape="circle"
                     className="ring-4 ring-background mx-auto sm:mx-0"
