@@ -90,7 +90,7 @@ function MemberProfile() {
           <AlertTriangle className="h-12 w-12 text-warning mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">Member Not Found</h3>
           <p className="text-muted-foreground mb-6">The member you're looking for doesn't exist or has been removed.</p>
-          <BackButton fallbackPath="/members" label="Go Back to Members" />
+          <BackButton fallbackPath="/members/list" label="Go Back to Members" />
         </CardContent>
       </Card>
     );
@@ -99,7 +99,7 @@ function MemberProfile() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <BackButton fallbackPath="/members" label="Back to Members" />
+        <BackButton fallbackPath="/members/list" label="Back to Members" />
         
         <div className="flex space-x-3">
           <Button
