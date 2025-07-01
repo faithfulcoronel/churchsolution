@@ -22,7 +22,7 @@ export function DataGridColumnHeader<TData, TValue>({ header }: DataGridColumnHe
       >
         {flexRender(column.columnDef.header, header.getContext())}
         {column.getCanSort() && (
-          <span>
+          <span className="ml-2">
             {{
               asc: <ArrowUp className="h-4 w-4 dark:text-gray-300" />,
               desc: <ArrowDown className="h-4 w-4 dark:text-gray-300" />,
