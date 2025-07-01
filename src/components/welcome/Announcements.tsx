@@ -1,36 +1,27 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { container } from '@/lib/container';
+import { TYPES } from '@/lib/types';
+import type { AnnouncementService } from '@/services/AnnouncementService';
+import type { Announcement } from '@/models/announcement.model';
 import { Card, CardContent } from '../ui2/card';
 
 interface AnnouncementsProps {
   messages?: string[];
 }
 
-interface Announcement {
-  id: number;
-  message: string;
-}
 
 export function Announcements({ messages }: AnnouncementsProps) {
+  const service = container.get<AnnouncementService>(TYPES.AnnouncementService);
+
   const { data } = useQuery<Announcement[]>({
     queryKey: ['announcements'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('announcements')
-        .select('id, message')
-        .eq('active', true);
-      if (error) {
-        console.error('Error fetching announcements:', error);
-        return [];
-      }
-      return data as Announcement[];
-    },
+    queryFn: () => service.getActiveAnnouncements(),
     enabled: !messages,
   });
 
   const toRender = messages
-    ? messages.map((m, i) => ({ id: i, message: m }))
+    ? messages.map((m, i) => ({ id: String(i), message: m }))
     : data || [];
 
   if (toRender.length === 0) return null;
