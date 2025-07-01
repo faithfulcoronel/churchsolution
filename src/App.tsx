@@ -11,6 +11,7 @@ import { handleError } from './utils/errorHandler';
 const Login = React.lazy(() => import('./pages/auth/Login'));
 const Register = React.lazy(() => import('./pages/auth/Register'));
 const MemberRegister = React.lazy(() => import('./pages/auth/MemberRegister'));
+const MemberOnboarding = React.lazy(() => import('./pages/onboarding/MemberOnboarding'));
 const ChurchOnboarding = React.lazy(() => import('./pages/onboarding/ChurchOnboarding'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Settings = React.lazy(() => import('./pages/Settings'));
@@ -126,6 +127,10 @@ function App() {
                 <Route
                   path="/register-member"
                   element={!user ? <MemberRegister /> : <Navigate to="/welcome" replace />}
+                />
+                <Route
+                  path="/member-onboarding"
+                  element={<MemberOnboarding />}
                 />
               <Route
                 path="/onboarding"
