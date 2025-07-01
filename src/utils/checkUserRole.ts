@@ -4,7 +4,7 @@ export async function checkUserRoles() {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
-    console.log('No user logged in');
+    console.debug('No user logged in');
     return;
   }
 
@@ -25,7 +25,7 @@ export async function checkUserRoles() {
     return;
   }
 
-  console.log('User Roles:', userRoles?.map(ur => ur.role));
+  console.debug('User Roles:', userRoles?.map(ur => ur.role));
 
   // Get role permissions
   if (userRoles?.length) {
@@ -48,6 +48,6 @@ export async function checkUserRoles() {
       return;
     }
 
-    console.log('User Permissions:', permissions?.map(rp => rp.permission));
+    console.debug('User Permissions:', permissions?.map(rp => rp.permission));
   }
 }

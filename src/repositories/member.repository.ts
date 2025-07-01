@@ -91,21 +91,21 @@ export class MemberRepository
 
   private async sendWelcomeNotification(member: Member): Promise<void> {
     // Implement welcome notification logic
-    console.log(`Welcome notification sent to ${member.first_name} ${member.last_name}`);
+    console.debug(`Welcome notification sent to ${member.first_name} ${member.last_name}`);
   }
 
   private async updateRelatedRecords(member: Member): Promise<void> {
     // Implement related records update logic
-    console.log(`Updated related records for member ${member.id}`);
+    console.debug(`Updated related records for member ${member.id}`);
   }
 
   private async validateDeletion(id: string): Promise<void> {
     // Additional deletion validation if needed
-    console.log(`Validated deletion for member ${id}`);
+    console.debug(`Validated deletion for member ${id}`);
   }
 
   private async cleanupRelatedRecords(id: string): Promise<void> {
     // Implement cleanup logic for related records
-    console.log(`Cleaned up related records for member ${id}`);
+    console.debug(`Cleaned up related records for member ${id}`);
   }
 }

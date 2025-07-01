@@ -100,7 +100,7 @@ export default function NotificationDropdown() {
       setOpen(false);
     } else if (notification.action_type === 'modal' && notification.action_payload) {
       // Handle modal action (would need to implement modal system)
-      console.log('Open modal:', notification.action_payload);
+      console.debug('Open modal:', notification.action_payload);
     }
   };
 
