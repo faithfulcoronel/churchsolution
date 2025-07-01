@@ -213,7 +213,7 @@ function FamilyRelationships() {
       <div className="space-y-6">
         {/* Back Button */}
         <div className="flex items-center justify-between">
-          <BackButton fallbackPath="/members" label="Back to Members" />
+          <BackButton fallbackPath="/members/list" label="Back to Members" />
 
           <Button
             variant="default"

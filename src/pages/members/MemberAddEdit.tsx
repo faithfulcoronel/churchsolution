@@ -217,7 +217,7 @@ function MemberAddEdit() {
   return (
     <div className="space-y-6">
         {/* Back Button */}
-        <BackButton fallbackPath="/members" label="Back to Members" />
+        <BackButton fallbackPath="/members/list" label="Back to Members" />
 
         <form onSubmit={handleSubmit}>
           <Card>
