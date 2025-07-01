@@ -72,13 +72,17 @@ const UserAddEdit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    const payload = { ...formData };
+    if (id && payload.password === '') {
+      delete (payload as any).password;
+    }
 
     try {
       if (id) {
-        await updateUserMutation.mutateAsync({ id, data: formData });
+        await updateUserMutation.mutateAsync({ id, data: payload });
       } else {
-        await createUserMutation.mutateAsync({ data: formData });
+        await createUserMutation.mutateAsync({ data: payload });
       }
       navigate('/administration/users');
     } catch (error) {
