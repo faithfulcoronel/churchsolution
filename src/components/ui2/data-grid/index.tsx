@@ -29,7 +29,7 @@ function DataGridContent() {
     <div
       className={cn(
         'space-y-4 w-full',
-        fluid ? '' : 'max-w-screen-xl mx-auto',
+        fluid ? '' : 'mx-auto',
         containerClassName,
         className
       )}

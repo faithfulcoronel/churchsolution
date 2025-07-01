@@ -253,7 +253,6 @@ function MemberList() {
               </div>
             )}
             pagination={{ pageSize }}
-            quickFilterPlaceholder="Search members..."
           />
         </div>
       </Card>
