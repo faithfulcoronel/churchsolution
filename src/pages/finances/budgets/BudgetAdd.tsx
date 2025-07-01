@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { categoryUtils } from '../../../utils/categoryUtils';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
@@ -44,18 +45,7 @@ function BudgetAdd() {
   // Get budget categories
   const { data: categories } = useQuery({
     queryKey: ['categories', 'budget', currentTenant?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .eq('type', 'budget')
-        .is('deleted_at', null)
-        .order('sort_order');
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => categoryUtils.getCategories('budget'),
     enabled: !!currentTenant?.id,
   });
 

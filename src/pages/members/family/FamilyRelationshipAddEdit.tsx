@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { categoryUtils } from '../../../utils/categoryUtils';
 import { useMessageStore } from '../../../components/MessageHandler';
 import { Container } from '../../../components/ui2/container';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
@@ -98,18 +99,7 @@ function FamilyRelationshipAddEdit() {
   // Get relationship categories
   const { data: categories } = useQuery({
     queryKey: ['categories', 'relationship_type', currentTenant?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('tenant_id', currentTenant?.id)
-        .eq('type', 'relationship_type')
-        .is('deleted_at', null)
-        .order('sort_order');
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => categoryUtils.getCategories('relationship_type'),
     enabled: !!currentTenant?.id,
   });
 

@@ -4,7 +4,6 @@ import { tenantUtils } from './tenantUtils';
 export type Category = {
   id: string;
   tenant_id: string;
-  type: string;
   code: string;
   name: string;
   description: string | null;
@@ -30,11 +29,19 @@ export interface CategoryDataProvider {
 
 class SupabaseCategoryDataProvider implements CategoryDataProvider {
   async fetchCategories(tenantId: string, type: CategoryType): Promise<Category[]> {
+    const table = {
+      membership: 'membership_categories',
+      member_status: 'status_categories',
+      income_transaction: 'income_categories',
+      expense_transaction: 'expense_categories',
+      budget: 'budget_categories',
+      relationship_type: 'relationship_categories'
+    }[type];
+
     const { data, error } = await supabase
-      .from('categories')
+      .from(table)
       .select('*')
       .eq('tenant_id', tenantId)
-      .eq('type', type)
       .is('deleted_at', null)
       .order('sort_order', { ascending: true });
     if (error) throw error;

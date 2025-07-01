@@ -60,9 +60,11 @@ function CategoryProfile() {
             <h2 className="text-2xl font-bold flex items-center">
               <Tag className="h-6 w-6 mr-2 text-primary" />
               {category.name}
-              <Badge variant="secondary" className="ml-3 capitalize">
-                {category.type.replace('_', ' ')}
-              </Badge>
+              {category.type && (
+                <Badge variant="secondary" className="ml-3 capitalize">
+                  {category.type.replace('_', ' ')}
+                </Badge>
+              )}
             </h2>
             <div className="flex space-x-3">
               <Button variant="outline" onClick={() => navigate('edit')} className="flex items-center" disabled={category.is_system}>
