@@ -21,6 +21,7 @@ const Administration = React.lazy(() => import('./pages/admin/Administration'));
 const Layout = React.lazy(() => import('./components/Layout'));
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Welcome = React.lazy(() => import('./pages/Welcome'));
+const ActivityList = React.lazy(() => import('./pages/activity/ActivityList'));
 
 
 // Error boundary component
@@ -133,6 +134,7 @@ function App() {
               {user ? (
                 <Route element={<Layout />}>
                   <Route path="/welcome" element={<Welcome />} />
+                  <Route path="/activity" element={<ActivityList />} />
                   <Route path="/dashboard/*" element={<Dashboard />} />
                   <Route path="/members/*" element={<Members />} />
                   <Route path="/finances/*" element={<Finances />} />

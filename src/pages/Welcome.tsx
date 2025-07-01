@@ -1,12 +1,30 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase'; 
-import { tenantUtils } from '../utils/tenantUtils'; 
+import { supabase } from '../lib/supabase';
+import { tenantUtils } from '../utils/tenantUtils';
 import { usePermissions } from '../hooks/usePermissions';
+import { container } from '../lib/container';
+import { TYPES } from '../lib/types';
+import type { ActivityLogService } from '../services/ActivityLogService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../components/ui2/card';
 import { Button } from '../components/ui2/button';
-import { Building2, DollarSign, BarChart3, Users, Plus, Calendar, FileText, Heart, ChevronRight, Bell, Zap } from 'lucide-react';
+import {
+  Building2,
+  DollarSign,
+  BarChart3,
+  Users,
+  Plus,
+  Calendar,
+  FileText,
+  Heart,
+  ChevronRight,
+  Bell,
+  Zap,
+  History,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { QuickAccessCard, Announcements } from '../components/welcome';
 import WelcomeGreeting from '../components/WelcomeGreeting';
 import { Badge } from '../components/ui2/badge';
@@ -42,16 +60,10 @@ function Welcome() {
   });
 
   // Get recent activity data
+  const activityService = container.get<ActivityLogService>(TYPES.ActivityLogService);
   const { data: recentActivity } = useQuery({
     queryKey: ['recent-activity'],
-    queryFn: async () => {
-      // This would normally fetch from an API
-      return [
-        { id: 1, type: 'donation', date: new Date(), description: 'New donation received', amount: 250 },
-        { id: 2, type: 'member', date: new Date(Date.now() - 86400000), description: 'New member joined', name: 'Sarah Johnson' },
-        { id: 3, type: 'event', date: new Date(Date.now() - 172800000), description: 'Upcoming service', title: 'Sunday Worship' }
-      ];
-    },
+    queryFn: () => activityService.getRecentActivity(5),
   });
 
   // Featured quick links
@@ -152,35 +164,29 @@ function Welcome() {
                   <div className="space-y-4">
                     {recentActivity.map((activity) => (
                       <div key={activity.id} className="flex items-start space-x-4 pb-4 border-b last:border-0 last:pb-0">
-                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                          activity.type === 'donation' ? 'bg-green-100 text-green-600' : 
-                          activity.type === 'member' ? 'bg-blue-100 text-blue-600' : 
-                          'bg-amber-100 text-amber-600'
-                        }`}>
-                          {activity.type === 'donation' ? <DollarSign className="h-5 w-5" /> : 
-                           activity.type === 'member' ? <Users className="h-5 w-5" /> : 
-                           <Calendar className="h-5 w-5" />}
+                        <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                          {activity.action === 'create' ? (
+                            <Plus className="h-5 w-5" />
+                          ) : activity.action === 'update' ? (
+                            <Pencil className="h-5 w-5" />
+                          ) : activity.action === 'delete' ? (
+                            <Trash2 className="h-5 w-5" />
+                          ) : (
+                            <History className="h-5 w-5" />
+                          )}
                         </div>
                         <div className="flex-1">
                           <div className="flex justify-between">
-                            <p className="font-medium text-foreground">{activity.description}</p>
+                            <p className="font-medium text-foreground">
+                              {activity.action} {activity.entity_type}
+                            </p>
                             <span className="text-sm text-muted-foreground">
-                              {activity.date.toLocaleDateString()}
+                              {activity.created_at ? new Date(activity.created_at).toLocaleDateString() : ''}
                             </span>
                           </div>
-                          {activity.type === 'donation' && (
-                            <p className="text-sm text-success font-medium mt-1">
-                              +${activity.amount.toFixed(2)}
-                            </p>
-                          )}
-                          {activity.type === 'member' && (
+                          {activity.auth_users?.email && (
                             <p className="text-sm text-muted-foreground mt-1">
-                              {activity.name}
-                            </p>
-                          )}
-                          {activity.type === 'event' && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {activity.title}
+                              {activity.auth_users.email}
                             </p>
                           )}
                         </div>
@@ -194,7 +200,7 @@ function Welcome() {
                 )}
               </CardContent>
               <CardFooter className="bg-muted/30 px-6 py-3">
-                <Link to="/dashboard" className="text-sm text-primary font-medium flex items-center hover:underline">
+                <Link to="/activity" className="text-sm text-primary font-medium flex items-center hover:underline">
                   View all activity <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
               </CardFooter>
