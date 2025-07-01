@@ -5,6 +5,8 @@ import type { IMemberAdapter } from '../adapters/member.adapter';
 import type { IAccountRepository } from './account.repository';
 import { NotificationService } from '../services/NotificationService';
 import { MemberValidator } from '../validators/member.validator';
+import { deleteProfilePicture } from '../utils/storage';
+import { tenantUtils } from '../utils/tenantUtils';
 
 export interface IMemberRepository extends BaseRepository<Member> {}
 
@@ -62,6 +64,16 @@ export class MemberRepository
   protected override async afterDelete(id: string): Promise<void> {
     // Additional repository-level cleanup after delete
     await this.cleanupRelatedRecords(id);
+
+    // Remove profile picture from storage
+    try {
+      const tenantId = await tenantUtils.getTenantId();
+      if (tenantId) {
+        await deleteProfilePicture(tenantId, id);
+      }
+    } catch (error) {
+      console.error('Failed to delete profile picture:', error);
+    }
   }
 
   // Private helper methods
