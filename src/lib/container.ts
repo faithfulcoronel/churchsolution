@@ -51,6 +51,8 @@ import {
   SourceRecentTransactionAdapter,
   type ISourceRecentTransactionAdapter
 } from '../adapters/sourceRecentTransaction.adapter';
+import { MessageThreadAdapter, type IMessageThreadAdapter } from '../adapters/messageThread.adapter';
+import { MessageAdapter, type IMessageAdapter } from '../adapters/message.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -102,6 +104,8 @@ import {
   SourceRecentTransactionRepository,
   type ISourceRecentTransactionRepository
 } from '../repositories/sourceRecentTransaction.repository';
+import { MessageThreadRepository, type IMessageThreadRepository } from '../repositories/messageThread.repository';
+import { MessageRepository, type IMessageRepository } from '../repositories/message.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
 import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
@@ -197,6 +201,14 @@ container
 container
   .bind<ISourceRecentTransactionAdapter>(TYPES.ISourceRecentTransactionAdapter)
   .to(SourceRecentTransactionAdapter)
+  .inSingletonScope();
+container
+  .bind<IMessageThreadAdapter>(TYPES.IMessageThreadAdapter)
+  .to(MessageThreadAdapter)
+  .inSingletonScope();
+container
+  .bind<IMessageAdapter>(TYPES.IMessageAdapter)
+  .to(MessageAdapter)
   .inSingletonScope();
 
 // Register services
@@ -311,6 +323,14 @@ container
     TYPES.ISourceRecentTransactionRepository
   )
   .to(SourceRecentTransactionRepository)
+  .inSingletonScope();
+container
+  .bind<IMessageThreadRepository>(TYPES.IMessageThreadRepository)
+  .to(MessageThreadRepository)
+  .inSingletonScope();
+container
+  .bind<IMessageRepository>(TYPES.IMessageRepository)
+  .to(MessageRepository)
   .inSingletonScope();
 
 export { container };

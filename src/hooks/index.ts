@@ -23,3 +23,5 @@ export * from './useFinanceDashboardData';
 export * from './useIncomeExpenseService';
 export * from "./useAnnouncementRepository";
 export * from './useActivityLogRepository';
+export * from './useMessageThreadRepository';
+export * from './useMessageRepository';
