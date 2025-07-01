@@ -10,6 +10,7 @@ export type QueryOptions = {
   order?: {
     column: string;
     ascending?: boolean;
+    foreignTable?: string;
   };
   pagination?: {
     page: number;
@@ -178,7 +179,8 @@ export class QueryUtils {
     // Add ordering
     if (options.order) {
       query = query.order(options.order.column, {
-        ascending: options.order.ascending ?? true
+        ascending: options.order.ascending ?? true,
+        foreignTable: options.order.foreignTable || table
       });
     }
 
