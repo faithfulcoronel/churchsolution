@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
+import { useQuery as useReactQuery } from '@tanstack/react-query';
 import { useMemberRepository } from '../../hooks/useMemberRepository';
 import { Member } from '../../models/member.model';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
@@ -8,6 +9,16 @@ import { DataGrid } from '../../components/ui2/data-grid';
 import { Button } from '../../components/ui2/button';
 import { Badge } from '../../components/ui2/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
+import { Input } from '../../components/ui2/input';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '../../components/ui2/select';
+import { Search } from 'lucide-react';
+import { categoryUtils } from '../../utils/categoryUtils';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -37,10 +48,25 @@ function MemberList() {
   const [pageSize, setPageSize] = useState(10);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const handleFilterChange = useCallback(
+    (f: ColumnFiltersState, g: string) => {
+      setColumnFilters(f);
+      setSearchTerm(g);
+    },
+    [setColumnFilters, setSearchTerm]
+  );
 
   // Use the member repository hook
-  const { useQuery, useDelete } = useMemberRepository();
+  const { useQuery: useMembersQuery, useDelete } = useMemberRepository();
+
+  // Fetch membership status categories for filter
+  const { data: statusCategories } = useReactQuery({
+    queryKey: ['categories', 'member_status'],
+    queryFn: () => categoryUtils.getCategories('member_status'),
+  });
 
   // Get members with repository
   const filters = columnFilters.reduce((acc, filter) => {
@@ -50,16 +76,20 @@ function MemberList() {
     };
   }, {} as Record<string, any>);
 
-  if (globalFilter) {
+  if (searchTerm) {
     filters.or = [
-      { field: 'first_name', operator: 'contains', value: globalFilter },
-      { field: 'last_name', operator: 'contains', value: globalFilter },
-      { field: 'preferred_name', operator: 'contains', value: globalFilter },
-      { field: 'email', operator: 'contains', value: globalFilter },
+      { field: 'first_name', operator: 'contains', value: searchTerm },
+      { field: 'last_name', operator: 'contains', value: searchTerm },
+      { field: 'preferred_name', operator: 'contains', value: searchTerm },
+      { field: 'email', operator: 'contains', value: searchTerm },
     ];
   }
 
-  const { data: result, isLoading, error } = useQuery({
+  if (statusFilter !== 'all') {
+    filters.membership_status_id = { operator: 'eq', value: statusFilter };
+  }
+
+  const { data: result, isLoading, error } = useMembersQuery({
     pagination: {
       page: page + 1, // Data grid uses 0-based pages
       pageSize,
@@ -212,6 +242,34 @@ function MemberList() {
       </div>
 
 
+      <div className="mt-6 sm:flex sm:items-center sm:justify-between">
+        <div className="relative max-w-xs">
+          <Input
+            placeholder="Search members..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon={<Search />}
+          />
+        </div>
+
+        <div className="relative mt-4 sm:mt-0">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              {statusCategories?.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+
       <Card className="mt-6">
         <div style={{ height: 600, width: '100%' }}>
           <DataGrid<Member>
@@ -223,10 +281,7 @@ function MemberList() {
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
             onSortingChange={setSorting}
-            onFilterChange={(f, g) => {
-              setColumnFilters(f);
-              setGlobalFilter(g);
-            }}
+            onFilterChange={handleFilterChange}
             onRowClick={(row) => navigate(`/members/${row.id}`)}
             rowActions={(row) => (
               <div className="flex items-center space-x-2">
