@@ -25,7 +25,7 @@ export async function uploadProfilePicture(file: File, tenantId: string, memberI
 
   // Generate a unique filename with proper path structure
   const fileExt = file.name.split('.').pop();
-  const fileName = `${tenantId}/${memberId}/${Math.random()}.${fileExt}`;
+  const fileName = `${tenantId}/${memberId}/${crypto.randomUUID()}.${fileExt}`;
 
   try {
     // Delete any existing profile pictures for this user
