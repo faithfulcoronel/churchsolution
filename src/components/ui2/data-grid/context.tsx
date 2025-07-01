@@ -20,6 +20,7 @@ import * as XLSX from 'xlsx';
 export interface DataGridProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  recordCount?: number;
   loading?: boolean;
   title?: string;
   description?: string;
@@ -48,6 +49,7 @@ export interface DataGridContextValue<TData, TValue> {
   table: ReturnType<typeof useReactTable<TData>>;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  recordCount: number;
   loading: boolean;
   rowActions?: (row: TData) => React.ReactNode;
   onRowClick?: (row: TData) => void;
@@ -80,6 +82,7 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
   const {
     columns,
     data,
+    recordCount = data.length,
     loading = false,
     title,
     description,
@@ -277,6 +280,7 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     table,
     columns,
     data,
+    recordCount,
     loading,
     rowActions,
     onRowClick,
