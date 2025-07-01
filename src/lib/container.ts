@@ -124,6 +124,7 @@ import { MessageThreadRepository, type IMessageThreadRepository } from '../repos
 import { MessageRepository, type IMessageRepository } from '../repositories/message.repository';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
+import { DonationImportService } from '../services/DonationImportService';
 import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
 import { SupabaseAnnouncementService, type AnnouncementService } from '../services/AnnouncementService';
 import { SupabaseActivityLogService, type ActivityLogService } from '../services/ActivityLogService';
@@ -243,6 +244,10 @@ container
 container
   .bind<IncomeExpenseTransactionService>(TYPES.IncomeExpenseTransactionService)
   .to(IncomeExpenseTransactionService)
+  .inSingletonScope();
+container
+  .bind<DonationImportService>(TYPES.DonationImportService)
+  .to(DonationImportService)
   .inSingletonScope();
 container
   .bind<ErrorLogService>(TYPES.ErrorLogService)
