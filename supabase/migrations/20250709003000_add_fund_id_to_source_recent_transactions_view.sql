@@ -34,10 +34,6 @@ CREATE INDEX IF NOT EXISTS source_recent_transactions_view_account_date_idx
 CREATE INDEX IF NOT EXISTS source_recent_transactions_view_fund_date_idx
   ON source_recent_transactions_view(fund_id, date);
 
--- Unique index required for REFRESH MATERIALIZED VIEW CONCURRENTLY
-CREATE UNIQUE INDEX IF NOT EXISTS source_recent_transactions_view_header_id_uidx
-  ON source_recent_transactions_view(header_id);
-
 -- Refresh function and trigger
 CREATE OR REPLACE FUNCTION refresh_source_recent_transactions_view()
 RETURNS TRIGGER AS $$
