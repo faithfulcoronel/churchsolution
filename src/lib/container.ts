@@ -45,6 +45,7 @@ import { RoleAdapter, type IRoleAdapter } from '../adapters/role.adapter';
 import { PermissionAdapter, type IPermissionAdapter } from '../adapters/permission.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
+import { ActivityLogAdapter, type IActivityLogAdapter } from '../adapters/activityLog.adapter';
 import { FinanceDashboardAdapter, type IFinanceDashboardAdapter } from '../adapters/financeDashboard.adapter';
 import {
   SourceRecentTransactionAdapter,
@@ -95,6 +96,7 @@ import { RoleRepository, type IRoleRepository } from '../repositories/role.repos
 import { PermissionRepository, type IPermissionRepository } from '../repositories/permission.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
+import { ActivityLogRepository, type IActivityLogRepository } from '../repositories/activityLog.repository';
 import { FinanceDashboardRepository, type IFinanceDashboardRepository } from '../repositories/financeDashboard.repository';
 import {
   SourceRecentTransactionRepository,
@@ -104,6 +106,7 @@ import { SupabaseAuditService, type AuditService } from '../services/AuditServic
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
 import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
 import { SupabaseAnnouncementService, type AnnouncementService } from '../services/AnnouncementService';
+import { SupabaseActivityLogService, type ActivityLogService } from '../services/ActivityLogService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -184,6 +187,10 @@ container
   .to(ErrorLogAdapter)
   .inSingletonScope();
 container
+  .bind<IActivityLogAdapter>(TYPES.IActivityLogAdapter)
+  .to(ActivityLogAdapter)
+  .inSingletonScope();
+container
   .bind<IFinanceDashboardAdapter>(TYPES.IFinanceDashboardAdapter)
   .to(FinanceDashboardAdapter)
   .inSingletonScope();
@@ -204,6 +211,10 @@ container
 container
   .bind<ErrorLogService>(TYPES.ErrorLogService)
   .to(SupabaseErrorLogService)
+  .inSingletonScope();
+container
+  .bind<ActivityLogService>(TYPES.ActivityLogService)
+  .to(SupabaseActivityLogService)
   .inSingletonScope();
 container
   .bind<AnnouncementService>(TYPES.AnnouncementService)
@@ -286,6 +297,10 @@ container
 container
   .bind<IErrorLogRepository>(TYPES.IErrorLogRepository)
   .to(ErrorLogRepository)
+  .inSingletonScope();
+container
+  .bind<IActivityLogRepository>(TYPES.IActivityLogRepository)
+  .to(ActivityLogRepository)
   .inSingletonScope();
 container
   .bind<IFinanceDashboardRepository>(TYPES.IFinanceDashboardRepository)

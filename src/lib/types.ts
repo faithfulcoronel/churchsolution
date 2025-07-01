@@ -14,6 +14,7 @@ export const TYPES = {
   IOfferingBatchAdapter: 'IOfferingBatchAdapter',
   IAuthUserAdapter: 'IAuthUserAdapter',
   IErrorLogAdapter: 'IErrorLogAdapter',
+  IActivityLogAdapter: 'IActivityLogAdapter',
   IRoleAdapter: 'IRoleAdapter',
   IPermissionAdapter: 'IPermissionAdapter',
   IMemberRepository: 'IMemberRepository',
@@ -35,12 +36,14 @@ export const TYPES = {
   IPermissionRepository: 'IPermissionRepository',
   IUserRepository: 'IUserRepository',
   IErrorLogRepository: 'IErrorLogRepository',
+  IActivityLogRepository: 'IActivityLogRepository',
   IFinanceDashboardAdapter: 'IFinanceDashboardAdapter',
   IFinanceDashboardRepository: 'IFinanceDashboardRepository',
   ISourceRecentTransactionAdapter: 'ISourceRecentTransactionAdapter',
   ISourceRecentTransactionRepository: 'ISourceRecentTransactionRepository',
   AuditService: 'AuditService',
   ErrorLogService: 'ErrorLogService',
+  ActivityLogService: 'ActivityLogService',
   IncomeExpenseTransactionService: 'IncomeExpenseTransactionService',
   AnnouncementService: 'AnnouncementService'
 };

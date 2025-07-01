@@ -21,3 +21,4 @@ export * from './usePermissionRepository';
 export * from './useIncomeExpenseTransactionRepository';
 export * from './useFinanceDashboardData';
 export * from './useIncomeExpenseService';
+export * from './useActivityLogRepository';
