@@ -1,7 +1,7 @@
 import { BaseModel } from './base.model';
 import type { Message } from './message.model';
 
-export type MessageThreadStatus = 'pending' | 'resolved';
+export type MessageThreadStatus = 'pending' | 'resolved' | 'in_progress';
 
 export interface MessageThread extends BaseModel {
   id: string;
