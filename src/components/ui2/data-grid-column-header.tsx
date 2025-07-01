@@ -38,7 +38,7 @@ export function DataGridColumnHeader<TData, TValue>({ header }: DataGridColumnHe
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
           className={cn(
-            'absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none',
+            'absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none bg-border dark:bg-gray-700 hover:bg-primary/10 transition-colors',
             header.column.getIsResizing() && 'bg-primary/20'
           )}
         />
