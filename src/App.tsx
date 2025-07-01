@@ -23,6 +23,7 @@ const Layout = React.lazy(() => import('./components/Layout'));
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Welcome = React.lazy(() => import('./pages/Welcome'));
 const ActivityList = React.lazy(() => import('./pages/activity/ActivityList'));
+const Support = React.lazy(() => import('./pages/support/Support'));
 
 
 // Error boundary component
@@ -141,6 +142,7 @@ function App() {
                   <Route path="/finances/*" element={<Finances />} />
                   <Route path="/accounts/*" element={<Accounts />} />
                   <Route path="/announcements" element={<AnnouncementList />} />
+                  <Route path="/support/*" element={<Support />} />
                   <Route path="/administration/*" element={<Administration />} />
                   <Route path="/settings/*" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/welcome" replace />} />
