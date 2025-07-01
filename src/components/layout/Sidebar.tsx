@@ -280,7 +280,7 @@ function Sidebar({
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
-          w-64 ${collapsed ? 'lg:w-20' : 'lg:w-64'}
+          w-72 ${collapsed ? 'lg:w-20' : 'lg:w-72'}
           transition-all
         `}
         onMouseEnter={() => {

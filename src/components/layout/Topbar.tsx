@@ -27,7 +27,7 @@ function Topbar({ setSidebarOpen, sidebarCollapsed }: TopbarProps) {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 w-full z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:pr-8 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}
+      className={`fixed top-0 inset-x-0 w-full z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:pr-8 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-72'}`}
     >
       {/* Sidebar toggle, only on mobile */}
       <button
