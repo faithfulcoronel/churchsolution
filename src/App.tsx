@@ -20,6 +20,7 @@ const Accounts = React.lazy(() => import('./pages/accounts/Accounts'));
 const Administration = React.lazy(() => import('./pages/admin/Administration'));
 const Layout = React.lazy(() => import('./components/Layout'));
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const Welcome = React.lazy(() => import('./pages/Welcome'));
 
 
 // Error boundary component
@@ -107,22 +108,22 @@ function App() {
             <MessageHandler />
             <Routes>
               {/* Public routes */}
-              <Route
-                path="/"
-                element={!user ? <LandingPage /> : <Navigate to="/dashboard" replace />}
-              />
-              <Route
-                path="/login"
-                element={!user ? <Login /> : <Navigate to="/dashboard" replace />}
-              />
-              <Route
-                path="/register"
-                element={!user ? <Register /> : <Navigate to="/dashboard" replace />}
-              />
-              <Route
-                path="/register-member"
-                element={!user ? <MemberRegister /> : <Navigate to="/dashboard" replace />}
-              />
+                <Route
+                  path="/"
+                  element={!user ? <LandingPage /> : <Navigate to="/welcome" replace />}
+                />
+                <Route
+                  path="/login"
+                  element={!user ? <Login /> : <Navigate to="/welcome" replace />}
+                />
+                <Route
+                  path="/register"
+                  element={!user ? <Register /> : <Navigate to="/welcome" replace />}
+                />
+                <Route
+                  path="/register-member"
+                  element={!user ? <MemberRegister /> : <Navigate to="/welcome" replace />}
+                />
               <Route
                 path="/onboarding"
                 element={user ? <ChurchOnboarding /> : <Navigate to="/register" replace />}
@@ -131,13 +132,14 @@ function App() {
               {/* Protected routes */}
               {user ? (
                 <Route element={<Layout />}>
+                  <Route path="/welcome" element={<Welcome />} />
                   <Route path="/dashboard/*" element={<Dashboard />} />
                   <Route path="/members/*" element={<Members />} />
                   <Route path="/finances/*" element={<Finances />} />
                   <Route path="/accounts/*" element={<Accounts />} />
                   <Route path="/administration/*" element={<Administration />} />
                   <Route path="/settings/*" element={<Settings />} />
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="*" element={<Navigate to="/welcome" replace />} />
                 </Route>
               ) : (
                 <Route path="*" element={<Navigate to="/" replace />} />
