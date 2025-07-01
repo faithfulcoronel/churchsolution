@@ -6,6 +6,12 @@ import MemberAddEdit from './MemberAddEdit';
 import FamilyRelationships from './family/FamilyRelationships';
 import FamilyRelationshipProfile from './family/FamilyRelationshipProfile';
 import FamilyRelationshipAddEdit from './family/FamilyRelationshipAddEdit';
+import MembershipTypeList from './configuration/MembershipTypeList';
+import MembershipTypeAddEdit from './configuration/MembershipTypeAddEdit';
+import MembershipTypeProfile from './configuration/MembershipTypeProfile';
+import MembershipStatusList from './configuration/MembershipStatusList';
+import MembershipStatusAddEdit from './configuration/MembershipStatusAddEdit';
+import MembershipStatusProfile from './configuration/MembershipStatusProfile';
 import CategoryList from '../finances/configuration/CategoryList';
 import CategoryAddEdit from '../finances/configuration/CategoryAddEdit';
 import CategoryProfile from '../finances/configuration/CategoryProfile';
@@ -26,50 +32,14 @@ function Members() {
       <Route path="family/:id/edit" element={<FamilyRelationshipAddEdit />} />
 
       {/* Configuration Routes */}
-      <Route
-        path="configuration/membership-types"
-        element={
-          <CategoryList
-            categoryType="membership"
-            title="Membership Types"
-            description="Manage membership types."
-          />
-        }
-      />
-      <Route
-        path="configuration/membership-types/add"
-        element={<CategoryAddEdit categoryType="membership" basePath="/members/configuration/membership-types" />}
-      />
-      <Route
-        path="configuration/membership-types/:id/edit"
-        element={<CategoryAddEdit categoryType="membership" basePath="/members/configuration/membership-types" />}
-      />
-      <Route
-        path="configuration/membership-types/:id"
-        element={<CategoryProfile basePath="/members/configuration/membership-types" />}
-      />
-      <Route
-        path="configuration/membership-status"
-        element={
-          <CategoryList
-            categoryType="member_status"
-            title="Membership Status"
-            description="Manage membership status options."
-          />
-        }
-      />
-      <Route
-        path="configuration/membership-status/add"
-        element={<CategoryAddEdit categoryType="member_status" basePath="/members/configuration/membership-status" />}
-      />
-      <Route
-        path="configuration/membership-status/:id/edit"
-        element={<CategoryAddEdit categoryType="member_status" basePath="/members/configuration/membership-status" />}
-      />
-      <Route
-        path="configuration/membership-status/:id"
-        element={<CategoryProfile basePath="/members/configuration/membership-status" />}
-      />
+      <Route path="configuration/membership-types" element={<MembershipTypeList />} />
+      <Route path="configuration/membership-types/add" element={<MembershipTypeAddEdit />} />
+      <Route path="configuration/membership-types/:id/edit" element={<MembershipTypeAddEdit />} />
+      <Route path="configuration/membership-types/:id" element={<MembershipTypeProfile />} />
+      <Route path="configuration/membership-status" element={<MembershipStatusList />} />
+      <Route path="configuration/membership-status/add" element={<MembershipStatusAddEdit />} />
+      <Route path="configuration/membership-status/:id/edit" element={<MembershipStatusAddEdit />} />
+      <Route path="configuration/membership-status/:id" element={<MembershipStatusProfile />} />
       <Route
         path="configuration/relationship-types"
         element={

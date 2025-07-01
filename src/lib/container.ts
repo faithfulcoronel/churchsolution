@@ -41,6 +41,14 @@ import {
   type IOfferingBatchAdapter,
 } from '../adapters/offeringBatch.adapter';
 import { CategoryAdapter, type ICategoryAdapter } from '../adapters/category.adapter';
+import {
+  MembershipTypeAdapter,
+  type IMembershipTypeAdapter
+} from '../adapters/membershipType.adapter';
+import {
+  MembershipStatusAdapter,
+  type IMembershipStatusAdapter
+} from '../adapters/membershipStatus.adapter';
 import { RoleAdapter, type IRoleAdapter } from '../adapters/role.adapter';
 import { PermissionAdapter, type IPermissionAdapter } from '../adapters/permission.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
@@ -94,6 +102,14 @@ import {
   type IOfferingBatchRepository,
 } from '../repositories/offeringBatch.repository';
 import { CategoryRepository, type ICategoryRepository } from '../repositories/category.repository';
+import {
+  MembershipTypeRepository,
+  type IMembershipTypeRepository
+} from '../repositories/membershipType.repository';
+import {
+  MembershipStatusRepository,
+  type IMembershipStatusRepository
+} from '../repositories/membershipStatus.repository';
 import { RoleRepository, type IRoleRepository } from '../repositories/role.repository';
 import { PermissionRepository, type IPermissionRepository } from '../repositories/permission.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
@@ -169,6 +185,14 @@ container
 container
   .bind<ICategoryAdapter>(TYPES.ICategoryAdapter)
   .to(CategoryAdapter)
+  .inSingletonScope();
+container
+  .bind<IMembershipTypeAdapter>(TYPES.IMembershipTypeAdapter)
+  .to(MembershipTypeAdapter)
+  .inSingletonScope();
+container
+  .bind<IMembershipStatusAdapter>(TYPES.IMembershipStatusAdapter)
+  .to(MembershipStatusAdapter)
   .inSingletonScope();
 container
   .bind<IRoleAdapter>(TYPES.IRoleAdapter)
@@ -275,6 +299,14 @@ container
 container
   .bind<ICategoryRepository>(TYPES.ICategoryRepository)
   .to(CategoryRepository)
+  .inSingletonScope();
+container
+  .bind<IMembershipTypeRepository>(TYPES.IMembershipTypeRepository)
+  .to(MembershipTypeRepository)
+  .inSingletonScope();
+container
+  .bind<IMembershipStatusRepository>(TYPES.IMembershipStatusRepository)
+  .to(MembershipStatusRepository)
   .inSingletonScope();
 container
   .bind<IRoleRepository>(TYPES.IRoleRepository)

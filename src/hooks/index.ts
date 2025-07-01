@@ -25,3 +25,5 @@ export * from "./useAnnouncementRepository";
 export * from './useActivityLogRepository';
 export * from './useMessageThreadRepository';
 export * from './useMessageRepository';
+export * from './useMembershipTypeRepository';
+export * from './useMembershipStatusRepository';
