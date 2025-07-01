@@ -90,28 +90,28 @@ function MemberRegister() {
     if (!validate()) return;
     try {
       setSubmitting(true);
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: {
-          data: {
-            first_name: form.firstName,
-            last_name: form.lastName,
-          },
-        },
+      const { data, error: rpcError } = await supabase.rpc('register_member', {
+        p_email: form.email,
+        p_password: form.password,
+        p_tenant_id: form.tenantId,
+        p_first_name: form.firstName,
+        p_last_name: form.lastName,
       });
-      if (signUpError || !user) throw signUpError || new Error('Unable to register');
 
-      const { error: linkError } = await supabase.from('tenant_users').insert({
-        tenant_id: form.tenantId,
-        user_id: user.id,
-        admin_role: 'member',
-        created_by: user.id,
+      if (rpcError || !data) throw rpcError || new Error('Unable to register');
+
+      sessionStorage.setItem(
+        'memberOnboardingData',
+        JSON.stringify({ userId: (data as any).id })
+      );
+
+      addMessage({
+        type: 'success',
+        text: 'Registration successful! Setting up your account...',
+        duration: 5000,
       });
-      if (linkError) throw linkError;
 
-      addMessage({ type: 'success', text: 'Registration successful! Please check your email to verify your account.', duration: 5000 });
-      navigate('/login');
+      navigate('/member-onboarding');
     } catch (err) {
       console.error('Registration error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
