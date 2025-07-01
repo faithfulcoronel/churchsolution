@@ -1,26 +1,29 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { tenantUtils } from '../utils/tenantUtils';
+import { supabase } from '../lib/supabase'; 
+import { tenantUtils } from '../utils/tenantUtils'; 
 import { usePermissions } from '../hooks/usePermissions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui2/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../components/ui2/card';
 import { Button } from '../components/ui2/button';
-import { Building2, DollarSign, BarChart3, Users, Plus } from 'lucide-react';
+import { Building2, DollarSign, BarChart3, Users, Plus, Calendar, FileText, Heart, ChevronRight, Bell, Zap } from 'lucide-react';
 import { QuickAccessCard, Announcements } from '../components/welcome';
+import WelcomeGreeting from '../components/WelcomeGreeting';
+import { Badge } from '../components/ui2/badge';
+import { Progress } from '../components/ui2/progress';
 
 function Welcome() {
   const { hasPermission } = usePermissions();
 
   // Fetch the logged in member
-  const { data: member } = useQuery({
+  const { data: member, isLoading: memberLoading } = useQuery({
     queryKey: ['current-user-member'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) return null;
       const { data, error } = await supabase
         .from('members')
-        .select('first_name')
+        .select('first_name, last_name, email')
         .eq('email', user.email)
         .is('deleted_at', null)
         .single();
@@ -33,96 +36,263 @@ function Welcome() {
   });
 
   // Fetch current tenant info
-  const { data: tenant } = useQuery({
+  const { data: tenant, isLoading: tenantLoading } = useQuery({
     queryKey: ['current-tenant-info'],
     queryFn: () => tenantUtils.getCurrentTenant(),
   });
 
-  const quickLinks = [
+  // Get recent activity data
+  const { data: recentActivity } = useQuery({
+    queryKey: ['recent-activity'],
+    queryFn: async () => {
+      // This would normally fetch from an API
+      return [
+        { id: 1, type: 'donation', date: new Date(), description: 'New donation received', amount: 250 },
+        { id: 2, type: 'member', date: new Date(Date.now() - 86400000), description: 'New member joined', name: 'Sarah Johnson' },
+        { id: 3, type: 'event', date: new Date(Date.now() - 172800000), description: 'Upcoming service', title: 'Sunday Worship' }
+      ];
+    },
+  });
+
+  // Featured quick links
+  const featuredLinks = [
     { label: 'Church Overview', href: '/dashboard/church', icon: Building2, permission: null },
     { label: 'Donations', href: '/finances/giving', icon: DollarSign, permission: 'finance.view' },
-    { label: 'Reports', href: '/finances/reports', icon: BarChart3, permission: 'finance.report' },
+    { label: 'Members', href: '/members/list', icon: Users, permission: 'member.view' },
   ];
 
+  // All quick links
+  const allQuickLinks = [
+    ...featuredLinks,
+    { label: 'Reports', href: '/finances/reports', icon: BarChart3, permission: 'finance.report' },
+    { label: 'Calendar', href: '/calendar', icon: Calendar, permission: null },
+    { label: 'Statements', href: '/finances/statements', icon: FileText, permission: 'finance.view' },
+  ];
+  
+  // Quick actions
   const quickActions = [
-    { label: 'Add Donation', href: '/finances/giving/add', icon: Plus, permission: 'finance.create' },
+    { label: 'Record Donation', href: '/finances/giving/add', icon: Heart, permission: 'finance.create' },
     { label: 'Add Member', href: '/members/add', icon: Users, permission: 'member.create' },
+    { label: 'Create Report', href: '/finances/reports', icon: FileText, permission: 'finance.report' },
   ];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-4xl font-heading font-bold text-foreground">
-          {member ? `Welcome back, ${member.first_name}!` : 'Welcome!'}
-        </h1>
-        <p className="text-muted-foreground">
-          Here's a quick overview to get you started.
-        </p>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Welcome Banner with Greeting */}
+      <WelcomeGreeting />
 
-      {tenant && (
-        <Card className="max-w-md bg-muted">
-          <CardHeader className="p-4">
-            <div className="flex items-center space-x-4">
-              {tenant.logo_url && (
-                <img
-                  src={tenant.logo_url}
-                  alt={tenant.name}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-              )}
-              <div>
-                <CardTitle className="text-lg font-semibold">
-                  {tenant.name}
-                </CardTitle>
-                <CardDescription className="capitalize">
-                  Plan: {tenant.subscription_tier}
-                </CardDescription>
-              </div>
+      {/* Main Dashboard Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Quick Access */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Featured Quick Links */}
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+              <Zap className="h-5 w-5 mr-2 text-primary" />
+              Quick Access
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {featuredLinks
+                .filter((q) => !q.permission || hasPermission(q.permission))
+                .map((q) => (
+                  <QuickAccessCard
+                    key={q.label}
+                    to={q.href}
+                    icon={q.icon}
+                    label={q.label}
+                  />
+                ))}
             </div>
-          </CardHeader>
-        </Card>
-      )}
+          </div>
 
-      {/* Quick Access */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-foreground">Quick Access</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {quickLinks
-            .filter((q) => !q.permission || hasPermission(q.permission))
-            .map((q) => (
-              <QuickAccessCard
-                key={q.label}
-                to={q.href}
-                icon={q.icon}
-                label={q.label}
-              />
-            ))}
+          {/* Quick Actions */}
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+              <Plus className="h-5 w-5 mr-2 text-primary" />
+              Quick Actions
+            </h2>
+            <Card className="overflow-hidden">
+              <CardContent className="p-0">
+                <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border">
+                  {quickActions
+                    .filter((a) => !a.permission || hasPermission(a.permission))
+                    .map((a, index) => (
+                      <Link to={a.href} key={a.label} className="group">
+                        <div className="p-6 hover:bg-muted/50 transition-colors h-full flex flex-col justify-between">
+                          <div className="mb-4">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                              <a.icon className="h-5 w-5 text-primary" />
+                            </div>
+                            <h3 className="font-medium text-foreground">{a.label}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {index === 0 ? 'Record a new donation' : 
+                               index === 1 ? 'Add a new church member' : 'Generate financial reports'}
+                            </p>
+                          </div>
+                          <div className="flex items-center text-primary text-sm font-medium group-hover:translate-x-0.5 transition-transform">
+                            Get Started <ChevronRight className="h-4 w-4 ml-1" />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Activity */}
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+              <Bell className="h-5 w-5 mr-2 text-primary" />
+              Recent Activity
+            </h2>
+            <Card>
+              <CardContent className="p-6">
+                {recentActivity && recentActivity.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-start space-x-4 pb-4 border-b last:border-0 last:pb-0">
+                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                          activity.type === 'donation' ? 'bg-green-100 text-green-600' : 
+                          activity.type === 'member' ? 'bg-blue-100 text-blue-600' : 
+                          'bg-amber-100 text-amber-600'
+                        }`}>
+                          {activity.type === 'donation' ? <DollarSign className="h-5 w-5" /> : 
+                           activity.type === 'member' ? <Users className="h-5 w-5" /> : 
+                           <Calendar className="h-5 w-5" />}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <p className="font-medium text-foreground">{activity.description}</p>
+                            <span className="text-sm text-muted-foreground">
+                              {activity.date.toLocaleDateString()}
+                            </span>
+                          </div>
+                          {activity.type === 'donation' && (
+                            <p className="text-sm text-success font-medium mt-1">
+                              +${activity.amount.toFixed(2)}
+                            </p>
+                          )}
+                          {activity.type === 'member' && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {activity.name}
+                            </p>
+                          )}
+                          {activity.type === 'event' && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {activity.title}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-muted-foreground">No recent activity to display</p>
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter className="bg-muted/30 px-6 py-3">
+                <Link to="/dashboard" className="text-sm text-primary font-medium flex items-center hover:underline">
+                  View all activity <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+
+        {/* Right Column - Church Info & Resources */}
+        <div className="space-y-6">
+          {/* Church Info Card */}
+          {tenant && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Church Information</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="h-16 w-16 rounded-full bg-primary-100 flex items-center justify-center">
+                    {tenant.profile_picture_url ? (
+                      <img
+                        src={tenant.profile_picture_url}
+                        alt={tenant.name}
+                        className="h-16 w-16 rounded-full object-cover"
+                      />
+                    ) : (
+                      <Building2 className="h-8 w-8 text-primary" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{tenant.name}</h3>
+                    <Badge variant="outline" className="mt-1 capitalize">
+                      {tenant.subscription_tier} Plan
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  {tenant.subscription_tier === 'free' && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Member Usage</span>
+                        <span className="font-medium">15/25</span>
+                      </div>
+                      <Progress value={60} className="h-2" />
+                    </div>
+                  )}
+                  
+                  <div className="pt-2">
+                    <Link to="/settings/subscription">
+                      <Button variant="outline" className="w-full">
+                        Manage Subscription
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* All Quick Links */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">All Quick Links</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-1">
+                {allQuickLinks
+                  .filter((q) => !q.permission || hasPermission(q.permission))
+                  .map((link) => (
+                    <Link 
+                      key={link.label} 
+                      to={link.href}
+                      className="flex items-center p-2 rounded-md hover:bg-muted transition-colors"
+                    >
+                      <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center mr-3">
+                        <link.icon className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-medium">{link.label}</span>
+                    </Link>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Announcements */}
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+              <Bell className="h-5 w-5 mr-2 text-primary" />
+              Announcements
+            </h2>
+            <Announcements messages={[
+              'Welcome to StewardTrack! Use the sidebar to quickly navigate between modules.',
+              'Need help? Check out our documentation or contact support from the settings page.',
+              'New feature: You can now export member reports to PDF format.'
+            ]} />
+          </div>
         </div>
       </div>
-
-      {/* Quick Actions */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-foreground">Quick Actions</h2>
-        <Card>
-          <CardContent className="p-4 flex flex-wrap gap-3">
-            {quickActions
-              .filter((a) => !a.permission || hasPermission(a.permission))
-              .map((a) => (
-                <Link to={a.href} key={a.label}>
-                  <Button variant="default" icon={<a.icon className="h-4 w-4" />}>
-                    {a.label}
-                  </Button>
-                </Link>
-              ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Announcement / Tip */}
-      <Announcements messages={[
-        'Tip: Use the sidebar to quickly navigate between modules.'
-      ]} />
     </div>
   );
 }
