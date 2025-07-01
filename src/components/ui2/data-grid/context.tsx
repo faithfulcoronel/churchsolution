@@ -93,6 +93,13 @@ export interface DataGridContextValue<TData, TValue> {
 const DataGridContext = React.createContext<DataGridContextValue<any, any> | undefined>(undefined);
 
 export function DataGridProvider<TData, TValue>({ children, ...props }: DataGridProps<TData, TValue> & { children: React.ReactNode }) {
+  const defaultExportOptions = {
+    enabled: true,
+    fileName: 'export',
+    pdf: true,
+    excel: true,
+  };
+
   const {
     columns,
     data,
@@ -111,9 +118,11 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     className,
     containerClassName,
     fluid = false,
-    exportOptions = { enabled: true, fileName: 'export', pdf: true, excel: true },
+    exportOptions: providedExportOptions,
     quickFilterPlaceholder,
   } = props;
+
+  const exportOptions = { ...defaultExportOptions, ...providedExportOptions };
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
