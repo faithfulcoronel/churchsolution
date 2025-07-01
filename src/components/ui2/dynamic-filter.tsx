@@ -1,5 +1,19 @@
 import * as React from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from './card';
 import { Input } from './input';
@@ -98,21 +112,61 @@ export function DynamicFilter({
     onChange(newFilters);
   };
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const sensors = useSensors(useSensor(PointerSensor));
 
-    const reorderedValues = Array.from(values);
-    const [removed] = reorderedValues.splice(result.source.index, 1);
-    reorderedValues.splice(result.destination.index, 0, removed);
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    const oldIndex = parseInt(active.id.toString(), 10);
+    const newIndex = parseInt(over.id.toString(), 10);
+    if (oldIndex !== newIndex) {
+      onChange(arrayMove(values, oldIndex, newIndex));
+    }
+  };
 
-    onChange(reorderedValues);
+  const FilterItem = ({ filter, index, field }: { filter: FilterValue; index: number; field: FilterField }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      setActivatorNodeRef,
+      transform,
+      transition,
+    } = useSortable({ id: index.toString() });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    } as React.CSSProperties;
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        className="bg-muted/5 rounded-lg p-4 border border-border"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div ref={setActivatorNodeRef} {...listeners} className="cursor-move">
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <span className="font-medium text-sm">{field.label}</span>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => removeFilter(index)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        {renderFilterInput(filter, field, index)}
+      </div>
+    );
   };
 
   const renderFilterInput = (filter: FilterValue, field: FilterField, index: number) => {
     const operators = field.operators || getDefaultOperators(field.type);
 
     return (
-      <div key={index} className="flex flex-wrap items-end gap-2">
+      <div className="flex flex-wrap items-end gap-2">
         <div className="flex-1 min-w-[200px]">
           <Select
             value={filter.operator}
@@ -196,58 +250,17 @@ export function DynamicFilter({
         </div>
 
         {showFilters && (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="filters">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="space-y-4"
-                >
-                  {values.map((filter, index) => {
-                    const field = fields.find(f => f.id === filter.field);
-                    if (!field) return null;
-
-                    return (
-                      <Draggable
-                        key={`${filter.field}-${index}`}
-                        draggableId={`${filter.field}-${index}`}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className="bg-muted/5 rounded-lg p-4 border border-border"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <div {...provided.dragHandleProps}>
-                                  <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                                </div>
-                                <span className="font-medium text-sm">
-                                  {field.label}
-                                </span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeFilter(index)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            {renderFilterInput(filter, field, index)}
-                          </div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={values.map((_, i) => i.toString())} strategy={verticalListSortingStrategy}>
+              <div className="space-y-4">
+                {values.map((filter, index) => {
+                  const field = fields.find((f) => f.id === filter.field);
+                  if (!field) return null;
+                  return <FilterItem key={`${filter.field}-${index}`} filter={filter} index={index} field={field} />;
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
 
         {showFilters && (
