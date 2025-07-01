@@ -49,9 +49,16 @@ function DataGridContent() {
                 size="sm"
                 placeholder={quickFilterPlaceholder}
                 value={globalFilter}
-                onChange={(e) => setGlobalFilter(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setGlobalFilter(value);
+                  table.setGlobalFilter(value);
+                }}
                 clearable
-                onClear={() => setGlobalFilter('')}
+                onClear={() => {
+                  setGlobalFilter('');
+                  table.setGlobalFilter('');
+                }}
                 className="h-8"
               />
             )}
