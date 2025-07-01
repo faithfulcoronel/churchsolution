@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useMemberRepository } from '../../hooks/useMemberRepository';
 import {
@@ -44,22 +44,12 @@ import NotesTab from './tabs/NotesTab';
 function MemberProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { useQuery, useDelete } = useMemberRepository();
+  const { useFindById, useDelete } = useMemberRepository();
   const [activeTab, setActiveTab] = useState('basic');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Fetch member data using repository
-  const { data: result, isLoading, error } = useQuery({
-    filters: {
-      id: {
-        operator: 'eq',
-        value: id
-      }
-    },
-    enabled: !!id
-  });
-
-  const member = result?.data?.[0];
+  const { data: member, isLoading, error } = useFindById(id || '');
 
   // Delete mutation
   const deleteMemberMutation = useDelete();
