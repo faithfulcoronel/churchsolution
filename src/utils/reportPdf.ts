@@ -1,4 +1,5 @@
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import { formatCurrency } from './currency';
 import { useCurrencyStore } from '../stores/currencyStore';
 
@@ -56,9 +57,11 @@ export async function exportReportPdf(
   if (columns.length === 0) return;
 
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
+  const fontBytes = await fetch('/fonts/Inter_18pt-Regular.ttf').then(r => r.arrayBuffer());
+  const font = await pdfDoc.embedFont(fontBytes);
   let page = pdfDoc.addPage();
   const { width, height } = page.getSize();
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   const margin = 40;
   const rowHeight = 16;
