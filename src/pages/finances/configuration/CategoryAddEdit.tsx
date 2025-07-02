@@ -78,10 +78,12 @@ function CategoryAddEdit({ categoryType, basePath }: CategoryAddEditProps) {
     if (!validateForm()) return;
     try {
       if (isEditMode) {
-        await updateMutation.mutateAsync({ id: id!, data: formData });
+        const { chart_of_accounts, ...updateData } = formData as any;
+        await updateMutation.mutateAsync({ id: id!, data: updateData });
         navigate(`${basePath}/${id}`);
       } else {
-        const result = await createMutation.mutateAsync({ data: formData });
+        const { chart_of_accounts, ...createData } = formData as any;
+        const result = await createMutation.mutateAsync({ data: createData });
         navigate(`${basePath}/${result.id}`);
       }
     } catch (err) {
