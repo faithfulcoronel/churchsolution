@@ -11,6 +11,7 @@ import { Loader2, Printer, Download } from 'lucide-react';
 import { useFinancialReports } from '../../hooks/useFinancialReports';
 import { tenantUtils } from '../../utils/tenantUtils';
 import { usePermissions } from '../../hooks/usePermissions';
+import { supabase } from '../../lib/supabase';
 
 interface RecordData {
   [key: string]: any;
@@ -131,18 +132,21 @@ function FinancialReportsPage() {
   const exportPdfWithPdfKit = async () => {
     if (!data || !Array.isArray(data)) return;
     try {
-      const response = await fetch('/functions/generate-financial-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: reportOptions.find(r => r.id === reportType)?.label,
-          transactions: data,
-        }),
-      });
+      const { data: pdfBlob, error } = await supabase.functions.invoke(
+        'generate-financial-report',
+        {
+          as: 'blob',
+          body: {
+            title: reportOptions.find(r => r.id === reportType)?.label,
+            transactions: data,
+          },
+        },
+      );
 
-      if (!response.ok) throw new Error('Failed to generate PDF');
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      if (error) throw error;
+      if (!pdfBlob) throw new Error('Failed to generate PDF');
+
+      const url = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `${reportType}.pdf`;
@@ -215,7 +219,7 @@ function FinancialReportsPage() {
               data={data}
               columns={columns}
               title={reportOptions.find(r => r.id === reportType)?.label}
-              exportOptions={{ enabled: true, excel: true, fileName: reportType }}
+              exportOptions={{ enabled: true, excel: true, pdf: false, fileName: reportType }}
             />
           ) : (
             <div className="py-8 text-center text-muted-foreground">No data available.</div>
