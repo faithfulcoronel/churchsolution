@@ -143,6 +143,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
             }
             autoHeight
             paginationMode="client"
+            storageKey="income-expense-profile-entries"
           />
         </CardContent>
       </Card>

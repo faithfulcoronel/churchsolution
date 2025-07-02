@@ -151,6 +151,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
               showQuickFilter={false}
               page={page}
               pageSize={pageSize}
+              storageKey="income-expense-list-grid"
             />
           </CardContent>
         </Card>

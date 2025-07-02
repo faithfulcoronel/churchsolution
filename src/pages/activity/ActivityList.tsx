@@ -56,6 +56,7 @@ function ActivityList() {
             paginationMode="client"
             autoHeight
             getRowId={row => row.id}
+            storageKey="activity-list-grid"
           />
         </CardContent>
       </Card>
