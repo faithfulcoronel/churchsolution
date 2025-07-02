@@ -81,7 +81,7 @@ The JSON file should contain a `title` and a `transactions` array with `date`,
 and show the total amount at the bottom.
 
 The `FinancialReportsPage` component now generates the PDF directly in the
-browser using PDFKit when you click the **PDF** button.
+browser using [pdf-lib](https://pdf-lib.js.org/) when you click the **PDF** button.
 
 ## Changelog
 
