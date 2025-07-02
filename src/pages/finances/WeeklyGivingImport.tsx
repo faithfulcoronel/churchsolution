@@ -154,9 +154,9 @@ function WeeklyGivingImport() {
     const parsed: ParsedRow[] = [];
     let idx = 0;
     for (const r of fileRows) {
-      const memberName = r.member || r.name || '';
-      const fundName = r.fund || '';
-      const sourceName = r.source || '';
+      const memberName = r['MEMBERS LIST'] || r.member || r.name || '';
+      const fundName = r.fund || 'Default Fund';
+      const sourceName = r.source || 'Offering Box';
 
       for (const cat of categoryHeaders) {
         const amt = parseFloat(r[cat]) || 0;
