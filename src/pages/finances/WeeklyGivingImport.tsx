@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
 import { Button } from '../../components/ui2/button';
 import { DataGrid, GridColDef } from '../../components/ui2/mui-datagrid';
+import { Combobox } from '../../components/ui2/combobox';
 import { DatePickerInput } from '../../components/ui2/date-picker';
 import { ProgressSteps } from '../../components/ui2/progress-steps';
 import { useMemberRepository } from '../../hooks/useMemberRepository';
@@ -55,6 +56,39 @@ function WeeklyGivingImport() {
   });
   const fundsRes = useFundsQuery();
   const sourcesRes = useSourcesQuery();
+
+  const memberOptions = React.useMemo(
+    () =>
+      (membersRes.data?.data || []).map((m) => ({
+        value: m.id,
+        label: `${m.first_name} ${m.last_name}`,
+      })),
+    [membersRes.data],
+  );
+  const categoryOptions = React.useMemo(
+    () =>
+      (categoriesRes.data?.data || []).map((c) => ({
+        value: c.id,
+        label: c.name,
+      })),
+    [categoriesRes.data],
+  );
+  const fundOptions = React.useMemo(
+    () =>
+      (fundsRes.data?.data || []).map((f) => ({
+        value: f.id,
+        label: f.name,
+      })),
+    [fundsRes.data],
+  );
+  const sourceOptions = React.useMemo(
+    () =>
+      (sourcesRes.data?.data || []).map((s) => ({
+        value: s.id,
+        label: s.name,
+      })),
+    [sourcesRes.data],
+  );
 
   const createMemberMutation = useCreate();
 
@@ -134,10 +168,94 @@ function WeeklyGivingImport() {
   }, [fileRows, membersRes.data, categoriesRes.data, fundsRes.data, sourcesRes.data]);
 
   const columns: GridColDef[] = [
-    { field: 'memberName', headerName: 'Member', flex: 1, editable: true },
-    { field: 'categoryName', headerName: 'Category', flex: 1, editable: true },
-    { field: 'fundName', headerName: 'Fund', flex: 1, editable: true },
-    { field: 'sourceName', headerName: 'Source', flex: 1, editable: true },
+    {
+      field: 'memberName',
+      headerName: 'Member',
+      flex: 1,
+      editable: true,
+      renderEditCell: (params) => (
+        <Combobox
+          options={memberOptions}
+          value={params.row.memberId || ''}
+          onChange={(v) => {
+            const label =
+              memberOptions.find((o) => o.value === v)?.label || params.row.memberName;
+            setGridRows((prev) =>
+              prev.map((r) =>
+                r.id === params.row.id
+                  ? { ...r, memberId: v || null, memberName: label }
+                  : r,
+              ),
+            );
+          }}
+        />
+      ),
+    },
+    {
+      field: 'categoryName',
+      headerName: 'Category',
+      flex: 1,
+      editable: true,
+      renderEditCell: (params) => (
+        <Combobox
+          options={categoryOptions}
+          value={params.row.categoryId || ''}
+          onChange={(v) => {
+            const label =
+              categoryOptions.find((o) => o.value === v)?.label || params.row.categoryName;
+            setGridRows((prev) =>
+              prev.map((r) =>
+                r.id === params.row.id
+                  ? { ...r, categoryId: v || null, categoryName: label }
+                  : r,
+              ),
+            );
+          }}
+        />
+      ),
+    },
+    {
+      field: 'fundName',
+      headerName: 'Fund',
+      flex: 1,
+      editable: true,
+      renderEditCell: (params) => (
+        <Combobox
+          options={fundOptions}
+          value={params.row.fundId || ''}
+          onChange={(v) => {
+            const label =
+              fundOptions.find((o) => o.value === v)?.label || params.row.fundName;
+            setGridRows((prev) =>
+              prev.map((r) =>
+                r.id === params.row.id ? { ...r, fundId: v || null, fundName: label } : r,
+              ),
+            );
+          }}
+        />
+      ),
+    },
+    {
+      field: 'sourceName',
+      headerName: 'Source',
+      flex: 1,
+      editable: true,
+      renderEditCell: (params) => (
+        <Combobox
+          options={sourceOptions}
+          value={params.row.sourceId || ''}
+          onChange={(v) => {
+            const label =
+              sourceOptions.find((o) => o.value === v)?.label || params.row.sourceName;
+            setGridRows((prev) =>
+              prev.map((r) =>
+                r.id === params.row.id ? { ...r, sourceId: v || null, sourceName: label } : r,
+              ),
+            );
+          }}
+        />
+      ),
+    },
     { field: 'amount', headerName: 'Amount', flex: 1, type: 'number', editable: true },
     {
       field: 'actions',
@@ -178,6 +296,13 @@ function WeeklyGivingImport() {
   ];
 
   const handleCellEdit = React.useCallback((params: any) => {
+    if (
+      ['memberName', 'categoryName', 'fundName', 'sourceName'].includes(
+        params.field,
+      )
+    ) {
+      return;
+    }
     setGridRows((prev) =>
       prev.map((r) =>
         r.id === params.id ? { ...r, [params.field]: params.value } : r,
