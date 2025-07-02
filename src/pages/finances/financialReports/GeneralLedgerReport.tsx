@@ -35,7 +35,11 @@ export default function GeneralLedgerReport({ tenantId, dateRange, accountId }: 
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'General Ledger', fileName: 'general-ledger' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'General Ledger', fileName: 'general-ledger' },
+    );
 
   return (
     <div className="space-y-4">

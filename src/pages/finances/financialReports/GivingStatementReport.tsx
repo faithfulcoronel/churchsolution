@@ -33,7 +33,11 @@ export default function GivingStatementReport({ tenantId, dateRange, memberId }:
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Giving Statement', fileName: 'giving-statement' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Giving Statement', fileName: 'giving-statement' },
+    );
 
   return (
     <div className="space-y-4">

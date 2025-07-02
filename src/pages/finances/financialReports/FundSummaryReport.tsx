@@ -31,7 +31,11 @@ export default function FundSummaryReport({ tenantId, dateRange }: Props) {
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Fund Summary', fileName: 'fund-summary' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Fund Summary', fileName: 'fund-summary' },
+    );
 
   return (
     <div className="space-y-4">

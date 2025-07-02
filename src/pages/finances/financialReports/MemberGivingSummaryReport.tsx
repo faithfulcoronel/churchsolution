@@ -32,7 +32,11 @@ export default function MemberGivingSummaryReport({ tenantId, dateRange, memberI
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Member Giving Summary', fileName: 'member-giving' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Member Giving Summary', fileName: 'member-giving' },
+    );
 
   return (
     <div className="space-y-4">

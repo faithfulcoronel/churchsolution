@@ -31,7 +31,11 @@ export default function IncomeStatementReport({ tenantId, dateRange }: Props) {
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Income Statement', fileName: 'income-statement' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Income Statement', fileName: 'income-statement' },
+    );
 
   return (
     <div className="space-y-4">

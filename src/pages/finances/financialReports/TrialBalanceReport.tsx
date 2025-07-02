@@ -29,7 +29,11 @@ export default function TrialBalanceReport({ tenantId, dateRange }: Props) {
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Trial Balance', fileName: 'trial-balance' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Trial Balance', fileName: 'trial-balance' },
+    );
 
   return (
     <div className="space-y-4">
