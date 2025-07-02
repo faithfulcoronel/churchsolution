@@ -135,29 +135,29 @@ export class FinancialTransactionHeaderAdapter
   }
 
   protected override async onBeforeDelete(id: string): Promise<void> {
-    // Check if header has transactions
-    const { data: transactions, error: transactionsError } = await supabase
-      .from('financial_transactions')
-      .select('id')
-      .eq('header_id', id)
-      .limit(1);
-
-    if (transactionsError) throw transactionsError;
-    if (transactions?.length) {
-      throw new Error('Cannot delete header with existing transactions');
-    }
-    
-    // Check if header is posted or voided
+    // Check status of header before allowing delete
     const { data: header, error: headerError } = await supabase
       .from(this.tableName)
       .select('status')
       .eq('id', id)
       .single();
-    
+
     if (headerError) throw headerError;
     if (header && (header.status === 'posted' || header.status === 'voided')) {
       throw new Error(`Cannot delete a ${header.status} transaction`);
     }
+
+    // Remove all associated transactions for this header
+    const tenantId = await tenantUtils.getTenantId();
+    if (!tenantId) throw new Error('No tenant context found');
+
+    const { error: deleteError } = await supabase
+      .from('financial_transactions')
+      .delete()
+      .eq('header_id', id)
+      .eq('tenant_id', tenantId);
+
+    if (deleteError) throw deleteError;
   }
 
   protected override async onAfterDelete(id: string): Promise<void> {
