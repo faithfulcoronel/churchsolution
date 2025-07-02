@@ -215,7 +215,7 @@ function FinancialReportsPage() {
               data={data}
               columns={columns}
               title={reportOptions.find(r => r.id === reportType)?.label}
-              exportOptions={{ enabled: true, excel: true, pdf: false, fileName: reportType }}
+              exportOptions={{ enabled: true, excel: true, fileName: reportType }}
             />
           ) : (
             <div className="py-8 text-center text-muted-foreground">No data available.</div>
