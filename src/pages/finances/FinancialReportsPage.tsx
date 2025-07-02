@@ -11,6 +11,7 @@ import { Loader2, Printer, Download } from 'lucide-react';
 import { useFinancialReports } from '../../hooks/useFinancialReports';
 import { tenantUtils } from '../../utils/tenantUtils';
 import { usePermissions } from '../../hooks/usePermissions';
+import { supabase } from '../../lib/supabase';
 
 interface RecordData {
   [key: string]: any;
@@ -128,6 +129,36 @@ function FinancialReportsPage() {
 
   const handlePrint = () => window.print();
 
+  const exportPdfWithPdfKit = async () => {
+    if (!data || !Array.isArray(data)) return;
+    try {
+      const { data: pdfBlob, error } = await supabase.functions.invoke(
+        'generate-financial-report',
+        {
+          as: 'blob',
+          body: {
+            title: reportOptions.find(r => r.id === reportType)?.label,
+            transactions: data,
+          },
+        },
+      );
+
+      if (error) throw error;
+      if (!pdfBlob) throw new Error('Failed to generate PDF');
+
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${reportType}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+    }
+  };
+
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="flex justify-between items-center">
@@ -140,7 +171,7 @@ function FinancialReportsPage() {
             <Printer className="h-4 w-4 mr-2" />
             Print
           </Button>
-          <Button variant="outline" onClick={() => window.dispatchEvent(new Event('download-pdf'))} className="flex items-center">
+          <Button variant="outline" onClick={exportPdfWithPdfKit} className="flex items-center">
             <Download className="h-4 w-4 mr-2" />
             PDF
           </Button>
@@ -188,7 +219,7 @@ function FinancialReportsPage() {
               data={data}
               columns={columns}
               title={reportOptions.find(r => r.id === reportType)?.label}
-              exportOptions={{ enabled: true, excel: true, pdf: true, fileName: reportType }}
+              exportOptions={{ enabled: true, excel: true, pdf: false, fileName: reportType }}
             />
           ) : (
             <div className="py-8 text-center text-muted-foreground">No data available.</div>
