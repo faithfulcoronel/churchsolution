@@ -98,7 +98,12 @@ export async function exportReportPdf(
   for (const rec of data) {
     const cellLines = columns.map(col => {
       let value = rec[col.key];
-      if (['debit', 'credit', 'amount'].includes(col.key)) {
+      const key = col.key.toLowerCase();
+      const header = col.header.toLowerCase();
+      if (
+        ['debit', 'credit', 'amount'].includes(key) ||
+        ['debit', 'credit', 'amount'].includes(header)
+      ) {
         value = formatCurrency(Number(value) || 0, currency);
       }
       return splitTextIntoLines(String(value ?? ''), font, 12, columnWidth - 2);
