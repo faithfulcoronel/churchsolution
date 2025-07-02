@@ -10,15 +10,20 @@ import { exportReportPdf } from '../../../utils';
 interface Props {
   tenantId: string | null;
   dateRange: { from: Date; to: Date };
-  accountId?: string;
+  accountId?: string | string[];
 }
 
 export default function GeneralLedgerReport({ tenantId, dateRange, accountId }: Props) {
   const { useGeneralLedger } = useFinancialReports(tenantId);
+  const accountParam = Array.isArray(accountId)
+    ? accountId.length === 1
+      ? accountId[0]
+      : undefined
+    : accountId;
   const { data, isLoading } = useGeneralLedger(
     format(dateRange.from, 'yyyy-MM-dd'),
     format(dateRange.to, 'yyyy-MM-dd'),
-    accountId || undefined,
+    accountParam || undefined,
   );
 
   const columns = React.useMemo<ColumnDef<any>[]>(

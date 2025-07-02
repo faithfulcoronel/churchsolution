@@ -10,15 +10,20 @@ import { exportReportPdf } from '../../../utils';
 interface Props {
   tenantId: string | null;
   dateRange: { from: Date; to: Date };
-  memberId?: string;
+  memberId?: string | string[];
 }
 
 export default function MemberGivingSummaryReport({ tenantId, dateRange, memberId }: Props) {
   const { useMemberGivingSummary } = useFinancialReports(tenantId);
+  const memberParam = Array.isArray(memberId)
+    ? memberId.length === 1
+      ? memberId[0]
+      : undefined
+    : memberId;
   const { data, isLoading } = useMemberGivingSummary(
     format(dateRange.from, 'yyyy-MM-dd'),
     format(dateRange.to, 'yyyy-MM-dd'),
-    memberId || undefined,
+    memberParam || undefined,
   );
 
   const columns = React.useMemo<ColumnDef<any>[]>(
