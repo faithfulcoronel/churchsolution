@@ -21,7 +21,7 @@ type UserFormData = {
 const UserAddEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { useQuery: useUserQuery, useCreate, useUpdate } = useUserRepository();
+  const { useFindById, useCreate, useUpdate } = useUserRepository();
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
     password: '',
@@ -30,11 +30,9 @@ const UserAddEdit = () => {
     last_name: '',
   });
 
-  const { data: userResult, isLoading: userLoading } = useUserQuery({
-    filters: { id: { operator: 'eq', value: id } },
+  const { data: userData, isLoading: userLoading } = useFindById(id || '', {
     enabled: !!id,
   });
-  const userData = userResult?.data?.[0];
 
   // Fetch available roles
   const { data: roles } = useQuery({
