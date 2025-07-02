@@ -15,8 +15,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { getData, setData } from '@/utils/LocalStorage';
 
@@ -42,7 +40,6 @@ export interface DataGridProps<TData, TValue> {
   exportOptions?: {
     enabled?: boolean;
     fileName?: string;
-    pdf?: boolean;
     excel?: boolean;
   };
   quickFilterPlaceholder?: string;
@@ -92,7 +89,6 @@ export interface DataGridContextValue<TData, TValue> {
   containerClassName?: string;
   /** Whether the container should take the full width */
   fluid?: boolean;
-  handleExportPDF: () => void;
   handleExportExcel: () => void;
 }
 
@@ -102,7 +98,6 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
   const defaultExportOptions = {
     enabled: true,
     fileName: 'export',
-    pdf: true,
     excel: true,
   };
 
@@ -271,63 +266,6 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     onPageSizeChange?.(newSize);
   };
 
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-
-    if (title) {
-      doc.setFontSize(16);
-      doc.text(title, 20, 20);
-    }
-
-    const visibleColumns = table.getAllColumns().filter(col => col.getIsVisible());
-
-    const headers = visibleColumns.map(column => {
-      const headerContext = column.getContext();
-      const headerContent = column.columnDef.header;
-      if (typeof headerContent === 'function') {
-        return headerContent(headerContext).toString();
-      }
-      return headerContent?.toString() || '';
-    });
-
-    const tableData = table.getRowModel().rows.map(row =>
-      visibleColumns.map(column => {
-        const cell = row.getAllCells().find(cell => cell.column.id === column.id);
-        if (!cell) return '';
-        const value = cell.getValue();
-        if (React.isValidElement(value)) {
-          return value.props.children?.toString() || '';
-        }
-        return value instanceof Date ? value.toLocaleDateString() : String(value);
-      })
-    );
-
-    const footerData = table.getFooterGroups().map(footerGroup =>
-      footerGroup.headers.filter(header => header.column.getIsVisible()).map(header => {
-        const footer = header.column.columnDef.footer;
-        if (!footer) return '';
-        const rendered = flexRender(footer, header.getContext());
-        if (React.isValidElement(rendered)) {
-          return rendered.props.children?.toString() || '';
-        }
-        return String(rendered);
-      })
-    );
-
-    const tableOptions = {
-      head: [headers],
-      body: tableData,
-      foot: footerData,
-      startY: title ? 30 : 20,
-      theme: 'striped',
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-      footStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
-    } as any;
-
-    autoTable(doc, tableOptions);
-    doc.save(`${exportOptions.fileName || 'export'}.pdf`);
-  };
 
   const handleExportExcel = () => {
     const visibleColumns = table.getAllColumns().filter(col => col.getIsVisible());
@@ -407,7 +345,6 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     className,
     containerClassName,
     fluid,
-    handleExportPDF,
     handleExportExcel,
   };
 

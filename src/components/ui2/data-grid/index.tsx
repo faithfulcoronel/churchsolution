@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button } from '../button';
 import { Input } from '../input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from '../dropdown-menu';
-import { Settings2, FileText, FileSpreadsheet } from 'lucide-react';
+import { Settings2, FileSpreadsheet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DataGridProvider, DataGridProps, useDataGrid } from './context';
 import { DataGridTable } from '../data-grid-table';
@@ -15,7 +15,6 @@ function DataGridContent() {
     toolbar,
     exportOptions,
     handleExportExcel,
-    handleExportPDF,
     quickFilterPlaceholder,
     globalFilter,
     setGlobalFilter,
@@ -68,12 +67,6 @@ function DataGridContent() {
                   <Button variant="outline" size="sm" onClick={handleExportExcel} className="flex items-center space-x-2">
                     <FileSpreadsheet className="h-4 w-4" />
                     <span>Excel</span>
-                  </Button>
-                )}
-                {exportOptions.pdf && (
-                  <Button variant="outline" size="sm" onClick={handleExportPDF} className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4" />
-                    <span>PDF</span>
                   </Button>
                 )}
               </div>
