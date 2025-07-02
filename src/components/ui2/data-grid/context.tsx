@@ -51,8 +51,10 @@ export interface DataGridProps<TData, TValue> {
   /** Whether the container should take the full width */
   fluid?: boolean;
   /**
-   * Optional key used to store column sizing in localStorage.
-   * Provide a unique value per page to scope the cache.
+   * Optional key used to persist column sizing and table state in localStorage.
+   * Provide a unique value per page to scope the cache. Stored state includes
+   * pagination (`page`, `pageSize`), sorting, filters, column visibility and
+   * global filter.
    */
   storageKey?: string;
 }
@@ -131,18 +133,24 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
 
   const exportOptions = { ...defaultExportOptions, ...providedExportOptions };
 
+  /**
+   * Shape of the state persisted in localStorage under `${storageKey}-state`.
+   * The `page` property stores the current zero-based page index.
+   */
   type PersistedState = {
     sorting: SortingState;
     columnFilters: ColumnFiltersState;
     columnVisibility: VisibilityState;
-    pageIndex: number;
+    page: number;
     pageSize: number;
     globalFilter: string;
   };
 
   const savedState = React.useMemo(() => {
     if (!storageKey) return undefined;
-    return getData(`${storageKey}-state`) as Partial<PersistedState> | undefined;
+    return getData(`${storageKey}-state`) as (Partial<PersistedState> & {
+      pageIndex?: number;
+    }) | undefined;
   }, [storageKey]);
 
   const [sorting, setSorting] = React.useState<SortingState>(savedState?.sorting ?? []);
@@ -158,7 +166,9 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
   const [globalFilter, setGlobalFilter] = React.useState(savedState?.globalFilter ?? '');
   const [openFilterMenus, setOpenFilterMenus] = React.useState<Record<string, boolean>>({});
   const [tempFilters, setTempFilters] = React.useState<Record<string, string>>({});
-  const [pageIndex, setPageIndex] = React.useState(savedState?.pageIndex ?? 0);
+  const [pageIndex, setPageIndex] = React.useState(
+    savedState?.page ?? savedState?.pageIndex ?? 0
+  );
   const [pageSize, setPageSize] = React.useState(savedState?.pageSize ?? pagination.pageSize ?? 10);
   const pageSizeOptions = pagination.pageSizeOptions ?? [5, 10, 20, 50, 100];
 
@@ -206,7 +216,7 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
       sorting,
       columnFilters,
       columnVisibility,
-      pageIndex,
+      page: pageIndex,
       pageSize,
       globalFilter,
     };
