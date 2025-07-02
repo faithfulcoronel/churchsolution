@@ -1,5 +1,13 @@
 import * as React from 'react';
-import { format, isValid, startOfDay, endOfDay, isBefore, isAfter, addDays } from 'date-fns';
+import {
+  format,
+  isValid,
+  startOfDay,
+  endOfDay,
+  isBefore,
+  isAfter,
+  addDays,
+} from 'date-fns';
 import { Calendar as CalendarIcon, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -120,6 +128,28 @@ export function DateRangePicker({
         };
       },
     },
+    {
+      name: 'thisYear',
+      label: 'This Year',
+      range: () => {
+        const year = new Date().getFullYear();
+        return {
+          from: new Date(year, 0, 1),
+          to: new Date(year, 11, 31),
+        };
+      },
+    },
+    {
+      name: 'lastYear',
+      label: 'Last Year',
+      range: () => {
+        const year = new Date().getFullYear() - 1;
+        return {
+          from: new Date(year, 0, 1),
+          to: new Date(year, 11, 31),
+        };
+      },
+    },
   ];
 
   const finalPresets = presets || defaultPresets;
@@ -131,6 +161,7 @@ export function DateRangePicker({
 
   const handlePresetSelect = (preset: DateRangePreset) => {
     onChange(preset.range());
+    setOpen(false);
   };
 
   const handleSelect = (day: Date) => {
@@ -239,6 +270,9 @@ export function DateRangePicker({
             <div className="p-2 sm:p-3">
               <Calendar
                 mode="range"
+                captionLayout="dropdown-buttons"
+                fromYear={1900}
+                toYear={new Date().getFullYear() + 10}
                 selected={{
                   from: value.from,
                   to: value.to,
