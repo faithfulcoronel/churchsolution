@@ -123,10 +123,11 @@ export class Repository<T extends Entity> {
   }
 
   public useQuery(options: QueryOptions = {}) {
-    const queryClient = useQueryClient();
+    const { enabled, ...rest } = options;
+    const serializedOptions = JSON.stringify(rest);
 
     return useQuery({
-      queryKey: [this.config.tableName, options],
+      queryKey: [this.config.tableName, serializedOptions],
       queryFn: async (): Promise<QueryResult<T>> => {
         try {
           // Use queryUtils to fetch data
@@ -136,7 +137,7 @@ export class Repository<T extends Entity> {
               select: this.config.defaultSelect,
               relationships: this.config.defaultRelationships,
               order: this.config.defaultOrder,
-              ...options
+              ...rest
             }
           );
 
@@ -153,7 +154,7 @@ export class Repository<T extends Entity> {
       },
       staleTime: this.options.staleTime,
       cacheTime: this.options.cacheTime,
-      enabled: options.enabled !== false,
+      enabled: enabled !== false,
     });
   }
 
