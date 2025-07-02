@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from '../../components/ui2/card';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from ../../components/ui2/select';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../../components/ui2/select';
 import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
 import { Combobox } from '../../components/ui2/combobox';
 import { MultiSelect } from '../../components/ui2/multi-select';
