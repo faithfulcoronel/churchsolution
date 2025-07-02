@@ -116,8 +116,44 @@ function FinancialReportsPage() {
     { enabled: reportType === 'cash-flow' }
   );
 
-  const activeQuery =
-    trialBalanceQuery ?? generalLedgerQuery ?? journalQuery ?? incomeStatementQuery ?? budgetQuery ?? fundSummaryQuery ?? memberGivingQuery ?? givingStatementQuery ?? offeringSummaryQuery ?? categoryReportQuery ?? cashFlowQuery;
+  let activeQuery;
+  switch (reportType) {
+    case 'trial-balance':
+      activeQuery = trialBalanceQuery;
+      break;
+    case 'general-ledger':
+      activeQuery = generalLedgerQuery;
+      break;
+    case 'journal':
+      activeQuery = journalQuery;
+      break;
+    case 'income-statement':
+      activeQuery = incomeStatementQuery;
+      break;
+    case 'budget-vs-actual':
+      activeQuery = budgetQuery;
+      break;
+    case 'fund-summary':
+      activeQuery = fundSummaryQuery;
+      break;
+    case 'member-giving':
+      activeQuery = memberGivingQuery;
+      break;
+    case 'giving-statement':
+      activeQuery = givingStatementQuery;
+      break;
+    case 'offering-summary':
+      activeQuery = offeringSummaryQuery;
+      break;
+    case 'category-financial':
+      activeQuery = categoryReportQuery;
+      break;
+    case 'cash-flow':
+      activeQuery = cashFlowQuery;
+      break;
+    default:
+      activeQuery = trialBalanceQuery;
+  }
 
   const { data, isLoading } = activeQuery;
 
