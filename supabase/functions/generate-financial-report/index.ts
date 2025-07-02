@@ -1,6 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import PDFDocument from 'https://esm.sh/pdfkit@0.15.1';
-import { Buffer } from 'node:buffer';
+import { PDFDocument, StandardFonts } from 'https://esm.sh/pdf-lib@1.17.1?target=deno';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,36 +22,37 @@ function sum(transactions: Transaction[] = []): number {
   return transactions.reduce((acc, cur) => acc + (Number(cur.amount) || 0), 0);
 }
 
-function createPdf(data: ReportData): Promise<Uint8Array> {
-  return new Promise((resolve) => {
-    const doc = new PDFDocument({ margin: 40 });
-    const chunks: Uint8Array[] = [];
-    doc.on('data', (c: Uint8Array) => chunks.push(c));
-    doc.on('end', () => {
-      resolve(Buffer.concat(chunks));
-    });
+async function createPdf(data: ReportData): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage();
+  const { height } = page.getSize();
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    doc.fontSize(18).text(data.title || 'Financial Report', { align: 'center' });
-    doc.moveDown();
-
-    doc.fontSize(12);
-    doc.text('Date', 50, doc.y, { continued: true });
-    doc.text('Description', 150, doc.y, { continued: true });
-    doc.text('Amount', 400, doc.y);
-    doc.moveDown();
-
-    (data.transactions || []).forEach((txn) => {
-      doc.text(txn.date, 50, doc.y, { continued: true });
-      doc.text(txn.description, 150, doc.y, { continued: true });
-      doc.text(String(txn.amount), 400, doc.y);
-      doc.moveDown();
-    });
-
-    doc.moveDown();
-    doc.text(`Total: ${sum(data.transactions)}`, 400);
-
-    doc.end();
+  let y = height - 40;
+  page.drawText(data.title || 'Financial Report', {
+    x: 40,
+    y,
+    size: 18,
+    font,
   });
+  y -= 24;
+
+  page.drawText('Date', { x: 40, y, size: 12, font });
+  page.drawText('Description', { x: 150, y, size: 12, font });
+  page.drawText('Amount', { x: 400, y, size: 12, font });
+  y -= 16;
+
+  for (const txn of data.transactions || []) {
+    page.drawText(txn.date, { x: 40, y, size: 12, font });
+    page.drawText(txn.description, { x: 150, y, size: 12, font });
+    page.drawText(String(txn.amount), { x: 400, y, size: 12, font });
+    y -= 16;
+  }
+
+  y -= 8;
+  page.drawText(`Total: ${sum(data.transactions)}`, { x: 400, y, size: 12, font });
+
+  return pdfDoc.save();
 }
 
 serve(async (req: Request) => {
