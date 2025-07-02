@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format, parse } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { ChartOfAccount } from '../models/chartOfAccount.model';
 import { useMessageStore } from '../components/MessageHandler';
@@ -230,7 +231,7 @@ export function useChartOfAccounts() {
         try {
           const { data, error } = await supabase.rpc('get_account_balance', {
             p_account_id: accountId,
-            p_end_date: asOfDate || new Date().toISOString().split('T')[0]
+            p_end_date: asOfDate || format(new Date(), 'yyyy-MM-dd')
           });
 
           if (error) throw error;

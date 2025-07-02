@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { format, parse } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useMessageStore } from '../components/MessageHandler';
@@ -9,8 +10,8 @@ export function useAccountingReports() {
     startDate: string;
     endDate: string;
   }>({
-    startDate: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0], // Jan 1 of current year
-    endDate: new Date().toISOString().split('T')[0], // Today
+    startDate: format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd'), // Jan 1 of current year
+    endDate: format(new Date(), 'yyyy-MM-dd'), // Today
   });
 
   // Get trial balance

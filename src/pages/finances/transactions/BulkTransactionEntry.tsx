@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { format, parse } from 'date-fns';
 import { useNavigate, useParams } from "react-router-dom";
 import { useFinancialTransactionHeaderRepository } from "../../../hooks/useFinancialTransactionHeaderRepository";
 import { useChartOfAccounts } from "../../../hooks/useChartOfAccounts";
@@ -115,7 +116,7 @@ function BulkTransactionEntry() {
 
   // Form state
   const [headerData, setHeaderData] = useState({
-    transaction_date: new Date().toISOString().split("T")[0],
+    transaction_date: format(new Date(), 'yyyy-MM-dd'),
     description: "",
     reference: "",
     source_id: "none",
@@ -464,13 +465,13 @@ function BulkTransactionEntry() {
                   label="Transaction Date"
                   value={
                     headerData.transaction_date
-                      ? new Date(headerData.transaction_date)
+                      ? parse(headerData.transaction_date, 'yyyy-MM-dd', new Date())
                       : undefined
                   }
                   onChange={(date) =>
                     handleHeaderChange(
                       "transaction_date",
-                      date ? date.toISOString().split("T")[0] : "",
+                      date ? format(date, 'yyyy-MM-dd') : ''
                     )
                   }
                   placeholder="Select date"

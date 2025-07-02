@@ -7,6 +7,7 @@ import {
   useSensors,
   DragEndEvent,
 } from '@dnd-kit/core';
+import { format, parse } from 'date-fns';
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -188,19 +189,23 @@ export function DynamicFilter({
           ) : field.type === 'date' ? (
             <div className="flex gap-2 items-center">
               <DatePickerInput
-                value={filter.value ? new Date(filter.value) : undefined}
-                onChange={(date) => updateFilter(index, {
-                  value: date?.toISOString().split('T')[0]
-                })}
+                value={filter.value ? parse(filter.value, 'yyyy-MM-dd', new Date()) : undefined}
+                onChange={(date) =>
+                  updateFilter(index, {
+                    value: date ? format(date, 'yyyy-MM-dd') : ''
+                  })
+                }
               />
               {filter.operator === 'between' && (
                 <>
                   <span className="text-muted-foreground">to</span>
                   <DatePickerInput
-                    value={filter.valueTo ? new Date(filter.valueTo) : undefined}
-                    onChange={(date) => updateFilter(index, {
-                      valueTo: date?.toISOString().split('T')[0]
-                    })}
+                    value={filter.valueTo ? parse(filter.valueTo, 'yyyy-MM-dd', new Date()) : undefined}
+                    onChange={(date) =>
+                      updateFilter(index, {
+                        valueTo: date ? format(date, 'yyyy-MM-dd') : ''
+                      })
+                    }
                   />
                 </>
               )}

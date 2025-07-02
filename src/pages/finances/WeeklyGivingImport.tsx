@@ -1,4 +1,5 @@
 import React from 'react';
+import { format, parse } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { Card, CardContent, CardHeader } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
@@ -547,9 +548,16 @@ function WeeklyGivingImport() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <DatePickerInput
                 label="Date"
-                value={headerData.transaction_date ? new Date(headerData.transaction_date) : undefined}
+                value={
+                  headerData.transaction_date
+                    ? parse(headerData.transaction_date, 'yyyy-MM-dd', new Date())
+                    : undefined
+                }
                 onChange={(d) =>
-                  setHeaderData({ ...headerData, transaction_date: d ? d.toISOString().split('T')[0] : '' })
+                  setHeaderData({
+                    ...headerData,
+                    transaction_date: d ? format(d, 'yyyy-MM-dd') : ''
+                  })
                 }
                 required
               />

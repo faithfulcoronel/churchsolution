@@ -26,7 +26,7 @@ import {
   Filter,
   MoreHorizontal
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
 import { GridColDef } from '@mui/x-data-grid';
@@ -95,8 +95,8 @@ function TransactionList() {
     filters: {
       transaction_date: {
         operator: 'between',
-        value: dateRange.from.toISOString().split('T')[0],
-        valueTo: dateRange.to.toISOString().split('T')[0]
+        value: format(dateRange.from, 'yyyy-MM-dd'),
+        valueTo: format(dateRange.to, 'yyyy-MM-dd')
       }
     },
     relationships: [
@@ -159,8 +159,9 @@ function TransactionList() {
       headerName: 'Date',
       flex: 1,
       minWidth: 120,
-      valueGetter: (params) => new Date(params.row.transaction_date),
-      renderCell: (params) => format(new Date(params.row.transaction_date), 'MMM d, yyyy'),
+      valueGetter: (params) => parse(params.row.transaction_date, 'yyyy-MM-dd', new Date()),
+      renderCell: (params) =>
+        format(parse(params.row.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy'),
     },
     {
       field: 'transaction_number',
