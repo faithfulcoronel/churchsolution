@@ -141,7 +141,7 @@ function WeeklyGivingImport() {
     if (!fileRows.length) return;
 
     const headers = Object.keys(fileRows[0]);
-    const known = ['member', 'name', 'date', 'fund', 'source', 'description'];
+    const known = ['id','member', 'name', 'date', 'fund', 'source', 'description'];
     const categoryHeaders = headers.filter(
       (h) => !known.includes(h.toLowerCase()),
     );
