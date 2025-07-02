@@ -179,17 +179,6 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
 
   React.useEffect(() => {
     if (!storageKey) return;
-    if (savedState?.pageIndex !== undefined) {
-      onPageChange?.(savedState.pageIndex);
-    }
-    if (savedState?.pageSize !== undefined) {
-      onPageSizeChange?.(savedState.pageSize);
-    }
-    // run once on mount to sync pagination state
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  React.useEffect(() => {
-    if (!storageKey) return;
     const saved = getData(`${storageKey}-columnSizing`);
     if (saved && typeof saved === 'object') {
       setColumnSizing(saved as ColumnSizingState);
