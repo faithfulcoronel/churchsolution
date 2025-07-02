@@ -71,7 +71,7 @@ function CategoryProfile({ basePath }: CategoryProfileProps) {
               )}
             </h2>
             <div className="flex space-x-3">
-              <Button variant="outline" onClick={() => navigate('edit')} className="flex items-center" disabled={category.is_system}>
+              <Button variant="outline" onClick={() => navigate('edit')} className="flex items-center">
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit
               </Button>

@@ -144,7 +144,7 @@ function CategoryList() {
                                 <Button variant="ghost" size="sm" onClick={() => navigate(`${cat.id}`)}>
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" onClick={() => navigate(`${cat.id}/edit`)} disabled={cat.is_system}>
+                                <Button variant="ghost" size="sm" onClick={() => navigate(`${cat.id}/edit`)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button variant="ghost" size="sm" onClick={() => handleDelete(cat.id)} disabled={cat.is_system}>

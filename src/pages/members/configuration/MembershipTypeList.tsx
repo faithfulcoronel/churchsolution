@@ -69,7 +69,7 @@ function MembershipTypeList() {
           <Button variant="ghost" size="sm" onClick={e => { e.stopPropagation(); navigate(`${params.row.id}`); }}>
             <Eye className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={e => { e.stopPropagation(); navigate(`${params.row.id}/edit`); }} disabled={params.row.is_system}>
+          <Button variant="ghost" size="sm" onClick={e => { e.stopPropagation(); navigate(`${params.row.id}/edit`); }}>
             <Edit className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={e => { e.stopPropagation(); handleDelete(params.row.id); }} disabled={params.row.is_system}>
