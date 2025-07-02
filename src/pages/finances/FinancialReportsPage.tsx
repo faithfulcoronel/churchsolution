@@ -11,8 +11,7 @@ import { Loader2, Printer, Download } from 'lucide-react';
 import { useFinancialReports } from '../../hooks/useFinancialReports';
 import { tenantUtils } from '../../utils/tenantUtils';
 import { usePermissions } from '../../hooks/usePermissions';
-import PDFDocument from 'pdfkit/js/pdfkit.standalone.js';
-import blobStream from 'blob-stream';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 interface RecordData {
   [key: string]: any;
@@ -130,46 +129,47 @@ function FinancialReportsPage() {
 
   const handlePrint = () => window.print();
 
-  const exportPdfWithPdfKit = () => {
+  const exportPdfWithPdfLib = async () => {
     if (!data || !Array.isArray(data)) return;
 
-    const doc = new PDFDocument({ margin: 40 });
-    const stream = doc.pipe(blobStream());
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage();
+    const { height } = page.getSize();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
     const title = reportOptions.find(r => r.id === reportType)?.label || 'Financial Report';
 
-    doc.fontSize(18).text(title, { align: 'center' });
-    doc.moveDown();
+    let y = height - 40;
+    page.drawText(title, { x: 40, y, size: 18, font });
+    y -= 24;
 
-    doc.fontSize(12);
-    doc.text('Date', 50, doc.y, { continued: true });
-    doc.text('Description', 150, doc.y, { continued: true });
-    doc.text('Amount', 400, doc.y);
-    doc.moveDown();
+    page.drawText('Date', { x: 40, y, size: 12, font });
+    page.drawText('Description', { x: 150, y, size: 12, font });
+    page.drawText('Amount', { x: 400, y, size: 12, font });
+    y -= 16;
 
     (data as RecordData[]).forEach(rec => {
-      doc.text(String(rec.date), 50, doc.y, { continued: true });
-      doc.text(String(rec.description), 150, doc.y, { continued: true });
-      doc.text(String(rec.amount), 400, doc.y);
-      doc.moveDown();
+      page.drawText(String(rec.date), { x: 40, y, size: 12, font });
+      page.drawText(String(rec.description), { x: 150, y, size: 12, font });
+      page.drawText(String(rec.amount), { x: 400, y, size: 12, font });
+      y -= 16;
     });
 
     const total = (data as RecordData[]).reduce(
       (acc, cur) => acc + (Number(cur.amount) || 0),
       0,
     );
-    doc.moveDown();
-    doc.text(`Total: ${total}`, 400);
+    y -= 8;
+    page.drawText(`Total: ${total}`, { x: 400, y, size: 12, font });
 
-    doc.end();
-
-    stream.on('finish', () => {
-      const url = stream.toBlobURL('application/pdf');
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${reportType}.pdf`;
-      link.click();
-    });
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${reportType}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -184,7 +184,7 @@ function FinancialReportsPage() {
             <Printer className="h-4 w-4 mr-2" />
             Print
           </Button>
-          <Button variant="outline" onClick={exportPdfWithPdfKit} className="flex items-center">
+          <Button variant="outline" onClick={exportPdfWithPdfLib} className="flex items-center">
             <Download className="h-4 w-4 mr-2" />
             PDF
           </Button>
