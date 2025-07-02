@@ -25,6 +25,7 @@ interface ParsedRow {
   sourceName: string;
   sourceId: string | null;
   amount: number;
+  status?: 'matched' | 'unmatched';
 }
 
 function toSnake(str: string) {
@@ -90,6 +91,18 @@ function WeeklyGivingImport() {
     [sourcesRes.data],
   );
 
+  const uploadColumns = React.useMemo<GridColDef[]>(
+    () =>
+      fileRows.length
+        ? Object.keys(fileRows[0]).map((h) => ({
+            field: h,
+            headerName: h,
+            flex: 1,
+          }))
+        : [],
+    [fileRows],
+  );
+
   const createMemberMutation = useCreate();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +116,7 @@ function WeeklyGivingImport() {
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const json: Record<string, any>[] = XLSX.utils.sheet_to_json(sheet, { defval: '' });
       setFileRows(json);
-      setStep(1);
+      setStep(0);
     };
     reader.readAsArrayBuffer(file);
   };
@@ -161,13 +174,14 @@ function WeeklyGivingImport() {
           sourceName,
           sourceId: source ? source.id : null,
           amount: amt,
+          status: member ? 'matched' : 'unmatched',
         });
       }
     }
     setGridRows(parsed);
   }, [fileRows, membersRes.data, categoriesRes.data, fundsRes.data, sourcesRes.data]);
 
-  const columns: GridColDef[] = [
+  const editColumns: GridColDef[] = [
     {
       field: 'memberName',
       headerName: 'Member',
@@ -295,6 +309,58 @@ function WeeklyGivingImport() {
     },
   ];
 
+  const matchColumns: GridColDef[] = [
+    { field: 'memberName', headerName: 'Member', flex: 1 },
+    { field: 'categoryName', headerName: 'Category', flex: 1 },
+    { field: 'fundName', headerName: 'Fund', flex: 1 },
+    { field: 'sourceName', headerName: 'Source', flex: 1 },
+    { field: 'amount', headerName: 'Amount', type: 'number', flex: 1 },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 100,
+      valueGetter: (params) => params.row.memberId ? 'matched' : 'unmatched',
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      renderCell: (params) => {
+        const row = params.row as ParsedRow;
+        if (row.memberId) return null;
+        return (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              const [first, ...rest] = row.memberName.split(' ');
+              const newMember = await createMemberMutation.mutateAsync({
+                data: {
+                  first_name: first || row.memberName,
+                  last_name: rest.join(' ') || '.',
+                  gender: 'other',
+                  marital_status: 'single',
+                  contact_number: 'N/A',
+                  address: 'N/A',
+                },
+                fieldsToRemove: ['membership_type', 'membership_status'],
+              });
+              setGridRows((prev) =>
+                prev.map((r) =>
+                  r.id === row.id
+                    ? { ...r, memberId: newMember.id, status: 'matched' }
+                    : r,
+                ),
+              );
+            }}
+          >
+            Create Member
+          </Button>
+        );
+      },
+    },
+  ];
+
   const handleCellEdit = React.useCallback((params: any) => {
     if (
       ['memberName', 'categoryName', 'fundName', 'sourceName'].includes(
@@ -358,55 +424,102 @@ function WeeklyGivingImport() {
 
       <ProgressSteps
         steps={[
-          { title: 'Upload File', description: 'Select an XLSX file' },
-          { title: 'Review', description: 'Verify and edit records' },
+          { title: 'Upload', description: 'Select file & preview' },
+          { title: 'Match Members', description: 'Resolve unmatched members' },
+          { title: 'Finalize', description: 'Edit details and submit' },
         ]}
         currentStep={step}
         orientation="horizontal"
       />
 
       {step === 0 && (
-        <Input type="file" accept=".xls,.xlsx" onChange={handleFileUpload} />
+        <>
+          <Input type="file" accept=".xls,.xlsx" onChange={handleFileUpload} />
+          {fileRows.length > 0 && (
+            <Card className="mt-4">
+              <CardContent>
+                <DataGrid
+                  columns={uploadColumns}
+                  data={fileRows}
+                  totalRows={fileRows.length}
+                  paginationMode="client"
+                  autoHeight
+                />
+                <div className="mt-4 flex justify-end">
+                  <Button onClick={() => setStep(1)} disabled={!fileRows.length}>
+                    Next
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       {step === 1 && (
-        <>
-          <Card>
-            <CardHeader>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DatePickerInput
-                  label="Date"
-                  value={headerData.transaction_date ? new Date(headerData.transaction_date) : undefined}
-                  onChange={(d) =>
-                    setHeaderData({ ...headerData, transaction_date: d ? d.toISOString().split('T')[0] : '' })
-                  }
-                  required
-                />
-                <Input
-                  label="Description"
-                  value={headerData.description}
-                  onChange={(e) =>
-                    setHeaderData({ ...headerData, description: e.target.value })
-                  }
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <DataGrid
-                columns={columns}
-                data={gridRows}
-                totalRows={gridRows.length}
-                paginationMode="client"
-                autoHeight
-                processRowUpdate={(newRow) => newRow}
-                onCellEditCommit={handleCellEdit}
+        <Card>
+          <CardContent>
+            <DataGrid
+              columns={matchColumns}
+              data={gridRows}
+              totalRows={gridRows.length}
+              paginationMode="client"
+              autoHeight
+            />
+            <div className="mt-4 flex justify-between">
+              <Button variant="outline" onClick={() => setStep(0)}>
+                Back
+              </Button>
+              <Button
+                onClick={() => setStep(2)}
+                disabled={!gridRows.every((r) => r.memberId)}
+              >
+                Next
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === 2 && (
+        <Card>
+          <CardHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <DatePickerInput
+                label="Date"
+                value={headerData.transaction_date ? new Date(headerData.transaction_date) : undefined}
+                onChange={(d) =>
+                  setHeaderData({ ...headerData, transaction_date: d ? d.toISOString().split('T')[0] : '' })
+                }
+                required
               />
-              <div className="mt-4 flex justify-end">
-                <Button onClick={finalizeImport}>Finalize Import</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </>
+              <Input
+                label="Description"
+                value={headerData.description}
+                onChange={(e) =>
+                  setHeaderData({ ...headerData, description: e.target.value })
+                }
+              />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <DataGrid
+              columns={editColumns}
+              data={gridRows}
+              totalRows={gridRows.length}
+              paginationMode="client"
+              autoHeight
+              processRowUpdate={(newRow) => newRow}
+              onCellEditCommit={handleCellEdit}
+            />
+            <div className="mt-4 flex justify-between">
+              <Button variant="outline" onClick={() => setStep(1)}>
+                Back
+              </Button>
+              <Button onClick={finalizeImport}>Submit</Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
