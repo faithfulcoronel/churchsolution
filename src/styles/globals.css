@@ -6,6 +6,9 @@
 /* Demos */
 @import 'stylelib/style1';
 
+/* React Day Picker */
+@import 'react-day-picker/dist/style.css';
+
 /* Shadcn UI */
 @import 'shadcn.ui';
 
