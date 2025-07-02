@@ -118,21 +118,24 @@ export class QueryUtils {
   }
 
   private buildRelationshipQuery(relationships: QueryOptions['relationships'] = []): string {
-    const buildNestedSelect = (relationship: NonNullable<QueryOptions['relationships']>[0]): string => {
+    const buildNestedSelect = (
+      relationship: NonNullable<QueryOptions['relationships']>[0]
+    ): string => {
       const baseSelect = relationship.select?.join(',') || '*';
-      
+
       if (!relationship.nestedRelationships?.length) {
-        return `${relationship.table}:${relationship.foreignKey}(${baseSelect})`;
+        return `${relationship.table}!${relationship.foreignKey}(${baseSelect})`;
       }
 
-      const nestedSelects = relationship.nestedRelationships.map(nested => 
-        buildNestedSelect(typeof nested === 'string' 
-          ? { table: nested, foreignKey: 'id' }
-          : nested
+      const nestedSelects = relationship.nestedRelationships.map(nested =>
+        buildNestedSelect(
+          typeof nested === 'string'
+            ? { table: nested, foreignKey: 'id' }
+            : nested
         )
       );
 
-      return `${relationship.table}:${relationship.foreignKey}(${baseSelect},${nestedSelects.join(',')})`;
+      return `${relationship.table}!${relationship.foreignKey}(${baseSelect},${nestedSelects.join(',')})`;
     };
 
     return relationships.map(buildNestedSelect).join(',');
