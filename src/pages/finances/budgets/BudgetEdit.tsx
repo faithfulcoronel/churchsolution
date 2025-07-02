@@ -1,5 +1,6 @@
 // src/pages/finances/BudgetEdit.tsx
 import React, { useState, useEffect } from 'react';
+import { format, parse } from 'date-fns';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
@@ -40,8 +41,8 @@ function BudgetEdit() {
     amount: 0,
     category_id: '',
     description: '',
-    start_date: new Date().toISOString().split('T')[0],
-    end_date: new Date(new Date().getFullYear(), 11, 31).toISOString().split('T')[0],
+    start_date: format(new Date(), 'yyyy-MM-dd'),
+    end_date: format(new Date(new Date().getFullYear(), 11, 31), 'yyyy-MM-dd'),
   });
 
   // Get current tenant
@@ -127,7 +128,10 @@ function BudgetEdit() {
       return;
     }
 
-    if (new Date(formData.end_date) < new Date(formData.start_date)) {
+    if (
+      parse(formData.end_date, 'yyyy-MM-dd', new Date()) <
+      parse(formData.start_date, 'yyyy-MM-dd', new Date())
+    ) {
       setError('End date must be after start date');
       return;
     }
@@ -207,22 +211,34 @@ function BudgetEdit() {
               <div>
                 <DatePickerInput
                   label="Start Date"
-                  value={formData.start_date ? new Date(formData.start_date) : undefined}
-                  onChange={(date) => setFormData(prev => ({
-                    ...prev,
-                    start_date: date?.toISOString().split('T')[0] || ''
-                  }))}
+                  value={
+                    formData.start_date
+                      ? parse(formData.start_date, 'yyyy-MM-dd', new Date())
+                      : undefined
+                  }
+                  onChange={(date) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      start_date: date ? format(date, 'yyyy-MM-dd') : ''
+                    }))
+                  }
                 />
               </div>
 
               <div>
                 <DatePickerInput
                   label="End Date"
-                  value={formData.end_date ? new Date(formData.end_date) : undefined}
-                  onChange={(date) => setFormData(prev => ({
-                    ...prev,
-                    end_date: date?.toISOString().split('T')[0] || ''
-                  }))}
+                  value={
+                    formData.end_date
+                      ? parse(formData.end_date, 'yyyy-MM-dd', new Date())
+                      : undefined
+                  }
+                  onChange={(date) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      end_date: date ? format(date, 'yyyy-MM-dd') : ''
+                    }))
+                  }
                 />
               </div>
 

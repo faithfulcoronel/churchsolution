@@ -6,6 +6,7 @@ import { AuditService } from '../services/AuditService';
 import { TYPES } from '../lib/types';
 import { supabase } from '../lib/supabase';
 import { tenantUtils } from '../utils/tenantUtils';
+import { format, parse } from 'date-fns';
 
 export interface IFinancialTransactionHeaderAdapter
   extends BaseAdapter<FinancialTransactionHeader> {
@@ -72,7 +73,7 @@ export class FinancialTransactionHeaderAdapter
     // Generate transaction number if not provided
     if (!data.transaction_number) {
       data.transaction_number = await this.generateTransactionNumber(
-        data.transaction_date || new Date().toISOString().split('T')[0],
+        data.transaction_date || format(new Date(), 'yyyy-MM-dd'),
         data.status ?? 'draft'
       );
     }

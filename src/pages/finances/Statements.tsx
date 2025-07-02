@@ -1,5 +1,5 @@
 import React from 'react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
 import { useContributionStatements } from '../../hooks/useContributionStatements';
@@ -19,7 +19,7 @@ function Statements() {
   const pdfContent = {
     sections: [
       {
-        title: `Contributions ${format(new Date(dateRange.startDate), 'MMM d, yyyy')} - ${format(new Date(dateRange.endDate), 'MMM d, yyyy')}`,
+        title: `Contributions ${format(parse(dateRange.startDate, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')} - ${format(parse(dateRange.endDate, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}`,
         content: (
           <PDFTable
             headers={['Member', 'Fund', 'Amount']}
@@ -52,14 +52,14 @@ function Statements() {
             <h3 className="text-lg font-medium">Statement Data</h3>
             <DateRangePickerField
               value={{
-                from: new Date(dateRange.startDate),
-                to: new Date(dateRange.endDate),
+                from: parse(dateRange.startDate, 'yyyy-MM-dd', new Date()),
+                to: parse(dateRange.endDate, 'yyyy-MM-dd', new Date()),
               }}
               onChange={(range) => {
                 if (range.from && range.to) {
                   setDateRange({
-                    startDate: range.from.toISOString().split('T')[0],
-                    endDate: range.to.toISOString().split('T')[0],
+                    startDate: format(range.from, 'yyyy-MM-dd'),
+                    endDate: format(range.to, 'yyyy-MM-dd'),
                   });
                 }
               }}

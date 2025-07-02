@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { format } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
@@ -56,8 +57,8 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       id: { operator: 'isAnyOf', value: headerIds },
       transaction_date: {
         operator: 'between',
-        value: dateRange.from.toISOString().split('T')[0],
-        valueTo: dateRange.to.toISOString().split('T')[0],
+        value: format(dateRange.from, 'yyyy-MM-dd'),
+        valueTo: format(dateRange.to, 'yyyy-MM-dd'),
       },
     },
     order: { column: 'transaction_date', ascending: false },

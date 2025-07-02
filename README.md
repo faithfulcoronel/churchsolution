@@ -65,3 +65,7 @@ dependencies run:
 npm install && npm run test
 ```
 
+## Changelog
+
+- Dates are now stored and parsed using local `yyyy-MM-dd` format instead of ISO strings.
+

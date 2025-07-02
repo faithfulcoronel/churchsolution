@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { format, parse } from 'date-fns';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -89,7 +90,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   const sourceOptions = React.useMemo(() => sources.map(s => ({ value: s.id, label: s.name })), [sources]);
 
   const [headerData, setHeaderData] = useState({
-    transaction_date: new Date().toISOString().split('T')[0],
+    transaction_date: format(new Date(), 'yyyy-MM-dd'),
     description: '',
   });
 
@@ -242,8 +243,17 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <DatePickerInput
               label="Date"
-              value={headerData.transaction_date ? new Date(headerData.transaction_date) : undefined}
-              onChange={d => setHeaderData({ ...headerData, transaction_date: d ? d.toISOString().split('T')[0] : '' })}
+              value={
+                headerData.transaction_date
+                  ? parse(headerData.transaction_date, 'yyyy-MM-dd', new Date())
+                  : undefined
+              }
+              onChange={d =>
+                setHeaderData({
+                  ...headerData,
+                  transaction_date: d ? format(d, 'yyyy-MM-dd') : ''
+                })
+              }
               required
               disabled={isDisabled}
             />

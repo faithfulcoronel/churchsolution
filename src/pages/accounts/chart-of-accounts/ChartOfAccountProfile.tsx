@@ -34,7 +34,7 @@ import {
   AlertTriangle,
   Eye
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
 import { GridColDef } from '@mui/x-data-grid';
@@ -90,8 +90,8 @@ function ChartOfAccountProfile() {
     isLoading: isBalanceLoading,
     error: balanceError,
   } = useAccountBalance(
-    id || '', 
-    dateRange.to.toISOString().split('T')[0]
+    id || '',
+    format(dateRange.to, 'yyyy-MM-dd')
   );
   
   // Get account transactions
@@ -101,8 +101,8 @@ function ChartOfAccountProfile() {
     error: transactionsError,
   } = useAccountTransactions(
     id || '',
-    dateRange.from.toISOString().split('T')[0],
-    dateRange.to.toISOString().split('T')[0]
+    format(dateRange.from, 'yyyy-MM-dd'),
+    format(dateRange.to, 'yyyy-MM-dd')
   );
   
   // Delete mutation
@@ -133,7 +133,7 @@ function ChartOfAccountProfile() {
     // Create CSV content
     const headers = ['Date', 'Transaction #', 'Description', 'Debit', 'Credit', 'Status'];
     const rows = transactions.map(tx => [
-      format(new Date(tx.date), 'yyyy-MM-dd'),
+      format(parse(tx.date, 'yyyy-MM-dd', new Date()), 'yyyy-MM-dd'),
       tx.header?.transaction_number || '',
       tx.description,
       tx.debit || '',
@@ -164,8 +164,9 @@ function ChartOfAccountProfile() {
       headerName: 'Date',
       flex: 1,
       minWidth: 120,
-      valueGetter: (params) => new Date(params.row.date),
-      renderCell: (params) => format(new Date(params.row.date), 'MMM d, yyyy'),
+      valueGetter: (params) => parse(params.row.date, 'yyyy-MM-dd', new Date()),
+      renderCell: (params) =>
+        format(parse(params.row.date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy'),
     },
     {
       field: 'transaction_number',

@@ -18,7 +18,7 @@ import {
   FileSpreadsheet,
   Download
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
 
@@ -43,16 +43,17 @@ function AccountDetail() {
   // Get account balance
   const { useAccountBalance, useAccountTransactions } = useAccountingReports();
   const { data: balance, isLoading: isLoadingBalance } = useAccountBalance(
-    id || '', 
-    dateRange.to.toISOString().split('T')[0]
+    id || '',
+    format(dateRange.to, 'yyyy-MM-dd')
   );
   
   // Get account transactions
-  const { data: transactions, isLoading: isLoadingTransactions } = useAccountTransactions(
-    id || '',
-    dateRange.from.toISOString().split('T')[0],
-    dateRange.to.toISOString().split('T')[0]
-  );
+  const { data: transactions, isLoading: isLoadingTransactions } =
+    useAccountTransactions(
+      id || '',
+      format(dateRange.from, 'yyyy-MM-dd'),
+      format(dateRange.to, 'yyyy-MM-dd')
+    );
   
   // Export transactions
   const handleExportCSV = () => {
@@ -61,7 +62,7 @@ function AccountDetail() {
     // Create CSV content
     const headers = ['Date', 'Transaction #', 'Description', 'Debit', 'Credit', 'Status'];
     const rows = transactions.map(tx => [
-      format(new Date(tx.date), 'yyyy-MM-dd'),
+      format(parse(tx.date, 'yyyy-MM-dd', new Date()), 'yyyy-MM-dd'),
       tx.header?.transaction_number || '',
       tx.description,
       tx.debit || '',
@@ -318,7 +319,7 @@ function AccountDetail() {
                   {transactions.map((transaction) => (
                     <tr key={transaction.id} className="hover:bg-muted/50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                        {format(new Date(transaction.date), 'MMM d, yyyy')}
+                        {format(parse(transaction.date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         {transaction.header?.transaction_number || '-'}
