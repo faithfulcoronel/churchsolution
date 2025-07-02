@@ -202,14 +202,6 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     setData(`${storageKey}-state`, state);
   }, [storageKey, sorting, columnFilters, columnVisibility, pageIndex, pageSize, globalFilter]);
 
-  React.useEffect(() => {
-    table.setPageIndex(pageIndex);
-  }, [table, pageIndex]);
-
-  React.useEffect(() => {
-    table.setPageSize(pageSize);
-  }, [table, pageSize]);
-
   const table = useReactTable({
     data,
     columns,
@@ -239,6 +231,14 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
+
+  React.useEffect(() => {
+    table.setPageIndex(pageIndex);
+  }, [table, pageIndex]);
+
+  React.useEffect(() => {
+    table.setPageSize(pageSize);
+  }, [table, pageSize]);
 
   const handleApplyFilter = (columnId: string) => {
     const filterValue = tempFilters[columnId];
