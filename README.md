@@ -80,9 +80,8 @@ The JSON file should contain a `title` and a `transactions` array with `date`,
 `description` and `amount` fields. The generated PDF will list each transaction
 and show the total amount at the bottom.
 
-The `FinancialReportsPage` component now posts report data to a serverless
-function at `/functions/generate-financial-report` when you click the **PDF**
-button. The function generates the PDF using PDFKit and returns it for download.
+The `FinancialReportsPage` component now generates the PDF directly in the
+browser using PDFKit when you click the **PDF** button.
 
 ## Changelog
 
