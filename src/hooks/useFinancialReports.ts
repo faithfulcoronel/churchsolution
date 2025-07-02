@@ -25,7 +25,11 @@ export function useFinancialReports(tenantId: string | null) {
   const useTrialBalance = (endDate: string, options?: QueryOptions) =>
     useQuery({
       queryKey: ['trial-balance', tenantId, endDate],
-      queryFn: () => fetchReport('report_trial_balance', { tenant_id: tenantId, end_date: endDate }),
+      queryFn: () =>
+        fetchReport('report_trial_balance', {
+          p_tenant_id: tenantId,
+          p_end_date: endDate,
+        }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
     });
@@ -40,10 +44,10 @@ export function useFinancialReports(tenantId: string | null) {
       queryKey: ['general-ledger', tenantId, startDate, endDate, accountId],
       queryFn: () =>
         fetchReport('report_general_ledger', {
-          tenant_id: tenantId,
-          start_date: startDate,
-          end_date: endDate,
-          account_id: accountId,
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+          p_account_id: accountId,
         }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
@@ -57,7 +61,11 @@ export function useFinancialReports(tenantId: string | null) {
     useQuery({
       queryKey: ['journal-report', tenantId, startDate, endDate],
       queryFn: () =>
-        fetchReport('report_journal', { tenant_id: tenantId, start_date: startDate, end_date: endDate }),
+        fetchReport('report_journal', {
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+        }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
     });
@@ -71,9 +79,9 @@ export function useFinancialReports(tenantId: string | null) {
       queryKey: ['income-statement', tenantId, startDate, endDate],
       queryFn: () =>
         fetchReport('report_income_statement', {
-          tenant_id: tenantId,
-          start_date: startDate,
-          end_date: endDate,
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
         }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
@@ -88,9 +96,9 @@ export function useFinancialReports(tenantId: string | null) {
       queryKey: ['budget-vs-actual', tenantId, startDate, endDate],
       queryFn: () =>
         fetchReport('report_budget_vs_actual', {
-          tenant_id: tenantId,
-          start_date: startDate,
-          end_date: endDate,
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
         }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
@@ -100,7 +108,11 @@ export function useFinancialReports(tenantId: string | null) {
     useQuery({
       queryKey: ['fund-summary', tenantId, startDate, endDate],
       queryFn: () =>
-        fetchReport('report_fund_summary', { tenant_id: tenantId, start_date: startDate, end_date: endDate }),
+        fetchReport('report_fund_summary', {
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+        }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
     });
@@ -115,10 +127,10 @@ export function useFinancialReports(tenantId: string | null) {
       queryKey: ['member-giving-summary', tenantId, startDate, endDate, memberId],
       queryFn: () =>
         fetchReport('report_member_giving_summary', {
-          tenant_id: tenantId,
-          start_date: startDate,
-          end_date: endDate,
-          member_id: memberId,
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+          p_member_id: memberId,
         }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
@@ -134,10 +146,10 @@ export function useFinancialReports(tenantId: string | null) {
       queryKey: ['giving-statement', tenantId, startDate, endDate, memberId],
       queryFn: () =>
         fetchReport('report_giving_statement', {
-          tenant_id: tenantId,
-          start_date: startDate,
-          end_date: endDate,
-          member_id: memberId,
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+          p_member_id: memberId,
         }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
@@ -148,9 +160,9 @@ export function useFinancialReports(tenantId: string | null) {
       queryKey: ['offering-summary', tenantId, startDate, endDate],
       queryFn: () =>
         fetchReport('report_offering_summary', {
-          tenant_id: tenantId,
-          start_date: startDate,
-          end_date: endDate,
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
         }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
@@ -166,10 +178,10 @@ export function useFinancialReports(tenantId: string | null) {
       queryKey: ['category-financial-report', tenantId, startDate, endDate, categoryId],
       queryFn: () =>
         fetchReport('report_category_financial', {
-          tenant_id: tenantId,
-          start_date: startDate,
-          end_date: endDate,
-          category_id: categoryId,
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+          p_category_id: categoryId,
         }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
@@ -180,9 +192,9 @@ export function useFinancialReports(tenantId: string | null) {
       queryKey: ['cash-flow-summary', tenantId, startDate, endDate],
       queryFn: () =>
         fetchReport('report_cash_flow_summary', {
-          tenant_id: tenantId,
-          start_date: startDate,
-          end_date: endDate,
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
         }),
       enabled: !!tenantId && (options?.enabled ?? true),
       staleTime: 5 * 60 * 1000,
