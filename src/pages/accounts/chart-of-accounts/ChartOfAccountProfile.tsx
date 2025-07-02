@@ -562,6 +562,7 @@ function ChartOfAccountProfile() {
               fileName: `account_${account.code}_transactions`,
             }}
             paginationMode="client"
+            storageKey="chart-account-transactions"
             pageSize={10}
             page={0}
             pageSizeOptions={[5, 10, 25, 50, 100]}

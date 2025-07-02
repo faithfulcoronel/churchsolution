@@ -13,6 +13,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { getData, setData } from '@/utils/LocalStorage';
 
 // Extend the MUI DataGrid props to include our custom props
 export interface DataGridProps<T> extends Omit<MuiDataGridProps<T>, 'rows'> {
@@ -29,6 +30,10 @@ export interface DataGridProps<T> extends Omit<MuiDataGridProps<T>, 'rows'> {
   error?: string;
   paginationMode?: 'client' | 'server';
   showQuickFilter?: boolean;
+  /**
+   * Optional key to persist pagination and sorting state in localStorage
+   */
+  storageKey?: string;
 }
 
 // Style the DataGrid to match our theme
@@ -137,6 +142,7 @@ export function DataGrid<T>({
   error,
   paginationMode = 'server',
   showQuickFilter = false,
+  storageKey,
   columns,
   ...props
 }: DataGridProps<T>) {
@@ -145,6 +151,11 @@ export function DataGrid<T>({
     () => cn(inputVariants({ size: 'sm' })),
     []
   );
+
+  const initialCache = React.useMemo(() => {
+    if (!storageKey) return undefined;
+    return getData(`${storageKey}-state`) as any;
+  }, [storageKey]);
 
   // Create a custom theme that inherits from the current theme.
   // Memoize the theme to avoid unnecessary recalculations.
@@ -165,6 +176,23 @@ export function DataGrid<T>({
   );
 
   React.useEffect(() => {
+    if (!initialCache) return;
+    const saved = initialCache;
+    if (onPageChange && saved.page !== undefined && saved.page !== page) {
+      onPageChange(saved.page);
+    }
+    if (onPageSizeChange && saved.pageSize !== undefined && saved.pageSize !== pageSize) {
+      onPageSizeChange(saved.pageSize);
+    }
+    if (onSortChange && saved.sortModel) {
+      onSortChange(saved.sortModel);
+    }
+    if (onFilterChange && saved.filterModel) {
+      onFilterChange(saved.filterModel);
+    }
+  }, []); // run once on mount
+
+  React.useEffect(() => {
     const lastPage = Math.max(0, Math.ceil(totalRows / pageSize) - 1);
     if (page > lastPage) onPageChange?.(lastPage);
   }, [totalRows, pageSize, page]);
@@ -173,6 +201,26 @@ export function DataGrid<T>({
   const handlePaginationModelChange = (model: GridPaginationModel) => {
     onPageChange?.(model.page);
     onPageSizeChange?.(model.pageSize);
+    if (storageKey) {
+      const saved = (getData(`${storageKey}-state`) as any) || {};
+      setData(`${storageKey}-state`, { ...saved, page: model.page, pageSize: model.pageSize });
+    }
+  };
+
+  const handleSortModelChange = (model: GridSortModel) => {
+    onSortChange?.(model);
+    if (storageKey) {
+      const saved = (getData(`${storageKey}-state`) as any) || {};
+      setData(`${storageKey}-state`, { ...saved, sortModel: model });
+    }
+  };
+
+  const handleFilterModelChange = (model: GridFilterModel) => {
+    onFilterChange?.(model);
+    if (storageKey) {
+      const saved = (getData(`${storageKey}-state`) as any) || {};
+      setData(`${storageKey}-state`, { ...saved, filterModel: model });
+    }
   };
 
   return (
@@ -204,9 +252,14 @@ export function DataGrid<T>({
           },
           ...(error ? { errorOverlay: { message: error } } : {}),
         }}
+        initialState={initialCache ? {
+          pagination: { paginationModel: { page: initialCache.page ?? page, pageSize: initialCache.pageSize ?? pageSize } },
+          sorting: { sortModel: initialCache.sortModel ?? [] },
+          filter: initialCache.filterModel ? { filterModel: initialCache.filterModel } : undefined,
+        } : undefined}
         onPaginationModelChange={handlePaginationModelChange}
-        onSortModelChange={onSortChange}
-        onFilterModelChange={onFilterChange}
+        onSortModelChange={handleSortModelChange}
+        onFilterModelChange={handleFilterModelChange}
         paginationModel={{ page, pageSize }}
         getRowClassName={() => 'cursor-pointer hover:bg-muted/50'}
         {...props}

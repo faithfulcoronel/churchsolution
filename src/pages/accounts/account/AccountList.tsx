@@ -280,25 +280,26 @@ function AccountList() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <DataGrid<Account>
-                columns={columns}
-                data={filteredAccounts}
-                totalRows={filteredAccounts.length}
-                loading={isLoading}
-                error={error instanceof Error ? error.message : undefined}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
-                getRowId={(row) => row.id}
-                onRowClick={(params) => handleRowClick(params)}
-                autoHeight
-                paginationMode="client"
-                disableColumnMenu={false}
-                disableColumnFilter={false}
-                disableColumnSelector={false}
-                disableDensitySelector={false}
-                page={page}
-                pageSize={pageSize}
-                slots={{
+                <DataGrid<Account>
+                  columns={columns}
+                  data={filteredAccounts}
+                  totalRows={filteredAccounts.length}
+                  loading={isLoading}
+                  error={error instanceof Error ? error.message : undefined}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                  getRowId={(row) => row.id}
+                  onRowClick={(params) => handleRowClick(params)}
+                  autoHeight
+                  paginationMode="client"
+                  disableColumnMenu={false}
+                  disableColumnFilter={false}
+                  disableColumnSelector={false}
+                  disableDensitySelector={false}
+                  page={page}
+                  pageSize={pageSize}
+                  storageKey="account-list-grid"
+                  slots={{
                   toolbar: () => (
                     <div className="flex justify-between items-center p-4">
                       <h3 className="text-lg font-semibold">Accounts</h3>

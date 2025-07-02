@@ -131,17 +131,35 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
 
   const exportOptions = { ...defaultExportOptions, ...providedExportOptions };
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [columnSizing, setColumnSizing] = React.useState<ColumnSizingState>({});
+  type PersistedState = {
+    sorting: SortingState;
+    columnFilters: ColumnFiltersState;
+    columnVisibility: VisibilityState;
+    pageIndex: number;
+    pageSize: number;
+    globalFilter: string;
+  };
+
+  const savedState = React.useMemo(() => {
+    if (!storageKey) return undefined;
+    return getData(`${storageKey}-state`) as Partial<PersistedState> | undefined;
+  }, [storageKey]);
+
+  const [sorting, setSorting] = React.useState<SortingState>(savedState?.sorting ?? []);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(savedState?.columnFilters ?? []);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(savedState?.columnVisibility ?? {});
+  const [columnSizing, setColumnSizing] = React.useState<ColumnSizingState>(() => {
+    if (!storageKey) return {};
+    const sizing = getData(`${storageKey}-columnSizing`);
+    return (sizing as ColumnSizingState) ?? {};
+  });
   const [columnSizingInfo, setColumnSizingInfo] = React.useState<ColumnSizingInfoState>({} as ColumnSizingInfoState);
   const [rowSelection, setRowSelection] = React.useState({});
-  const [globalFilter, setGlobalFilter] = React.useState('');
+  const [globalFilter, setGlobalFilter] = React.useState(savedState?.globalFilter ?? '');
   const [openFilterMenus, setOpenFilterMenus] = React.useState<Record<string, boolean>>({});
   const [tempFilters, setTempFilters] = React.useState<Record<string, string>>({});
-  const [pageIndex, setPageIndex] = React.useState(0);
-  const [pageSize, setPageSize] = React.useState(pagination.pageSize ?? 10);
+  const [pageIndex, setPageIndex] = React.useState(savedState?.pageIndex ?? 0);
+  const [pageSize, setPageSize] = React.useState(savedState?.pageSize ?? pagination.pageSize ?? 10);
   const pageSizeOptions = pagination.pageSizeOptions ?? [5, 10, 20, 50, 100];
 
   const defaultColumn = React.useMemo(() => ({
@@ -170,6 +188,27 @@ export function DataGridProvider<TData, TValue>({ children, ...props }: DataGrid
   React.useEffect(() => {
     onFilterChange?.(columnFilters, globalFilter);
   }, [columnFilters, globalFilter, onFilterChange]);
+
+  React.useEffect(() => {
+    if (!storageKey) return;
+    const state: PersistedState = {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      pageIndex,
+      pageSize,
+      globalFilter,
+    };
+    setData(`${storageKey}-state`, state);
+  }, [storageKey, sorting, columnFilters, columnVisibility, pageIndex, pageSize, globalFilter]);
+
+  React.useEffect(() => {
+    table.setPageIndex(pageIndex);
+  }, [table, pageIndex]);
+
+  React.useEffect(() => {
+    table.setPageSize(pageSize);
+  }, [table, pageSize]);
 
   const table = useReactTable({
     data,

@@ -97,6 +97,7 @@ function PermissionList() {
                 pageSize={pageSize}
                 autoHeight
                 getRowId={(row) => row.id}
+                storageKey="permission-list-grid"
               />
             )}
           </CardContent>

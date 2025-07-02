@@ -126,6 +126,7 @@ function MembershipTypeList() {
                 onRowClick={params => navigate(`${params.row.id}`)}
                 autoHeight
                 paginationMode="client"
+                storageKey="membership-type-list-grid"
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-8">
