@@ -67,9 +67,8 @@ npm install && npm run test
 
 ## Generating PDF reports
 
-The project includes a small utility for rendering financial reports using
-[Handlebars](https://handlebarsjs.com/) templates and
-[Puppeteer](https://pptr.dev/) to generate a PDF.
+A simple Node script is included for producing PDF versions of financial reports
+using [PDFKit](https://pdfkit.org/).
 
 Create a data file in JSON format and run:
 
@@ -77,8 +76,9 @@ Create a data file in JSON format and run:
 npm run generate-report -- <data.json> <output.pdf>
 ```
 
-This will compile `templates/financial-report.hbs` with your data and save the
-resulting PDF to the specified location.
+The JSON file should contain a `title` and a `transactions` array with `date`,
+`description` and `amount` fields. The generated PDF will list each transaction
+and show the total amount at the bottom.
 
 ## Changelog
 
