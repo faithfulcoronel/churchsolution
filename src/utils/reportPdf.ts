@@ -1,4 +1,6 @@
 import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { formatCurrency } from './currency';
+import { useCurrencyStore } from '../stores/currencyStore';
 
 export interface PdfOptions {
   title: string;
@@ -8,6 +10,41 @@ export interface PdfOptions {
 export interface PdfColumn {
   key: string;
   header: string;
+}
+
+function splitTextIntoLines(
+  text: string,
+  font: any,
+  size: number,
+  maxWidth: number,
+) {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = '';
+
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(next, size) <= maxWidth) {
+      current = next;
+    } else {
+      if (current) lines.push(current);
+      current = word;
+      while (font.widthOfTextAtSize(current, size) > maxWidth) {
+        let i = 1;
+        while (
+          i <= current.length &&
+          font.widthOfTextAtSize(current.substring(0, i), size) <= maxWidth
+        ) {
+          i++;
+        }
+        const part = current.substring(0, i - 1);
+        lines.push(part);
+        current = current.substring(i - 1);
+      }
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
 }
 
 export async function exportReportPdf(
@@ -27,6 +64,20 @@ export async function exportReportPdf(
   const rowHeight = 16;
   const columnWidth = (width - margin * 2) / columns.length;
   let y = height - margin;
+  let pageNumber = 1;
+
+  const { currency } = useCurrencyStore.getState();
+
+  const drawPageNumber = (p: any, num: number) => {
+    const text = `Page ${num}`;
+    const textWidth = font.widthOfTextAtSize(text, 10);
+    p.drawText(text, {
+      x: width / 2 - textWidth / 2,
+      y: margin / 2,
+      size: 10,
+      font,
+    });
+  };
 
   page.drawText(title, { x: margin, y, size: 18, font });
   y -= 24;
@@ -45,25 +96,40 @@ export async function exportReportPdf(
 
   drawHeaders();
   for (const rec of data) {
-    if (y < margin) {
+    const cellLines = columns.map(col => {
+      let value = rec[col.key];
+      if (['debit', 'credit', 'amount'].includes(col.key)) {
+        value = formatCurrency(Number(value) || 0, currency);
+      }
+      return splitTextIntoLines(String(value ?? ''), font, 12, columnWidth - 2);
+    });
+
+    const maxLines = Math.max(...cellLines.map(l => l.length));
+    if (y - rowHeight * maxLines < margin) {
+      drawPageNumber(page, pageNumber);
+      pageNumber++;
       page = pdfDoc.addPage();
       y = height - margin;
       drawHeaders();
     }
 
-    columns.forEach((col, index) => {
-      page.drawText(String(rec[col.key] ?? ''), {
-        x: margin + index * columnWidth,
-        y,
-        font,
-        size: 12,
+    cellLines.forEach((lines, index) => {
+      lines.forEach((line, lineIdx) => {
+        page.drawText(line, {
+          x: margin + index * columnWidth,
+          y: y - lineIdx * rowHeight,
+          font,
+          size: 12,
+        });
       });
     });
-    y -= rowHeight;
+    y -= rowHeight * maxLines;
   }
 
   if (columns.some(c => c.key === 'amount')) {
-    if (y < margin) {
+    if (y - rowHeight < margin) {
+      drawPageNumber(page, pageNumber);
+      pageNumber++;
       page = pdfDoc.addPage();
       y = height - margin;
       drawHeaders();
@@ -71,13 +137,15 @@ export async function exportReportPdf(
     const total = data.reduce((acc, cur) => acc + (Number(cur.amount) || 0), 0);
     y -= 8;
     const amountIndex = columns.findIndex(c => c.key === 'amount');
-    page.drawText(`Total: ${total}`, {
+    page.drawText(`Total: ${formatCurrency(total, currency)}`, {
       x: margin + amountIndex * columnWidth,
       y,
       size: 12,
       font,
     });
   }
+
+  drawPageNumber(page, pageNumber);
 
   const pdfBytes = await pdfDoc.save();
   const blob = new Blob([pdfBytes], { type: 'application/pdf' });
