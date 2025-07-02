@@ -1,6 +1,10 @@
 const getData = (key: string): unknown | undefined => {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return undefined;
+  }
+
   try {
-    const data = localStorage.getItem(key);
+    const data = window.localStorage.getItem(key);
 
     if (data) {
       return JSON.parse(data);
@@ -11,8 +15,12 @@ const getData = (key: string): unknown | undefined => {
 };
 
 const setData = (key: string, value: unknown): void => {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return;
+  }
+
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    window.localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
     console.error('Save in local storage', error);
   }
