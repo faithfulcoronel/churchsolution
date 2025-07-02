@@ -11,7 +11,8 @@ import { Loader2, Printer, Download } from 'lucide-react';
 import { useFinancialReports } from '../../hooks/useFinancialReports';
 import { tenantUtils } from '../../utils/tenantUtils';
 import { usePermissions } from '../../hooks/usePermissions';
-import { supabase } from '../../lib/supabase';
+import PDFDocument from 'pdfkit/js/pdfkit.standalone.js';
+import blobStream from 'blob-stream';
 
 interface RecordData {
   [key: string]: any;
@@ -129,34 +130,46 @@ function FinancialReportsPage() {
 
   const handlePrint = () => window.print();
 
-  const exportPdfWithPdfKit = async () => {
+  const exportPdfWithPdfKit = () => {
     if (!data || !Array.isArray(data)) return;
-    try {
-      const { data: pdfBlob, error } = await supabase.functions.invoke(
-        'generate-financial-report',
-        {
-          as: 'blob',
-          body: {
-            title: reportOptions.find(r => r.id === reportType)?.label,
-            transactions: data,
-          },
-        },
-      );
 
-      if (error) throw error;
-      if (!pdfBlob) throw new Error('Failed to generate PDF');
+    const doc = new PDFDocument({ margin: 40 });
+    const stream = doc.pipe(blobStream());
 
-      const url = window.URL.createObjectURL(pdfBlob);
+    const title = reportOptions.find(r => r.id === reportType)?.label || 'Financial Report';
+
+    doc.fontSize(18).text(title, { align: 'center' });
+    doc.moveDown();
+
+    doc.fontSize(12);
+    doc.text('Date', 50, doc.y, { continued: true });
+    doc.text('Description', 150, doc.y, { continued: true });
+    doc.text('Amount', 400, doc.y);
+    doc.moveDown();
+
+    (data as RecordData[]).forEach(rec => {
+      doc.text(String(rec.date), 50, doc.y, { continued: true });
+      doc.text(String(rec.description), 150, doc.y, { continued: true });
+      doc.text(String(rec.amount), 400, doc.y);
+      doc.moveDown();
+    });
+
+    const total = (data as RecordData[]).reduce(
+      (acc, cur) => acc + (Number(cur.amount) || 0),
+      0,
+    );
+    doc.moveDown();
+    doc.text(`Total: ${total}`, 400);
+
+    doc.end();
+
+    stream.on('finish', () => {
+      const url = stream.toBlobURL('application/pdf');
       const link = document.createElement('a');
       link.href = url;
       link.download = `${reportType}.pdf`;
-      document.body.appendChild(link);
       link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-    }
+    });
   };
 
   return (
