@@ -6,6 +6,7 @@ import { Button } from '../../../components/ui2/button';
 import { Printer, Download } from 'lucide-react';
 import { useFinancialReports } from '../../../hooks/useFinancialReports';
 import { exportReportPdf } from '../../../utils';
+import { FundSummary } from '../../../models/financialReport.model';
 
 interface Props {
   tenantId: string | null;
@@ -19,7 +20,7 @@ export default function FundSummaryReport({ tenantId, dateRange }: Props) {
     format(dateRange.to, 'yyyy-MM-dd'),
   );
 
-  const columns = React.useMemo<ColumnDef<any>[]>(
+  const columns = React.useMemo<ColumnDef<FundSummary>[]>(
     () => [
       { accessorKey: 'fund_name', header: 'Fund' },
       { accessorKey: 'income', header: 'Income' },
@@ -43,7 +44,7 @@ export default function FundSummaryReport({ tenantId, dateRange }: Props) {
         <Button variant="outline" onClick={handlePrint} icon={<Printer className="h-4 w-4" />}>Print</Button>
         <Button variant="outline" onClick={handlePdf} icon={<Download className="h-4 w-4" />}>PDF</Button>
       </div>
-      <DataGrid
+      <DataGrid<FundSummary>
         data={data || []}
         columns={columns}
         loading={isLoading}
