@@ -302,7 +302,11 @@ BEGIN
     m.last_name,
     SUM(ft.credit) AS total_amount
   FROM members m
-  LEFT JOIN financial_transactions ft ON ft.member_id = m.id
+  LEFT JOIN accounts a
+    ON a.member_id = m.id
+    AND a.deleted_at IS NULL
+  LEFT JOIN financial_transactions ft
+    ON ft.accounts_account_id = a.id
     AND ft.date BETWEEN p_start_date AND p_end_date
     AND ft.type = 'income'
   WHERE m.tenant_id = p_tenant_id
@@ -344,10 +348,12 @@ BEGIN
     f.name,
     ft.credit,
     ft.description
-  FROM financial_transactions ft
+  FROM accounts a
+  JOIN members m ON a.member_id = m.id
+  JOIN financial_transactions ft ON ft.accounts_account_id = a.id
   LEFT JOIN funds f ON ft.fund_id = f.id
-  WHERE ft.tenant_id = p_tenant_id
-    AND ft.member_id = p_member_id
+  WHERE m.tenant_id = p_tenant_id
+    AND m.id = p_member_id
     AND ft.date BETWEEN p_start_date AND p_end_date
     AND ft.type = 'income'
   ORDER BY ft.date;
