@@ -130,11 +130,11 @@ function FinancialReportsPage() {
   const handlePrint = () => window.print();
 
   const exportPdfWithPdfLib = async () => {
-    if (!data || !Array.isArray(data)) return;
+    if (!data || !Array.isArray(data) || data.length === 0) return;
 
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage();
-    const { height } = page.getSize();
+    const { width, height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
     const title = reportOptions.find(r => r.id === reportType)?.label || 'Financial Report';
@@ -143,24 +143,40 @@ function FinancialReportsPage() {
     page.drawText(title, { x: 40, y, size: 18, font });
     y -= 24;
 
-    page.drawText('Date', { x: 40, y, size: 12, font });
-    page.drawText('Description', { x: 150, y, size: 12, font });
-    page.drawText('Amount', { x: 400, y, size: 12, font });
+    const keys = Object.keys(data[0] as RecordData);
+    const columnWidth = (width - 80) / keys.length;
+
+    keys.forEach((key, index) => {
+      page.drawText(startCase(key), { x: 40 + index * columnWidth, y, size: 12, font });
+    });
     y -= 16;
 
     (data as RecordData[]).forEach(rec => {
-      page.drawText(String(rec.date), { x: 40, y, size: 12, font });
-      page.drawText(String(rec.description), { x: 150, y, size: 12, font });
-      page.drawText(String(rec.amount), { x: 400, y, size: 12, font });
+      keys.forEach((key, index) => {
+        page.drawText(String(rec[key] ?? ''), {
+          x: 40 + index * columnWidth,
+          y,
+          font,
+          size: 12,
+        });
+      });
       y -= 16;
     });
 
-    const total = (data as RecordData[]).reduce(
-      (acc, cur) => acc + (Number(cur.amount) || 0),
-      0,
-    );
-    y -= 8;
-    page.drawText(`Total: ${total}`, { x: 400, y, size: 12, font });
+    if (keys.includes('amount')) {
+      const total = (data as RecordData[]).reduce(
+        (acc, cur) => acc + (Number(cur.amount) || 0),
+        0,
+      );
+      y -= 8;
+      const amountIndex = keys.indexOf('amount');
+      page.drawText(`Total: ${total}`, {
+        x: 40 + amountIndex * columnWidth,
+        y,
+        size: 12,
+        font,
+      });
+    }
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
