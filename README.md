@@ -65,6 +65,21 @@ dependencies run:
 npm install && npm run test
 ```
 
+## Generating PDF reports
+
+The project includes a small utility for rendering financial reports using
+[Handlebars](https://handlebarsjs.com/) templates and
+[Puppeteer](https://pptr.dev/) to generate a PDF.
+
+Create a data file in JSON format and run:
+
+```bash
+npm run generate-report -- <data.json> <output.pdf>
+```
+
+This will compile `templates/financial-report.hbs` with your data and save the
+resulting PDF to the specified location.
+
 ## Changelog
 
 - Dates are now stored and parsed using local `yyyy-MM-dd` format instead of ISO strings.
