@@ -99,11 +99,13 @@ function WeeklyGivingImport() {
   const uploadColumns = React.useMemo<GridColDef[]>(
     () =>
       fileRows.length
-        ? Object.keys(fileRows[0]).map((h) => ({
-            field: h,
-            headerName: h,
-            flex: 1,
-          }))
+        ? Object.keys(fileRows[0])
+            .filter((h) => h !== 'id')
+            .map((h) => ({
+              field: h,
+              headerName: h,
+              flex: 1,
+            }))
         : [],
     [fileRows],
   );
@@ -120,7 +122,8 @@ function WeeklyGivingImport() {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const json: Record<string, any>[] = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-      setFileRows(json);
+      const withIds = json.map((row, index) => ({ id: index, ...row }));
+      setFileRows(withIds);
       setStep(0);
     };
     reader.readAsArrayBuffer(file);
