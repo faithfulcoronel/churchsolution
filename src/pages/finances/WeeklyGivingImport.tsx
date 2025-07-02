@@ -96,6 +96,14 @@ function WeeklyGivingImport() {
     [sourcesRes.data],
   );
 
+  const [defaultSourceId, setDefaultSourceId] = React.useState('');
+
+  React.useEffect(() => {
+    if (!defaultSourceId && sourceOptions.length) {
+      setDefaultSourceId(sourceOptions[0].value);
+    }
+  }, [sourceOptions, defaultSourceId]);
+
   const uploadColumns = React.useMemo<GridColDef[]>(
     () =>
       fileRows.length
@@ -171,6 +179,15 @@ function WeeklyGivingImport() {
           (s) => s.name.toLowerCase() === sourceName.toLowerCase(),
         );
 
+        let resolvedSourceId = source ? source.id : null;
+        let resolvedSourceName = source ? source.name : sourceName;
+
+        if (!source && defaultSourceId) {
+          const def = sources.find((s) => s.id === defaultSourceId);
+          resolvedSourceId = def ? def.id : null;
+          resolvedSourceName = def ? def.name : resolvedSourceName;
+        }
+
         const row = {
           id: idx++,
           memberName,
@@ -179,8 +196,8 @@ function WeeklyGivingImport() {
           categoryId: category ? category.id : null,
           fundName,
           fundId: fund ? fund.id : null,
-          sourceName,
-          sourceId: source ? source.id : null,
+          sourceName: resolvedSourceName,
+          sourceId: resolvedSourceId,
           amount: amt,
           status: 'unmatched' as const,
         };
@@ -469,7 +486,20 @@ function WeeklyGivingImport() {
 
       {step === 0 && (
         <>
-          <Input type="file" accept=".xls,.xlsx" onChange={handleFileUpload} />
+          <div className="space-y-4">
+            <Input type="file" accept=".xls,.xlsx" onChange={handleFileUpload} />
+            <div>
+              <label className="block text-sm font-medium mb-1.5 text-foreground">
+                Default Source
+              </label>
+              <Combobox
+                options={sourceOptions}
+                value={defaultSourceId}
+                onChange={(v) => setDefaultSourceId(v)}
+                placeholder="Select source"
+              />
+            </div>
+          </div>
           {fileRows.length > 0 && (
             <Card className="mt-4">
               <CardContent>
