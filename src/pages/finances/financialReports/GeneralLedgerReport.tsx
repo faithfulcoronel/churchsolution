@@ -29,7 +29,8 @@ export default function GeneralLedgerReport({ tenantId, dateRange, accountId }: 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       { accessorKey: 'entry_date', header: 'Date' },
-      { accessorKey: 'account_id', header: 'Account' },
+      { accessorKey: 'account_code', header: 'Account Code' },
+      { accessorKey: 'account_name', header: 'Account Name' },
       { accessorKey: 'description', header: 'Description' },
       { accessorKey: 'debit', header: 'Debit' },
       { accessorKey: 'credit', header: 'Credit' },
