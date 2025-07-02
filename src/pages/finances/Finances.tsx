@@ -16,6 +16,7 @@ const FundList = React.lazy(() => import('./funds/FundList'));
 const FundAddEdit = React.lazy(() => import('./funds/FundAddEdit'));
 const FundProfile = React.lazy(() => import('./funds/FundProfile'));
 const Reports = React.lazy(() => import('./Reports'));
+const FinancialReportsPage = React.lazy(() => import('./FinancialReportsPage'));
 const Statements = React.lazy(() => import('./Statements'));
 const IncomeExpenseList = React.lazy(() => import('./incomeExpense/IncomeExpenseList'));
 const IncomeExpenseAddEdit = React.lazy(() => import('./incomeExpense/IncomeExpenseAddEdit'));
@@ -142,6 +143,7 @@ function Finances() {
         <Route path="giving/:id/edit" element={<IncomeExpenseAddEdit transactionType="income" />} />
         <Route path="giving/:id" element={<IncomeExpenseProfile transactionType="income" />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="financial-reports" element={<FinancialReportsPage />} />
         <Route path="statements" element={<Statements />} />
       </Routes>
     </Suspense>
