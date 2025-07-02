@@ -32,13 +32,15 @@ export class IncomeExpenseTransactionMappingAdapter
 
   protected defaultRelationships: QueryOptions['relationships'] = [
     {
-      table: 'debit_transaction',
+      table: 'financial_transactions',
       foreignKey: 'debit_transaction_id',
+      alias: 'debit_transaction',
       select: ['id', 'account_id', 'amount', 'debit', 'credit']
     },
     {
-      table: 'credit_transaction',
+      table: 'financial_transactions',
       foreignKey: 'credit_transaction_id',
+      alias: 'credit_transaction',
       select: ['id', 'account_id', 'amount', 'debit', 'credit']
     }
   ];

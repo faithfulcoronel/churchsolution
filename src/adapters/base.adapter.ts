@@ -22,10 +22,12 @@ export interface QueryOptions {
   relationships?: {
     table: string;
     foreignKey: string;
+    alias?: string;
     select?: string[];
     nestedRelationships?: Array<string | {
       table: string;
       foreignKey: string;
+      alias?: string;
       select?: string[];
     }>;
   }[];
@@ -137,22 +139,28 @@ export class BaseAdapter<T extends BaseModel> {
     return applyFilter(filter.operator, filter.value, filter.valueTo);
   }
 
-  protected buildRelationshipQuery(relationships: QueryOptions['relationships'] = []): string {
-    const buildNestedSelect = (relationship: NonNullable<QueryOptions['relationships']>[0]): string => {
+  protected buildRelationshipQuery(
+    relationships: QueryOptions['relationships'] = []
+  ): string {
+    const buildNestedSelect = (
+      relationship: NonNullable<QueryOptions['relationships']>[0]
+    ): string => {
       const baseSelect = relationship.select?.join(',') || '*';
-      
+      const alias = relationship.alias ? `${relationship.alias}:` : '';
+
       if (!relationship.nestedRelationships?.length) {
-        return `${relationship.table}!${relationship.foreignKey}(${baseSelect})`;
+        return `${alias}${relationship.table}!${relationship.foreignKey}(${baseSelect})`;
       }
 
-      const nestedSelects = relationship.nestedRelationships.map(nested => 
-        buildNestedSelect(typeof nested === 'string' 
-          ? { table: nested, foreignKey: 'id' }
-          : nested
+      const nestedSelects = relationship.nestedRelationships.map(nested =>
+        buildNestedSelect(
+          typeof nested === 'string'
+            ? { table: nested, foreignKey: 'id' }
+            : nested
         )
       );
 
-      return `${relationship.table}!${relationship.foreignKey}(${baseSelect},${nestedSelects.join(',')})`;
+      return `${alias}${relationship.table}!${relationship.foreignKey}(${baseSelect},${nestedSelects.join(',')})`;
     };
 
     return relationships.map(buildNestedSelect).join(',');
