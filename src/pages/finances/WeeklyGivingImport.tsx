@@ -14,6 +14,11 @@ import { useFinancialSourceRepository } from '../../hooks/useFinancialSourceRepo
 import { useDonationImportService } from '../../hooks/useDonationImportService';
 import { tenantUtils } from '../../utils/tenantUtils';
 
+const computeStatus = (row: Omit<ParsedRow, 'status'> & { status?: ParsedRow['status'] }): ParsedRow['status'] =>
+  row.memberId && row.categoryId && row.fundId && row.sourceId
+    ? 'matched'
+    : 'unmatched';
+
 interface ParsedRow {
   id: number;
   memberName: string;
@@ -25,7 +30,7 @@ interface ParsedRow {
   sourceName: string;
   sourceId: string | null;
   amount: number;
-  status?: 'matched' | 'unmatched';
+  status: 'matched' | 'unmatched';
 }
 
 function toSnake(str: string) {
@@ -163,7 +168,7 @@ function WeeklyGivingImport() {
           (s) => s.name.toLowerCase() === sourceName.toLowerCase(),
         );
 
-        parsed.push({
+        const row = {
           id: idx++,
           memberName,
           memberId: member ? member.id : null,
@@ -174,8 +179,10 @@ function WeeklyGivingImport() {
           sourceName,
           sourceId: source ? source.id : null,
           amount: amt,
-          status: member ? 'matched' : 'unmatched',
-        });
+          status: 'unmatched' as const,
+        };
+        row.status = computeStatus(row);
+        parsed.push(row);
       }
     }
     setGridRows(parsed);
@@ -197,7 +204,10 @@ function WeeklyGivingImport() {
             setGridRows((prev) =>
               prev.map((r) =>
                 r.id === params.row.id
-                  ? { ...r, memberId: v || null, memberName: label }
+                  ? (() => {
+                      const updated = { ...r, memberId: v || null, memberName: label };
+                      return { ...updated, status: computeStatus(updated) };
+                    })()
                   : r,
               ),
             );
@@ -220,7 +230,10 @@ function WeeklyGivingImport() {
             setGridRows((prev) =>
               prev.map((r) =>
                 r.id === params.row.id
-                  ? { ...r, categoryId: v || null, categoryName: label }
+                  ? (() => {
+                      const updated = { ...r, categoryId: v || null, categoryName: label };
+                      return { ...updated, status: computeStatus(updated) };
+                    })()
                   : r,
               ),
             );
@@ -242,7 +255,12 @@ function WeeklyGivingImport() {
               fundOptions.find((o) => o.value === v)?.label || params.row.fundName;
             setGridRows((prev) =>
               prev.map((r) =>
-                r.id === params.row.id ? { ...r, fundId: v || null, fundName: label } : r,
+                r.id === params.row.id
+                  ? (() => {
+                      const updated = { ...r, fundId: v || null, fundName: label };
+                      return { ...updated, status: computeStatus(updated) };
+                    })()
+                  : r,
               ),
             );
           }}
@@ -263,7 +281,12 @@ function WeeklyGivingImport() {
               sourceOptions.find((o) => o.value === v)?.label || params.row.sourceName;
             setGridRows((prev) =>
               prev.map((r) =>
-                r.id === params.row.id ? { ...r, sourceId: v || null, sourceName: label } : r,
+                r.id === params.row.id
+                  ? (() => {
+                      const updated = { ...r, sourceId: v || null, sourceName: label };
+                      return { ...updated, status: computeStatus(updated) };
+                    })()
+                  : r,
               ),
             );
           }}
@@ -271,56 +294,7 @@ function WeeklyGivingImport() {
       ),
     },
     { field: 'amount', headerName: 'Amount', flex: 1, type: 'number', editable: true },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 150,
-      renderCell: (params) => {
-        const row = params.row as ParsedRow;
-        if (row.memberId) return null;
-        return (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={async () => {
-              const [first, ...rest] = row.memberName.split(' ');
-              const newMember = await createMemberMutation.mutateAsync({
-                data: {
-                  first_name: first || row.memberName,
-                  last_name: rest.join(' ') || '.',
-                  gender: 'other',
-                  marital_status: 'single',
-                  contact_number: 'N/A',
-                  address: 'N/A',
-                },
-                fieldsToRemove: ['membership_type', 'membership_status'],
-              });
-              setGridRows((prev) =>
-                prev.map((r) =>
-                  r.id === row.id ? { ...r, memberId: newMember.id } : r,
-                ),
-              );
-            }}
-          >
-            Create Member
-          </Button>
-        );
-      },
-    },
-  ];
-
-  const matchColumns: GridColDef[] = [
-    { field: 'memberName', headerName: 'Member', flex: 1 },
-    { field: 'categoryName', headerName: 'Category', flex: 1 },
-    { field: 'fundName', headerName: 'Fund', flex: 1 },
-    { field: 'sourceName', headerName: 'Source', flex: 1 },
-    { field: 'amount', headerName: 'Amount', type: 'number', flex: 1 },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 100,
-      valueGetter: (params) => params.row.memberId ? 'matched' : 'unmatched',
-    },
+    { field: 'status', headerName: 'Status', width: 100 },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -348,7 +322,60 @@ function WeeklyGivingImport() {
               setGridRows((prev) =>
                 prev.map((r) =>
                   r.id === row.id
-                    ? { ...r, memberId: newMember.id, status: 'matched' }
+                    ? (() => {
+                        const updated = { ...r, memberId: newMember.id };
+                        return { ...updated, status: computeStatus(updated) };
+                      })()
+                    : r,
+                ),
+              );
+            }}
+          >
+            Create Member
+          </Button>
+        );
+      },
+    },
+  ];
+
+  const matchColumns: GridColDef[] = [
+    { field: 'memberName', headerName: 'Member', flex: 1 },
+    { field: 'categoryName', headerName: 'Category', flex: 1 },
+    { field: 'fundName', headerName: 'Fund', flex: 1 },
+    { field: 'sourceName', headerName: 'Source', flex: 1 },
+    { field: 'amount', headerName: 'Amount', type: 'number', flex: 1 },
+    { field: 'status', headerName: 'Status', width: 100 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      renderCell: (params) => {
+        const row = params.row as ParsedRow;
+        if (row.memberId) return null;
+        return (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              const [first, ...rest] = row.memberName.split(' ');
+              const newMember = await createMemberMutation.mutateAsync({
+                data: {
+                  first_name: first || row.memberName,
+                  last_name: rest.join(' ') || '.',
+                  gender: 'other',
+                  marital_status: 'single',
+                  contact_number: 'N/A',
+                  address: 'N/A',
+                },
+                fieldsToRemove: ['membership_type', 'membership_status'],
+              });
+              setGridRows((prev) =>
+                prev.map((r) =>
+                  r.id === row.id
+                    ? (() => {
+                        const updated = { ...r, memberId: newMember.id };
+                        return { ...updated, status: computeStatus(updated) };
+                      })()
                     : r,
                 ),
               );
@@ -371,7 +398,12 @@ function WeeklyGivingImport() {
     }
     setGridRows((prev) =>
       prev.map((r) =>
-        r.id === params.id ? { ...r, [params.field]: params.value } : r,
+        r.id === params.id
+          ? (() => {
+              const updated = { ...r, [params.field]: params.value };
+              return { ...updated, status: computeStatus(updated) };
+            })()
+          : r,
       ),
     );
   }, []);
