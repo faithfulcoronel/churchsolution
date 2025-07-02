@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from '../../components/ui2/card';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from ../../components/ui2/select';
 import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
-import { Input } from '../../components/ui2/input';
+import { Combobox } from '../../components/ui2/combobox';
+import { MultiSelect } from '../../components/ui2/multi-select';
+import { useAccountRepository } from '../../hooks/useAccountRepository';
+import { useMemberRepository } from '../../hooks/useMemberRepository';
+import { useFundRepository } from '../../hooks/useFundRepository';
+import { useCategoryRepository } from '../../hooks/useCategoryRepository';
 import { tenantUtils } from '../../utils/tenantUtils';
 
 import TrialBalanceReport from './financialReports/TrialBalanceReport';
@@ -35,10 +40,43 @@ function FinancialReportsPage() {
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [reportType, setReportType] = useState(reportOptions[0].id);
   const [dateRange, setDateRange] = useState({ from: new Date(), to: new Date() });
-  const [memberId, setMemberId] = useState('');
-  const [fundId, setFundId] = useState('');
-  const [accountId, setAccountId] = useState('');
-  const [categoryId, setCategoryId] = useState('');
+  const [memberId, setMemberId] = useState<string | null>(null);
+  const [fundId, setFundId] = useState<string | null>(null);
+  const [accountIds, setAccountIds] = useState<string[]>([]);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+
+  const { useQuery: useAccountsQuery } = useAccountRepository();
+  const { useQuery: useMembersQuery } = useMemberRepository();
+  const { useQuery: useFundsQuery } = useFundRepository();
+  const { useQuery: useCategoriesQuery } = useCategoryRepository();
+
+  const accountsRes = useAccountsQuery();
+  const membersRes = useMembersQuery();
+  const fundsRes = useFundsQuery();
+  const categoriesRes = useCategoriesQuery();
+
+  const accountOptions = React.useMemo(
+    () =>
+      (accountsRes.data?.data || []).map(a => ({ value: a.id, label: a.name })),
+    [accountsRes.data],
+  );
+  const memberOptions = React.useMemo(
+    () =>
+      (membersRes.data?.data || []).map(m => ({
+        value: m.id,
+        label: `${m.first_name} ${m.last_name}`,
+      })),
+    [membersRes.data],
+  );
+  const fundOptions = React.useMemo(
+    () => (fundsRes.data?.data || []).map(f => ({ value: f.id, label: f.name })),
+    [fundsRes.data],
+  );
+  const categoryOptions = React.useMemo(
+    () =>
+      (categoriesRes.data?.data || []).map(c => ({ value: c.id, label: c.name })),
+    [categoriesRes.data],
+  );
 
 
   useEffect(() => {
@@ -71,16 +109,41 @@ function FinancialReportsPage() {
             showCompactInput
           />
           {['general-ledger'].includes(reportType) && (
-            <Input value={accountId} onChange={e => setAccountId(e.target.value)} label="Account ID" className="max-w-xs" />
+            <MultiSelect
+              label="Account"
+              options={accountOptions}
+              value={accountIds}
+              onChange={setAccountIds}
+              placeholder="Select account"
+              className="max-w-xs"
+            />
           )}
           {['member-giving', 'giving-statement'].includes(reportType) && (
-            <Input value={memberId} onChange={e => setMemberId(e.target.value)} label="Member ID" className="max-w-xs" />
+            <Combobox
+              options={memberOptions}
+              value={memberId || ''}
+              onChange={v => setMemberId(v || null)}
+              placeholder="Select member"
+              className="max-w-xs"
+            />
           )}
           {['fund-summary'].includes(reportType) && (
-            <Input value={fundId} onChange={e => setFundId(e.target.value)} label="Fund ID" className="max-w-xs" />
+            <Combobox
+              options={fundOptions}
+              value={fundId || ''}
+              onChange={v => setFundId(v || null)}
+              placeholder="Select fund"
+              className="max-w-xs"
+            />
           )}
           {['category-financial'].includes(reportType) && (
-            <Input value={categoryId} onChange={e => setCategoryId(e.target.value)} label="Category" className="max-w-xs" />
+            <Combobox
+              options={categoryOptions}
+              value={categoryId || ''}
+              onChange={v => setCategoryId(v || null)}
+              placeholder="Select category"
+              className="max-w-xs"
+            />
           )}
         </CardHeader>
         <CardContent>
@@ -88,7 +151,7 @@ function FinancialReportsPage() {
             <TrialBalanceReport tenantId={tenantId} dateRange={dateRange} />
           )}
           {reportType === 'general-ledger' && (
-            <GeneralLedgerReport tenantId={tenantId} dateRange={dateRange} accountId={accountId} />
+            <GeneralLedgerReport tenantId={tenantId} dateRange={dateRange} accountId={accountIds} />
           )}
           {reportType === 'journal' && (
             <JournalReport tenantId={tenantId} dateRange={dateRange} />
@@ -103,16 +166,16 @@ function FinancialReportsPage() {
             <FundSummaryReport tenantId={tenantId} dateRange={dateRange} />
           )}
           {reportType === 'member-giving' && (
-            <MemberGivingSummaryReport tenantId={tenantId} dateRange={dateRange} memberId={memberId} />
+            <MemberGivingSummaryReport tenantId={tenantId} dateRange={dateRange} memberId={memberId || undefined} />
           )}
           {reportType === 'giving-statement' && (
-            <GivingStatementReport tenantId={tenantId} dateRange={dateRange} memberId={memberId} />
+            <GivingStatementReport tenantId={tenantId} dateRange={dateRange} memberId={memberId || undefined} />
           )}
           {reportType === 'offering-summary' && (
             <OfferingSummaryReport tenantId={tenantId} dateRange={dateRange} />
           )}
           {reportType === 'category-financial' && (
-            <CategoryFinancialReport tenantId={tenantId} dateRange={dateRange} categoryId={categoryId} />
+            <CategoryFinancialReport tenantId={tenantId} dateRange={dateRange} categoryId={categoryId || undefined} />
           )}
           {reportType === 'cash-flow' && (
             <CashFlowSummaryReport tenantId={tenantId} dateRange={dateRange} />

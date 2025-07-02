@@ -10,15 +10,20 @@ import { exportReportPdf } from '../../../utils';
 interface Props {
   tenantId: string | null;
   dateRange: { from: Date; to: Date };
-  categoryId?: string;
+  categoryId?: string | string[];
 }
 
 export default function CategoryFinancialReport({ tenantId, dateRange, categoryId }: Props) {
   const { useCategoryFinancialReport } = useFinancialReports(tenantId);
+  const categoryParam = Array.isArray(categoryId)
+    ? categoryId.length === 1
+      ? categoryId[0]
+      : undefined
+    : categoryId;
   const { data, isLoading } = useCategoryFinancialReport(
     format(dateRange.from, 'yyyy-MM-dd'),
     format(dateRange.to, 'yyyy-MM-dd'),
-    categoryId || undefined,
+    categoryParam || undefined,
   );
 
   const columns = React.useMemo<ColumnDef<any>[]>(
