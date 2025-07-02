@@ -1,4 +1,5 @@
 -- Update general ledger report to return account details
+DROP FUNCTION IF EXISTS report_general_ledger(uuid, date, date, uuid);
 
 CREATE OR REPLACE FUNCTION report_general_ledger(
   p_tenant_id uuid,
