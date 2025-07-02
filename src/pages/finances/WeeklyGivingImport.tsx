@@ -7,7 +7,7 @@ import { DataGrid, GridColDef } from '../../components/ui2/mui-datagrid';
 import { Combobox } from '../../components/ui2/combobox';
 import { DatePickerInput } from '../../components/ui2/date-picker';
 import { ProgressSteps } from '../../components/ui2/progress-steps';
-import { useMemberRepository } from '../../hooks/useMemberRepository';
+import { useAccountRepository } from '../../hooks/useAccountRepository';
 import { useCategoryRepository } from '../../hooks/useCategoryRepository';
 import { useFundRepository } from '../../hooks/useFundRepository';
 import { useFinancialSourceRepository } from '../../hooks/useFinancialSourceRepository';
@@ -15,14 +15,14 @@ import { useDonationImportService } from '../../hooks/useDonationImportService';
 import { tenantUtils } from '../../utils/tenantUtils';
 
 const computeStatus = (row: Omit<ParsedRow, 'status'> & { status?: ParsedRow['status'] }): ParsedRow['status'] =>
-  row.memberId && row.categoryId && row.fundId && row.sourceId
+  row.accountId && row.categoryId && row.fundId && row.sourceId
     ? 'matched'
     : 'unmatched';
 
 interface ParsedRow {
   id: number;
-  memberName: string;
-  memberId: string | null;
+  accountName: string;
+  accountId: string | null;
   categoryName: string;
   categoryId: string | null;
   fundName: string;
@@ -50,26 +50,26 @@ function WeeklyGivingImport() {
     description: '',
   });
 
-  const { useQuery: useMembersQuery, useCreate } = useMemberRepository();
+  const { useQuery: useAccountsQuery, useCreate } = useAccountRepository();
   const { useQuery: useCategoriesQuery } = useCategoryRepository();
   const { useQuery: useFundsQuery } = useFundRepository();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
   const { importDonations } = useDonationImportService();
 
-  const membersRes = useMembersQuery();
+  const accountsRes = useAccountsQuery();
   const categoriesRes = useCategoriesQuery({
     filters: { type: { operator: 'eq', value: 'income_transaction' } },
   });
   const fundsRes = useFundsQuery();
   const sourcesRes = useSourcesQuery();
 
-  const memberOptions = React.useMemo(
+  const accountOptions = React.useMemo(
     () =>
-      (membersRes.data?.data || []).map((m) => ({
-        value: m.id,
-        label: `${m.first_name} ${m.last_name}`,
+      (accountsRes.data?.data || []).map((a) => ({
+        value: a.id,
+        label: a.name,
       })),
-    [membersRes.data],
+    [accountsRes.data],
   );
   const categoryOptions = React.useMemo(
     () =>
@@ -118,7 +118,7 @@ function WeeklyGivingImport() {
     [fileRows],
   );
 
-  const createMemberMutation = useCreate();
+  const createAccountMutation = useCreate();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -146,7 +146,7 @@ function WeeklyGivingImport() {
       (h) => !known.includes(h.toLowerCase()),
     );
 
-    const members = membersRes.data?.data || [];
+    const accounts = accountsRes.data?.data || [];
     const categories = categoriesRes.data?.data || [];
     const funds = fundsRes.data?.data || [];
     const sources = sourcesRes.data?.data || [];
@@ -154,7 +154,7 @@ function WeeklyGivingImport() {
     const parsed: ParsedRow[] = [];
     let idx = 0;
     for (const r of fileRows) {
-      const memberName = r['MEMBERS LIST'] || r.member || r.name || '';
+      const accountName = r['MEMBERS LIST'] || r.member || r.name || '';
       const fundName = r.fund || 'Default Fund';
       const sourceName = r.source || 'Offering Box';
 
@@ -162,8 +162,8 @@ function WeeklyGivingImport() {
         const amt = parseFloat(r[cat]) || 0;
         if (!amt) continue;
 
-        const member = members.find(
-          (m) => `${m.first_name} ${m.last_name}`.toLowerCase() === memberName.toLowerCase(),
+        const account = accounts.find(
+          (a) => a.name.toLowerCase() === accountName.toLowerCase(),
         );
         const category = categories.find(
           (c) =>
@@ -190,8 +190,8 @@ function WeeklyGivingImport() {
 
         const row = {
           id: idx++,
-          memberName,
-          memberId: member ? member.id : null,
+          accountName,
+          accountId: account ? account.id : null,
           categoryName: cat,
           categoryId: category ? category.id : null,
           fundName,
@@ -206,26 +206,26 @@ function WeeklyGivingImport() {
       }
     }
     setGridRows(parsed);
-  }, [fileRows, membersRes.data, categoriesRes.data, fundsRes.data, sourcesRes.data]);
+  }, [fileRows, accountsRes.data, categoriesRes.data, fundsRes.data, sourcesRes.data]);
 
   const editColumns: GridColDef[] = [
     {
-      field: 'memberName',
-      headerName: 'Member',
+      field: 'accountName',
+      headerName: 'Account',
       flex: 1,
       editable: true,
       renderEditCell: (params) => (
         <Combobox
-          options={memberOptions}
-          value={params.row.memberId || ''}
+          options={accountOptions}
+          value={params.row.accountId || ''}
           onChange={(v) => {
             const label =
-              memberOptions.find((o) => o.value === v)?.label || params.row.memberName;
+              accountOptions.find((o) => o.value === v)?.label || params.row.accountName;
             setGridRows((prev) =>
               prev.map((r) =>
                 r.id === params.row.id
                   ? (() => {
-                      const updated = { ...r, memberId: v || null, memberName: label };
+                      const updated = { ...r, accountId: v || null, accountName: label };
                       return { ...updated, status: computeStatus(updated) };
                     })()
                   : r,
@@ -321,29 +321,20 @@ function WeeklyGivingImport() {
       width: 150,
       renderCell: (params) => {
         const row = params.row as ParsedRow;
-        if (row.memberId) return null;
+        if (row.accountId) return null;
         return (
           <Button
             size="sm"
             variant="outline"
             onClick={async () => {
-              const [first, ...rest] = row.memberName.split(' ');
-              const newMember = await createMemberMutation.mutateAsync({
-                data: {
-                  first_name: first || row.memberName,
-                  last_name: rest.join(' ') || '.',
-                  gender: 'other',
-                  marital_status: 'single',
-                  contact_number: 'N/A',
-                  address: 'N/A',
-                },
-                fieldsToRemove: ['membership_type', 'membership_status'],
+              const newAccount = await createAccountMutation.mutateAsync({
+                data: { name: row.accountName, account_type: 'person' },
               });
               setGridRows((prev) =>
                 prev.map((r) =>
                   r.id === row.id
                     ? (() => {
-                        const updated = { ...r, memberId: newMember.id };
+                        const updated = { ...r, accountId: newAccount.id };
                         return { ...updated, status: computeStatus(updated) };
                       })()
                     : r,
@@ -351,7 +342,7 @@ function WeeklyGivingImport() {
               );
             }}
           >
-            Create Member
+            Create Account
           </Button>
         );
       },
@@ -359,7 +350,7 @@ function WeeklyGivingImport() {
   ];
 
   const matchColumns: GridColDef[] = [
-    { field: 'memberName', headerName: 'Member', flex: 1 },
+    { field: 'accountName', headerName: 'Account', flex: 1 },
     { field: 'categoryName', headerName: 'Category', flex: 1 },
     { field: 'fundName', headerName: 'Fund', flex: 1 },
     { field: 'sourceName', headerName: 'Source', flex: 1 },
@@ -371,29 +362,20 @@ function WeeklyGivingImport() {
       width: 150,
       renderCell: (params) => {
         const row = params.row as ParsedRow;
-        if (row.memberId) return null;
+        if (row.accountId) return null;
         return (
           <Button
             size="sm"
             variant="outline"
             onClick={async () => {
-              const [first, ...rest] = row.memberName.split(' ');
-              const newMember = await createMemberMutation.mutateAsync({
-                data: {
-                  first_name: first || row.memberName,
-                  last_name: rest.join(' ') || '.',
-                  gender: 'other',
-                  marital_status: 'single',
-                  contact_number: 'N/A',
-                  address: 'N/A',
-                },
-                fieldsToRemove: ['membership_type', 'membership_status'],
+              const newAccount = await createAccountMutation.mutateAsync({
+                data: { name: row.accountName, account_type: 'person' },
               });
               setGridRows((prev) =>
                 prev.map((r) =>
                   r.id === row.id
                     ? (() => {
-                        const updated = { ...r, memberId: newMember.id };
+                        const updated = { ...r, accountId: newAccount.id };
                         return { ...updated, status: computeStatus(updated) };
                       })()
                     : r,
@@ -401,7 +383,7 @@ function WeeklyGivingImport() {
               );
             }}
           >
-            Create Member
+            Create Account
           </Button>
         );
       },
@@ -410,7 +392,7 @@ function WeeklyGivingImport() {
 
   const handleCellEdit = React.useCallback((params: any) => {
     if (
-      ['memberName', 'categoryName', 'fundName', 'sourceName'].includes(
+      ['accountName', 'categoryName', 'fundName', 'sourceName'].includes(
         params.field,
       )
     ) {
@@ -434,9 +416,11 @@ function WeeklyGivingImport() {
 
     const categories = categoriesRes.data?.data || [];
 
+    const accounts = accountsRes.data?.data || [];
+
     const grouped: Record<string, ParsedRow[]> = {};
     for (const r of gridRows) {
-      const key = `${r.memberId || ''}-${headerData.transaction_date}`;
+      const key = `${r.accountId || ''}-${headerData.transaction_date}`;
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(r);
     }
@@ -451,7 +435,7 @@ function WeeklyGivingImport() {
       });
       return {
         tenant_id: tenantId,
-        member_id: rows[0].memberId,
+        member_id: accounts.find((a) => a.id === rows[0].accountId)?.member_id ?? null,
         giving_date: headerData.transaction_date,
         categories: categoriesMap,
       };
@@ -477,7 +461,7 @@ function WeeklyGivingImport() {
       <ProgressSteps
         steps={[
           { title: 'Upload', description: 'Select file & preview' },
-          { title: 'Match Members', description: 'Resolve unmatched members' },
+          { title: 'Match Accounts', description: 'Resolve unmatched accounts' },
           { title: 'Finalize', description: 'Edit details and submit' },
         ]}
         currentStep={step}
@@ -537,7 +521,7 @@ function WeeklyGivingImport() {
               </Button>
               <Button
                 onClick={() => setStep(2)}
-                disabled={!gridRows.every((r) => r.memberId)}
+                disabled={!gridRows.every((r) => r.accountId)}
               >
                 Next
               </Button>
