@@ -87,7 +87,8 @@ function FinancialSourceAddEdit() {
       if (isEditMode) {
         await updateMutation.mutateAsync({
           id: id!,
-          data: formData
+          data: formData,
+          fieldsToRemove: ['chart_of_accounts']
         });
         navigate(`/accounts/sources/${id}`);
       } else {
