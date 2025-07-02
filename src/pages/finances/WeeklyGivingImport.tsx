@@ -23,6 +23,7 @@ interface ParsedRow {
   id: number;
   accountName: string;
   accountId: string | null;
+  memberId: string | null;
   categoryName: string;
   categoryId: string | null;
   fundName: string;
@@ -192,6 +193,7 @@ function WeeklyGivingImport() {
           id: idx++,
           accountName,
           accountId: account ? account.id : null,
+          memberId: account?.member_id ?? null,
           categoryName: cat,
           categoryId: category ? category.id : null,
           fundName,
@@ -221,11 +223,12 @@ function WeeklyGivingImport() {
           onChange={(v) => {
             const label =
               accountOptions.find((o) => o.value === v)?.label || params.row.accountName;
+            const memberId = accountsRes.data?.data?.find((a) => a.id === v)?.member_id ?? null;
             setGridRows((prev) =>
               prev.map((r) =>
                 r.id === params.row.id
                   ? (() => {
-                      const updated = { ...r, accountId: v || null, accountName: label };
+                      const updated = { ...r, accountId: v || null, accountName: label, memberId };
                       return { ...updated, status: computeStatus(updated) };
                     })()
                   : r,
@@ -334,7 +337,11 @@ function WeeklyGivingImport() {
                 prev.map((r) =>
                   r.id === row.id
                     ? (() => {
-                        const updated = { ...r, accountId: newAccount.id };
+                        const updated = {
+                          ...r,
+                          accountId: newAccount.id,
+                          memberId: newAccount.member_id ?? null,
+                        };
                         return { ...updated, status: computeStatus(updated) };
                       })()
                     : r,
@@ -375,7 +382,11 @@ function WeeklyGivingImport() {
                 prev.map((r) =>
                   r.id === row.id
                     ? (() => {
-                        const updated = { ...r, accountId: newAccount.id };
+                        const updated = {
+                          ...r,
+                          accountId: newAccount.id,
+                          memberId: newAccount.member_id ?? null,
+                        };
                         return { ...updated, status: computeStatus(updated) };
                       })()
                     : r,
