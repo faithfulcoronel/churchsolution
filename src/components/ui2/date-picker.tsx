@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { format } from 'date-fns';
+import { format, parse, isValid } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from './button';
 import { Input } from './input';
 import {
   Popover,
@@ -34,22 +33,29 @@ export function DatePickerInput({
   helperText,
 }: DatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(value);
+  const [inputValue, setInputValue] = React.useState(
+    value ? format(value, 'yyyy-MM-dd') : ''
+  );
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
     setDate(value);
+    setInputValue(value ? format(value, 'yyyy-MM-dd') : '');
   }, [value]);
 
   const handleSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
+    setInputValue(selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '');
     onChange?.(selectedDate);
     setIsOpen(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputDate = new Date(e.target.value);
-    if (!isNaN(inputDate.getTime())) {
-      handleSelect(inputDate);
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    const parsed = parse(newValue, 'yyyy-MM-dd', new Date());
+    if (isValid(parsed)) {
+      handleSelect(parsed);
     }
   };
 
@@ -73,7 +79,7 @@ export function DatePickerInput({
           <div className="relative">
             <Input
               type="text"
-              value={date ? format(date, 'yyyy-MM-dd') : ''}
+              value={inputValue}
               onChange={handleInputChange}
               placeholder={placeholder}
               className={cn(error && "border-destructive", "dark:bg-gray-800 dark:border-gray-700")}
@@ -93,6 +99,9 @@ export function DatePickerInput({
             selected={date}
             onSelect={handleSelect}
             initialFocus
+            captionLayout="dropdown"
+            fromYear={1900}
+            toYear={new Date().getFullYear() + 10}
           />
         </PopoverContent>
       </Popover>
