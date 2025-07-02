@@ -32,7 +32,11 @@ export default function CategoryFinancialReport({ tenantId, dateRange, categoryI
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Category Financial', fileName: 'category-financial' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Category Financial', fileName: 'category-financial' },
+    );
 
   return (
     <div className="space-y-4">

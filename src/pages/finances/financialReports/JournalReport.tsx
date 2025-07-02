@@ -33,7 +33,11 @@ export default function JournalReport({ tenantId, dateRange }: Props) {
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Journal Report', fileName: 'journal' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Journal Report', fileName: 'journal' },
+    );
 
   return (
     <div className="space-y-4">

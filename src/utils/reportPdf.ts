@@ -1,52 +1,78 @@
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { startCase } from 'lodash-es';
 
 export interface PdfOptions {
   title: string;
   fileName: string;
 }
 
+export interface PdfColumn {
+  key: string;
+  header: string;
+}
+
 export async function exportReportPdf(
   data: Record<string, any>[] | undefined,
+  columns: PdfColumn[],
   { title, fileName }: PdfOptions,
 ) {
   if (!data || data.length === 0) return;
+  if (columns.length === 0) return;
 
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage();
+  let page = pdfDoc.addPage();
   const { width, height } = page.getSize();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  let y = height - 40;
-  page.drawText(title, { x: 40, y, size: 18, font });
+  const margin = 40;
+  const rowHeight = 16;
+  const columnWidth = (width - margin * 2) / columns.length;
+  let y = height - margin;
+
+  page.drawText(title, { x: margin, y, size: 18, font });
   y -= 24;
 
-  const keys = Object.keys(data[0]);
-  const columnWidth = (width - 80) / keys.length;
+  const drawHeaders = () => {
+    columns.forEach((col, index) => {
+      page.drawText(col.header, {
+        x: margin + index * columnWidth,
+        y,
+        size: 12,
+        font,
+      });
+    });
+    y -= rowHeight;
+  };
 
-  keys.forEach((key, index) => {
-    page.drawText(startCase(key), { x: 40 + index * columnWidth, y, size: 12, font });
-  });
-  y -= 16;
+  drawHeaders();
+  for (const rec of data) {
+    if (y < margin) {
+      page = pdfDoc.addPage();
+      y = height - margin;
+      drawHeaders();
+    }
 
-  data.forEach(rec => {
-    keys.forEach((key, index) => {
-      page.drawText(String(rec[key] ?? ''), {
-        x: 40 + index * columnWidth,
+    columns.forEach((col, index) => {
+      page.drawText(String(rec[col.key] ?? ''), {
+        x: margin + index * columnWidth,
         y,
         font,
         size: 12,
       });
     });
-    y -= 16;
-  });
+    y -= rowHeight;
+  }
 
-  if (keys.includes('amount')) {
+  if (columns.some(c => c.key === 'amount')) {
+    if (y < margin) {
+      page = pdfDoc.addPage();
+      y = height - margin;
+      drawHeaders();
+    }
     const total = data.reduce((acc, cur) => acc + (Number(cur.amount) || 0), 0);
     y -= 8;
-    const amountIndex = keys.indexOf('amount');
+    const amountIndex = columns.findIndex(c => c.key === 'amount');
     page.drawText(`Total: ${total}`, {
-      x: 40 + amountIndex * columnWidth,
+      x: margin + amountIndex * columnWidth,
       y,
       size: 12,
       font,

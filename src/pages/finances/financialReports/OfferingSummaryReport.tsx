@@ -29,7 +29,11 @@ export default function OfferingSummaryReport({ tenantId, dateRange }: Props) {
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Offering Summary', fileName: 'offering-summary' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Offering Summary', fileName: 'offering-summary' },
+    );
 
   return (
     <div className="space-y-4">

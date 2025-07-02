@@ -31,7 +31,11 @@ export default function BudgetVsActualReport({ tenantId, dateRange }: Props) {
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Budget vs Actual', fileName: 'budget-vs-actual' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Budget vs Actual', fileName: 'budget-vs-actual' },
+    );
 
   return (
     <div className="space-y-4">

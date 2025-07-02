@@ -31,7 +31,11 @@ export default function CashFlowSummaryReport({ tenantId, dateRange }: Props) {
 
   const handlePrint = () => window.print();
   const handlePdf = () =>
-    exportReportPdf(data, { title: 'Cash Flow Summary', fileName: 'cash-flow' });
+    exportReportPdf(
+      data,
+      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
+      { title: 'Cash Flow Summary', fileName: 'cash-flow' },
+    );
 
   return (
     <div className="space-y-4">
