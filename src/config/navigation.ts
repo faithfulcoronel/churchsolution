@@ -111,6 +111,11 @@ export const navigation: NavItem[] = [
             icon: FileText,
           },
           {
+            name: 'Financial Reports',
+            href: '/finances/financial-reports',
+            icon: FileText,
+          },
+          {
             name: 'Statements',
             href: '/finances/statements',
             icon: FileText,
