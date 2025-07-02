@@ -28,7 +28,7 @@ function DataGridContent() {
   return (
     <div
       className={cn(
-        'space-y-4 w-full',
+        'space-y-4 w-full h-full overflow-y-auto',
         fluid ? '' : 'mx-auto',
         containerClassName,
         className
