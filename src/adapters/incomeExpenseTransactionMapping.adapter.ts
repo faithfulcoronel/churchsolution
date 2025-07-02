@@ -35,13 +35,13 @@ export class IncomeExpenseTransactionMappingAdapter
       table: 'financial_transactions',
       foreignKey: 'debit_transaction_id',
       alias: 'debit_transaction',
-      select: ['id', 'account_id', 'amount', 'debit', 'credit']
+      select: ['id', 'account_id', 'debit', 'credit']
     },
     {
       table: 'financial_transactions',
       foreignKey: 'credit_transaction_id',
       alias: 'credit_transaction',
-      select: ['id', 'account_id', 'amount', 'debit', 'credit']
+      select: ['id', 'account_id', 'debit', 'credit']
     }
   ];
 
