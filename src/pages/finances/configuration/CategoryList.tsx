@@ -97,12 +97,11 @@ function CategoryList({ categoryType, title, description }: CategoryListProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`${params.row.id}/edit`);
-            }}
-            disabled={params.row.is_system}
-          >
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`${params.row.id}/edit`);
+              }}
+            >
             <Edit className="h-4 w-4" />
           </Button>
           <Button
