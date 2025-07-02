@@ -12,12 +12,10 @@ function UserProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { useQuery: useUserQuery } = useUserRepository();
-  const { data: result, isLoading, error } = useUserQuery({
-    filters: { id: { operator: 'eq', value: id } },
+  const { useFindById } = useUserRepository();
+  const { data: user, isLoading, error } = useFindById(id || '', {
     enabled: !!id,
   });
-  const user = result?.data?.[0];
   const [roles, setRoles] = useState<string[]>([]);
 
   useEffect(() => {
