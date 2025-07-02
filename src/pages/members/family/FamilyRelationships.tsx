@@ -277,6 +277,7 @@ function FamilyRelationships() {
           getRowId={(row) => row.id}
           autoHeight
           paginationMode="client"
+          storageKey="family-relationships-grid"
           disableColumnMenu={false}
           disableColumnFilter={false}
           disableColumnSelector={false}

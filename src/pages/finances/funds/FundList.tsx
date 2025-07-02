@@ -149,6 +149,7 @@ function FundList() {
                 page={page}
                 pageSize={pageSize}
                 showQuickFilter={false}
+                storageKey="fund-list-grid"
               />
             )}
           </CardContent>

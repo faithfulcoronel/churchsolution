@@ -375,6 +375,7 @@ function BudgetList() {
                 page={page}
                 pageSize={pageSize}
                 paginationMode="client"
+                storageKey="budget-list-grid"
               />
             )}
           </CardContent>

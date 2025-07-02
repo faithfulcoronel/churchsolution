@@ -497,6 +497,7 @@ function TransactionList() {
             page={page}
             pageSize={pageSize}
             showQuickFilter
+            storageKey="transaction-list-grid"
           />
           </CardContent>
         </Card>

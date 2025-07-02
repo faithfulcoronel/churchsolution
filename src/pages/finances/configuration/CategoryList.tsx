@@ -166,6 +166,7 @@ function CategoryList({ categoryType, title, description }: CategoryListProps) {
                 onRowClick={(params) => navigate(`${params.row.id}`)}
                 autoHeight
                 paginationMode="client"
+                storageKey={`category-list-grid-${categoryType}`}
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-8">
