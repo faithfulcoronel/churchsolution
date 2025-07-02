@@ -1,8 +1,6 @@
 import * as React from 'react';
-import { format } from 'date-fns';
-import { Calendar as CalendarIcon, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { DateRange, DateRangePicker } from './date-range-picker';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { DateRange, DateRangePicker, DateRangePreset } from './date-range-picker';
 import { FormFieldProps } from './types';
 
 export interface DateRangePickerFieldProps extends FormFieldProps {
@@ -13,6 +11,7 @@ export interface DateRangePickerFieldProps extends FormFieldProps {
   disabled?: boolean;
   clearable?: boolean;
   showCompactInput?: boolean;
+  presets?: DateRangePreset[];
 }
 
 export function DateRangePickerField({
@@ -23,6 +22,7 @@ export function DateRangePickerField({
   disabled = false,
   clearable = true,
   showCompactInput = false,
+  presets,
   label,
   required,
   error,
@@ -37,6 +37,7 @@ export function DateRangePickerField({
       disabled={disabled}
       clearable={clearable}
       showCompactInput={showCompactInput}
+      presets={presets}
       icon={<CalendarIcon className="h-4 w-4" />}
       label={label}
       required={required}
