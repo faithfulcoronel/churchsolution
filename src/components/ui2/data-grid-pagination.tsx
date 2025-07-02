@@ -14,7 +14,7 @@ export function DataGridPagination() {
       totalItems={recordCount}
       onItemsPerPageChange={handlePageSizeChange}
       showItemsPerPage
-      className="border-t"
+      className="border-t sticky bottom-0 bg-background z-10"
       size="sm"
     />
   );
