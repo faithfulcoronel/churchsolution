@@ -31,8 +31,7 @@ export interface DataGridProps<T> extends Omit<MuiDataGridProps<T>, 'rows'> {
   paginationMode?: 'client' | 'server';
   showQuickFilter?: boolean;
   /**
-   * Optional key to persist pagination and sorting state in localStorage.
-   * Stored values include `page`, `pageSize`, `sortModel` and `filterModel`.
+   * Optional key to persist pagination and sorting state in localStorage
    */
   storageKey?: string;
 }
@@ -153,9 +152,6 @@ export function DataGrid<T>({
     []
   );
 
-  // Cached pagination, sorting and filtering state stored under
-  // `${storageKey}-state`. Supports the legacy `pageIndex` key for
-  // backward compatibility.
   const initialCache = React.useMemo(() => {
     if (!storageKey) return undefined;
     return getData(`${storageKey}-state`) as any;
@@ -182,10 +178,8 @@ export function DataGrid<T>({
   React.useEffect(() => {
     if (!initialCache) return;
     const saved = initialCache;
-    const savedPage =
-      saved.page !== undefined ? saved.page : saved.pageIndex;
-    if (onPageChange && savedPage !== undefined && savedPage !== page) {
-      onPageChange(savedPage);
+    if (onPageChange && saved.page !== undefined && saved.page !== page) {
+      onPageChange(saved.page);
     }
     if (onPageSizeChange && saved.pageSize !== undefined && saved.pageSize !== pageSize) {
       onPageSizeChange(saved.pageSize);
@@ -259,12 +253,7 @@ export function DataGrid<T>({
           ...(error ? { errorOverlay: { message: error } } : {}),
         }}
         initialState={initialCache ? {
-          pagination: {
-            paginationModel: {
-              page: (initialCache.page ?? initialCache.pageIndex) ?? page,
-              pageSize: initialCache.pageSize ?? pageSize,
-            },
-          },
+          pagination: { paginationModel: { page: initialCache.page ?? page, pageSize: initialCache.pageSize ?? pageSize } },
           sorting: { sortModel: initialCache.sortModel ?? [] },
           filter: initialCache.filterModel ? { filterModel: initialCache.filterModel } : undefined,
         } : undefined}
