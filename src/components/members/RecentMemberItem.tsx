@@ -30,10 +30,10 @@ export function RecentMemberItem({ member }: RecentMemberItemProps) {
   const variant = statusVariantMap[member.membership_status?.code || ''] || 'secondary';
   const joinedDate = member.membership_date || member.created_at;
   return (
-    <Card size="sm" hoverable variant="secondary">
+    <Card size="sm" className="dark:bg-gray-600" hoverable>
       <CardContent className="flex justify-between gap-4 items-start py-3 px-4">
         <div className="flex items-start gap-3 flex-1">
-          <Avatar size="md">
+          <Avatar size="xl">
             {member.profile_picture_url && (
               <AvatarImage
                 src={member.profile_picture_url}
@@ -48,7 +48,7 @@ export function RecentMemberItem({ member }: RecentMemberItemProps) {
               {member.first_name.charAt(0)}{member.last_name.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
+          <div className="flex flex-col mt-1">
             <span className="font-semibold text-gray-800 dark:text-gray-200">
               {member.first_name} {member.last_name}
             </span>
@@ -59,7 +59,7 @@ export function RecentMemberItem({ member }: RecentMemberItemProps) {
               </span>
             )}
             {member.contact_number && (
-              <span className="flex items-center text-md text-gray-500 dark:text-gray-400">
+              <span className="flex items-center text-md text-gray-500 dark:text-gray-400 mt-1">
                 <Phone className="h-4 w-4 mr-1" />
                 {member.contact_number}
               </span>
