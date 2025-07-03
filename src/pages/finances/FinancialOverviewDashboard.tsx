@@ -206,7 +206,7 @@ function FinancialOverviewDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Income Distribution</CardTitle>
-            <CardDescription>Breakdown of income sources</CardDescription>
+            <CardDescription>Breakdown of income categories</CardDescription>
           </CardHeader>
           <CardContent>
             <Charts type="donut" series={incomeCategoryChartData.series} options={incomeCategoryChartData.options} height={350} />

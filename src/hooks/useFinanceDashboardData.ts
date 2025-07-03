@@ -5,6 +5,7 @@ import { TYPES } from '../lib/types';
 import type { IFinanceDashboardRepository } from '../repositories/financeDashboard.repository';
 import { useCurrencyStore } from '../stores/currencyStore';
 import { formatCurrency } from '../utils/currency';
+import { categoryUtils } from '../utils/categoryUtils';
 
 export function useFinanceDashboardData() {
   const { currency } = useCurrencyStore();
@@ -18,6 +19,16 @@ export function useFinanceDashboardData() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['finance-stats'],
     queryFn: () => repository.getMonthlyStats(),
+  });
+
+  const { data: incomeCategories, isLoading: incomeCatsLoading } = useQuery({
+    queryKey: ['categories', 'income_transaction'],
+    queryFn: () => categoryUtils.getCategories('income_transaction'),
+  });
+
+  const { data: expenseCategories, isLoading: expenseCatsLoading } = useQuery({
+    queryKey: ['categories', 'expense_transaction'],
+    queryFn: () => categoryUtils.getCategories('expense_transaction'),
   });
 
   const { data: fundBalances, isLoading: fundsLoading } = useQuery({
@@ -56,32 +67,55 @@ export function useFinanceDashboardData() {
   }, [monthlyTrends, currency]);
 
   const incomeCategoryChartData = useMemo(() => {
+    const totals = stats?.incomeByCategory || {};
+    const merged = (incomeCategories || []).reduce<Record<string, number>>(
+      (acc, c) => {
+        acc[c.name] = totals[c.name] ?? 0;
+        return acc;
+      },
+      {}
+    );
+
     return {
-      series: Object.values(stats?.incomeByCategory || {}),
+      series: Object.values(merged),
       options: {
         chart: { type: 'donut' },
-        labels: Object.keys(stats?.incomeByCategory || {}),
+        labels: Object.keys(merged),
         legend: { position: 'bottom', labels: { colors: 'hsl(var(--foreground))' } },
         dataLabels: { enabled: true, formatter: (value: number) => `${value.toFixed(2)}%` },
         tooltip: { y: { formatter: (value: number) => formatCurrency(value, currency) } },
       },
     };
-  }, [stats, currency]);
+  }, [stats, incomeCategories, currency]);
 
   const expenseCategoryChartData = useMemo(() => {
+    const totals = stats?.expensesByCategory || {};
+    const merged = (expenseCategories || []).reduce<Record<string, number>>(
+      (acc, c) => {
+        acc[c.name] = totals[c.name] ?? 0;
+        return acc;
+      },
+      {}
+    );
+
     return {
-      series: Object.values(stats?.expensesByCategory || {}),
+      series: Object.values(merged),
       options: {
         chart: { type: 'donut' },
-        labels: Object.keys(stats?.expensesByCategory || {}),
+        labels: Object.keys(merged),
         legend: { position: 'bottom', labels: { colors: 'hsl(var(--foreground))' } },
         dataLabels: { enabled: true, formatter: (value: number) => `${value.toFixed(2)}%` },
         tooltip: { y: { formatter: (value: number) => formatCurrency(value, currency) } },
       },
     };
-  }, [stats, currency]);
+  }, [stats, expenseCategories, currency]);
 
-  const isLoading = trendsLoading || statsLoading || fundsLoading;
+  const isLoading =
+    trendsLoading ||
+    statsLoading ||
+    fundsLoading ||
+    incomeCatsLoading ||
+    expenseCatsLoading;
 
   return {
     currency,
