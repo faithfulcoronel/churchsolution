@@ -101,6 +101,18 @@ function Sidebar() {
     [hasPermission]
   );
 
+  const menuItemCount = useMemo(() => {
+    let count = 0;
+    const walk = (items: NavItem[]) => {
+      items.forEach((it) => {
+        count += 1;
+        if (it.submenu) walk(it.submenu);
+      });
+    };
+    walk(navigation);
+    return count;
+  }, [navigation]);
+
 
   const itemLevels = useMemo(() => {
     const levels = new Map<string, number>();
@@ -115,6 +127,14 @@ function Sidebar() {
     walk(navigation);
     return levels;
   }, [navigation]);
+
+  const showSearch = menuItemCount > 10;
+
+  React.useEffect(() => {
+    if (!showSearch && searchTerm) {
+      setSearchTerm('');
+    }
+  }, [showSearch, searchTerm]);
 
   const renderItem = (item: NavItem, level = 0) => {
     const hasChildren = item.submenu && item.submenu.length > 0;
@@ -365,7 +385,7 @@ function Sidebar() {
               collapsed ? 'p-2 justify-center' : 'px-4 py-4'
             } flex items-center space-x-2`}
           >
-            {!collapsed && (
+            {!collapsed && showSearch && (
               <Input
                 placeholder="Search menu..."
                 value={searchTerm}
