@@ -142,7 +142,7 @@ function Sidebar() {
             title={collapsed ? item.name : undefined}
             className={`
               w-full group flex items-center justify-between rounded-xl ${padding} py-2.5 text-sm font-medium
-              transition-all duration-200 ease-in-out hover:brightness-110 focus:outline outline-green-400 ${collapsed ? 'justify-center' : ''}
+              transition-all duration-200 ease-in-out hover:brightness-110 active:scale-95 focus:outline outline-green-400 ${collapsed ? 'justify-center' : ''}
               ${isNavItemActive(item)
                 ? 'bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-sm'
                 : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -152,7 +152,7 @@ function Sidebar() {
           >
             <div className="flex items-center gap-3">
               <item.icon
-                className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-white/80 group-hover:text-white'}`}
+                className={`h-5 w-5 flex-shrink-0 transition-all duration-200 ease-in-out ${isNavItemActive(item) ? 'text-white' : 'text-white/80 group-hover:text-white'}`}
               />
               {!collapsed && <span>{item.name}</span>}
             </div>
@@ -180,7 +180,7 @@ function Sidebar() {
         title={collapsed ? item.name : undefined}
           className={`
           group flex items-center gap-3 rounded-xl ${padding} py-2.5 text-sm font-medium
-          transition-all duration-200 ease-in-out hover:brightness-110 focus:outline outline-green-400 ${collapsed ? 'justify-center' : ''}
+          transition-all duration-200 ease-in-out hover:brightness-110 active:scale-95 focus:outline outline-green-400 ${collapsed ? 'justify-center' : ''}
           ${isNavItemActive(item)
             ? 'bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-sm'
             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -189,7 +189,7 @@ function Sidebar() {
         `}
       >
         <item.icon
-          className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-white/80 group-hover:text-white'}`}
+          className={`h-5 w-5 flex-shrink-0 transition-all duration-200 ease-in-out ${isNavItemActive(item) ? 'text-white' : 'text-white/80 group-hover:text-white'}`}
         />
         {!collapsed && <span>{item.name}</span>}
       </Link>
