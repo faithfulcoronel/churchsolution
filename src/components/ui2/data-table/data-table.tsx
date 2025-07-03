@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Loader2 } from 'lucide-react';
 import { DataTableToolbar } from './data-table-toolbar';
 import { DataTableColumnHeader } from './data-table-column-header';
-import { Pagination } from '../pagination';
+import { DataTablePagination } from './data-table-pagination';
 import { cn } from '@/lib/utils';
 
 export interface DataTableProps<TData, TValue> {
@@ -143,17 +143,7 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <Pagination
-        currentPage={pageIndex + 1}
-        totalPages={Math.max(1, table.getPageCount())}
-        onPageChange={(p) => table.setPageIndex(p - 1)}
-        itemsPerPage={pageSize}
-        totalItems={table.getFilteredRowModel().rows.length}
-        onItemsPerPageChange={(size) => table.setPageSize(size)}
-        showItemsPerPage
-        className="border-t sticky bottom-0 bg-background z-10"
-        size="sm"
-      />
+      <DataTablePagination table={table} />
     </div>
   );
 }
