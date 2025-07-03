@@ -30,7 +30,7 @@ export function RecentMemberItem({ member }: RecentMemberItemProps) {
   const variant = statusVariantMap[member.membership_status?.code || ''] || 'secondary';
   const joinedDate = member.membership_date || member.created_at;
   return (
-    <Card size="sm" hoverable>
+    <Card size="sm" hoverable variant="secondary">
       <CardContent className="flex justify-between gap-4 items-start py-3 px-4">
         <div className="flex items-start gap-3 flex-1">
           <Avatar size="md">
