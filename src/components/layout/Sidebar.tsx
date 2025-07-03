@@ -371,11 +371,13 @@ function Sidebar() {
       >
         <SidebarHeader className="px-4">
           {/* Logo */}
-          <div className="flex-shrink-0 h-16 flex items-center justify-center px-4">
+          <div
+            className={`flex-shrink-0 h-16 flex items-center justify-center px-4 ${collapsed ? '' : 'pt-3'}`}
+          >
             <img
               src={collapsed ? '/logo_square.svg' : '/logo_long.svg'}
               alt="StewardTrack Logo"
-              className={collapsed ? 'h-20' : 'h-12'}
+              className={collapsed ? 'h-8' : 'h-10'}
             />
           </div>
 
