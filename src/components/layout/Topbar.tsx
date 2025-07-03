@@ -58,16 +58,16 @@ function Topbar() {
         <ChurchBranding />
       </div>
 
-      <div className="flex-1 px-4 hidden sm:block">
-        <Input
-          placeholder="Search StewardTrack..."
-          icon={<Search className="h-4 w-4 text-gray-500" />}
-          className="w-64 md:w-80 rounded-full"
-          aria-label="Search"
-        />
-      </div>
-
       <div className="flex items-center space-x-4">
+        <div className="hidden sm:block">
+          <Input
+            placeholder="Search StewardTrack..."
+            icon={<Search className="h-4 w-4 text-gray-500" />}
+            className="w-64 md:w-80 rounded-full"
+            aria-label="Search"
+          />
+        </div>
+
         <NotificationDropdown />
 
         <Button
