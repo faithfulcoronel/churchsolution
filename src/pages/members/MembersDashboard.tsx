@@ -1,9 +1,9 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { tenantUtils } from '../../utils/tenantUtils';
-import { startOfMonth } from 'date-fns';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "../../lib/supabase";
+import { tenantUtils } from "../../utils/tenantUtils";
+import { startOfMonth } from "date-fns";
 import {
   Card,
   CardContent,
@@ -11,9 +11,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../../components/ui2/card';
-import MetricCard from '../../components/dashboard/MetricCard';
-import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
+} from "../../components/ui2/card";
+import MetricCard from "../../components/dashboard/MetricCard";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "../../components/ui2/avatar";
 import {
   Users,
   UserPlus,
@@ -24,11 +28,16 @@ import {
   Search,
   Mail,
   Phone,
-} from 'lucide-react';
-import { Container } from '../../components/ui2/container';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
-import { Input } from '../../components/ui2/input';
-import { RecentMemberItem } from '../../components/members';
+} from "lucide-react";
+import { Container } from "../../components/ui2/container";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "../../components/ui2/tabs";
+import { Input } from "../../components/ui2/input";
+import { RecentMemberItem } from "../../components/members";
 
 interface MemberSummary {
   id: string;
@@ -43,21 +52,21 @@ interface MemberSummary {
 }
 
 function MembersDashboard() {
-  const [activeTab, setActiveTab] = React.useState('overview');
+  const [activeTab, setActiveTab] = React.useState("overview");
   const { data: tenant } = useQuery({
-    queryKey: ['current-tenant'],
+    queryKey: ["current-tenant"],
     queryFn: () => tenantUtils.getCurrentTenant(),
   });
 
   const { data: visitorStatus } = useQuery({
-    queryKey: ['visitor-status', tenant?.id],
+    queryKey: ["visitor-status", tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return null;
       const { data, error } = await supabase
-        .from('membership_status')
-        .select('id')
-        .eq('tenant_id', tenant.id)
-        .eq('code', 'visitor')
+        .from("membership_status")
+        .select("id")
+        .eq("tenant_id", tenant.id)
+        .eq("code", "visitor")
         .maybeSingle();
       if (error) throw error;
       return data?.id || null;
@@ -66,14 +75,14 @@ function MembersDashboard() {
   });
 
   const { data: totalMembers } = useQuery({
-    queryKey: ['total-members', tenant?.id],
+    queryKey: ["total-members", tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return 0;
       const { count, error } = await supabase
-        .from('members')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', tenant.id)
-        .is('deleted_at', null);
+        .from("members")
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenant.id)
+        .is("deleted_at", null);
       if (error) throw error;
       return count || 0;
     },
@@ -81,16 +90,16 @@ function MembersDashboard() {
   });
 
   const { data: newMembers } = useQuery({
-    queryKey: ['new-members', tenant?.id],
+    queryKey: ["new-members", tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return 0;
       const start = startOfMonth(new Date());
       const { count, error } = await supabase
-        .from('members')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', tenant.id)
-        .gte('created_at', start.toISOString())
-        .is('deleted_at', null);
+        .from("members")
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenant.id)
+        .gte("created_at", start.toISOString())
+        .is("deleted_at", null);
       if (error) throw error;
       return count || 0;
     },
@@ -98,15 +107,15 @@ function MembersDashboard() {
   });
 
   const { data: visitorCount } = useQuery({
-    queryKey: ['visitor-count', tenant?.id, visitorStatus],
+    queryKey: ["visitor-count", tenant?.id, visitorStatus],
     queryFn: async () => {
       if (!tenant?.id || !visitorStatus) return 0;
       const { count, error } = await supabase
-        .from('members')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', tenant.id)
-        .eq('status_category_id', visitorStatus)
-        .is('deleted_at', null);
+        .from("members")
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenant.id)
+        .eq("status_category_id", visitorStatus)
+        .is("deleted_at", null);
       if (error) throw error;
       return count || 0;
     },
@@ -114,13 +123,13 @@ function MembersDashboard() {
   });
 
   const { data: familyCount } = useQuery({
-    queryKey: ['family-count', tenant?.id],
+    queryKey: ["family-count", tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return 0;
       const { count, error } = await supabase
-        .from('family_relationships')
-        .select('id', { count: 'exact', head: true })
-        .eq('tenant_id', tenant.id);
+        .from("family_relationships")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenant.id);
       if (error) throw error;
       return count || 0;
     },
@@ -128,17 +137,17 @@ function MembersDashboard() {
   });
 
   const { data: recentMembers } = useQuery({
-    queryKey: ['recent-members', tenant?.id],
+    queryKey: ["recent-members", tenant?.id],
     queryFn: async () => {
       if (!tenant?.id) return [] as MemberSummary[];
       const { data, error } = await supabase
-        .from('members')
+        .from("members")
         .select(
-          'id, first_name, last_name, email, contact_number, membership_date, profile_picture_url, created_at, membership_status(name, code)'
+          "id, first_name, last_name, email, contact_number, membership_date, profile_picture_url, created_at, membership_status(name, code)"
         )
-        .eq('tenant_id', tenant.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
+        .eq("tenant_id", tenant.id)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
         .limit(5);
       if (error) throw error;
       return (data || []) as MemberSummary[];
@@ -146,18 +155,18 @@ function MembersDashboard() {
     enabled: !!tenant?.id,
   });
 
-  const [directorySearch, setDirectorySearch] = React.useState('');
+  const [directorySearch, setDirectorySearch] = React.useState("");
   const { data: directoryMembers } = useQuery({
-    queryKey: ['directory-members', tenant?.id, directorySearch],
+    queryKey: ["directory-members", tenant?.id, directorySearch],
     queryFn: async () => {
       if (!tenant?.id) return [] as MemberSummary[];
       const search = directorySearch.trim();
       let query = supabase
-        .from('members')
-        .select('id, first_name, last_name, profile_picture_url')
-        .eq('tenant_id', tenant.id)
-        .is('deleted_at', null)
-        .order('last_name', { ascending: true })
+        .from("members")
+        .select("id, first_name, last_name, profile_picture_url")
+        .eq("tenant_id", tenant.id)
+        .is("deleted_at", null)
+        .order("last_name", { ascending: true })
         .limit(3);
       if (search) {
         query = query.or(
@@ -173,31 +182,30 @@ function MembersDashboard() {
 
   const highlights = [
     {
-      name: 'Total Members',
+      name: "Total Members",
       value: totalMembers || 0,
       icon: Users,
-      subtext: 'Active members',
+      subtext: "Active members",
     },
     {
-      name: 'New This Month',
+      name: "New This Month",
       value: newMembers || 0,
       icon: UserPlus,
-      subtext: 'Joined this month',
+      subtext: "Joined this month",
     },
     {
-      name: 'Visitors',
+      name: "Visitors",
       value: visitorCount || 0,
       icon: UserCheck,
-      subtext: 'Current visitors',
+      subtext: "Current visitors",
     },
     {
-      name: 'Families',
+      name: "Families",
       value: familyCount || 0,
       icon: Heart,
-      subtext: 'Family groups',
+      subtext: "Family groups",
     },
   ];
-
 
   return (
     <Container className="space-y-6 max-w-[1200px]" size="xl">
@@ -242,23 +250,64 @@ function MembersDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Choose how you’d like to add new members</CardDescription>
+              <CardDescription>
+                Choose how you’d like to add new members
+              </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col md:flex-row gap-4">
               <Link to="/members/add" className="w-full md:w-1/2">
-                <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1" hoverable>
+                <Card
+                  className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1"
+                  hoverable
+                >
                   <UserPlus className="text-white text-xl" />
                   <span>Add Single Member</span>
-                  <span className="text-xs font-normal">Individual entry form</span>
+                  <span className="text-xs font-normal">
+                    Individual entry form
+                  </span>
                 </Card>
               </Link>
               <Link to="/members/batch" className="w-full md:w-1/2">
-                <Card className="bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1" hoverable>
+                <Card
+                  className="bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1"
+                  hoverable
+                >
                   <FileText className="text-xl text-gray-600" />
                   <span>Batch Entry</span>
-                  <span className="text-xs text-gray-500">Spreadsheet-style entry</span>
+                  <span className="text-xs text-gray-500">
+                    Spreadsheet-style entry
+                  </span>
                 </Card>
               </Link>
+            </CardContent>
+          </Card>
+          <Card className="mt-4">
+            <CardContent className="space-y-4">
+              <h3 className="font-semibold text-lg text-gray-900">
+                Recent Additions
+              </h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Latest member entries
+              </p>
+              <div className="flex flex-col space-y-2">
+                {recentMembers && recentMembers.length > 0 ? (
+                  recentMembers.map((member) => (
+                    <RecentMemberItem key={member.id} member={member} />
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No recent members.
+                  </p>
+                )}
+              </div>
+              <div className="pt-4">
+                <Link
+                  to="/members/list"
+                  className="text-sm text-primary font-medium flex items-center hover:underline"
+                >
+                  View all members <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -287,12 +336,13 @@ function MembersDashboard() {
                             alt={`${member.first_name} ${member.last_name}`}
                             crossOrigin="anonymous"
                             onError={(e) => {
-                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.style.display = "none";
                             }}
                           />
                         )}
                         <AvatarFallback>
-                          {member.first_name.charAt(0)}{member.last_name.charAt(0)}
+                          {member.first_name.charAt(0)}
+                          {member.last_name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <span className="font-medium text-foreground">
@@ -301,38 +351,16 @@ function MembersDashboard() {
                     </Link>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">No members found.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No members found.
+                  </p>
                 )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-        </Tabs>
-
-        <Card>
-          <CardContent className="space-y-4">
-          <h3 className="font-semibold text-lg text-gray-900">Recent Additions</h3>
-          <p className="text-sm text-gray-500 mb-4">Latest member entries</p>
-          <div className="flex flex-col space-y-2">
-            {recentMembers && recentMembers.length > 0 ? (
-              recentMembers.map((member) => (
-                <RecentMemberItem key={member.id} member={member} />
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">No recent members.</p>
-            )}
-          </div>
-          <div className="pt-4">
-            <Link
-              to="/members/list"
-              className="text-sm text-primary font-medium flex items-center hover:underline"
-            >
-              View all members <ChevronRight className="h-4 w-4 ml-1" />
-            </Link>
-          </div>
-          </CardContent>
-        </Card>
-      </Container>
+      </Tabs>
+    </Container>
   );
 }
 
