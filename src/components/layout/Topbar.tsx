@@ -1,5 +1,13 @@
 import React, { useMemo } from 'react';
-import { Menu, User, Search, Sun, Moon, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+  Menu,
+  User,
+  Search,
+  Sun,
+  Moon,
+  PanelLeft,
+  PanelLeftClose
+} from 'lucide-react';
 import { Button } from '../ui2/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui2/dropdown-menu';
 import { Input } from '../ui2/input';
@@ -64,9 +72,9 @@ function Topbar() {
           className="hidden lg:inline-flex"
         >
           {collapsed ? (
-            <ChevronsRight className="h-5 w-5" />
+            <PanelLeftClose className="h-5 w-5" />
           ) : (
-            <ChevronsLeft className="h-5 w-5" />
+            <PanelLeft className="h-5 w-5" />
           )}
         </Button>
       </div>
