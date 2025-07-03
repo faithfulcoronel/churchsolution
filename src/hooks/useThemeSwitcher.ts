@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect } from 'react';
 import { useSettings } from '@/providers/SettingsProvider';
 
 const useThemeSwitcher = () => {
@@ -9,6 +9,11 @@ const useThemeSwitcher = () => {
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
   };
+
+  // Apply the currently selected theme when the hook initializes
+  useEffect(() => {
+    applyTheme(settings.themeMode === 'dark' ? 'dark' : 'light');
+  }, [settings.themeMode]);
 
   const handleThemeToggle = (
     e: ChangeEvent<HTMLInputElement> | boolean
