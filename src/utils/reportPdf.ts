@@ -104,8 +104,8 @@ export async function exportReportPdf(
       const key = col.key.toLowerCase();
       const header = col.header.toLowerCase();
       if (
-        ['debit', 'credit', 'amount'].includes(key) ||
-        ['debit', 'credit', 'amount'].includes(header)
+        ['debit', 'credit', 'amount','income','expenses','net change','total amount'].includes(key) ||
+        ['debit', 'credit', 'amount','income','expenses','net change','total amount'].includes(header)
       ) {
         value = formatCurrency(Number(value) || 0, currency);
       }

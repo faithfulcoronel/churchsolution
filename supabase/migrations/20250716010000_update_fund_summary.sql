@@ -1,4 +1,5 @@
 -- Update fund summary report to remove fund_id column
+DROP FUNCTION IF EXISTS report_fund_summary(uuid, date, date);
 
 CREATE OR REPLACE FUNCTION report_fund_summary(
   p_tenant_id uuid,
