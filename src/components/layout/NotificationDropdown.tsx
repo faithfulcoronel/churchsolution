@@ -131,14 +131,17 @@ export default function NotificationDropdown() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative rounded-full"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          aria-label="Notifications"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 text-gray-500" />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />
+            <span className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 bg-green-500 text-white text-xs rounded-full px-1">
+              {unreadCount}
+            </span>
           )}
         </Button>
       </DropdownMenuTrigger>
