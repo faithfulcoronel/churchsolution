@@ -93,7 +93,7 @@ export function MultiSelect({
       {label && (
         <label 
           className={cn(
-            "block text-sm font-medium mb-1.5 dark:text-gray-300",
+            "block text-sm font-medium mb-1.5 dark:text-muted-foreground",
             error ? 'text-destructive' : 'text-foreground',
             disabled && 'opacity-50'
           )}
@@ -114,7 +114,7 @@ export function MultiSelect({
               "w-full justify-between",
               value.length === 0 && "text-muted-foreground",
               error && "border-destructive",
-              "h-10 px-3 py-2 dark:border-gray-700 dark:bg-gray-800"
+              "h-10 px-3 py-2 dark:border-border dark:bg-muted"
             )}
             disabled={disabled}
           >
@@ -127,7 +127,7 @@ export function MultiSelect({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 p-0 opacity-70 hover:opacity-100 mr-1 dark:text-gray-400 dark:hover:text-gray-300"
+                  className="h-4 w-4 p-0 opacity-70 hover:opacity-100 mr-1 dark:text-muted-foreground dark:hover:text-muted-foreground"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleClear();
@@ -136,11 +136,11 @@ export function MultiSelect({
                   <X className="h-3 w-3" />
                 </Button>
               )}
-              <ChevronsUpDown className="h-4 w-4 opacity-50 dark:text-gray-400" />
+              <ChevronsUpDown className="h-4 w-4 opacity-50 dark:text-muted-foreground" />
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 dark:border-gray-700" align="start">
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 dark:border-border" align="start">
           <Command>
             {searchable && (
               <CommandInput 
@@ -164,12 +164,12 @@ export function MultiSelect({
                       className={cn(
                         "flex items-center gap-2",
                         option.disabled && "opacity-50 cursor-not-allowed",
-                        "dark:aria-selected:bg-gray-700"
+                        "dark:aria-selected:bg-muted"
                       )}
                     >
                       <Checkbox
                         checked={isSelected}
-                        className="h-4 w-4 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:border-gray-600"
+                        className="h-4 w-4 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:border-border"
                         onCheckedChange={() => handleSelect(option.value)}
                       />
                       {option.icon && <span className="mr-1">{option.icon}</span>}
@@ -180,7 +180,7 @@ export function MultiSelect({
               </CommandGroup>
             </CommandList>
             {value.length > 0 && (
-              <div className="border-t p-2 dark:border-gray-700">
+              <div className="border-t p-2 dark:border-border">
                 <div className="flex flex-wrap gap-1 mb-2">
                   {value.map((selectedValue) => {
                     const option = options.find(opt => opt.value === selectedValue);
@@ -188,14 +188,14 @@ export function MultiSelect({
                       <Badge 
                         key={selectedValue} 
                         variant="secondary"
-                        className="flex items-center gap-1 px-2 py-1 dark:bg-gray-700 dark:text-gray-300"
+                        className="flex items-center gap-1 px-2 py-1 dark:bg-muted dark:text-muted-foreground"
                       >
                         {option?.icon && <span className="mr-0.5">{option.icon}</span>}
                         <span>{option?.label || selectedValue}</span>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-3 w-3 p-0 ml-1 hover:bg-transparent dark:text-gray-400 dark:hover:text-gray-300"
+                          className="h-3 w-3 p-0 ml-1 hover:bg-transparent dark:text-muted-foreground dark:hover:text-muted-foreground"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSelect(selectedValue);
@@ -208,13 +208,13 @@ export function MultiSelect({
                   })}
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-xs text-muted-foreground dark:text-gray-400">
+                  <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                     {value.length} selected
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-xs dark:text-gray-300 dark:hover:bg-gray-800"
+                    className="h-7 px-2 text-xs dark:text-muted-foreground dark:hover:bg-muted"
                     onClick={handleClear}
                   >
                     Clear all
@@ -230,7 +230,7 @@ export function MultiSelect({
         <p
           className={cn(
             "mt-1.5 text-sm",
-            error ? "text-destructive" : "text-muted-foreground dark:text-gray-400"
+            error ? "text-destructive" : "text-muted-foreground dark:text-muted-foreground"
           )}
         >
           {error || helperText}

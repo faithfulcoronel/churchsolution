@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useAuthStore } from '../../stores/authStore';
 import { Scrollable } from '../ui2/scrollable';
 import { Input } from '../ui2/input';
 import { Button } from '../ui2/button';
-import { Badge } from '../ui2/badge';
+import { Card } from '../ui2/card';
 import { Separator } from '../ui2/separator';
+import { Avatar, AvatarImage, AvatarFallback } from '../ui2/avatar';
 import {
   Sidebar as SidebarContainer,
   SidebarHeader,
@@ -16,9 +18,6 @@ import {
   useSidebar,
 } from '../ui2/sidebar';
 import {
-  Settings as SettingsIcon,
-  Crown,
-  Sparkles,
   Pin,
   PinOff,
   Search,
@@ -38,7 +37,6 @@ function Sidebar() {
     setPinned,
   } = useSidebar();
   const location = useLocation();
-  const navigate = useNavigate();
   const { hasPermission } = usePermissions();
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,6 +59,43 @@ function Sidebar() {
       return data?.[0];
     },
   });
+
+  // Current auth user
+  const { user } = useAuthStore();
+
+  // Fetch user roles
+  const { data: userRoles } = useQuery({
+    queryKey: ['current-user-roles', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase.rpc('get_user_roles', {
+        user_id: user.id,
+      });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  const fullName = useMemo(() => {
+    if (!user) return '';
+    const first = (user.user_metadata as any)?.first_name || '';
+    const last = (user.user_metadata as any)?.last_name || '';
+    const name = `${first} ${last}`.trim();
+    return name || user.email || '';
+  }, [user]);
+
+  const initials = useMemo(() => {
+    if (!user) return '';
+    const first = (user.user_metadata as any)?.first_name || '';
+    const last = (user.user_metadata as any)?.last_name || '';
+    const init = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase().trim();
+    return init || user.email?.charAt(0).toUpperCase() || '';
+  }, [user]);
+
+  const primaryRole = useMemo(() => {
+    return userRoles?.[0]?.role_name || 'User';
+  }, [userRoles]);
 
   const navigation = useMemo(
     () =>
@@ -108,7 +143,7 @@ function Sidebar() {
               w-full group flex items-center justify-between rounded-lg ${padding} py-2 text-sm font-medium
               transition-colors duration-200 ${collapsed ? 'justify-center' : ''}
               ${isNavItemActive(item)
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-white shadow-md shadow-primary/50'
                 : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                 ? 'bg-primary/20 text-white'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
@@ -146,7 +181,7 @@ function Sidebar() {
           group flex items-center rounded-lg ${padding} py-2 text-sm font-medium
           transition-colors duration-200 ${collapsed ? 'justify-center' : ''}
           ${isNavItemActive(item)
-            ? 'bg-primary text-white'
+            ? 'bg-primary text-white shadow-md shadow-primary/50'
             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
             ? 'bg-primary/20 text-white'
             : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
@@ -303,7 +338,7 @@ function Sidebar() {
       {/* Sidebar */}
       <SidebarContainer
         className={`
-          fixed inset-y-0 left-0 z-50 bg-gray-900 bg-primary-gradient flex flex-col
+          fixed inset-y-0 left-0 z-50 flex flex-col bg-primary-gradient dark:bg-primary-gradient
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
@@ -311,7 +346,7 @@ function Sidebar() {
           flex flex-col transition-all
         `}
       >
-        <SidebarHeader className="px-2">
+        <SidebarHeader className="px-4">
           {/* Logo */}
           <div className="flex-shrink-0 h-16 flex items-center justify-center px-4">
             <img
@@ -324,7 +359,7 @@ function Sidebar() {
           {/* Search Bar and Actions */}
           <div
             className={`${
-              collapsed ? 'p-2 justify-center' : 'px-2 py-4'
+              collapsed ? 'p-2 justify-center' : 'px-4 py-4'
             } flex items-center space-x-2`}
           >
             {!collapsed && (
@@ -333,7 +368,7 @@ function Sidebar() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 icon={<Search className="h-4 w-4" />}
-                className="flex-1 bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500 focus:border-primary focus:ring-primary"
+                className="flex-1"
               />
             )}
             <Button
@@ -341,7 +376,7 @@ function Sidebar() {
               size="icon"
               onClick={() => setCollapsed(!collapsed)}
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="hidden lg:flex bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 h-8 w-8"
+              className="hidden lg:flex h-8 w-8"
             >
               {collapsed ? (
                 <ChevronsRight className="h-4 w-4" />
@@ -355,18 +390,18 @@ function Sidebar() {
                 size="icon"
                 onClick={() => setPinned(!pinned)}
                 title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
-                className="hidden lg:flex bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 h-8 w-8"
+                className="hidden lg:flex h-8 w-8"
               >
                 {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
               </Button>
             )}
           </div>
 
-          {!collapsed && <Separator className="bg-gray-800" />}
+          {!collapsed && <Separator className="bg-border" />}
         </SidebarHeader>
 
         <SidebarContent>
-          <Scrollable className={`${collapsed ? 'py-2' : 'py-4'}`} shadow={false}>
+          <Scrollable className={`${collapsed ? 'py-2 px-4' : 'py-4 px-4'}`} shadow={false}>
             <nav className="space-y-1">
               {filteredNavigation.map((item) => renderItem(item))}
 
@@ -380,72 +415,26 @@ function Sidebar() {
           </Scrollable>
         </SidebarContent>
 
-        <SidebarFooter className="border-t border-gray-800 p-4 space-y-4">
-          {/* Subscribe Button */}
+        <SidebarFooter className="border-t border-border p-4 space-y-4">
+          {/* Profile */}
           {!collapsed && (
-            <Link
-              to="/settings/subscription"
-              className="block"
-                aria-label="Manage Subscription"
-              >
-                <div className={`
-                  relative overflow-hidden rounded-xl group
-                  transition-all duration-300
-                  hover:shadow-2xl hover:-translate-y-1
-                  ${tenant?.subscription_tier === 'free'
-                    ? 'bg-gradient-to-r from-primary-600 to-primary-400'
-                    : 'bg-gradient-to-r from-primary-700 to-primary-500'
-                  }
-                `}>
-                  {/* Animated Background */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-30 blur-lg animate-pulse" />
-
-                  {/* Content */}
-                  <div className="relative p-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Crown className={`
-                        h-5 w-5 text-white
-                        ${tenant?.subscription_tier === 'free' ? 'animate-pulse' : ''}
-                      `} />
-                      <div>
-                        <p className="text-white font-semibold">
-                          {tenant?.subscription_tier === 'free' ? 'Subscribe Now' : 'Upgrade Plan'}
-                        </p>
-                        <p className="text-xs text-white/80">
-                          {tenant?.subscription_tier === 'free' ? 'Unlock premium features' : 'Explore more features'}
-                        </p>
-                      </div>
-                    </div>
-                    <Sparkles className="h-5 w-5 text-white opacity-75 group-hover:opacity-100" />
-                  </div>
-
-                  {/* Animated Border */}
-                  {tenant?.subscription_tier === 'free' && (
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-white to-yellow-400 animate-[shimmer_2s_infinite_linear]" />
-                  )}
-                </div>
-              </Link>
-            )}
-
-            {/* Settings Button */}
-            <Button
-              variant="ghost"
-              className={`
-                w-full ${collapsed ? 'justify-center' : 'justify-start'} text-gray-300 hover:text-white hover:bg-gray-800
-                ${location.pathname.startsWith('/settings') ? 'bg-primary text-white' : ''}
-              `}
-              onClick={() => navigate('/settings')}
+            <Card
+              size="sm"
+              className="flex items-center space-x-3 rounded-xl p-4 bg-gradient-to-br from-emerald-500/70 to-teal-500/70 hover:brightness-105 transition"
             >
-              <SettingsIcon className={`h-5 w-5 ${collapsed ? '' : 'mr-2'} ${location.pathname.startsWith('/settings') ? 'text-white' : ''}`} />
-              {!collapsed && 'Settings'}
-              {!collapsed && tenant?.subscription_tier === 'free' && (
-                <Badge variant="primary" className="ml-auto">
-                  Free
-                </Badge>
-              )}
-            </Button>
+              <Avatar className="h-9 w-9">
+                <AvatarFallback className="text-sm text-white">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-white">{fullName}</span>
+                <span className="text-xs text-white/80">{primaryRole}</span>
+              </div>
+            </Card>
+          )}
 
-          </SidebarFooter>
+        </SidebarFooter>
       </SidebarContainer>
     </>
   );

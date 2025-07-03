@@ -37,7 +37,7 @@ const SelectTrigger = React.forwardRef<
         <label
           htmlFor={id}
           className={cn(
-            'block text-sm font-medium mb-1.5 dark:text-gray-300',
+            'block text-sm font-medium mb-1.5 dark:text-muted-foreground',
             error ? 'text-destructive' : 'text-foreground',
             disabled && 'opacity-50'
           )}
@@ -57,7 +57,7 @@ const SelectTrigger = React.forwardRef<
           error || helperText ? `${id}-description` : undefined
         }
         className={cn(
-          'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800',
+          'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-muted',
           error && 'border-destructive focus:ring-destructive',
           icon && 'pl-10',
           className
@@ -65,13 +65,13 @@ const SelectTrigger = React.forwardRef<
         {...props}
       >
         {icon && (
-          <span className="absolute left-3 flex items-center text-muted-foreground dark:text-gray-400">
+          <span className="absolute left-3 flex items-center text-muted-foreground dark:text-muted-foreground">
             {icon}
           </span>
         )}
         {children}
         <SelectPrimitive.Icon asChild>
-          <ChevronDown className="h-4 w-4 opacity-50 dark:text-gray-400" />
+          <ChevronDown className="h-4 w-4 opacity-50 dark:text-muted-foreground" />
         </SelectPrimitive.Icon>
       </SelectPrimitive.Trigger>
 

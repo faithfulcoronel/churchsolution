@@ -20,18 +20,18 @@ function Calendar({
       classNames={{
         months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
         month: 'space-y-4',
-        caption: 'flex justify-center pt-1 relative items-center dark:text-gray-200',
-        caption_label: 'text-sm font-medium dark:text-gray-200',
+        caption: 'flex justify-center pt-1 relative items-center dark:text-foreground',
+        caption_label: 'text-sm font-medium dark:text-foreground',
         nav: 'space-x-1 flex items-center',
         nav_button: cn(
           buttonVariants({ variant: 'outline' }),
-          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 dark:border-gray-700 dark:bg-gray-800'
+          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 dark:border-border dark:bg-muted'
         ),
         nav_button_previous: 'absolute left-1',
         nav_button_next: 'absolute right-1',
         table: 'w-full border-collapse space-y-1',
         head_row: 'flex',
-        head_cell: 'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] dark:text-gray-400',
+        head_cell: 'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] dark:text-muted-foreground',
         row: 'flex w-full mt-2',
         cell: cn(
           'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent',
@@ -41,17 +41,17 @@ function Calendar({
         ),
         day: cn(
           buttonVariants({ variant: 'ghost' }),
-          'h-9 w-9 p-0 font-normal aria-selected:opacity-100 dark:hover:bg-gray-800 dark:text-gray-300'
+          'h-9 w-9 p-0 font-normal aria-selected:opacity-100 dark:hover:bg-muted dark:text-muted-foreground'
         ),
         day_range_start: 'day-range-start',
         day_range_end: 'day-range-end',
         day_selected:
           'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground dark:bg-primary/90',
-        day_today: 'bg-accent text-accent-foreground dark:bg-gray-700 dark:text-gray-200',
-        day_outside: 'text-muted-foreground opacity-50 dark:text-gray-500',
-        day_disabled: 'text-muted-foreground opacity-50 dark:text-gray-600',
+        day_today: 'bg-accent text-accent-foreground dark:bg-muted dark:text-foreground',
+        day_outside: 'text-muted-foreground opacity-50 dark:text-muted-foreground',
+        day_disabled: 'text-muted-foreground opacity-50 dark:text-muted-foreground',
         day_range_middle:
-          'aria-selected:bg-accent aria-selected:text-accent-foreground dark:aria-selected:bg-gray-700',
+          'aria-selected:bg-accent aria-selected:text-accent-foreground dark:aria-selected:bg-muted',
         day_hidden: 'invisible',
         ...classNames
       }}
@@ -59,13 +59,13 @@ function Calendar({
         IconLeft: (props) => (
           <ChevronLeft
             {...props}
-            className={cn('h-4 w-4 dark:text-gray-400', props.className)}
+            className={cn('h-4 w-4 dark:text-muted-foreground', props.className)}
           />
         ),
         IconRight: (props) => (
           <ChevronRight
             {...props}
-            className={cn('h-4 w-4 dark:text-gray-400', props.className)}
+            className={cn('h-4 w-4 dark:text-muted-foreground', props.className)}
           />
         )
       }}

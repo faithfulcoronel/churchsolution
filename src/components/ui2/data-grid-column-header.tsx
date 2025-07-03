@@ -24,10 +24,10 @@ export function DataGridColumnHeader<TData, TValue>({ header }: DataGridColumnHe
         {column.getCanSort() && (
           <span className="ml-2">
             {{
-              asc: <ArrowUp className="h-4 w-4 dark:text-gray-300" />,
-              desc: <ArrowDown className="h-4 w-4 dark:text-gray-300" />,
+              asc: <ArrowUp className="h-4 w-4 dark:text-muted-foreground" />,
+              desc: <ArrowDown className="h-4 w-4 dark:text-muted-foreground" />,
             }[column.getIsSorted() as string] ?? (
-              <ArrowUpDown className="h-4 w-4 dark:text-gray-400" />
+              <ArrowUpDown className="h-4 w-4 dark:text-muted-foreground" />
             )}
           </span>
         )}
@@ -38,7 +38,7 @@ export function DataGridColumnHeader<TData, TValue>({ header }: DataGridColumnHe
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
           className={cn(
-            'absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none bg-border dark:bg-gray-700 hover:bg-primary/10 transition-colors',
+            'absolute right-0 top-0 h-full w-2 cursor-col-resize select-none touch-none bg-border dark:bg-muted hover:bg-primary/10 transition-colors',
             header.column.getIsResizing() && 'bg-primary/20'
           )}
         />

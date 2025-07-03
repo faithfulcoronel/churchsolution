@@ -64,7 +64,7 @@ export function DatePickerInput({
       {label && (
         <label 
           className={cn(
-            "block text-sm font-medium mb-1.5 dark:text-gray-300",
+            "block text-sm font-medium mb-1.5 dark:text-muted-foreground",
             error ? 'text-destructive' : 'text-foreground',
             disabled && 'opacity-50'
           )}
@@ -82,7 +82,7 @@ export function DatePickerInput({
               value={inputValue}
               onChange={handleInputChange}
               placeholder={placeholder}
-              className={cn(error && "border-destructive", "dark:bg-gray-800 dark:border-gray-700")}
+              className={cn(error && "border-destructive", "dark:bg-muted dark:border-border")}
               disabled={disabled}
               icon={<CalendarIcon className="h-4 w-4" />}
               clearable={clearable && !!date}
@@ -93,7 +93,7 @@ export function DatePickerInput({
             />
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 dark:border-gray-700" align="start">
+        <PopoverContent className="w-auto p-0 dark:border-border" align="start">
           <Calendar
             mode="single"
             selected={date}
@@ -110,7 +110,7 @@ export function DatePickerInput({
         <p
           className={cn(
             "mt-1.5 text-sm",
-            error ? "text-destructive" : "text-muted-foreground dark:text-gray-400"
+            error ? "text-destructive" : "text-muted-foreground dark:text-muted-foreground"
           )}
         >
           {error || helperText}
