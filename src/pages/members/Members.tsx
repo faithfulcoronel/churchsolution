@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import MemberList from './MemberList';
+const MembersDashboard = React.lazy(() => import("./MembersDashboard"));
 import MemberProfile from './MemberProfile';
 import MemberAddEdit from './MemberAddEdit';
 import FamilyRelationships from './family/FamilyRelationships';
@@ -19,6 +20,7 @@ import CategoryProfile from '../finances/configuration/CategoryProfile';
 function Members() {
   return (
     <Routes>
+      <Route index element={<MembersDashboard />} />
       {/* Member Routes */}
       <Route path="list" element={<MemberList />} />
       <Route path="add" element={<MemberAddEdit />} />
