@@ -128,7 +128,7 @@ function Sidebar() {
     return levels;
   }, [navigation]);
 
-  const showSearch = menuItemCount > 10;
+  const showSearch = menuItemCount > 20;
 
   React.useEffect(() => {
     if (!showSearch && searchTerm) {

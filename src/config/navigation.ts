@@ -1,10 +1,15 @@
 import {
   Home,
   Users,
-  DollarSign,
-  Shield,
+  CalendarCheck,
+  CalendarClock,
+  HandCoins,
+  PiggyBank,
+  FileBarChart,
+  LayoutDashboard,
   Bell,
   LifeBuoy,
+  Shield,
   LucideIcon,
 } from 'lucide-react';
 
@@ -14,15 +19,7 @@ export interface NavItem {
   icon: LucideIcon;
   permission?: string | null;
   submenu?: NavItem[];
-  /**
-   * Optional group/section label used for organizing the sidebar.
-   * Only required for top level navigation items.
-   */
   section?: string;
-  /**
-   * When true the nav item is marked active only when the current path
-   * exactly matches the item's href.
-   */
   exact?: boolean;
 }
 
@@ -53,14 +50,49 @@ export const navigation: NavItem[] = [
     href: '/members',
     icon: Users,
     permission: 'member.view',
-    section: 'Management',
+    section: 'Community',
   },
   {
-    name: 'Finance',
+    name: 'Attendance',
+    href: '/attendance',
+    icon: CalendarCheck,
+    permission: 'member.view',
+    section: 'Community',
+  },
+  {
+    name: 'Events',
+    href: '/events',
+    icon: CalendarClock,
+    permission: 'member.view',
+    section: 'Community',
+  },
+  {
+    name: 'Financial Overview',
     href: '/finances',
-    icon: DollarSign,
+    icon: LayoutDashboard,
     permission: 'finance.view',
-    section: 'Management',
+    section: 'Financial',
+  },
+  {
+    name: 'Tithes and Offerings',
+    href: '/offerings',
+    icon: HandCoins,
+    permission: 'finance.view',
+    section: 'Financial',
+  },
+  {
+    name: 'Expenses',
+    href: '/expenses',
+    icon: PiggyBank,
+    permission: 'finance.view',
+    section: 'Financial',
+  },
+  {
+    name: 'Financial Reports',
+    href: '/financialreports',
+    icon: FileBarChart,
+    permission: 'finance.view',
+    section: 'Financial',
   },
   {
     name: 'Admin Panel',
