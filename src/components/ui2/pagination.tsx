@@ -72,12 +72,12 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
         ref={ref}
         className={cn(
           'flex flex-col sm:flex-row items-center justify-between',
-          'bg-background px-4 py-3 sm:px-6 dark:bg-gray-800',
+          'bg-background px-4 py-3 sm:px-6 dark:bg-muted',
           variant !== 'simple' && 'border-t',
           className
         )}
       >
-        <div className="flex-1 text-sm text-muted-foreground dark:text-gray-400">
+        <div className="flex-1 text-sm text-muted-foreground dark:text-muted-foreground">
           {totalItems > 0 && (
             <p>
               Showing <span className="font-medium">{startItem}</span> to{' '}
@@ -91,7 +91,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
           {/* Items per page selector */}
           {showItemsPerPage && onItemsPerPageChange && (
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground dark:text-gray-400">Show:</span>
+              <span className="text-sm text-muted-foreground dark:text-muted-foreground">Show:</span>
               <Select
                 value={itemsPerPage.toString()}
                 onValueChange={(value) => onItemsPerPageChange(Number(value))}
@@ -115,11 +115,11 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
               className={cn(
                 'rounded-l-md',
                 variant === 'pills' && 'rounded-full',
-                'dark:border-gray-700 dark:bg-gray-800'
+                'dark:border-border dark:bg-muted'
               )}
             >
               <span className="sr-only">First page</span>
-              <ChevronsLeft className="h-4 w-4 dark:text-gray-400" />
+              <ChevronsLeft className="h-4 w-4 dark:text-muted-foreground" />
             </Button>
 
             <Button
@@ -127,10 +127,10 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
               size={size}
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="dark:border-gray-700 dark:bg-gray-800"
+              className="dark:border-border dark:bg-muted"
             >
               <span className="sr-only">Previous page</span>
-              <ChevronLeft className="h-4 w-4 dark:text-gray-400" />
+              <ChevronLeft className="h-4 w-4 dark:text-muted-foreground" />
             </Button>
 
             <div className="hidden md:flex">
@@ -143,8 +143,8 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
                     onClick={() => onPageChange(page)}
                     className={cn(
                       variant === 'pills' && 'rounded-full',
-                      'dark:border-gray-700',
-                      page !== currentPage && 'dark:bg-gray-800'
+                      'dark:border-border',
+                      page !== currentPage && 'dark:bg-muted'
                     )}
                   >
                     {page}
@@ -157,7 +157,7 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
                     disabled
                     className={cn(
                       variant === 'pills' && 'rounded-full',
-                      'dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500'
+                      'dark:border-border dark:bg-muted dark:text-muted-foreground'
                     )}
                   >
                     {page}
@@ -171,10 +171,10 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
               size={size}
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="dark:border-gray-700 dark:bg-gray-800"
+              className="dark:border-border dark:bg-muted"
             >
               <span className="sr-only">Next page</span>
-              <ChevronRight className="h-4 w-4 dark:text-gray-400" />
+              <ChevronRight className="h-4 w-4 dark:text-muted-foreground" />
             </Button>
 
             <Button
@@ -185,11 +185,11 @@ const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
               className={cn(
                 'rounded-r-md',
                 variant === 'pills' && 'rounded-full',
-                'dark:border-gray-700 dark:bg-gray-800'
+                'dark:border-border dark:bg-muted'
               )}
             >
               <span className="sr-only">Last page</span>
-              <ChevronsRight className="h-4 w-4 dark:text-gray-400" />
+              <ChevronsRight className="h-4 w-4 dark:text-muted-foreground" />
             </Button>
           </nav>
         </div>

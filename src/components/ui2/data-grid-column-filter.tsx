@@ -43,7 +43,7 @@ export function DataGridColumnFilter<TData, TValue>({ column }: DataGridColumnFi
             column.getIsFiltered() && 'text-primary dark:text-primary'
           )}
         >
-          <Filter className="h-4 w-4 dark:text-gray-400" />
+          <Filter className="h-4 w-4 dark:text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[200px] p-2">

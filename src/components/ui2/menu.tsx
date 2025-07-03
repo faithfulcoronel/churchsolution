@@ -36,11 +36,11 @@ const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(
       ref={ref}
       className={cn(
         'menu-item relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors',
-        'focus:bg-gray-800/50 focus:text-gray-100',
+        'focus:bg-muted/50 focus:text-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-        active && 'bg-gray-800/50 text-gray-100',
+        active && 'bg-muted/50 text-foreground',
         disabled && 'pointer-events-none opacity-50',
-        'text-gray-300 hover:bg-gray-800/50 hover:text-gray-100',
+        'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
         className
       )}
       onClick={onClick}
@@ -63,7 +63,7 @@ const MenuLabel = React.forwardRef<HTMLDivElement, MenuLabelProps>(
   ({ children, className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('menu-label px-2 py-1.5 text-sm font-semibold text-gray-400', className)}
+      className={cn('menu-label px-2 py-1.5 text-sm font-semibold text-muted-foreground', className)}
       {...props}
     >
       {children}
@@ -79,7 +79,7 @@ const MenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('menu-separator -mx-1 my-1 h-px bg-gray-800', className)}
+    className={cn('menu-separator -mx-1 my-1 h-px bg-muted', className)}
     {...props}
   />
 ));
@@ -95,7 +95,7 @@ const MenuIcon = React.forwardRef<HTMLSpanElement, MenuIconProps>(
   ({ children, className, ...props }, ref) => (
     <span
       ref={ref}
-      className={cn('menu-icon mr-2 h-4 w-4 text-gray-400', className)}
+      className={cn('menu-icon mr-2 h-4 w-4 text-muted-foreground', className)}
       {...props}
     >
       {children}
@@ -167,7 +167,7 @@ const MenuHeading = React.forwardRef<HTMLDivElement, MenuHeadingProps>(
     <div
       ref={ref}
       className={cn(
-        'menu-heading px-2 py-1.5 text-xs font-semibold text-gray-400',
+        'menu-heading px-2 py-1.5 text-xs font-semibold text-muted-foreground',
         className
       )}
       {...props}
@@ -194,16 +194,16 @@ const MenuSub = React.forwardRef<HTMLDivElement, MenuSubProps>(
         <div
           className={cn(
             'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
-            'focus:bg-gray-800/50 focus:text-gray-100',
-            'hover:bg-gray-800/50 hover:text-gray-100',
-            'text-gray-300',
-            isOpen && 'bg-gray-800/50 text-gray-100'
+            'focus:bg-muted/50 focus:text-foreground',
+            'hover:bg-muted/50 hover:text-foreground',
+            'text-muted-foreground',
+            isOpen && 'bg-muted/50 text-foreground'
           )}
           onClick={() => setIsOpen(!isOpen)}
         >
           {trigger}
           <ChevronRight className={cn(
-            'ml-auto h-4 w-4 text-gray-400 transition-transform duration-200',
+            'ml-auto h-4 w-4 text-muted-foreground transition-transform duration-200',
             isOpen && 'rotate-90'
           )} />
         </div>
@@ -230,10 +230,10 @@ const MenuLink = React.forwardRef<HTMLAnchorElement, MenuLinkProps>(
       ref={ref}
       className={cn(
         'menu-link relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors',
-        'focus:bg-gray-800/50 focus:text-gray-100',
-        'hover:bg-gray-800/50 hover:text-gray-100',
-        'text-gray-300',
-        active && 'bg-gray-800/50 text-gray-100',
+        'focus:bg-muted/50 focus:text-foreground',
+        'hover:bg-muted/50 hover:text-foreground',
+        'text-muted-foreground',
+        active && 'bg-muted/50 text-foreground',
         disabled && 'pointer-events-none opacity-50',
         className
       )}
