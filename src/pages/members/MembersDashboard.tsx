@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from '../../components/ui2/card';
 import MetricCard from '../../components/dashboard/MetricCard';
-import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import {
   Users,
@@ -20,7 +19,7 @@ import {
   UserCheck,
   Heart,
   ChevronRight,
-  Settings as SettingsIcon,
+  FileText,
 } from 'lucide-react';
 import { Container } from '../../components/ui2/container';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui2/tabs';
@@ -162,23 +161,6 @@ function MembersDashboard() {
     },
   ];
 
-  const actions = [
-    {
-      label: 'New Member',
-      href: '/members/add',
-      icon: UserPlus,
-    },
-    {
-      label: 'New Family',
-      href: '/members/family/add',
-      icon: Heart,
-    },
-    {
-      label: 'Member Settings',
-      href: '/members/configuration/membership-types',
-      icon: SettingsIcon,
-    },
-  ];
 
   return (
     <Container className="space-y-6 max-w-[1200px]" size="xl">
@@ -203,12 +185,32 @@ function MembersDashboard() {
         ))}
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} variant="enclosed">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="add">Add Member</TabsTrigger>
-          <TabsTrigger value="batch">Batch Entry</TabsTrigger>
-          <TabsTrigger value="directory">Directory</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="flex justify-start items-center gap-2 rounded-full bg-gray-100 p-1 max-w-full overflow-x-auto">
+          <TabsTrigger
+            value="overview"
+            className="text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="add"
+            className="text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
+          >
+            Add Member
+          </TabsTrigger>
+          <TabsTrigger
+            value="batch"
+            className="text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
+          >
+            Batch Entry
+          </TabsTrigger>
+          <TabsTrigger
+            value="directory"
+            className="text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
+          >
+            Directory
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -259,36 +261,30 @@ function MembersDashboard() {
           </CardFooter>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link to="/members/add">
-                <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-xl">
-                  Add Single Member
-                </Button>
-              </Link>
-
-              <div className="bg-gray-50 border p-4 rounded-xl space-y-4">
-                {actions.slice(1).map((a) => (
-                  <Link
-                    to={a.href}
-                    key={a.label}
-                    className="flex items-center justify-between hover:underline"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <a.icon className="h-5 w-5 text-primary" />
-                      <span className="text-sm font-medium text-foreground">{a.label}</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </Link>
-                ))}
+        <div className="bg-white p-6 rounded-xl shadow-sm mt-6 flex flex-col gap-4 md:col-span-1">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Quick Actions</h2>
+            <p className="text-sm text-gray-500 mb-2">
+              Choose how you’d like to add new members
+            </p>
+          </div>
+          <div className="flex flex-col md:flex-row gap-4">
+            <Link to="/members/add" className="w-full md:w-1/2">
+              <div className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1">
+                <UserPlus className="text-white text-xl" />
+                <span>Add Single Member</span>
+                <span className="text-xs font-normal">Individual entry form</span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </Link>
+            <Link to="/members/batch" className="w-full md:w-1/2">
+              <div className="bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1">
+                <FileText className="text-xl text-gray-600" />
+                <span>Batch Entry</span>
+                <span className="text-xs text-gray-500">Spreadsheet-style entry</span>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     </Container>
   );
