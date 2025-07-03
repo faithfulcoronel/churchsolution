@@ -20,9 +20,11 @@ import {
   Heart,
   ChevronRight,
   FileText,
+  Search,
 } from 'lucide-react';
 import { Container } from '../../components/ui2/container';
-import { Tabs, TabsList, TabsTrigger } from '../../components/ui2/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
+import { Input } from '../../components/ui2/input';
 
 interface MemberSummary {
   id: string;
@@ -134,6 +136,31 @@ function MembersDashboard() {
     enabled: !!tenant?.id,
   });
 
+  const [directorySearch, setDirectorySearch] = React.useState('');
+  const { data: directoryMembers } = useQuery({
+    queryKey: ['directory-members', tenant?.id, directorySearch],
+    queryFn: async () => {
+      if (!tenant?.id) return [] as MemberSummary[];
+      const search = directorySearch.trim();
+      let query = supabase
+        .from('members')
+        .select('id, first_name, last_name, profile_picture_url')
+        .eq('tenant_id', tenant.id)
+        .is('deleted_at', null)
+        .order('last_name', { ascending: true })
+        .limit(3);
+      if (search) {
+        query = query.or(
+          `first_name.ilike.%${search}%,last_name.ilike.%${search}%,preferred_name.ilike.%${search}%`
+        );
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []) as MemberSummary[];
+    },
+    enabled: !!tenant?.id,
+  });
+
   const highlights = [
     {
       name: 'Total Members',
@@ -186,43 +213,109 @@ function MembersDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex justify-start items-center gap-2 rounded-full bg-gray-100 p-1 max-w-full overflow-x-auto">
+        <TabsList className="w-full grid grid-cols-2">
           <TabsTrigger
             value="overview"
-            className="text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
+            className="flex-1 text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
           >
             Overview
           </TabsTrigger>
           <TabsTrigger
-            value="add"
-            className="text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
-          >
-            Add Member
-          </TabsTrigger>
-          <TabsTrigger
-            value="batch"
-            className="text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
-          >
-            Batch Entry
-          </TabsTrigger>
-          <TabsTrigger
             value="directory"
-            className="text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
+            className="flex-1 text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
           >
             Directory
           </TabsTrigger>
         </TabsList>
-      </Tabs>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Recent Members</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recentMembers && recentMembers.length > 0 ? (
-              recentMembers.map((member) => (
-                <div key={member.id} className="flex items-center space-x-3">
+        <TabsContent value="overview" className="space-y-4">
+          <div className="bg-white p-6 rounded-xl shadow-sm mt-6 flex flex-col gap-4">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">Quick Actions</h2>
+              <p className="text-sm text-gray-500 mb-2">
+                Choose how you’d like to add new members
+              </p>
+            </div>
+            <div className="flex flex-col md:flex-row gap-4">
+              <Link to="/members/add" className="w-full md:w-1/2">
+                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1">
+                  <UserPlus className="text-white text-xl" />
+                  <span>Add Single Member</span>
+                  <span className="text-xs font-normal">Individual entry form</span>
+                </div>
+              </Link>
+              <Link to="/members/batch" className="w-full md:w-1/2">
+                <div className="bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1">
+                  <FileText className="text-xl text-gray-600" />
+                  <span>Batch Entry</span>
+                  <span className="text-xs text-gray-500">Spreadsheet-style entry</span>
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Members</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {recentMembers && recentMembers.length > 0 ? (
+                recentMembers.map((member) => (
+                  <div key={member.id} className="flex items-center space-x-3">
+                    <Avatar size="sm">
+                      {member.profile_picture_url && (
+                        <AvatarImage
+                          src={member.profile_picture_url}
+                          alt={`${member.first_name} ${member.last_name}`}
+                          crossOrigin="anonymous"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      <AvatarFallback>
+                        {member.first_name.charAt(0)}{member.last_name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">
+                        {member.first_name} {member.last_name}
+                      </p>
+                      {member.created_at && (
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(member.created_at).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No recent members.</p>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Link to="/members/list" className="text-sm text-primary font-medium flex items-center hover:underline">
+                View all members <ChevronRight className="h-4 w-4 ml-1" />
+              </Link>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="directory" className="space-y-4">
+          <Input
+            value={directorySearch}
+            onChange={(e) => setDirectorySearch(e.target.value)}
+            placeholder="Search members..."
+            icon={<Search className="h-4 w-4" />}
+          />
+          <div className="space-y-4">
+            {directoryMembers && directoryMembers.length > 0 ? (
+              directoryMembers.map((member) => (
+                <Link
+                  key={member.id}
+                  to={`/members/${member.id}`}
+                  className="flex items-center space-x-3 hover:underline"
+                >
                   <Avatar size="sm">
                     {member.profile_picture_url && (
                       <AvatarImage
@@ -238,54 +331,17 @@ function MembersDashboard() {
                       {member.first_name.charAt(0)}{member.last_name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">
-                      {member.first_name} {member.last_name}
-                    </p>
-                    {member.created_at && (
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(member.created_at).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  <span className="font-medium text-foreground">
+                    {member.first_name} {member.last_name}
+                  </span>
+                </Link>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">No recent members.</p>
+              <p className="text-sm text-muted-foreground">No members found.</p>
             )}
-          </CardContent>
-          <CardFooter>
-            <Link to="/members/list" className="text-sm text-primary font-medium flex items-center hover:underline">
-              View all members <ChevronRight className="h-4 w-4 ml-1" />
-            </Link>
-          </CardFooter>
-        </Card>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm mt-6 flex flex-col gap-4 md:col-span-1">
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">Quick Actions</h2>
-            <p className="text-sm text-gray-500 mb-2">
-              Choose how you’d like to add new members
-            </p>
           </div>
-          <div className="flex flex-col md:flex-row gap-4">
-            <Link to="/members/add" className="w-full md:w-1/2">
-              <div className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1">
-                <UserPlus className="text-white text-xl" />
-                <span>Add Single Member</span>
-                <span className="text-xs font-normal">Individual entry form</span>
-              </div>
-            </Link>
-            <Link to="/members/batch" className="w-full md:w-1/2">
-              <div className="bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1">
-                <FileText className="text-xl text-gray-600" />
-                <span>Batch Entry</span>
-                <span className="text-xs text-gray-500">Spreadsheet-style entry</span>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </Container>
   );
 }
