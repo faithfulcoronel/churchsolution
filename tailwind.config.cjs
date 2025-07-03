@@ -394,6 +394,10 @@ module.exports = {
         xl: '1280px',
         '2xl': '1536px'
       },
+      backgroundImage: {
+        'primary-gradient':
+          'linear-gradient(to right, #4ADE80, #14B8A6, #15803D)'
+      },
       //begin: Shadcn UI Animations
       keyframes: {
         'accordion-down': {
