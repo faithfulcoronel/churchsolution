@@ -104,7 +104,5 @@ export {
   SidebarFooter,
   SidebarContent,
   SidebarGroup,
-  SidebarTrigger,
-  SidebarProvider,
-  useSidebar,
+  SidebarTrigger
 };
