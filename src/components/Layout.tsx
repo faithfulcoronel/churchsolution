@@ -12,8 +12,6 @@ function LayoutContent() {
 
   // Check if current page is settings
   const isSettingsPage = location.pathname.startsWith('/settings');
-  const isMembersDashboard =
-    location.pathname === '/members' || location.pathname === '/members/';
 
   return (
     <div className="min-h-screen w-screen flex bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
@@ -29,10 +27,7 @@ function LayoutContent() {
 
         {/* Main content */}
         <main
-          className={cn('flex-1 w-full', {
-            'bg-gray-50 dark:bg-gray-800': !isSettingsPage && isMembersDashboard,
-            'bg-white dark:bg-gray-800': !isSettingsPage && !isMembersDashboard
-          })}
+          className={cn('flex-1 w-full','bg-white dark:bg-gray-800')}
         >
           {isSettingsPage ? (
             <Outlet />
