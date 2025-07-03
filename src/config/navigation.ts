@@ -74,7 +74,7 @@ export const navigation: NavItem[] = [
     section: 'Financial',
   },
   {
-    name: 'Tithes and Offerings',
+    name: 'Tithes & Offerings',
     href: '/offerings',
     icon: HandCoins,
     permission: 'finance.view',
