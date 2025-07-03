@@ -20,27 +20,27 @@
   --font-family-body: 'DM Sans', system-ui, -apple-system, sans-serif;
   
   /* Modern color palette inspired by the design */
-  --background: #f8fafc;
-  --foreground: #1e293b;
-  --card: #ffffff;
-  --card-foreground: #1e293b;
-  --popover: #ffffff;
-  --popover-foreground: #1e293b;
-  --primary: #22C55E;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #475569;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #475569;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: rgba(226, 232, 240, 0.8);
-  --input: #ffffff;
-  --input-background: #ffffff;
-  --switch-background: #e2e8f0;
-  --ring: #22C55E;
+  --background: 210 40% 98%;
+  --foreground: 217 33% 17%;
+  --card: 0 0% 100%;
+  --card-foreground: 217 33% 17%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 217 33% 17%;
+  --primary: 142 71% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 215 19% 35%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 215 19% 35%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91% / 0.8;
+  --input: 0 0% 100%;
+  --input-background: 0 0% 100%;
+  --switch-background: hsl(214 32% 91%);
+  --ring: 142 71% 45%;
   
   /* Enhanced shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -51,36 +51,36 @@
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   
   /* Updated light green to forest green gradient system */
-  --gradient-green-start: #22C55E;
-  --gradient-green-end: #15803D;
-  --gradient-green-light: #DCFCE7;
-  --success: #22C55E;
-  --success-foreground: #ffffff;
-  --financial-accent: #22C55E;
-  --financial-accent-foreground: #ffffff;
-  --financial-light: #DCFCE7;
-  --financial-dark: #14532D;
+  --gradient-green-start: hsl(142 71% 45%);
+  --gradient-green-end: hsl(142 72% 29%);
+  --gradient-green-light: hsl(141 84% 93%);
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 100%;
+  --financial-accent: 142 71% 45%;
+  --financial-accent-foreground: 0 0% 100%;
+  --financial-light: hsl(141 84% 93%);
+  --financial-dark: hsl(144 61% 20%);
   
   /* Enhanced sidebar colors with new gradient */
-  --sidebar: linear-gradient(135deg, #22C55E 0%, #15803D 100%);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ffffff;
-  --sidebar-primary-foreground: #22C55E;
+  --sidebar: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(142 72% 29%) 100%);
+  --sidebar-foreground: hsl(0 0% 100%);
+  --sidebar-primary: hsl(0 0% 100%);
+  --sidebar-primary-foreground: hsl(142 71% 45%);
   --sidebar-accent: rgba(255, 255, 255, 0.1);
-  --sidebar-accent-foreground: #ffffff;
+  --sidebar-accent-foreground: hsl(0 0% 100%);
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #ffffff;
+  --sidebar-ring: hsl(0 0% 100%);
   
   /* Header variables */
   --header-height: 3.5rem; /* 56px on mobile */
   --header-height-sm: 4rem; /* 64px on desktop */
   
   /* Chart colors - updated primary to match new gradient */
-  --chart-1: #22C55E;
-  --chart-2: #3b82f6;
-  --chart-3: #8b5cf6;
-  --chart-4: #f59e0b;
-  --chart-5: #ef4444;
+  --chart-1: 142 71% 45%;
+  --chart-2: 217 91% 60%;
+  --chart-3: 258 90% 66%;
+  --chart-4: 38 92% 50%;
+  --chart-5: 0 84% 60%;
   
   /* Modern radius system */
   --radius: 1rem;
@@ -113,25 +113,25 @@
 }
 
 .dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
-  --popover: #1e293b;
-  --popover-foreground: #f8fafc;
-  --primary: #4ADE80;
-  --primary-foreground: #14532D;
-  --secondary: #334155;
-  --secondary-foreground: #f8fafc;
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
-  --accent: #334155;
-  --accent-foreground: #f8fafc;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: rgba(51, 65, 85, 0.8);
-  --input: #334155;
-  --ring: #4ADE80;
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  --card: 217 33% 17%;
+  --card-foreground: 210 40% 98%;
+  --popover: 217 33% 17%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 142 69% 58%;
+  --primary-foreground: 144 61% 20%;
+  --secondary: 215 25% 27%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 215 25% 27%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 215 25% 27%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 215 25% 27% / 0.8;
+  --input: 215 25% 27%;
+  --ring: 142 69% 58%;
   
   /* Dark mode shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
@@ -142,25 +142,25 @@
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
   
   /* Dark mode sidebar with new gradient */
-  --sidebar: linear-gradient(135deg, #16A34A 0%, #14532D 100%);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ffffff;
-  --sidebar-primary-foreground: #16A34A;
+  --sidebar: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(144 61% 20%) 100%);
+  --sidebar-foreground: hsl(0 0% 100%);
+  --sidebar-primary: hsl(0 0% 100%);
+  --sidebar-primary-foreground: hsl(142 76% 36%);
   --sidebar-accent: rgba(255, 255, 255, 0.1);
-  --sidebar-accent-foreground: #ffffff;
+  --sidebar-accent-foreground: hsl(0 0% 100%);
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #ffffff;
+  --sidebar-ring: hsl(0 0% 100%);
   
   /* Dark mode financial colors with new gradient */
-  --gradient-green-start: #16A34A;
-  --gradient-green-end: #14532D;
-  --gradient-green-light: #14532D;
-  --success: #4ADE80;
-  --success-foreground: #ffffff;
-  --financial-accent: #4ADE80;
-  --financial-accent-foreground: #14532D;
-  --financial-light: #14532D;
-  --financial-dark: #DCFCE7;
+  --gradient-green-start: hsl(142 76% 36%);
+  --gradient-green-end: hsl(144 61% 20%);
+  --gradient-green-light: hsl(144 61% 20%);
+  --success: 142 69% 58%;
+  --success-foreground: 0 0% 100%;
+  --financial-accent: 142 69% 58%;
+  --financial-accent-foreground: hsl(144 61% 20%);
+  --financial-light: hsl(144 61% 20%);
+  --financial-dark: hsl(141 84% 93%);
 }
 
 @theme inline {
