@@ -11,7 +11,10 @@ interface MetricCardProps {
 
 export default function MetricCard({ label, value, icon: Icon, subtext }: MetricCardProps) {
   return (
-    <Card className="relative min-w-[240px] h-auto p-5 shadow-md flex flex-col justify-between gap-2">
+    <Card
+      hoverable
+      className="group relative min-w-[240px] h-auto p-5 shadow-md flex flex-col justify-between gap-2"
+    >
       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</p>
       {Icon && (
         <Icon className="absolute top-4 right-4 text-blue-600 dark:text-blue-400 text-xl" />
