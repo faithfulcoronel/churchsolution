@@ -86,15 +86,15 @@ function Topbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div
-              className="flex items-center bg-white px-3 py-1.5 rounded-full shadow-sm cursor-pointer"
+              className="flex items-center bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full shadow-sm cursor-pointer"
               aria-label="Open user menu"
             >
               <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center">
                 {initials}
               </div>
               <div className="ml-2 text-sm leading-tight">
-                <p className="font-medium">{userName}</p>
-                <p className="text-xs text-gray-500">Administrator</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{userName}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
               </div>
             </div>
           </DropdownMenuTrigger>
