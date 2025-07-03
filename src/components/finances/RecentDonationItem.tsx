@@ -1,8 +1,8 @@
-import React from 'react';
-import { Card, CardContent } from '../ui2/card';
-import { Avatar, AvatarImage, AvatarFallback } from '../ui2/avatar';
-import { useCurrencyStore } from '../../stores/currencyStore';
-import { formatCurrency } from '../../utils/currency';
+import React from "react";
+import { Card, CardContent } from "../ui2/card";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui2/avatar";
+import { useCurrencyStore } from "../../stores/currencyStore";
+import { formatCurrency } from "../../utils/currency";
 
 export interface DonationItem {
   id: string;
@@ -13,10 +13,10 @@ export interface DonationItem {
     last_name: string;
     profile_picture_url: string | null;
   } | null;
-  account?: {
+  accounts?: {
     name: string;
   } | null;
-  category?: {
+  categories?: {
     name: string;
   } | null;
 }
@@ -29,8 +29,8 @@ export default function RecentDonationItem({ donation }: Props) {
   const { currency } = useCurrencyStore();
   const name = donation.member
     ? `${donation.member.first_name} ${donation.member.last_name}`
-    : 'Anonymous';
-  const displayName = donation.account?.name || name;
+    : "Anonymous";
+  const displayName = donation.accounts?.name || name;
 
   return (
     <Card size="sm" hoverable className="dark:bg-gray-600">
@@ -43,20 +43,32 @@ export default function RecentDonationItem({ donation }: Props) {
                 alt={name}
                 crossOrigin="anonymous"
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
                 }}
               />
             )}
             <AvatarFallback className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-100 font-semibold">
-              {donation.member
-                ? `${donation.member.first_name.charAt(0)}${donation.member.last_name.charAt(0)}`
-                : '?'}
+              {donation.accounts?.name
+                ? donation.accounts.name
+                    .split(" ")
+                    .map((word) => word.charAt(0))
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()
+                : "?"}
             </AvatarFallback>
           </Avatar>
           <div>
             <p className="font-medium text-foreground">{displayName}</p>
             <p className="text-sm text-muted-foreground">
-              {new Date(donation.transaction_date).toLocaleDateString()}
+              {new Date(donation.transaction_date).toLocaleDateString(
+                undefined,
+                {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                }
+              )}
             </p>
           </div>
         </div>
@@ -65,7 +77,7 @@ export default function RecentDonationItem({ donation }: Props) {
             {formatCurrency(donation.amount, currency)}
           </p>
           <p className="text-sm text-muted-foreground">
-            {donation.category?.name || 'Uncategorized'}
+            {donation.categories?.name || "Uncategorized"}
           </p>
         </div>
       </CardContent>
