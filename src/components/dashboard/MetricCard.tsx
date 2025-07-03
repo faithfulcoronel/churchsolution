@@ -5,16 +5,18 @@ interface MetricCardProps {
   label: string;
   value: React.ReactNode;
   icon?: LucideIcon;
+  subtext?: string;
 }
 
-export default function MetricCard({ label, value, icon: Icon }: MetricCardProps) {
+export default function MetricCard({ label, value, icon: Icon, subtext }: MetricCardProps) {
   return (
-    <div className="bg-white dark:bg-muted rounded-xl shadow-md p-5 flex justify-between items-start">
-      <div>
-        <p className="text-sm text-gray-500 dark:text-muted-foreground">{label}</p>
-        <p className="text-2xl font-semibold text-gray-900 dark:text-foreground">{value}</p>
-      </div>
-      {Icon && <Icon className="h-6 w-6 text-gray-400 dark:text-muted-foreground" />}
+    <div className="relative min-w-[240px] h-auto p-5 rounded-xl bg-white dark:bg-gray-800 shadow-md flex flex-col justify-between gap-2">
+      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</p>
+      {Icon && (
+        <Icon className="absolute top-4 right-4 text-blue-600 dark:text-blue-400 text-xl" />
+      )}
+      <p className="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">{value}</p>
+      {subtext && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{subtext}</p>}
     </div>
   );
 }
