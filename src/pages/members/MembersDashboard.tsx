@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui2/card';
+import MetricCard from '../../components/dashboard/MetricCard';
 import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import {
@@ -170,19 +171,9 @@ function MembersDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {highlights.map((h) => (
-          <Card key={h.name}>
-            <CardContent className="p-4 flex items-center space-x-4">
-              <div className="p-2 rounded-md bg-primary/10">
-                <h.icon className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{h.value}</p>
-                <p className="text-sm text-muted-foreground">{h.name}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <MetricCard key={h.name} label={h.name} value={h.value} icon={h.icon} />
         ))}
       </div>
 
