@@ -105,6 +105,7 @@ function Sidebar() {
     [hasPermission]
   );
 
+
   const itemLevels = useMemo(() => {
     const levels = new Map<string, number>();
 
@@ -195,16 +196,15 @@ function Sidebar() {
     );
   };
 
-  // Recursively filter navigation items based on search term
+  // Recursively filter navigation items based on search term and group by section
   const filteredNavigation = useMemo(() => {
-    if (!searchTerm) return navigation;
-
     const searchLower = searchTerm.toLowerCase();
 
     const filterItems = (items: NavItem[]): NavItem[] =>
       items
         .map((item) => {
-          const matches = item.name.toLowerCase().includes(searchLower);
+          const matches =
+            !searchTerm || item.name.toLowerCase().includes(searchLower);
           const children = item.submenu ? filterItems(item.submenu) : undefined;
 
           if (matches || (children && children.length > 0)) {
@@ -214,7 +214,14 @@ function Sidebar() {
         })
         .filter((item): item is NavItem => item !== null);
 
-    return filterItems(navigation);
+    const items = filterItems(navigation);
+    const groups = new Map<string, NavItem[]>();
+    items.forEach((it) => {
+      const section = it.section || 'Other';
+      if (!groups.has(section)) groups.set(section, []);
+      groups.get(section)!.push(it);
+    });
+    return Array.from(groups.entries());
   }, [navigation, searchTerm]);
 
   // Handle submenu toggle
@@ -261,7 +268,7 @@ function Sidebar() {
         });
       };
 
-      collect(filteredNavigation);
+      filteredNavigation.forEach(([, items]) => collect(items));
       setOpenSubmenus((prev) => {
         if (areSetsEqual(prev, names)) return prev;
         return names;
@@ -403,13 +410,23 @@ function Sidebar() {
         <SidebarContent>
           <Scrollable className={`${collapsed ? 'py-2 px-4' : 'py-4 px-4'}`} shadow={false}>
             <nav className="space-y-1">
-              {filteredNavigation.map((item) => renderItem(item))}
+              {filteredNavigation.map(([section, items], idx) => (
+                <React.Fragment key={section}>
+                  {!collapsed && (
+                    <div className={`${idx === 0 ? '' : 'mt-4'} uppercase text-xs text-white/60`}>{section}</div>
+                  )}
+                  <div className="space-y-1 mt-1">
+                    {items.map((item) => renderItem(item))}
+                  </div>
+                  {idx < filteredNavigation.length - 1 && (
+                    <div className="mt-4 border-t border-white/20" />
+                  )}
+                </React.Fragment>
+              ))}
 
               {/* No results message */}
               {filteredNavigation.length === 0 && (
-                <div className="px-3 py-2 text-sm text-gray-500">
-                  No menu items found
-                </div>
+                <div className="px-3 py-2 text-sm text-gray-500">No menu items found</div>
               )}
             </nav>
           </Scrollable>
