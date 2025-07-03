@@ -3,11 +3,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useAuthStore } from '../../stores/authStore';
 import { Scrollable } from '../ui2/scrollable';
 import { Input } from '../ui2/input';
 import { Button } from '../ui2/button';
 import { Badge } from '../ui2/badge';
 import { Separator } from '../ui2/separator';
+import { Avatar, AvatarImage, AvatarFallback } from '../ui2/avatar';
 import {
   Sidebar as SidebarContainer,
   SidebarHeader,
@@ -62,6 +64,35 @@ function Sidebar() {
     },
   });
 
+  // Current auth user
+  const { user } = useAuthStore();
+
+  // Fetch user roles
+  const { data: userRoles } = useQuery({
+    queryKey: ['current-user-roles', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase.rpc('get_user_roles', {
+        user_id: user.id,
+      });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  const fullName = useMemo(() => {
+    if (!user) return '';
+    const first = (user.user_metadata as any)?.first_name || '';
+    const last = (user.user_metadata as any)?.last_name || '';
+    const name = `${first} ${last}`.trim();
+    return name || user.email || '';
+  }, [user]);
+
+  const primaryRole = useMemo(() => {
+    return userRoles?.[0]?.role_name || 'User';
+  }, [userRoles]);
+
   const navigation = useMemo(
     () =>
       baseNavigation.filter(
@@ -108,7 +139,7 @@ function Sidebar() {
               w-full group flex items-center justify-between rounded-lg ${padding} py-2 text-sm font-medium
               transition-colors duration-200 ${collapsed ? 'justify-center' : ''}
               ${isNavItemActive(item)
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-white shadow-md shadow-primary/50'
                 : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                 ? 'bg-primary/20 text-white'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
@@ -146,7 +177,7 @@ function Sidebar() {
           group flex items-center rounded-lg ${padding} py-2 text-sm font-medium
           transition-colors duration-200 ${collapsed ? 'justify-center' : ''}
           ${isNavItemActive(item)
-            ? 'bg-primary text-white'
+            ? 'bg-primary text-white shadow-md shadow-primary/50'
             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
             ? 'bg-primary/20 text-white'
             : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
@@ -303,7 +334,7 @@ function Sidebar() {
       {/* Sidebar */}
       <SidebarContainer
         className={`
-          fixed inset-y-0 left-0 z-50 bg-gray-900 bg-primary-gradient flex flex-col
+          fixed inset-y-0 left-0 z-50 bg-green-700 flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
@@ -438,14 +469,27 @@ function Sidebar() {
             >
               <SettingsIcon className={`h-5 w-5 ${collapsed ? '' : 'mr-2'} ${location.pathname.startsWith('/settings') ? 'text-white' : ''}`} />
               {!collapsed && 'Settings'}
-              {!collapsed && tenant?.subscription_tier === 'free' && (
-                <Badge variant="primary" className="ml-auto">
-                  Free
-                </Badge>
-              )}
-            </Button>
+            {!collapsed && tenant?.subscription_tier === 'free' && (
+              <Badge variant="primary" className="ml-auto">
+                Free
+              </Badge>
+            )}
+          </Button>
 
-          </SidebarFooter>
+          {!collapsed && (
+            <div className="pt-4 border-t border-gray-800 flex items-center space-x-3">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="/avatar.png" alt={fullName} />
+                <AvatarFallback>{fullName.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-white">{fullName}</span>
+                <span className="text-xs text-gray-300">{primaryRole}</span>
+              </div>
+            </div>
+          )}
+
+        </SidebarFooter>
       </SidebarContainer>
     </>
   );
