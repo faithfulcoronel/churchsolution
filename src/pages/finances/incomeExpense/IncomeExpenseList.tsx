@@ -33,7 +33,15 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
     isLoading: entriesLoading,
     error: entriesError,
   } = useEntryQuery({
-    filters: { transaction_type: { operator: 'eq', value: transactionType } },
+    filters: {
+      transaction_type: { operator: 'eq', value: transactionType },
+      transaction_date: {
+        operator: 'between',
+        value: format(dateRange.from, 'yyyy-MM-dd'),
+        valueTo: format(dateRange.to, 'yyyy-MM-dd'),
+      },
+    },
+    order: { column: 'transaction_date', ascending: false },
   });
 
   const headerIds = React.useMemo(
