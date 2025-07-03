@@ -44,22 +44,22 @@ export function RecentMemberItem({ member }: RecentMemberItemProps) {
                 }}
               />
             )}
-            <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold">
+            <AvatarFallback className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-100 font-semibold">
               {member.first_name.charAt(0)}{member.last_name.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-semibold text-gray-800">
+            <span className="font-semibold text-gray-800 dark:text-gray-200">
               {member.first_name} {member.last_name}
             </span>
             {member.email && (
-              <span className="flex items-center text-md text-gray-500">
+              <span className="flex items-center text-md text-gray-500 dark:text-gray-400">
                 <Mail className="h-4 w-4 mr-1" />
                 {member.email}
               </span>
             )}
             {member.contact_number && (
-              <span className="flex items-center text-md text-gray-500">
+              <span className="flex items-center text-md text-gray-500 dark:text-gray-400">
                 <Phone className="h-4 w-4 mr-1" />
                 {member.contact_number}
               </span>
@@ -72,7 +72,7 @@ export function RecentMemberItem({ member }: RecentMemberItemProps) {
               {member.membership_status.name}
             </Badge>
           )}
-          <span className="text-md text-gray-400 mt-1">
+          <span className="text-md text-gray-400 dark:text-gray-500 mt-1">
             Joined{' '}
             {joinedDate
             ? new Date(joinedDate).toLocaleDateString(undefined, {

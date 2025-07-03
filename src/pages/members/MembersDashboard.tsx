@@ -234,13 +234,13 @@ function MembersDashboard() {
         <TabsList className="w-full grid grid-cols-2 bg-muted p-1 rounded-full">
           <TabsTrigger
             value="overview"
-            className="flex-1 text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
+            className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm hover:text-black dark:hover:text-foreground"
           >
             Overview
           </TabsTrigger>
           <TabsTrigger
             value="directory"
-            className="flex-1 text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
+            className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm hover:text-black dark:hover:text-foreground"
           >
             Directory
           </TabsTrigger>
@@ -269,12 +269,12 @@ function MembersDashboard() {
               </Link>
               <Link to="/members/batch" className="w-full md:w-1/2">
                 <Card
-                  className="bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1"
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1"
                   hoverable
                 >
-                  <FileText className="text-xl text-gray-600" />
+                  <FileText className="text-xl text-gray-600 dark:text-gray-300" />
                   <span>Batch Entry</span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     Spreadsheet-style entry
                   </span>
                 </Card>
@@ -283,10 +283,10 @@ function MembersDashboard() {
           </Card>
           <Card className="mt-4">
             <CardContent className="space-y-4">
-              <h3 className="font-semibold text-lg text-gray-900">
+              <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
                 Recent Additions
               </h3>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 Latest member entries
               </p>
               <div className="flex flex-col space-y-2">
