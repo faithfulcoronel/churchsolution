@@ -28,6 +28,7 @@ const statusVariantMap: Record<string, 'success' | 'info' | 'secondary' | 'warni
 
 export function RecentMemberItem({ member }: RecentMemberItemProps) {
   const variant = statusVariantMap[member.membership_status?.code || ''] || 'secondary';
+  const joinedDate = member.membership_date || member.created_at;
   return (
     <Card size="sm" hoverable>
       <CardContent className="flex justify-between gap-4 items-start py-3 px-4">
@@ -52,13 +53,13 @@ export function RecentMemberItem({ member }: RecentMemberItemProps) {
               {member.first_name} {member.last_name}
             </span>
             {member.email && (
-              <span className="flex items-center text-sm text-gray-500">
+              <span className="flex items-center text-md text-gray-500">
                 <Mail className="h-4 w-4 mr-1" />
                 {member.email}
               </span>
             )}
             {member.contact_number && (
-              <span className="flex items-center text-sm text-gray-500">
+              <span className="flex items-center text-md text-gray-500">
                 <Phone className="h-4 w-4 mr-1" />
                 {member.contact_number}
               </span>
@@ -67,16 +68,19 @@ export function RecentMemberItem({ member }: RecentMemberItemProps) {
         </div>
         <div className="flex flex-col items-end">
           {member.membership_status?.name && (
-            <Badge variant={variant} className="text-xs font-medium">
+            <Badge variant={variant} className="text-md font-medium">
               {member.membership_status.name}
             </Badge>
           )}
-          <span className="text-xs text-gray-400 mt-1">
-            {member.membership_date
-              ? new Date(member.membership_date).toLocaleDateString()
-              : member.created_at
-              ? new Date(member.created_at).toLocaleDateString()
-              : ''}
+          <span className="text-md text-gray-400 mt-1">
+            Joined{' '}
+            {joinedDate
+            ? new Date(joinedDate).toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })
+            : ''}
           </span>
         </div>
       </CardContent>
