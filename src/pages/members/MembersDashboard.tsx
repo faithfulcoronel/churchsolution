@@ -28,6 +28,7 @@ import {
 import { Container } from '../../components/ui2/container';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
 import { Input } from '../../components/ui2/input';
+import { RecentMemberItem } from '../../components/members';
 
 interface MemberSummary {
   id: string;
@@ -197,19 +198,6 @@ function MembersDashboard() {
     },
   ];
 
-  const getStatusBadgeClass = (code?: string) => {
-    switch (code) {
-      case 'active':
-        return 'bg-green-100 text-green-700';
-      case 'visitor':
-        return 'bg-blue-100 text-blue-700';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
-  };
-
 
   return (
     <Container className="space-y-6 max-w-[1200px]" size="xl">
@@ -327,63 +315,7 @@ function MembersDashboard() {
           <div className="flex flex-col space-y-2">
             {recentMembers && recentMembers.length > 0 ? (
               recentMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="bg-muted/50 rounded-lg py-3 px-4 flex justify-between gap-4"
-                >
-                  <div className="flex items-start gap-3 flex-1">
-                    <Avatar size="md">
-                      {member.profile_picture_url && (
-                        <AvatarImage
-                          src={member.profile_picture_url}
-                          alt={`${member.first_name} ${member.last_name}`}
-                          crossOrigin="anonymous"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      )}
-                      <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold">
-                        {member.first_name.charAt(0)}{member.last_name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-gray-800">
-                        {member.first_name} {member.last_name}
-                      </span>
-                      {member.email && (
-                        <span className="flex items-center text-sm text-gray-500">
-                          <Mail className="h-4 w-4 mr-1" />
-                          {member.email}
-                        </span>
-                      )}
-                      {member.contact_number && (
-                        <span className="flex items-center text-sm text-gray-500">
-                          <Phone className="h-4 w-4 mr-1" />
-                          {member.contact_number}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    {member.membership_status?.name && (
-                      <span
-                        className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${getStatusBadgeClass(
-                          member.membership_status.code
-                        )}`}
-                      >
-                        {member.membership_status.name}
-                      </span>
-                    )}
-                    <span className="text-xs text-gray-400 mt-1">
-                      {member.membership_date
-                        ? new Date(member.membership_date).toLocaleDateString()
-                        : member.created_at
-                        ? new Date(member.created_at).toLocaleDateString()
-                        : ''}
-                    </span>
-                  </div>
-                </div>
+                <RecentMemberItem key={member.id} member={member} />
               ))
             ) : (
               <p className="text-sm text-muted-foreground">No recent members.</p>
