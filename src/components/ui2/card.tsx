@@ -14,8 +14,9 @@ interface CardProps extends BaseProps {
 
 const variantClasses = {
   default: `
-    bg-white dark:bg-gray-800 
+    bg-white dark:bg-gray-800
     border-gray-200 dark:border-gray-700
+    shadow-sm
   `,
   primary: `
     bg-primary-50 dark:bg-primary-900/10
@@ -27,8 +28,8 @@ const variantClasses = {
     border-gray-100 dark:border-gray-800
   `,
   gradient: `
-    bg-gradient-to-br from-white to-gray-50
-    dark:from-gray-800 dark:to-gray-900
+    bg-gradient-to-br from-emerald-50 to-teal-50
+    dark:from-emerald-900/10 dark:to-teal-900/10
     border-gray-200/50 dark:border-gray-700/50
     backdrop-blur-sm
   `
@@ -59,7 +60,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           ref={ref}
           className={cn(
             // Base styles
-            'relative rounded-xl border shadow-sm transition-all duration-200 dark:border-gray-800',
+            'relative rounded-2xl border transition-all duration-200 dark:border-gray-800',
             // Variant styles
             variantClasses[variant],
             // Size styles
@@ -89,12 +90,12 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         >
           {/* Gradient overlay for hover effect */}
           {hoverable && (
-            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/0 to-primary-500/0 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-5 transition-opacity duration-200 rounded-xl" />
+            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/0 to-primary-500/0 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-5 transition-opacity duration-200 rounded-2xl" />
           )}
 
           {/* Loading overlay */}
           {loading && (
-            <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/70 backdrop-blur-sm rounded-xl" />
+            <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/70 backdrop-blur-sm rounded-2xl" />
           )}
 
           {/* Content */}
@@ -102,7 +103,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
           {/* Shimmer effect for loading state */}
           {loading && (
-            <div className="absolute inset-0 overflow-hidden rounded-xl">
+            <div className="absolute inset-0 overflow-hidden rounded-2xl">
               <div className="absolute inset-0 transform translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 dark:via-gray-700/10 to-transparent" />
             </div>
           )}
