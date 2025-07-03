@@ -55,7 +55,6 @@ function Topbar() {
         >
           <Menu className="h-6 w-6" aria-hidden="true" />
         </SidebarTrigger>
-        <ChurchBranding />
       </div>
 
       <div className="flex items-center space-x-4">
