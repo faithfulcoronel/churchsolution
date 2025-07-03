@@ -139,13 +139,13 @@ function Sidebar() {
             onClick={() => toggleSubmenu(item.name)}
             title={collapsed ? item.name : undefined}
             className={`
-              w-full group flex items-center justify-between rounded-xl ${padding} py-2.5 text-sm font-medium
+              w-full group flex items-center justify-between rounded-full ${padding} py-2.5 text-sm font-medium
               transition-all duration-200 ease-in-out hover:brightness-110 active:scale-95 focus:outline outline-green-400 ${collapsed ? 'justify-center' : ''}
               ${isNavItemActive(item)
                 ? 'bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-sm'
                 : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                 ? 'bg-primary/20 text-white'
-                : 'text-white/80 hover:bg-[--color-sidebar-accent] hover:text-[--color-sidebar-accent-foreground]'}
+                : 'text-white/80 hover:bg-gradient-to-r hover:from-green-400/20 hover:to-green-500/20 hover:text-white hover:font-semibold dark:hover:bg-green-900 dark:hover:shadow-inner'}
             `}
           >
             <div className="flex items-center gap-3">
@@ -177,13 +177,13 @@ function Sidebar() {
         to={item.href || ''}
         title={collapsed ? item.name : undefined}
           className={`
-          group flex items-center gap-3 rounded-xl ${padding} py-2.5 text-sm font-medium
+          group flex items-center gap-3 rounded-full ${padding} py-2.5 text-sm font-medium
           transition-all duration-200 ease-in-out hover:brightness-110 active:scale-95 focus:outline outline-green-400 ${collapsed ? 'justify-center' : ''}
           ${isNavItemActive(item)
             ? 'bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-sm'
             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
             ? 'bg-primary/20 text-white'
-            : 'text-white/80 hover:bg-[--color-sidebar-accent] hover:text-[--color-sidebar-accent-foreground]'}
+            : 'text-white/80 hover:bg-gradient-to-r hover:from-green-400/20 hover:to-green-500/20 hover:text-white hover:font-semibold dark:hover:bg-green-900 dark:hover:shadow-inner'}
         `}
       >
         <item.icon
