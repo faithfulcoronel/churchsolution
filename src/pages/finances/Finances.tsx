@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
 
 // Lazy load finance components
-const FinancesDashboard = React.lazy(() => import('./FinancesDashboard'));
+const FinancialOverviewDashboard = React.lazy(() => import('./FinancialOverviewDashboard'));
 const TransactionList = React.lazy(() => import('./transactions/TransactionList'));
 const TransactionDetail = React.lazy(() => import('./transactions/TransactionDetail'));
 const BulkTransactionEntry = React.lazy(() => import('./transactions/BulkTransactionEntry'));
@@ -45,7 +45,7 @@ function Finances() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>
-        <Route index element={<FinancesDashboard />} />
+        <Route index element={<FinancialOverviewDashboard />} />
         <Route path="transactions" element={<TransactionList />} />
         <Route path="transactions/add" element={
           <SubscriptionGate type="transaction">
