@@ -7,11 +7,11 @@ const adapter: IFinanceDashboardAdapter = {
     { month: '2025-06', income: '100', expenses: '50', percentage_change: '10' },
   ],
   fetchMonthlyStats: async () => ({
-    monthly_income: '100',
-    monthly_expenses: '50',
-    active_budgets: 2,
-    income_by_category: { Tithe: 100 },
-    expenses_by_category: { Utilities: 50 },
+    monthly_income: '200',
+    monthly_expenses: '75',
+    active_budgets: 1,
+    income_by_category: { Tithe: 120, Offerings: 80 },
+    expenses_by_category: { Utilities: 50, Uncategorized: 25 },
   }),
   fetchFundBalances: async () => [
     { id: 'f1', name: 'General', balance: '25' },
@@ -34,11 +34,11 @@ describe('FinanceDashboardRepository mapping', () => {
   it('maps monthly stats', async () => {
     const stats = await repo.getMonthlyStats();
     expect(stats).toEqual({
-      monthlyIncome: 100,
-      monthlyExpenses: 50,
-      activeBudgets: 2,
-      incomeByCategory: { Tithe: 100 },
-      expensesByCategory: { Utilities: 50 },
+      monthlyIncome: 200,
+      monthlyExpenses: 75,
+      activeBudgets: 1,
+      incomeByCategory: { Tithe: 120, Offerings: 80 },
+      expensesByCategory: { Utilities: 50, Uncategorized: 25 },
     });
   });
 
