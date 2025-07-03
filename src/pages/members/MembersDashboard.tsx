@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabase";
 import { tenantUtils } from "../../utils/tenantUtils";
@@ -28,6 +28,7 @@ import {
   Search,
   Mail,
   Phone,
+  Settings,
 } from "lucide-react";
 import { Container } from "../../components/ui2/container";
 import {
@@ -38,6 +39,13 @@ import {
 } from "../../components/ui2/tabs";
 import { Input } from "../../components/ui2/input";
 import { RecentMemberItem } from "../../components/members";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui2/dropdown-menu";
+import { Button } from "../../components/ui2/button";
 
 interface MemberSummary {
   id: string;
@@ -53,6 +61,7 @@ interface MemberSummary {
 
 function MembersDashboard() {
   const [activeTab, setActiveTab] = React.useState("overview");
+  const navigate = useNavigate();
   const { data: tenant } = useQuery({
     queryKey: ["current-tenant"],
     queryFn: () => tenantUtils.getCurrentTenant(),
@@ -215,6 +224,27 @@ function MembersDashboard() {
           <p className="mt-2 text-sm text-muted-foreground">
             Overview of your church membership records.
           </p>
+        </div>
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate('/members/configuration/membership-types')}>
+                Manage Membership Types
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/members/configuration/membership-status')}>
+                Manage Membership Status
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/members/configuration/relationship-types')}>
+                Manage Relationship Types
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
