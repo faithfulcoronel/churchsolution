@@ -21,30 +21,46 @@ import { cn } from '@/lib/utils';
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  /** Total number of records when using server side pagination */
+  recordCount?: number;
   loading?: boolean;
   exportOptions?: { enabled?: boolean; excel?: boolean; fileName?: string };
   quickFilterPlaceholder?: string;
   className?: string;
   containerClassName?: string;
   fluid?: boolean;
+  pagination?: {
+    pageSize?: number;
+    pageSizeOptions?: number[];
+  };
+  onPageChange?: (pageIndex: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  recordCount,
   loading = false,
   exportOptions,
   quickFilterPlaceholder,
   className,
   containerClassName,
   fluid = false,
+  pagination,
+  onPageChange,
+  onPageSizeChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [globalFilter, setGlobalFilter] = React.useState('');
+
+  const initialPageSize = pagination?.pageSize ?? 10;
+  const pageSizeOptions = pagination?.pageSizeOptions ?? [10, 20, 25, 30, 40, 50];
+
   const [pageIndex, setPageIndex] = React.useState(0);
-  const [pageSize, setPageSize] = React.useState(10);
+  const [pageSize, setPageSize] = React.useState(initialPageSize);
 
   const table = useReactTable({
     data,
@@ -56,6 +72,8 @@ export function DataTable<TData, TValue>({
       globalFilter,
       pagination: { pageIndex, pageSize },
     },
+    pageCount: recordCount ? Math.ceil(recordCount / pageSize) : undefined,
+    manualPagination: recordCount !== undefined,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -64,6 +82,8 @@ export function DataTable<TData, TValue>({
       const newState = typeof updater === 'function' ? updater({ pageIndex, pageSize }) : updater;
       setPageIndex(newState.pageIndex);
       setPageSize(newState.pageSize);
+      onPageChange?.(newState.pageIndex);
+      onPageSizeChange?.(newState.pageSize);
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -143,7 +163,7 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} pageSizeOptions={pageSizeOptions} />
     </div>
   );
 }
