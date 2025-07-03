@@ -4,6 +4,7 @@ import Sidebar from './layout/Sidebar';
 import Topbar from './layout/Topbar';
 import Footer from './Footer';
 import { SidebarProvider, useSidebar } from './ui2/sidebar';
+import { cn } from '@/lib/utils';
 
 function LayoutContent() {
   const { collapsed } = useSidebar();
@@ -28,7 +29,10 @@ function LayoutContent() {
 
         {/* Main content */}
         <main
-          className={`flex-1 w-full ${isSettingsPage ? '' : isMembersDashboard ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-800'}`}
+          className={cn('flex-1 w-full', {
+            'bg-gray-50 dark:bg-gray-800': !isSettingsPage && isMembersDashboard,
+            'bg-white dark:bg-gray-800': !isSettingsPage && !isMembersDashboard
+          })}
         >
           {isSettingsPage ? (
             <Outlet />
