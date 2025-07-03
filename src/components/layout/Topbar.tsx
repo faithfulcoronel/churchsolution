@@ -9,13 +9,10 @@ import { useAuthStore } from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import ChurchBranding from '../ChurchBranding';
 import NotificationDropdown from './NotificationDropdown';
+import { SidebarTrigger, useSidebar } from '../ui2/sidebar';
 
-interface TopbarProps {
-  setSidebarOpen: (open: boolean) => void;
-  sidebarCollapsed: boolean;
-}
-
-function Topbar({ setSidebarOpen, sidebarCollapsed }: TopbarProps) {
+function Topbar() {
+  const { setOpen: setSidebarOpen, collapsed: sidebarCollapsed } = useSidebar();
   const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
   const { settings, handleThemeToggle } = useThemeSwitcher();
@@ -27,17 +24,16 @@ function Topbar({ setSidebarOpen, sidebarCollapsed }: TopbarProps) {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 w-full z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:pr-8 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-72'}`}
+      className={`fixed top-0 inset-x-0 w-full z-30 flex h-16 shrink-0 items-center justify-end gap-x-4 border-b border-gray-200 bg-primary-gradient dark:bg-gray-800 dark:border-gray-700 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:pr-8 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-72'}`}
     >
       {/* Sidebar toggle, only on mobile */}
-      <button
-        type="button"
+      <SidebarTrigger
+        action="open"
         className="-m-2.5 p-2.5 text-gray-700 dark:text-gray-300 lg:hidden"
-        onClick={() => setSidebarOpen(true)}
       >
         <span className="sr-only">Open sidebar</span>
         <Menu className="h-6 w-6" aria-hidden="true" />
-      </button>
+      </SidebarTrigger>
 
       {/* Separator */}
       <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 lg:hidden" aria-hidden="true" />
