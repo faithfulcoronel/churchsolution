@@ -31,6 +31,7 @@ import {
 } from '../../components/ui2/alert-dialog';
 import {
   Plus,
+  Eye,
   Edit2,
   Trash2,
   Loader2,
@@ -268,9 +269,19 @@ function MemberList() {
             onPageSizeChange={setPageSize}
             onSortingChange={setSorting}
             onFilterChange={handleFilterChange}
-            onRowClick={(row) => navigate(`/members/${row.id}`)}
+            onRowDoubleClick={(row) => navigate(`/members/${row.id}`)}
             rowActions={(row) => (
               <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/members/${row.id}`);
+                  }}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
