@@ -35,7 +35,10 @@ import {
   TabsContent,
 } from "../../components/ui2/tabs";
 import { Input } from "../../components/ui2/input";
-import { RecentMemberItem, DirectoryMemberItem } from "../../components/members";
+import {
+  RecentMemberItem,
+  DirectoryMemberItem,
+} from "../../components/members";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,28 +72,33 @@ function MembersDashboard() {
   const { useQuery: useStatusQuery } = useMembershipStatusRepository();
 
   const { data: visitorStatusData } = useStatusQuery({
-    filters: { code: { operator: 'eq', value: 'visitor' } },
-    enabled: !!tenant?.id
+    filters: { code: { operator: "eq", value: "visitor" } },
+    enabled: !!tenant?.id,
   });
   const visitorStatus = visitorStatusData?.data?.[0]?.id || null;
 
   const { data: totalMembersResult } = useMembersQuery({
     pagination: { page: 1, pageSize: 1 },
-    enabled: !!tenant?.id
+    enabled: !!tenant?.id,
   });
   const totalMembers = totalMembersResult?.count ?? 0;
 
   const { data: newMembersResult } = useMembersQuery({
-    filters: { created_at: { operator: 'gte', value: startOfMonth(new Date()).toISOString() } },
+    filters: {
+      created_at: {
+        operator: "gte",
+        value: startOfMonth(new Date()).toISOString(),
+      },
+    },
     pagination: { page: 1, pageSize: 1 },
-    enabled: !!tenant?.id
+    enabled: !!tenant?.id,
   });
   const newMembers = newMembersResult?.count ?? 0;
 
   const { data: visitorCountResult } = useMembersQuery({
-    filters: { status_category_id: { operator: 'eq', value: visitorStatus } },
+    filters: { status_category_id: { operator: "eq", value: visitorStatus } },
     pagination: { page: 1, pageSize: 1 },
-    enabled: !!tenant?.id && !!visitorStatus
+    enabled: !!tenant?.id && !!visitorStatus,
   });
   const visitorCount = visitorCountResult?.count ?? 0;
 
@@ -109,9 +117,9 @@ function MembersDashboard() {
   });
 
   const { data: recentMembersResult } = useMembersQuery({
-    order: { column: 'created_at', ascending: false },
+    order: { column: "created_at", ascending: false },
     pagination: { page: 1, pageSize: 5 },
-    enabled: !!tenant?.id
+    enabled: !!tenant?.id,
   });
   const recentMembers = (recentMembersResult?.data || []) as MemberSummary[];
 
@@ -119,14 +127,15 @@ function MembersDashboard() {
   const { data: directoryMembersResult } = useMembersQuery({
     filters: directorySearch.trim()
       ? {
-          or: `first_name.ilike.*${directorySearch.trim()}*,last_name.ilike.*${directorySearch.trim()}*,preferred_name.ilike.*${directorySearch.trim()}*`
+          or: `first_name.ilike.*${directorySearch.trim()}*,last_name.ilike.*${directorySearch.trim()}*,preferred_name.ilike.*${directorySearch.trim()}*`,
         }
       : undefined,
-    order: { column: 'last_name', ascending: true },
+    order: { column: "last_name", ascending: true },
     pagination: { page: 1, pageSize: 5 },
-    enabled: !!tenant?.id
+    enabled: !!tenant?.id,
   });
-  const directoryMembers = (directoryMembersResult?.data || []) as MemberSummary[];
+  const directoryMembers = (directoryMembersResult?.data ||
+    []) as MemberSummary[];
 
   const highlights = [
     {
@@ -173,13 +182,25 @@ function MembersDashboard() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate('/members/configuration/membership-types')}>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate("/members/configuration/membership-types")
+                }
+              >
                 Manage Membership Types
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/members/configuration/membership-status')}>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate("/members/configuration/membership-status")
+                }
+              >
                 Manage Membership Status
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/members/configuration/relationship-types')}>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigate("/members/configuration/relationship-types")
+                }
+              >
                 Manage Relationship Types
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -252,12 +273,10 @@ function MembersDashboard() {
           </Card>
           <Card className="mt-4">
             <CardContent className="space-y-4">
-              <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-                Recent Additions
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Latest member entries
-              </p>
+              <div className="text-gray-900 dark:text-gray-100 mt-4">
+                <CardTitle>Recent Additions</CardTitle>
+                <CardDescription>Latest member entries</CardDescription>
+              </div>
               <div className="flex flex-col space-y-2">
                 {recentMembers && recentMembers.length > 0 ? (
                   recentMembers.map((member) => (
@@ -283,26 +302,35 @@ function MembersDashboard() {
 
         <TabsContent value="directory" className="mt-4">
           <Card>
-            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <CardTitle>Member Directory</CardTitle>
-                <CardDescription>Search and manage all members</CardDescription>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full space-y-4 md:space-y-0">
+                <div className="text-gray-900 dark:text-gray-100">
+                  <CardTitle>Member Directory</CardTitle>
+                  <CardDescription>
+                    Search and manage all members
+                  </CardDescription>
+                </div>
+                <div className="w-full md:w-auto">
+                  <Input
+                    value={directorySearch}
+                    onChange={(e) => setDirectorySearch(e.target.value)}
+                    placeholder="Search members..."
+                    icon={<Search className="h-4 w-4" />}
+                    className="w-full md:w-64"
+                  />
+                </div>
               </div>
-              <Input
-                value={directorySearch}
-                onChange={(e) => setDirectorySearch(e.target.value)}
-                placeholder="Search members..."
-                icon={<Search className="h-4 w-4" />}
-                className="md:w-64 ml-auto"
-              />
             </CardHeader>
+
             <CardContent className="space-y-2">
               {directoryMembers && directoryMembers.length > 0 ? (
                 directoryMembers.map((member) => (
                   <DirectoryMemberItem key={member.id} member={member} />
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">No members found.</p>
+                <p className="text-sm text-muted-foreground">
+                  No members found.
+                </p>
               )}
             </CardContent>
           </Card>
