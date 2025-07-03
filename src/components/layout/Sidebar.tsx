@@ -122,16 +122,16 @@ function Sidebar() {
   const renderItem = (item: NavItem, level = 0) => {
     const hasChildren = item.submenu && item.submenu.length > 0;
     const padding = collapsed
-      ? 'px-3'
+      ? 'px-4'
       : level === 0
-        ? 'px-3'
+        ? 'px-4'
         : level === 1
-          ? 'pl-11 pr-3'
+          ? 'pl-11 pr-4'
           : level === 2
-            ? 'pl-16 pr-3'
+            ? 'pl-16 pr-4'
             : level === 3
-              ? 'pl-20 pr-3'
-              : 'pl-24 pr-3';
+              ? 'pl-20 pr-4'
+              : 'pl-24 pr-4';
 
     if (hasChildren) {
       return (
@@ -140,20 +140,20 @@ function Sidebar() {
             onClick={() => toggleSubmenu(item.name)}
             title={collapsed ? item.name : undefined}
             className={`
-              w-full group flex items-center justify-between rounded-lg ${padding} py-2 text-sm font-medium
-              transition-colors duration-200 ${collapsed ? 'justify-center' : ''}
+              w-full group flex items-center justify-between rounded-xl ${padding} py-2.5 text-sm font-medium
+              transition-all duration-200 ease-in-out hover:brightness-110 focus:outline outline-green-400 ${collapsed ? 'justify-center' : ''}
               ${isNavItemActive(item)
-                ? 'bg-primary text-white shadow-md shadow-primary/50'
+                ? 'bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-sm'
                 : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                 ? 'bg-primary/20 text-white'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
+                : 'text-white/80 hover:bg-gray-800 hover:text-white'}
             `}
           >
-            <div className="flex items-center">
+            <div className="flex items-center gap-3">
               <item.icon
-                className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}
+                className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-white/80 group-hover:text-white'}`}
               />
-              {!collapsed && <span className="ml-3">{item.name}</span>}
+              {!collapsed && <span>{item.name}</span>}
             </div>
             {!collapsed && (
               <ChevronDown
@@ -177,20 +177,20 @@ function Sidebar() {
         key={item.name}
         to={item.href || ''}
         title={collapsed ? item.name : undefined}
-        className={`
-          group flex items-center rounded-lg ${padding} py-2 text-sm font-medium
-          transition-colors duration-200 ${collapsed ? 'justify-center' : ''}
+          className={`
+          group flex items-center gap-3 rounded-xl ${padding} py-2.5 text-sm font-medium
+          transition-all duration-200 ease-in-out hover:brightness-110 focus:outline outline-green-400 ${collapsed ? 'justify-center' : ''}
           ${isNavItemActive(item)
-            ? 'bg-primary text-white shadow-md shadow-primary/50'
+            ? 'bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-sm'
             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
             ? 'bg-primary/20 text-white'
-            : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
+            : 'text-white/80 hover:bg-gray-800 hover:text-white'}
         `}
       >
         <item.icon
-          className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-gray-400 group-hover:text-white'} ${collapsed ? '' : 'mr-3'}`}
+          className={`h-5 w-5 flex-shrink-0 transition-colors ${isNavItemActive(item) ? 'text-white' : 'text-white/80 group-hover:text-white'}`}
         />
-        {!collapsed && item.name}
+        {!collapsed && <span>{item.name}</span>}
       </Link>
     );
   };
