@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui2/card';
+import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import {
   Users,
@@ -245,20 +246,30 @@ function MembersDashboard() {
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {actions.map((a) => (
-              <Link to={a.href} key={a.label}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                  <CardContent className="p-4 flex items-center justify-between">
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link to="/members/add">
+                <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-xl">
+                  Add Single Member
+                </Button>
+              </Link>
+
+              <div className="bg-gray-50 border p-4 rounded-xl space-y-4">
+                {actions.slice(1).map((a) => (
+                  <Link
+                    to={a.href}
+                    key={a.label}
+                    className="flex items-center justify-between hover:underline"
+                  >
                     <div className="flex items-center space-x-3">
                       <a.icon className="h-5 w-5 text-primary" />
                       <span className="text-sm font-medium text-foreground">{a.label}</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
