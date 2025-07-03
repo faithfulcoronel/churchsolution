@@ -12,8 +12,6 @@ function LayoutContent() {
 
   // Check if current page is settings
   const isSettingsPage = location.pathname.startsWith('/settings');
-  const isMembersDashboard =
-    location.pathname === '/members' || location.pathname === '/members/';
 
   return (
     <div className="min-h-screen w-screen flex bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
