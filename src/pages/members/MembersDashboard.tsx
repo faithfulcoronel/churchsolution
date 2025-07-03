@@ -246,18 +246,18 @@ function MembersDashboard() {
             </CardHeader>
             <CardContent className="flex flex-col md:flex-row gap-4">
               <Link to="/members/add" className="w-full md:w-1/2">
-                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1">
+                <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1" hoverable>
                   <UserPlus className="text-white text-xl" />
                   <span>Add Single Member</span>
                   <span className="text-xs font-normal">Individual entry form</span>
-                </div>
+                </Card>
               </Link>
               <Link to="/members/batch" className="w-full md:w-1/2">
-                <div className="bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1">
+                <Card className="bg-gray-50 border border-gray-200 text-gray-700 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1" hoverable>
                   <FileText className="text-xl text-gray-600" />
                   <span>Batch Entry</span>
                   <span className="text-xs text-gray-500">Spreadsheet-style entry</span>
-                </div>
+                </Card>
               </Link>
             </CardContent>
           </Card>
@@ -309,7 +309,8 @@ function MembersDashboard() {
         </TabsContent>
         </Tabs>
 
-        <div className="mt-6 rounded-xl border shadow-sm p-4 md:p-6">
+        <Card>
+          <CardContent className="space-y-4">
           <h3 className="font-semibold text-lg text-gray-900">Recent Additions</h3>
           <p className="text-sm text-gray-500 mb-4">Latest member entries</p>
           <div className="flex flex-col space-y-2">
@@ -329,7 +330,8 @@ function MembersDashboard() {
               View all members <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </Container>
   );
 }

@@ -29,7 +29,7 @@ const statusVariantMap: Record<string, 'success' | 'info' | 'secondary' | 'warni
 export function RecentMemberItem({ member }: RecentMemberItemProps) {
   const variant = statusVariantMap[member.membership_status?.code || ''] || 'secondary';
   return (
-    <Card size="sm" hoverable variant="secondary" className="bg-muted/50">
+    <Card size="sm" hoverable>
       <CardContent className="flex justify-between gap-4 items-start py-3 px-4">
         <div className="flex items-start gap-3 flex-1">
           <Avatar size="md">
