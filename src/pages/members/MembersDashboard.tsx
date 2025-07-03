@@ -352,7 +352,7 @@ function MembersDashboard() {
                 onChange={(e) => setDirectorySearch(e.target.value)}
                 placeholder="Search members..."
                 icon={<Search className="h-4 w-4" />}
-                className="md:w-64"
+                className="md:w-64 ml-auto"
               />
             </CardHeader>
             <CardContent className="space-y-2">
