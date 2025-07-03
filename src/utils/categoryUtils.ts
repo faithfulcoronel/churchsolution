@@ -29,21 +29,26 @@ export interface CategoryDataProvider {
 
 class SupabaseCategoryDataProvider implements CategoryDataProvider {
   async fetchCategories(tenantId: string, type: CategoryType): Promise<Category[]> {
-    const table = {
-      membership: 'membership_type',
-      member_status: 'membership_status',
-      income_transaction: 'income_categories',
-      expense_transaction: 'expense_categories',
-      budget: 'budget_categories',
-      relationship_type: 'relationship_categories'
+    const config = {
+      membership: { table: 'membership_type' },
+      member_status: { table: 'membership_status' },
+      income_transaction: { table: 'categories', type: 'income_transaction' },
+      expense_transaction: { table: 'categories', type: 'expense_transaction' },
+      budget: { table: 'categories', type: 'budget' },
+      relationship_type: { table: 'categories', type: 'relationship_type' },
     }[type];
 
-    const { data, error } = await supabase
-      .from(table)
+    const query = supabase
+      .from(config.table)
       .select('*')
       .eq('tenant_id', tenantId)
-      .is('deleted_at', null)
-      .order('sort_order', { ascending: true });
+      .is('deleted_at', null);
+
+    if (config.type) {
+      query.eq('type', config.type);
+    }
+
+    const { data, error } = await query.order('sort_order', { ascending: true });
     if (error) throw error;
     return data;
   }
