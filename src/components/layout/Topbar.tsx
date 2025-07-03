@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Menu, User, Search, Sun, Moon, Bell } from 'lucide-react';
+import { Menu, User, Search, Sun, Moon } from 'lucide-react';
 import { Button } from '../ui2/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui2/dropdown-menu';
 import { Input } from '../ui2/input';
@@ -8,32 +8,16 @@ import { useAuthStore } from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import ChurchBranding from '../ChurchBranding';
 import { SidebarTrigger, useSidebar } from '../ui2/sidebar';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { useNotificationListener } from '../../hooks/useNotificationListener';
+import NotificationDropdown from './NotificationDropdown';
+import { cn } from '@/lib/utils';
 
 function Topbar() {
-  const { setOpen: setSidebarOpen } = useSidebar();
+  const { collapsed } = useSidebar();
   const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
   const { settings, handleThemeToggle } = useThemeSwitcher();
-  useNotificationListener();
-
-  const { data: notifications = [] } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('is_read')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as { is_read: boolean }[];
-    },
-    refetchInterval: 5000,
-    refetchIntervalInBackground: true,
-  });
-
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  // No direct notification listener here. The dropdown handles fetching
+  // and listening for notification events.
 
   const userName = useMemo(() => {
     if (!user) return '';
@@ -57,7 +41,12 @@ function Topbar() {
   };
 
   return (
-    <header className="fixed top-0 inset-x-0 flex items-center justify-between bg-gray-50 dark:bg-gray-800 py-2 px-6 shadow-sm">
+    <header
+      className={cn(
+        'fixed top-0 right-0 left-0 z-40 flex items-center justify-between bg-gray-50 dark:bg-gray-800 py-2 px-6 shadow-sm transition-all',
+        collapsed ? 'lg:left-20' : 'lg:left-72'
+      )}
+    >
       <div className="flex items-center space-x-3">
         <SidebarTrigger
           action="open"
@@ -79,24 +68,12 @@ function Topbar() {
       </div>
 
       <div className="flex items-center space-x-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5 text-gray-500" />
-          {unreadCount > 0 && (
-            <span className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 bg-green-500 text-white text-xs rounded-full px-1">
-              {unreadCount}
-            </span>
-          )}
-        </Button>
+        <NotificationDropdown />
 
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleThemeToggle}
+          onClick={() => handleThemeToggle(settings.themeMode !== 'dark')}
           aria-label="Toggle dark mode"
         >
           {settings.themeMode === 'dark' ? (
