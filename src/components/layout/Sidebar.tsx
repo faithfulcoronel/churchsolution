@@ -145,7 +145,7 @@ function Sidebar() {
                 ? 'bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-sm'
                 : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
                 ? 'bg-primary/20 text-white'
-                : 'text-white/80 hover:bg-gray-800 hover:text-white'}
+                : 'text-white/80 hover:bg-[--color-sidebar-accent] hover:text-[--color-sidebar-accent-foreground]'}
             `}
           >
             <div className="flex items-center gap-3">
@@ -183,7 +183,7 @@ function Sidebar() {
             ? 'bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-sm'
             : searchTerm && item.name.toLowerCase().includes(searchTerm.toLowerCase())
             ? 'bg-primary/20 text-white'
-            : 'text-white/80 hover:bg-gray-800 hover:text-white'}
+            : 'text-white/80 hover:bg-[--color-sidebar-accent] hover:text-[--color-sidebar-accent-foreground]'}
         `}
       >
         <item.icon
