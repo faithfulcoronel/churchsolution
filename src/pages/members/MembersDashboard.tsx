@@ -14,11 +14,6 @@ import {
 } from "../../components/ui2/card";
 import MetricCard from "../../components/dashboard/MetricCard";
 import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "../../components/ui2/avatar";
-import {
   Users,
   UserPlus,
   UserCheck,
@@ -26,8 +21,6 @@ import {
   ChevronRight,
   FileText,
   Search,
-  Mail,
-  Phone,
 } from "lucide-react";
 import { Container } from "../../components/ui2/container";
 import {
@@ -37,7 +30,7 @@ import {
   TabsContent,
 } from "../../components/ui2/tabs";
 import { Input } from "../../components/ui2/input";
-import { RecentMemberItem } from "../../components/members";
+import { RecentMemberItem, DirectoryMemberItem } from "../../components/members";
 
 interface MemberSummary {
   id: string;
@@ -49,6 +42,7 @@ interface MemberSummary {
   membership_status: { name: string; code: string } | null;
   profile_picture_url: string | null;
   created_at: string | null;
+  address?: string | null;
 }
 
 function MembersDashboard() {
@@ -163,11 +157,13 @@ function MembersDashboard() {
       const search = directorySearch.trim();
       let query = supabase
         .from("members")
-        .select("id, first_name, last_name, profile_picture_url")
+        .select(
+          "id, first_name, last_name, email, contact_number, address, membership_date, profile_picture_url, created_at, membership_status(name, code)"
+        )
         .eq("tenant_id", tenant.id)
         .is("deleted_at", null)
         .order("last_name", { ascending: true })
-        .limit(3);
+        .limit(5);
       if (search) {
         query = query.or(
           `first_name.ilike.%${search}%,last_name.ilike.%${search}%,preferred_name.ilike.%${search}%`
@@ -314,48 +310,27 @@ function MembersDashboard() {
 
         <TabsContent value="directory" className="mt-4">
           <Card>
-            <CardContent className="space-y-4">
+            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <CardTitle>Member Directory</CardTitle>
+                <CardDescription>Search and manage all members</CardDescription>
+              </div>
               <Input
                 value={directorySearch}
                 onChange={(e) => setDirectorySearch(e.target.value)}
                 placeholder="Search members..."
                 icon={<Search className="h-4 w-4" />}
+                className="md:w-64"
               />
-              <div className="space-y-4">
-                {directoryMembers && directoryMembers.length > 0 ? (
-                  directoryMembers.map((member) => (
-                    <Link
-                      key={member.id}
-                      to={`/members/${member.id}`}
-                      className="flex items-center space-x-3 hover:underline"
-                    >
-                      <Avatar size="sm">
-                        {member.profile_picture_url && (
-                          <AvatarImage
-                            src={member.profile_picture_url}
-                            alt={`${member.first_name} ${member.last_name}`}
-                            crossOrigin="anonymous"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
-                          />
-                        )}
-                        <AvatarFallback>
-                          {member.first_name.charAt(0)}
-                          {member.last_name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-foreground">
-                        {member.first_name} {member.last_name}
-                      </span>
-                    </Link>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No members found.
-                  </p>
-                )}
-              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {directoryMembers && directoryMembers.length > 0 ? (
+                directoryMembers.map((member) => (
+                  <DirectoryMemberItem key={member.id} member={member} />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No members found.</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
