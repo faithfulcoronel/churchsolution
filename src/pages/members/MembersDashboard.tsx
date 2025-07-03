@@ -7,6 +7,7 @@ import { startOfMonth } from 'date-fns';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -30,6 +31,10 @@ interface MemberSummary {
   id: string;
   first_name: string;
   last_name: string;
+  email: string | null;
+  contact_number: string | null;
+  membership_date: string | null;
+  membership_status: { name: string } | null;
   profile_picture_url: string | null;
   created_at: string | null;
 }
@@ -125,11 +130,13 @@ function MembersDashboard() {
       if (!tenant?.id) return [] as MemberSummary[];
       const { data, error } = await supabase
         .from('members')
-        .select('id, first_name, last_name, profile_picture_url, created_at')
+        .select(
+          'id, first_name, last_name, email, contact_number, membership_date, profile_picture_url, created_at, membership_status(name)'
+        )
         .eq('tenant_id', tenant.id)
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
-        .limit(3);
+        .limit(5);
       if (error) throw error;
       return (data || []) as MemberSummary[];
     },
@@ -213,7 +220,7 @@ function MembersDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-2">
+        <TabsList className="w-full grid grid-cols-2 bg-muted p-1 rounded-full">
           <TabsTrigger
             value="overview"
             className="flex-1 text-sm font-medium text-gray-700 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm hover:text-black"
@@ -228,15 +235,13 @@ function MembersDashboard() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4">
-          <div className="bg-white p-6 rounded-xl shadow-sm mt-6 flex flex-col gap-4">
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Quick Actions</h2>
-              <p className="text-sm text-gray-500 mb-2">
-                Choose how you’d like to add new members
-              </p>
-            </div>
-            <div className="flex flex-col md:flex-row gap-4">
+        <TabsContent value="overview" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Choose how you’d like to add new members</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col md:flex-row gap-4">
               <Link to="/members/add" className="w-full md:w-1/2">
                 <div className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1">
                   <UserPlus className="text-white text-xl" />
@@ -251,17 +256,69 @@ function MembersDashboard() {
                   <span className="text-xs text-gray-500">Spreadsheet-style entry</span>
                 </div>
               </Link>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
+        <TabsContent value="directory" className="mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Members</CardTitle>
-            </CardHeader>
             <CardContent className="space-y-4">
-              {recentMembers && recentMembers.length > 0 ? (
-                recentMembers.map((member) => (
-                  <div key={member.id} className="flex items-center space-x-3">
+              <Input
+                value={directorySearch}
+                onChange={(e) => setDirectorySearch(e.target.value)}
+                placeholder="Search members..."
+                icon={<Search className="h-4 w-4" />}
+              />
+              <div className="space-y-4">
+                {directoryMembers && directoryMembers.length > 0 ? (
+                  directoryMembers.map((member) => (
+                    <Link
+                      key={member.id}
+                      to={`/members/${member.id}`}
+                      className="flex items-center space-x-3 hover:underline"
+                    >
+                      <Avatar size="sm">
+                        {member.profile_picture_url && (
+                          <AvatarImage
+                            src={member.profile_picture_url}
+                            alt={`${member.first_name} ${member.last_name}`}
+                            crossOrigin="anonymous"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        )}
+                        <AvatarFallback>
+                          {member.first_name.charAt(0)}{member.last_name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium text-foreground">
+                        {member.first_name} {member.last_name}
+                      </span>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No members found.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        </Tabs>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Recent Additions</CardTitle>
+            <CardDescription>Latest member entries</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-0">
+            {recentMembers && recentMembers.length > 0 ? (
+              recentMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center justify-between gap-4"
+                >
+                  <div className="flex items-center space-x-3">
                     <Avatar size="sm">
                       {member.profile_picture_url && (
                         <AvatarImage
@@ -277,72 +334,52 @@ function MembersDashboard() {
                         {member.first_name.charAt(0)}{member.last_name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
+                    <div>
                       <p className="font-medium text-foreground">
                         {member.first_name} {member.last_name}
                       </p>
-                      {member.created_at && (
+                      {member.email && (
                         <p className="text-sm text-muted-foreground">
-                          {new Date(member.created_at).toLocaleDateString()}
+                          {member.email}
+                        </p>
+                      )}
+                      {member.contact_number && (
+                        <p className="text-sm text-muted-foreground">
+                          {member.contact_number}
                         </p>
                       )}
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">No recent members.</p>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Link to="/members/list" className="text-sm text-primary font-medium flex items-center hover:underline">
-                View all members <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="directory" className="space-y-4">
-          <Input
-            value={directorySearch}
-            onChange={(e) => setDirectorySearch(e.target.value)}
-            placeholder="Search members..."
-            icon={<Search className="h-4 w-4" />}
-          />
-          <div className="space-y-4">
-            {directoryMembers && directoryMembers.length > 0 ? (
-              directoryMembers.map((member) => (
-                <Link
-                  key={member.id}
-                  to={`/members/${member.id}`}
-                  className="flex items-center space-x-3 hover:underline"
-                >
-                  <Avatar size="sm">
-                    {member.profile_picture_url && (
-                      <AvatarImage
-                        src={member.profile_picture_url}
-                        alt={`${member.first_name} ${member.last_name}`}
-                        crossOrigin="anonymous"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
+                  <div className="text-right">
+                    {member.membership_status?.name && (
+                      <p className="font-medium text-foreground">
+                        {member.membership_status.name}
+                      </p>
                     )}
-                    <AvatarFallback>
-                      {member.first_name.charAt(0)}{member.last_name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium text-foreground">
-                    {member.first_name} {member.last_name}
-                  </span>
-                </Link>
+                    <p className="text-sm text-muted-foreground">
+                      {member.membership_date
+                        ? new Date(member.membership_date).toLocaleDateString()
+                        : member.created_at
+                        ? new Date(member.created_at).toLocaleDateString()
+                        : ''}
+                    </p>
+                  </div>
+                </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">No members found.</p>
+              <p className="text-sm text-muted-foreground">No recent members.</p>
             )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </Container>
+          </CardContent>
+          <CardFooter>
+            <Link
+              to="/members/list"
+              className="text-sm text-primary font-medium flex items-center hover:underline"
+            >
+              View all members <ChevronRight className="h-4 w-4 ml-1" />
+            </Link>
+          </CardFooter>
+        </Card>
+      </Container>
   );
 }
 
