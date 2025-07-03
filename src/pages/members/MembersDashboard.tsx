@@ -21,6 +21,7 @@ import {
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { Container } from '../../components/ui2/container';
+import { Tabs, TabsList, TabsTrigger } from '../../components/ui2/tabs';
 
 interface MemberSummary {
   id: string;
@@ -31,6 +32,7 @@ interface MemberSummary {
 }
 
 function MembersDashboard() {
+  const [activeTab, setActiveTab] = React.useState('overview');
   const { data: tenant } = useQuery({
     queryKey: ['current-tenant'],
     queryFn: () => tenantUtils.getCurrentTenant(),
@@ -182,6 +184,15 @@ function MembersDashboard() {
           </Card>
         ))}
       </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} variant="enclosed">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="add">Add Member</TabsTrigger>
+          <TabsTrigger value="batch">Batch Entry</TabsTrigger>
+          <TabsTrigger value="directory">Directory</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="md:col-span-2">
