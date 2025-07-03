@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './layout/Sidebar';
 import Topbar from './layout/Topbar';
 import Footer from './Footer';
+import { SidebarProvider, useSidebar } from './ui2/sidebar';
 
-function Layout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [sidebarPinned, setSidebarPinned] = useState(true);
+function LayoutContent() {
+  const { collapsed } = useSidebar();
   const location = useLocation();
   
   // Check if current page is settings
@@ -16,24 +15,14 @@ function Layout() {
   return (
     <div className="min-h-screen w-screen flex bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
       {/* Sidebar */}
-      <Sidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        collapsed={sidebarCollapsed}
-        setCollapsed={setSidebarCollapsed}
-        pinned={sidebarPinned}
-        setPinned={setSidebarPinned}
-      />
+      <Sidebar />
 
       {/* Main content wrapper */}
       <div
-        className={`flex-1 w-screen overflow-x-hidden flex flex-col min-h-screen pb-24 pt-16 transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-72'}`}
+        className={`flex-1 w-screen overflow-x-hidden flex flex-col min-h-screen pb-24 pt-16 transition-all duration-300 ${collapsed ? 'lg:pl-16' : 'lg:pl-72'}`}
       >
         {/* Top navigation */}
-        <Topbar
-          setSidebarOpen={setSidebarOpen}
-          sidebarCollapsed={sidebarCollapsed}
-        />
+        <Topbar />
 
         {/* Main content */}
         <main className={`flex-1 w-full ${isSettingsPage ? '' : 'bg-white dark:bg-gray-800'}`}>
@@ -47,10 +36,16 @@ function Layout() {
         </main>
 
         {/* Footer */}
-        <Footer sidebarCollapsed={sidebarCollapsed} />
+        <Footer sidebarCollapsed={collapsed} />
       </div>
     </div>
   );
 }
 
-export default Layout;
+export default function Layout() {
+  return (
+    <SidebarProvider>
+      <LayoutContent />
+    </SidebarProvider>
+  );
+}

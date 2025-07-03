@@ -9,33 +9,34 @@ import { Button } from '../ui2/button';
 import { Badge } from '../ui2/badge';
 import { Separator } from '../ui2/separator';
 import {
+  Sidebar as SidebarContainer,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarContent,
+  useSidebar,
+} from '../ui2/sidebar';
+import {
   Settings as SettingsIcon,
   Crown,
   Sparkles,
   Pin,
   PinOff,
   Search,
-  ChevronDown
+  ChevronDown,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
 
-interface SidebarProps {
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
-  collapsed: boolean;
-  setCollapsed: (collapsed: boolean) => void;
-  pinned: boolean;
-  setPinned: (pinned: boolean) => void;
-}
-
-function Sidebar({
-  sidebarOpen,
-  setSidebarOpen,
-  collapsed,
-  setCollapsed,
-  pinned,
-  setPinned,
-}: SidebarProps) {
+function Sidebar() {
+  const {
+    open: sidebarOpen,
+    setOpen: setSidebarOpen,
+    collapsed,
+    setCollapsed,
+    pinned,
+    setPinned,
+  } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
@@ -300,27 +301,17 @@ function Sidebar({
       />
 
       {/* Sidebar */}
-      <aside
+      <SidebarContainer
         className={`
-          fixed inset-y-0 left-0 z-50 bg-gray-900 flex flex-col
+          fixed inset-y-0 left-0 z-50 bg-gray-900
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
           w-72 ${collapsed ? 'lg:w-20' : 'lg:w-72'}
-          transition-all
+          flex flex-col transition-all
         `}
-        onMouseEnter={() => {
-          if (!pinned) {
-            setCollapsed(false);
-          }
-        }}
-        onMouseLeave={() => {
-          if (!pinned) {
-            setCollapsed(true);
-          }
-        }}
       >
-        <div className="flex flex-col h-full px-2">
+        <SidebarHeader className="px-2">
           {/* Logo */}
           <div className="flex-shrink-0 h-16 flex items-center justify-center px-4">
             <img
@@ -330,9 +321,13 @@ function Sidebar({
             />
           </div>
 
-          {/* Search Bar */}
-          {!collapsed && (
-            <div className="px-2 py-4 flex items-center space-x-2">
+          {/* Search Bar and Actions */}
+          <div
+            className={`${
+              collapsed ? 'p-2 justify-center' : 'px-2 py-4'
+            } flex items-center space-x-2`}
+          >
+            {!collapsed && (
               <Input
                 placeholder="Search menu..."
                 value={searchTerm}
@@ -340,22 +335,38 @@ function Sidebar({
                 icon={<Search className="h-4 w-4" />}
                 className="flex-1 bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500 focus:border-primary focus:ring-primary"
               />
+            )}
+            <Button
+              variant="light"
+              size="icon"
+              onClick={() => setCollapsed(!collapsed)}
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="hidden lg:flex bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 h-8 w-8"
+            >
+              {collapsed ? (
+                <ChevronsRight className="h-4 w-4" />
+              ) : (
+                <ChevronsLeft className="h-4 w-4" />
+              )}
+            </Button>
+            {!collapsed && (
               <Button
                 variant="light"
                 size="icon"
                 onClick={() => setPinned(!pinned)}
                 title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
-                className="hidden lg:flex bg-gray-800 text-gray-300 h-8 w-8"
+                className="hidden lg:flex bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 h-8 w-8"
               >
                 {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
               </Button>
-            </div>
-          )}
+            )}
+          </div>
 
           {!collapsed && <Separator className="bg-gray-800" />}
+        </SidebarHeader>
 
-          {/* Navigation - Scrollable Area */}
-          <Scrollable className={`flex-1 ${collapsed ? 'py-2' : 'py-4'}`} shadow={false}>
+        <SidebarContent>
+          <Scrollable className={`${collapsed ? 'py-2' : 'py-4'}`} shadow={false}>
             <nav className="space-y-1">
               {filteredNavigation.map((item) => renderItem(item))}
 
@@ -367,14 +378,14 @@ function Sidebar({
               )}
             </nav>
           </Scrollable>
+        </SidebarContent>
 
-          {/* Bottom Section - Fixed */}
-          <div className="flex-shrink-0 border-t border-gray-800 p-4 space-y-4">
-            {/* Subscribe Button */}
-            {!collapsed && (
-              <Link
-                to="/settings/subscription"
-                className="block"
+        <SidebarFooter className="border-t border-gray-800 p-4 space-y-4">
+          {/* Subscribe Button */}
+          {!collapsed && (
+            <Link
+              to="/settings/subscription"
+              className="block"
                 aria-label="Manage Subscription"
               >
                 <div className={`
@@ -434,9 +445,8 @@ function Sidebar({
               )}
             </Button>
 
-          </div>
-        </div>
-      </aside>
+          </SidebarFooter>
+      </SidebarContainer>
     </>
   );
 }
