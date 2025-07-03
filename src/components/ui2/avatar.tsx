@@ -10,6 +10,7 @@ interface AvatarProps extends BaseProps {
   fallback?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   shape?: 'circle' | 'square';
+  children?: React.ReactNode;
 }
 
 const sizeClasses = {
@@ -20,7 +21,19 @@ const sizeClasses = {
 };
 
 const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
-  ({ className, src, alt, fallback, size = 'md', shape = 'circle', ...props }, ref) => (
+  (
+    {
+      className,
+      src,
+      alt,
+      fallback,
+      size = 'md',
+      shape = 'circle',
+      children,
+      ...props
+    },
+    ref
+  ) => (
     <AvatarPrimitive.Root
       ref={ref}
       className={cn(
@@ -31,21 +44,29 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
       )}
       {...props}
     >
-      <AvatarPrimitive.Image
-        src={src}
-        alt={alt || ''}
-        className="h-full w-full object-cover dark:border-border"
-      />
-      <AvatarPrimitive.Fallback
-        className={cn(
-          'flex h-full w-full items-center justify-center bg-muted dark:bg-muted',
-          shape === 'circle' ? 'rounded-full' : 'rounded-lg',
-          'dark:text-foreground'
-        )}
-        delayMs={600}
-      >
-        {fallback || alt?.charAt(0).toUpperCase() || '?'}
-      </AvatarPrimitive.Fallback>
+      {children ? (
+        children
+      ) : (
+        <>
+          {src && (
+            <AvatarPrimitive.Image
+              src={src}
+              alt={alt || ''}
+              className="h-full w-full object-cover dark:border-border"
+            />
+          )}
+          <AvatarPrimitive.Fallback
+            className={cn(
+              'flex h-full w-full items-center justify-center bg-muted dark:bg-muted',
+              shape === 'circle' ? 'rounded-full' : 'rounded-lg',
+              'dark:text-foreground'
+            )}
+            delayMs={600}
+          >
+            {fallback || alt?.charAt(0).toUpperCase() || '?'}
+          </AvatarPrimitive.Fallback>
+        </>
+      )}
     </AvatarPrimitive.Root>
   )
 );
