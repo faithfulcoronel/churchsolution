@@ -85,6 +85,14 @@ function Sidebar() {
     return name || user.email || '';
   }, [user]);
 
+  const initials = useMemo(() => {
+    if (!user) return '';
+    const first = (user.user_metadata as any)?.first_name || '';
+    const last = (user.user_metadata as any)?.last_name || '';
+    const init = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase().trim();
+    return init || user.email?.charAt(0).toUpperCase() || '';
+  }, [user]);
+
   const primaryRole = useMemo(() => {
     return userRoles?.[0]?.role_name || 'User';
   }, [userRoles]);
@@ -410,14 +418,18 @@ function Sidebar() {
         <SidebarFooter className="border-t border-border p-4 space-y-4">
           {/* Profile */}
           {!collapsed && (
-            <Card size="sm" className="flex items-center space-x-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/avatar.png" alt={fullName} />
-                <AvatarFallback>{fullName.charAt(0)}</AvatarFallback>
+            <Card
+              size="sm"
+              className="flex items-center space-x-3 rounded-xl p-4 bg-gradient-to-br from-emerald-500/70 to-teal-500/70 hover:brightness-105 transition"
+            >
+              <Avatar className="h-9 w-9">
+                <AvatarFallback className="text-sm text-white">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-foreground">{fullName}</span>
-                <span className="text-xs text-muted-foreground">{primaryRole}</span>
+                <span className="text-sm font-medium text-white">{fullName}</span>
+                <span className="text-xs text-white/80">{primaryRole}</span>
               </div>
             </Card>
           )}
