@@ -28,3 +28,4 @@ export * from './useMessageRepository';
 export * from './useMembershipTypeRepository';
 export * from './useMembershipStatusRepository';
 export * from './useDonationImportService';
+export * from './useOfferingDashboardData';
