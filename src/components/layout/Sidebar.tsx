@@ -22,7 +22,9 @@ import {
   Pin,
   PinOff,
   Search,
-  ChevronDown
+  ChevronDown,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
 
@@ -308,16 +310,6 @@ function Sidebar() {
           w-72 ${collapsed ? 'lg:w-20' : 'lg:w-72'}
           flex flex-col transition-all
         `}
-        onMouseEnter={() => {
-          if (!pinned) {
-            setCollapsed(false);
-          }
-        }}
-        onMouseLeave={() => {
-          if (!pinned) {
-            setCollapsed(true);
-          }
-        }}
       >
         <SidebarHeader className="px-2">
           {/* Logo */}
@@ -329,9 +321,13 @@ function Sidebar() {
             />
           </div>
 
-          {/* Search Bar */}
-          {!collapsed && (
-            <div className="px-2 py-4 flex items-center space-x-2">
+          {/* Search Bar and Actions */}
+          <div
+            className={`${
+              collapsed ? 'p-2 justify-center' : 'px-2 py-4'
+            } flex items-center space-x-2`}
+          >
+            {!collapsed && (
               <Input
                 placeholder="Search menu..."
                 value={searchTerm}
@@ -339,17 +335,32 @@ function Sidebar() {
                 icon={<Search className="h-4 w-4" />}
                 className="flex-1 bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500 focus:border-primary focus:ring-primary"
               />
+            )}
+            <Button
+              variant="light"
+              size="icon"
+              onClick={() => setCollapsed(!collapsed)}
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="hidden lg:flex bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 h-8 w-8"
+            >
+              {collapsed ? (
+                <ChevronsRight className="h-4 w-4" />
+              ) : (
+                <ChevronsLeft className="h-4 w-4" />
+              )}
+            </Button>
+            {!collapsed && (
               <Button
                 variant="light"
                 size="icon"
                 onClick={() => setPinned(!pinned)}
                 title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
-                className="hidden lg:flex bg-gray-800 text-gray-300 h-8 w-8"
+                className="hidden lg:flex bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 h-8 w-8"
               >
                 {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
               </Button>
-            </div>
-          )}
+            )}
+          </div>
 
           {!collapsed && <Separator className="bg-gray-800" />}
         </SidebarHeader>
