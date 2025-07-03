@@ -1,8 +1,10 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../../lib/supabase";
 import { tenantUtils } from "../../utils/tenantUtils";
+import { supabase } from "../../lib/supabase";
+import { useMemberRepository } from "../../hooks/useMemberRepository";
+import { useMembershipStatusRepository } from "../../hooks/useMembershipStatusRepository";
 import { startOfMonth } from "date-fns";
 import {
   Card,
@@ -63,69 +65,34 @@ function MembersDashboard() {
     queryFn: () => tenantUtils.getCurrentTenant(),
   });
 
-  const { data: visitorStatus } = useQuery({
-    queryKey: ["visitor-status", tenant?.id],
-    queryFn: async () => {
-      if (!tenant?.id) return null;
-      const { data, error } = await supabase
-        .from("membership_status")
-        .select("id")
-        .eq("tenant_id", tenant.id)
-        .eq("code", "visitor")
-        .maybeSingle();
-      if (error) throw error;
-      return data?.id || null;
-    },
-    enabled: !!tenant?.id,
-  });
+  const { useQuery: useMembersQuery } = useMemberRepository();
+  const { useQuery: useStatusQuery } = useMembershipStatusRepository();
 
-  const { data: totalMembers } = useQuery({
-    queryKey: ["total-members", tenant?.id],
-    queryFn: async () => {
-      if (!tenant?.id) return 0;
-      const { count, error } = await supabase
-        .from("members")
-        .select("*", { count: "exact", head: true })
-        .eq("tenant_id", tenant.id)
-        .is("deleted_at", null);
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!tenant?.id,
+  const { data: visitorStatusData } = useStatusQuery({
+    filters: { code: { operator: 'eq', value: 'visitor' } },
+    enabled: !!tenant?.id
   });
+  const visitorStatus = visitorStatusData?.data?.[0]?.id || null;
 
-  const { data: newMembers } = useQuery({
-    queryKey: ["new-members", tenant?.id],
-    queryFn: async () => {
-      if (!tenant?.id) return 0;
-      const start = startOfMonth(new Date());
-      const { count, error } = await supabase
-        .from("members")
-        .select("*", { count: "exact", head: true })
-        .eq("tenant_id", tenant.id)
-        .gte("created_at", start.toISOString())
-        .is("deleted_at", null);
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!tenant?.id,
+  const { data: totalMembersResult } = useMembersQuery({
+    pagination: { page: 1, pageSize: 1 },
+    enabled: !!tenant?.id
   });
+  const totalMembers = totalMembersResult?.count ?? 0;
 
-  const { data: visitorCount } = useQuery({
-    queryKey: ["visitor-count", tenant?.id, visitorStatus],
-    queryFn: async () => {
-      if (!tenant?.id || !visitorStatus) return 0;
-      const { count, error } = await supabase
-        .from("members")
-        .select("*", { count: "exact", head: true })
-        .eq("tenant_id", tenant.id)
-        .eq("status_category_id", visitorStatus)
-        .is("deleted_at", null);
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!tenant?.id && !!visitorStatus,
+  const { data: newMembersResult } = useMembersQuery({
+    filters: { created_at: { operator: 'gte', value: startOfMonth(new Date()).toISOString() } },
+    pagination: { page: 1, pageSize: 1 },
+    enabled: !!tenant?.id
   });
+  const newMembers = newMembersResult?.count ?? 0;
+
+  const { data: visitorCountResult } = useMembersQuery({
+    filters: { status_category_id: { operator: 'eq', value: visitorStatus } },
+    pagination: { page: 1, pageSize: 1 },
+    enabled: !!tenant?.id && !!visitorStatus
+  });
+  const visitorCount = visitorCountResult?.count ?? 0;
 
   const { data: familyCount } = useQuery({
     queryKey: ["family-count", tenant?.id],
@@ -141,51 +108,25 @@ function MembersDashboard() {
     enabled: !!tenant?.id,
   });
 
-  const { data: recentMembers } = useQuery({
-    queryKey: ["recent-members", tenant?.id],
-    queryFn: async () => {
-      if (!tenant?.id) return [] as MemberSummary[];
-      const { data, error } = await supabase
-        .from("members")
-        .select(
-          "id, first_name, last_name, email, contact_number, membership_date, profile_picture_url, created_at, membership_status(name, code)"
-        )
-        .eq("tenant_id", tenant.id)
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return (data || []) as MemberSummary[];
-    },
-    enabled: !!tenant?.id,
+  const { data: recentMembersResult } = useMembersQuery({
+    order: { column: 'created_at', ascending: false },
+    pagination: { page: 1, pageSize: 5 },
+    enabled: !!tenant?.id
   });
+  const recentMembers = (recentMembersResult?.data || []) as MemberSummary[];
 
   const [directorySearch, setDirectorySearch] = React.useState("");
-  const { data: directoryMembers } = useQuery({
-    queryKey: ["directory-members", tenant?.id, directorySearch],
-    queryFn: async () => {
-      if (!tenant?.id) return [] as MemberSummary[];
-      const search = directorySearch.trim();
-      let query = supabase
-        .from("members")
-        .select(
-          "id, first_name, last_name, email, contact_number, address, membership_date, profile_picture_url, created_at, membership_status(name, code)"
-        )
-        .eq("tenant_id", tenant.id)
-        .is("deleted_at", null)
-        .order("last_name", { ascending: true })
-        .limit(5);
-      if (search) {
-        query = query.or(
-          `first_name.ilike.%${search}%,last_name.ilike.%${search}%,preferred_name.ilike.%${search}%`
-        );
-      }
-      const { data, error } = await query;
-      if (error) throw error;
-      return (data || []) as MemberSummary[];
-    },
-    enabled: !!tenant?.id,
+  const { data: directoryMembersResult } = useMembersQuery({
+    filters: directorySearch.trim()
+      ? {
+          or: `first_name.ilike.*${directorySearch.trim()}*,last_name.ilike.*${directorySearch.trim()}*,preferred_name.ilike.*${directorySearch.trim()}*`
+        }
+      : undefined,
+    order: { column: 'last_name', ascending: true },
+    pagination: { page: 1, pageSize: 5 },
+    enabled: !!tenant?.id
   });
+  const directoryMembers = (directoryMembersResult?.data || []) as MemberSummary[];
 
   const highlights = [
     {
