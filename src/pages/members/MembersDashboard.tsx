@@ -332,6 +332,14 @@ function MembersDashboard() {
                   No members found.
                 </p>
               )}
+              <div className="pt-4">
+                <Link
+                  to="/members/list"
+                  className="text-sm text-primary font-medium flex items-center hover:underline"
+                >
+                  View all members <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
