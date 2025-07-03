@@ -66,7 +66,7 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
             {fallback || alt?.charAt(0).toUpperCase() || '?'}
           </AvatarPrimitive.Fallback>
         </>
-      )
+      )}
     </AvatarPrimitive.Root>
   )
 );
