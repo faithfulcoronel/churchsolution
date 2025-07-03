@@ -19,9 +19,7 @@ import {
 } from '../ui2/sidebar';
 import {
   Search,
-  ChevronDown,
-  ChevronsLeft,
-  ChevronsRight
+  ChevronDown
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
 
@@ -376,19 +374,6 @@ function Sidebar() {
                 className="flex-1"
               />
             )}
-            <Button
-              variant="light"
-              size="icon"
-              onClick={() => setCollapsed(!collapsed)}
-              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="hidden lg:flex h-8 w-8"
-            >
-              {collapsed ? (
-                <ChevronsRight className="h-4 w-4" />
-              ) : (
-                <ChevronsLeft className="h-4 w-4" />
-              )}
-            </Button>
           </div>
 
           {!collapsed && <Separator className="bg-border" />}

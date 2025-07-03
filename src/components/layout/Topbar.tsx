@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Menu, User, Search, Sun, Moon } from 'lucide-react';
+import { Menu, User, Search, Sun, Moon, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Button } from '../ui2/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui2/dropdown-menu';
 import { Input } from '../ui2/input';
@@ -12,7 +12,7 @@ import NotificationDropdown from './NotificationDropdown';
 import { cn } from '@/lib/utils';
 
 function Topbar() {
-  const { collapsed } = useSidebar();
+  const { collapsed, setCollapsed } = useSidebar();
   const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
   const { settings, handleThemeToggle } = useThemeSwitcher();
@@ -55,6 +55,20 @@ function Topbar() {
         >
           <Menu className="h-6 w-6" aria-hidden="true" />
         </SidebarTrigger>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setCollapsed(!collapsed)}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="hidden lg:inline-flex"
+        >
+          {collapsed ? (
+            <ChevronsRight className="h-5 w-5" />
+          ) : (
+            <ChevronsLeft className="h-5 w-5" />
+          )}
+        </Button>
       </div>
 
       <div className="flex items-center space-x-4">
@@ -62,7 +76,7 @@ function Topbar() {
           <Input
             placeholder="Search StewardTrack..."
             icon={<Search className="h-4 w-4 text-gray-500" />}
-            className="w-64 md:w-80 rounded-full"
+            className="w-72 md:w-96 rounded-full"
             aria-label="Search"
           />
         </div>
