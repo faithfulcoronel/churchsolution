@@ -29,6 +29,9 @@ export interface DataTableProps<TData, TValue> {
   className?: string;
   containerClassName?: string;
   fluid?: boolean;
+  rowActions?: (row: TData) => React.ReactNode;
+  onRowClick?: (row: TData) => void;
+  onRowDoubleClick?: (row: TData) => void;
   pagination?: {
     pageSize?: number;
     pageSizeOptions?: number[];
@@ -47,6 +50,9 @@ export function DataTable<TData, TValue>({
   className,
   containerClassName,
   fluid = false,
+  rowActions,
+  onRowClick,
+  onRowDoubleClick,
   pagination,
   onPageChange,
   onPageSizeChange,
@@ -62,9 +68,25 @@ export function DataTable<TData, TValue>({
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(initialPageSize);
 
+  const enhancedColumns = React.useMemo<ColumnDef<TData, any>[]>(
+    () =>
+      rowActions
+        ? [
+            ...columns,
+            {
+              id: 'actions',
+              header: 'Actions',
+              enableSorting: false,
+              cell: ({ row }) => rowActions(row.original),
+            },
+          ]
+        : columns,
+    [columns, rowActions]
+  );
+
   const table = useReactTable({
     data,
-    columns,
+    columns: enhancedColumns,
     state: {
       sorting,
       columnFilters,
@@ -121,7 +143,7 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-96 text-center">
+                <TableCell colSpan={enhancedColumns.length} className="h-96 text-center">
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
@@ -129,7 +151,17 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                  onDoubleClick={
+                    onRowDoubleClick ? () => onRowDoubleClick(row.original) : undefined
+                  }
+                  className={cn(
+                    (onRowClick || onRowDoubleClick) && 'cursor-pointer'
+                  )}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} style={{ width: cell.column.getSize() }}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -139,7 +171,7 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={enhancedColumns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
