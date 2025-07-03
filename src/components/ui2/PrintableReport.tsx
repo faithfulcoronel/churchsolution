@@ -115,8 +115,8 @@ export function PrintableReport({ title, content, footer }: PrintableReportProps
           header {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            background-color: rgb(37, 99, 235) !important;
-            color: white !important;
+            background-color: var(--primary) !important;
+            color: var(--primary-foreground) !important;
           }
         }
 
@@ -129,23 +129,23 @@ export function PrintableReport({ title, content, footer }: PrintableReportProps
         }
 
         .report-table th {
-          background-color: #f8fafc;
+          background-color: var(--background);
           padding: 0.75rem 1rem;
           text-align: left;
           font-weight: 600;
-          color: #475569;
-          border-bottom: 2px solid #e2e8f0;
+          color: var(--muted-foreground);
+          border-bottom: 2px solid var(--border);
           white-space: nowrap;
         }
 
         .report-table td {
           padding: 0.75rem 1rem;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid var(--border);
           vertical-align: middle;
         }
 
         .report-table tr:nth-child(even) {
-          background-color: #f8fafc;
+          background-color: var(--background);
         }
 
         .report-table .amount {
@@ -156,18 +156,18 @@ export function PrintableReport({ title, content, footer }: PrintableReportProps
 
         .report-table .total-row {
           font-weight: 600;
-          background-color: #f1f5f9;
+          background-color: var(--muted);
         }
 
         .report-table .total-row td {
-          border-top: 2px solid #e2e8f0;
-          border-bottom: 2px solid #e2e8f0;
+          border-top: 2px solid var(--border);
+          border-bottom: 2px solid var(--border);
         }
 
         /* Progress bar styles */
         .progress-bar {
           height: 0.5rem;
-          background-color: #e2e8f0;
+          background-color: var(--border);
           border-radius: 9999px;
           overflow: hidden;
         }
@@ -178,9 +178,9 @@ export function PrintableReport({ title, content, footer }: PrintableReportProps
           transition: width 0.3s ease;
         }
 
-        .progress-bar-fill.success { background-color: #22c55e; }
-        .progress-bar-fill.warning { background-color: #f59e0b; }
-        .progress-bar-fill.danger { background-color: #ef4444; }
+        .progress-bar-fill.success { background-color: var(--success); }
+        .progress-bar-fill.warning { background-color: var(--chart-4); }
+        .progress-bar-fill.danger { background-color: var(--destructive); }
       `}</style>
     </div>
   );
