@@ -73,12 +73,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div
-      className={cn(
-        'space-y-4 w-full h-full',
-        fluid ? '' : 'mx-auto',
-        containerClassName,
-        className
-      )}
+      className={cn('space-y-4 w-full h-full overflow-y-auto', fluid ? '' : 'mx-auto', containerClassName, className)}
     >
       <DataTableToolbar
         table={table}
@@ -89,9 +84,8 @@ export function DataTable<TData, TValue>({
       />
 
       <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
-        <div className="overflow-y-auto">
-          <Table>
-            <TableHeader className="sticky top-0 z-10 bg-card">
+        <Table>
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -103,13 +97,13 @@ export function DataTable<TData, TValue>({
                 ))}
               </TableRow>
             ))}
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-96 text-center">
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-96 text-center">
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 </TableCell>
               </TableRow>
@@ -131,23 +125,22 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
-            {table.getFooterGroups().length > 0 && (
-              <TableFooter className="sticky bottom-0 z-10 bg-card">
-                {table.getFooterGroups().map((footerGroup) => (
-                  <TableRow key={footerGroup.id}>
-                    {footerGroup.headers.map((header) => (
-                      <TableCell key={header.id} style={{ width: header.column.getSize() }}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.footer, header.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableFooter>
-            )}
-          </Table>
-        </div>
+          {table.getFooterGroups().length > 0 && (
+            <TableFooter>
+              {table.getFooterGroups().map((footerGroup) => (
+                <TableRow key={footerGroup.id}>
+                  {footerGroup.headers.map((header) => (
+                    <TableCell key={header.id} style={{ width: header.column.getSize() }}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.footer, header.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableFooter>
+          )}
+        </Table>
       </div>
 
       <DataTablePagination table={table} />
