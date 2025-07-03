@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Settings as SettingsIcon,
 } from 'lucide-react';
+import { Container } from '../../components/ui2/container';
 
 interface MemberSummary {
   id: string;
@@ -156,7 +157,7 @@ function MembersDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <Container className="space-y-6 max-w-[1200px]" size="xl">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-2xl font-semibold text-foreground">Members</h1>
@@ -250,7 +251,7 @@ function MembersDashboard() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Container>
   );
 }
 
