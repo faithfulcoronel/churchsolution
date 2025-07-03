@@ -22,6 +22,8 @@ import {
   ChevronRight,
   FileText,
   Search,
+  Mail,
+  Phone,
 } from 'lucide-react';
 import { Container } from '../../components/ui2/container';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
@@ -34,7 +36,7 @@ interface MemberSummary {
   email: string | null;
   contact_number: string | null;
   membership_date: string | null;
-  membership_status: { name: string } | null;
+  membership_status: { name: string; code: string } | null;
   profile_picture_url: string | null;
   created_at: string | null;
 }
@@ -131,7 +133,7 @@ function MembersDashboard() {
       const { data, error } = await supabase
         .from('members')
         .select(
-          'id, first_name, last_name, email, contact_number, membership_date, profile_picture_url, created_at, membership_status(name)'
+          'id, first_name, last_name, email, contact_number, membership_date, profile_picture_url, created_at, membership_status(name, code)'
         )
         .eq('tenant_id', tenant.id)
         .is('deleted_at', null)
@@ -194,6 +196,19 @@ function MembersDashboard() {
       subtext: 'Family groups',
     },
   ];
+
+  const getStatusBadgeClass = (code?: string) => {
+    switch (code) {
+      case 'active':
+        return 'bg-green-100 text-green-700';
+      case 'visitor':
+        return 'bg-blue-100 text-blue-700';
+      case 'inactive':
+        return 'bg-gray-100 text-gray-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
 
 
   return (
@@ -306,20 +321,18 @@ function MembersDashboard() {
         </TabsContent>
         </Tabs>
 
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Recent Additions</CardTitle>
-            <CardDescription>Latest member entries</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-0">
+        <div className="mt-6 rounded-xl border shadow-sm p-4 md:p-6">
+          <h3 className="font-semibold text-lg text-gray-900">Recent Additions</h3>
+          <p className="text-sm text-gray-500 mb-4">Latest member entries</p>
+          <div className="flex flex-col space-y-2">
             {recentMembers && recentMembers.length > 0 ? (
               recentMembers.map((member) => (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between gap-4"
+                  className="bg-muted/50 rounded-lg py-3 px-4 flex justify-between gap-4"
                 >
-                  <div className="flex items-center space-x-3">
-                    <Avatar size="sm">
+                  <div className="flex items-start gap-3 flex-1">
+                    <Avatar size="md">
                       {member.profile_picture_url && (
                         <AvatarImage
                           src={member.profile_picture_url}
@@ -330,55 +343,61 @@ function MembersDashboard() {
                           }}
                         />
                       )}
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold">
                         {member.first_name.charAt(0)}{member.last_name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-medium text-foreground">
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-gray-800">
                         {member.first_name} {member.last_name}
-                      </p>
+                      </span>
                       {member.email && (
-                        <p className="text-sm text-muted-foreground">
+                        <span className="flex items-center text-sm text-gray-500">
+                          <Mail className="h-4 w-4 mr-1" />
                           {member.email}
-                        </p>
+                        </span>
                       )}
                       {member.contact_number && (
-                        <p className="text-sm text-muted-foreground">
+                        <span className="flex items-center text-sm text-gray-500">
+                          <Phone className="h-4 w-4 mr-1" />
                           {member.contact_number}
-                        </p>
+                        </span>
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="flex flex-col items-end">
                     {member.membership_status?.name && (
-                      <p className="font-medium text-foreground">
+                      <span
+                        className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${getStatusBadgeClass(
+                          member.membership_status.code
+                        )}`}
+                      >
                         {member.membership_status.name}
-                      </p>
+                      </span>
                     )}
-                    <p className="text-sm text-muted-foreground">
+                    <span className="text-xs text-gray-400 mt-1">
                       {member.membership_date
                         ? new Date(member.membership_date).toLocaleDateString()
                         : member.created_at
                         ? new Date(member.created_at).toLocaleDateString()
                         : ''}
-                    </p>
+                    </span>
                   </div>
                 </div>
               ))
             ) : (
               <p className="text-sm text-muted-foreground">No recent members.</p>
             )}
-          </CardContent>
-          <CardFooter>
+          </div>
+          <div className="pt-4">
             <Link
               to="/members/list"
               className="text-sm text-primary font-medium flex items-center hover:underline"
             >
               View all members <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </Container>
   );
 }
