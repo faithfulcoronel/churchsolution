@@ -424,7 +424,7 @@ function Sidebar() {
           {!collapsed && (
             <Card
               size="sm"
-              className="flex items-center space-x-3 rounded-xl p-4 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-700 dark:to-teal-700 hover:brightness-105 transition"
+              className="flex items-center space-x-3 rounded-xl p-4 bg-gradient-to-br from-emerald-500/70 to-teal-500/70 hover:brightness-105 transition"
             >
               <Avatar className="h-9 w-9">
                 <AvatarFallback className="text-sm text-white">
@@ -432,8 +432,8 @@ function Sidebar() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-white">{fullName}</span>
-                <span className="text-xs text-[#D1FADF] dark:text-[#9AE6B4]">{primaryRole}</span>
+                <span className="text-sm font-medium text-white">{fullName}</span>
+                <span className="text-xs text-white/80">{primaryRole}</span>
               </div>
             </Card>
           )}
