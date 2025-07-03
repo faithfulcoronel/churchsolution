@@ -69,6 +69,20 @@ function Sidebar({
     [hasPermission]
   );
 
+  const itemLevels = useMemo(() => {
+    const levels = new Map<string, number>();
+
+    const walk = (items: NavItem[], level = 0) => {
+      items.forEach((it) => {
+        levels.set(it.name, level);
+        if (it.submenu) walk(it.submenu, level + 1);
+      });
+    };
+
+    walk(navigation);
+    return levels;
+  }, [navigation]);
+
   const renderItem = (item: NavItem, level = 0) => {
     const hasChildren = item.submenu && item.submenu.length > 0;
     const padding = collapsed
@@ -175,6 +189,14 @@ function Sidebar({
       if (newOpenSubmenus.has(itemName)) {
         newOpenSubmenus.delete(itemName);
       } else {
+        const level = itemLevels.get(itemName);
+        if (level !== undefined) {
+          for (const name of Array.from(newOpenSubmenus)) {
+            if (itemLevels.get(name) === level) {
+              newOpenSubmenus.delete(name);
+            }
+          }
+        }
         newOpenSubmenus.add(itemName);
       }
       return newOpenSubmenus;
