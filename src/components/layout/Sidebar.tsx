@@ -18,8 +18,6 @@ import {
   useSidebar,
 } from '../ui2/sidebar';
 import {
-  Pin,
-  PinOff,
   Search,
   ChevronDown,
   ChevronsLeft,
@@ -391,17 +389,6 @@ function Sidebar() {
                 <ChevronsLeft className="h-4 w-4" />
               )}
             </Button>
-            {!collapsed && (
-              <Button
-                variant="light"
-                size="icon"
-                onClick={() => setPinned(!pinned)}
-                title={pinned ? 'Collapse sidebar' : 'Expand sidebar'}
-                className="hidden lg:flex h-8 w-8"
-              >
-                {pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
-              </Button>
-            )}
           </div>
 
           {!collapsed && <Separator className="bg-border" />}
