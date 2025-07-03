@@ -24,7 +24,7 @@ function Topbar() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 w-full z-30 flex h-16 shrink-0 items-center justify-end gap-x-4 border-b border-gray-200 bg-primary-gradient dark:bg-gray-800 dark:border-gray-700 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:pr-8 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-72'}`}
+      className={`fixed top-0 inset-x-0 w-full z-30 flex h-16 shrink-0 items-center justify-end gap-x-4 border-b border-gray-200 bg-primary-gradient dark:bg-primary-gradient dark:border-gray-700 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:pr-8 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-72'}`}
     >
       {/* Sidebar toggle, only on mobile */}
       <SidebarTrigger
