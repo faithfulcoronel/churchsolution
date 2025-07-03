@@ -13,6 +13,9 @@ export interface DonationItem {
     last_name: string;
     profile_picture_url: string | null;
   } | null;
+  account?: {
+    name: string;
+  } | null;
   category?: {
     name: string;
   } | null;
@@ -27,6 +30,7 @@ export default function RecentDonationItem({ donation }: Props) {
   const name = donation.member
     ? `${donation.member.first_name} ${donation.member.last_name}`
     : 'Anonymous';
+  const displayName = donation.account?.name || name;
 
   return (
     <Card size="sm" hoverable className="dark:bg-gray-600">
@@ -50,9 +54,9 @@ export default function RecentDonationItem({ donation }: Props) {
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium text-foreground">{name}</p>
+            <p className="font-medium text-foreground">{displayName}</p>
             <p className="text-sm text-muted-foreground">
-              {donation.category?.name || 'Uncategorized'}
+              {new Date(donation.transaction_date).toLocaleDateString()}
             </p>
           </div>
         </div>
@@ -61,7 +65,7 @@ export default function RecentDonationItem({ donation }: Props) {
             {formatCurrency(donation.amount, currency)}
           </p>
           <p className="text-sm text-muted-foreground">
-            {new Date(donation.transaction_date).toLocaleDateString()}
+            {donation.category?.name || 'Uncategorized'}
           </p>
         </div>
       </CardContent>
