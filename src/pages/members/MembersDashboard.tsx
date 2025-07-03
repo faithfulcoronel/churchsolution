@@ -136,10 +136,30 @@ function MembersDashboard() {
   });
 
   const highlights = [
-    { name: 'Total Members', value: totalMembers || 0, icon: Users },
-    { name: 'New This Month', value: newMembers || 0, icon: UserPlus },
-    { name: 'Visitors', value: visitorCount || 0, icon: UserCheck },
-    { name: 'Families', value: familyCount || 0, icon: Heart },
+    {
+      name: 'Total Members',
+      value: totalMembers || 0,
+      icon: Users,
+      subtext: 'Active members',
+    },
+    {
+      name: 'New This Month',
+      value: newMembers || 0,
+      icon: UserPlus,
+      subtext: 'Joined this month',
+    },
+    {
+      name: 'Visitors',
+      value: visitorCount || 0,
+      icon: UserCheck,
+      subtext: 'Current visitors',
+    },
+    {
+      name: 'Families',
+      value: familyCount || 0,
+      icon: Heart,
+      subtext: 'Family groups',
+    },
   ];
 
   const actions = [
@@ -173,7 +193,13 @@ function MembersDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {highlights.map((h) => (
-          <MetricCard key={h.name} label={h.name} value={h.value} icon={h.icon} />
+          <MetricCard
+            key={h.name}
+            label={h.name}
+            value={h.value}
+            icon={h.icon}
+            subtext={h.subtext}
+          />
         ))}
       </div>
 
