@@ -27,7 +27,7 @@ function LayoutContent() {
 
         {/* Main content */}
         <main
-          className={cn('flex-1 w-full','bg-white dark:bg-gray-800')}
+          className={cn('flex-1 w-full','bg-gray-50 dark:bg-gray-800')}
         >
           {isSettingsPage ? (
             <Outlet />
