@@ -71,7 +71,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <label 
             htmlFor={id}
             className={cn(
-              "block text-sm font-medium mb-1.5 dark:text-gray-200",
+              "block text-sm font-medium mb-1.5 dark:text-foreground",
               error ? 'text-destructive' : 'text-foreground',
               disabled && 'opacity-50'
             )}
@@ -83,7 +83,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         
         <div className="relative">
           {icon && (
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground dark:text-gray-400">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground dark:text-muted-foreground">
               {icon}
             </div>
           )}
@@ -100,7 +100,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             }
             className={cn(
               inputVariants({ size, error }),
-              icon && 'pl-10 dark:bg-gray-800 dark:border-gray-700',
+              icon && 'pl-10 dark:bg-muted dark:border-border',
               (showClearButton || showPasswordButton || rightElement) && 'pr-10',
               className
             )}
@@ -111,7 +111,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={onClear}
-              className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-300"
+              className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
               aria-label="Clear input"
             >
               <X className="h-4 w-4" />
@@ -122,7 +122,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-300"
+              className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (

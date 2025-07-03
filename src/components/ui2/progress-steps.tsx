@@ -71,7 +71,7 @@ function ProgressSteps({
                     : `${sizeClasses[size].connector} top-14 bottom-0 ${sizeClasses[size].line}`,
                   isCompleted
                     ? 'bg-primary dark:bg-primary'
-                    : 'bg-gray-200 dark:bg-gray-700'
+                    : 'bg-muted dark:bg-muted'
                 )}
               />
             )}
@@ -90,7 +90,7 @@ function ProgressSteps({
                     ? 'bg-primary dark:bg-primary text-white'
                     : isCurrent
                       ? 'bg-primary-light dark:bg-primary-light border-2 border-primary dark:border-primary text-primary dark:text-primary'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                      : 'bg-muted dark:bg-muted text-muted-foreground dark:text-muted-foreground'
                 )}
               >
                 {isCompleted ? (
@@ -109,8 +109,8 @@ function ProgressSteps({
                     'font-semibold',
                     sizeClasses[size].text,
                     (isCompleted || isCurrent)
-                      ? 'text-gray-900 dark:text-gray-100'
-                      : 'text-gray-500 dark:text-gray-400'
+                      ? 'text-foreground dark:text-foreground'
+                      : 'text-muted-foreground dark:text-muted-foreground'
                   )}
                 >
                   {step.title}
@@ -120,8 +120,8 @@ function ProgressSteps({
                     'mt-1',
                     size === 'sm' ? 'text-xs' : 'text-sm',
                     (isCompleted || isCurrent)
-                      ? 'text-gray-600 dark:text-gray-300'
-                      : 'text-gray-400 dark:text-gray-500'
+                      ? 'text-muted-foreground dark:text-muted-foreground'
+                      : 'text-muted-foreground dark:text-muted-foreground'
                   )}
                 >
                   {step.description}

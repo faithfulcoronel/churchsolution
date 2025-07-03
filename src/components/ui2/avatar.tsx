@@ -26,7 +26,7 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
       className={cn(
         'relative flex shrink-0 overflow-hidden',
         sizeClasses[size],
-        shape === 'circle' ? 'rounded-full' : 'rounded-lg dark:bg-gray-800',
+        shape === 'circle' ? 'rounded-full' : 'rounded-lg dark:bg-muted',
         className
       )}
       {...props}
@@ -34,13 +34,13 @@ const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
       <AvatarPrimitive.Image
         src={src}
         alt={alt || ''}
-        className="h-full w-full object-cover dark:border-gray-700"
+        className="h-full w-full object-cover dark:border-border"
       />
       <AvatarPrimitive.Fallback
         className={cn(
-          'flex h-full w-full items-center justify-center bg-muted dark:bg-gray-700',
+          'flex h-full w-full items-center justify-center bg-muted dark:bg-muted',
           shape === 'circle' ? 'rounded-full' : 'rounded-lg',
-          'dark:text-gray-200'
+          'dark:text-foreground'
         )}
         delayMs={600}
       >

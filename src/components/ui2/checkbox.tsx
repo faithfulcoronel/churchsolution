@@ -26,7 +26,7 @@ const Checkbox = React.forwardRef<
       <CheckboxPrimitive.Root
         ref={ref}
         className={cn(
-          'peer shrink-0 border border-input ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:border-gray-600 dark:bg-gray-800',
+          'peer shrink-0 border border-input ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:border-border dark:bg-muted',
           sizeClasses[size],
           error && 'border-destructive',
           className
@@ -48,7 +48,7 @@ const Checkbox = React.forwardRef<
           <label
             htmlFor={props.id}
           className={cn(
-            'font-medium text-foreground dark:text-gray-300',
+            'font-medium text-foreground dark:text-muted-foreground',
             props.disabled && 'opacity-50'
           )}
         >
@@ -59,7 +59,7 @@ const Checkbox = React.forwardRef<
         {(helperText || error) && (
           <p className={cn(
             'text-sm',
-            error ? 'text-destructive' : 'text-muted-foreground dark:text-gray-400'
+            error ? 'text-destructive' : 'text-muted-foreground dark:text-muted-foreground'
           )}>
             {error || helperText}
           </p>

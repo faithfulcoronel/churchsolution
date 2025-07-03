@@ -14,8 +14,8 @@ interface CardProps extends BaseProps {
 
 const variantClasses = {
   default: `
-    bg-white dark:bg-gray-800
-    border-gray-200 dark:border-gray-700
+    bg-white dark:bg-muted
+    border-border dark:border-border
     shadow-sm
   `,
   primary: `
@@ -24,13 +24,13 @@ const variantClasses = {
     shadow-primary/5
   `,
   secondary: `
-    bg-gray-50 dark:bg-gray-900/50
-    border-gray-100 dark:border-gray-800
+    bg-muted dark:bg-muted/50
+    border-border dark:border-border
   `,
   gradient: `
     bg-gradient-to-br from-emerald-50 to-teal-50
     dark:from-emerald-900/10 dark:to-teal-900/10
-    border-gray-200/50 dark:border-gray-700/50
+    border-border/50 dark:border-border/50
     backdrop-blur-sm
   `
 };
@@ -60,7 +60,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           ref={ref}
           className={cn(
             // Base styles
-            'relative rounded-2xl border transition-all duration-200 dark:border-gray-800',
+            'relative rounded-2xl border transition-all duration-200 dark:border-border',
             // Variant styles
             variantClasses[variant],
             // Size styles
@@ -95,7 +95,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
           {/* Loading overlay */}
           {loading && (
-            <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/70 backdrop-blur-sm rounded-2xl" />
+            <div className="absolute inset-0 bg-white/50 dark:bg-muted/70 backdrop-blur-sm rounded-2xl" />
           )}
 
           {/* Content */}
