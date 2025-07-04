@@ -73,11 +73,20 @@ function TransactionList() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   
-  // State for delete dialog
+  // State for dialogs
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
+  const [showPostDialog, setShowPostDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+
+  const [selectedTransaction, setSelectedTransaction] = useState<FinancialTransactionHeader | null>(null);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
+
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [actionInProgress, setActionInProgress] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   
   // Get transaction headers and actions
   const {
@@ -150,6 +159,80 @@ function TransactionList() {
     } finally {
       setDeleteInProgress(false);
     }
+  };
+
+  const handleSubmitTransaction = async () => {
+    if (!selectedTransaction) return;
+
+    try {
+      setActionInProgress(true);
+      setActionError(null);
+
+      await submitTransaction(selectedTransaction.id);
+
+      setShowSubmitDialog(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting transaction:', error);
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while submitting the transaction'
+      );
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
+  const handleApproveTransaction = async () => {
+    if (!selectedTransaction) return;
+
+    try {
+      setActionInProgress(true);
+      setActionError(null);
+
+      await approveTransaction(selectedTransaction.id);
+
+      setShowApproveDialog(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error approving transaction:', error);
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while approving the transaction'
+      );
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
+  const handlePostTransaction = async () => {
+    if (!selectedTransaction) return;
+
+    try {
+      setActionInProgress(true);
+      setActionError(null);
+
+      await postTransaction(selectedTransaction.id);
+
+      setShowPostDialog(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error posting transaction:', error);
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while posting the transaction'
+      );
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
+  const handleEditTransaction = () => {
+    if (!selectedTransaction) return;
+    navigate(`/finances/transactions/${selectedTransaction.id}/edit`);
   };
   
   // Define columns for the DataGrid
@@ -278,7 +361,10 @@ function TransactionList() {
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0"
-              onClick={() => navigate(`/finances/transactions/${params.row.id}/edit`)}
+                onClick={() => {
+                  setSelectedTransaction(params.row);
+                  setShowEditDialog(true);
+                }}
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -305,7 +391,10 @@ function TransactionList() {
                 
                 {canEdit && (
                   <DropdownMenuItem
-                    onClick={() => navigate(`/finances/transactions/${params.row.id}/edit`)}
+                    onClick={() => {
+                      setSelectedTransaction(params.row);
+                      setShowEditDialog(true);
+                    }}
                     className="flex items-center"
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -315,9 +404,9 @@ function TransactionList() {
 
                 {status === 'draft' && (
                   <DropdownMenuItem
-                    onClick={async () => {
-                      await submitTransaction(params.row.id);
-                      window.location.reload();
+                    onClick={() => {
+                      setSelectedTransaction(params.row);
+                      setShowSubmitDialog(true);
                     }}
                     className="flex items-center"
                   >
@@ -328,9 +417,9 @@ function TransactionList() {
 
                 {status === 'submitted' && hasPermission('finance.approve') && (
                   <DropdownMenuItem
-                    onClick={async () => {
-                      await approveTransaction(params.row.id);
-                      window.location.reload();
+                    onClick={() => {
+                      setSelectedTransaction(params.row);
+                      setShowApproveDialog(true);
                     }}
                     className="flex items-center"
                   >
@@ -354,9 +443,9 @@ function TransactionList() {
 
                 {status === 'approved' && hasPermission('finance.approve') && (
                   <DropdownMenuItem
-                    onClick={async () => {
-                      await postTransaction(params.row.id);
-                      window.location.reload();
+                    onClick={() => {
+                      setSelectedTransaction(params.row);
+                      setShowPostDialog(true);
                     }}
                     className="flex items-center"
                   >
@@ -368,6 +457,7 @@ function TransactionList() {
                 {canEdit && (
                   <DropdownMenuItem
                     onClick={() => {
+                      setSelectedTransaction(params.row);
                       setTransactionToDelete(params.row.id);
                       setDeleteDialogOpen(true);
                     }}
@@ -507,11 +597,18 @@ function TransactionList() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle variant="danger">
-              Delete Transaction
-            </AlertDialogTitle>
+            <AlertDialogTitle variant="danger">Delete Transaction</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this transaction? This action cannot be undone.
+              {selectedTransaction && (
+                <div className="mt-4 border rounded-md p-3 text-left space-y-1">
+                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
+                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              )}
               {deleteError && (
                 <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start">
                   <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
@@ -521,7 +618,7 @@ function TransactionList() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel 
+            <AlertDialogCancel
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setTransactionToDelete(null);
@@ -545,6 +642,187 @@ function TransactionList() {
                 'Delete Transaction'
               )}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Submit Confirmation Dialog */}
+      <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="default">Submit Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to submit this transaction for approval?
+              {selectedTransaction && (
+                <div className="mt-4 border rounded-md p-3 text-left space-y-1">
+                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
+                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              )}
+              {actionError && (
+                <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start">
+                  <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>{actionError}</span>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowSubmitDialog(false);
+                setActionError(null);
+              }}
+              disabled={actionInProgress}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="default"
+              onClick={handleSubmitTransaction}
+              disabled={actionInProgress}
+            >
+              {actionInProgress ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Transaction'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Approve Confirmation Dialog */}
+      <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="success">Approve Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to approve this transaction?
+              {selectedTransaction && (
+                <div className="mt-4 border rounded-md p-3 text-left space-y-1">
+                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
+                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              )}
+              {actionError && (
+                <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start">
+                  <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>{actionError}</span>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowApproveDialog(false);
+                setActionError(null);
+              }}
+              disabled={actionInProgress}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="default"
+              onClick={handleApproveTransaction}
+              disabled={actionInProgress}
+            >
+              {actionInProgress ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                'Approve Transaction'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Post Confirmation Dialog */}
+      <AlertDialog open={showPostDialog} onOpenChange={setShowPostDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="success">Post Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to post this transaction? Once posted, it cannot be edited or deleted.
+              {selectedTransaction && (
+                <div className="mt-4 border rounded-md p-3 text-left space-y-1">
+                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
+                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              )}
+              {actionError && (
+                <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start">
+                  <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>{actionError}</span>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowPostDialog(false);
+                setActionError(null);
+              }}
+              disabled={actionInProgress}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="default"
+              onClick={handlePostTransaction}
+              disabled={actionInProgress}
+            >
+              {actionInProgress ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Posting...
+                </>
+              ) : (
+                'Post Transaction'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Confirmation Dialog */}
+      <AlertDialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="default">Edit Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to edit this transaction?
+              {selectedTransaction && (
+                <div className="mt-4 border rounded-md p-3 text-left space-y-1">
+                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
+                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowEditDialog(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEditTransaction}>Edit</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
