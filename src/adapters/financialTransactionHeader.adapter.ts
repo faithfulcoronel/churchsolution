@@ -261,7 +261,8 @@ export class FinancialTransactionHeaderAdapter
       `
       )
       .eq('tenant_id', tenantId)
-      .eq('header_id', headerId);
+      .eq('header_id', headerId)
+      .order('created_at', { ascending: true });
 
     if (error) throw error;
     return data || [];
