@@ -13,6 +13,7 @@ import { TYPES } from '../../../lib/types';
 import type { IFinanceDashboardRepository } from '../../../repositories/financeDashboard.repository';
 import { formatCurrency } from '../../../utils/currency';
 import { useCurrencyStore } from '../../../stores/currencyStore';
+import { FundBalances } from '../dashboard/FundBalances';
 
 interface Props {
   tenantId: string | null;
@@ -73,11 +74,6 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
         header: 'Fund',
       },
       {
-        accessorKey: 'fund_balance',
-        header: 'Fund Balance',
-        cell: ({ row }) => formatCurrency(row.original.fund_balance, currency),
-      },
-      {
         accessorKey: 'amount',
         header: 'Amount',
         cell: ({ row }) => formatCurrency(row.original.amount, currency),
@@ -89,7 +85,12 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
   const handlePrint = () => window.print();
   const handlePdf = async () => {
     const tenant = await tenantUtils.getCurrentTenant();
-    const blob = await generateExpenseSummaryPdf(tenant?.name || '', dateRange, records);
+    const blob = await generateExpenseSummaryPdf(
+      tenant?.name || '',
+      dateRange,
+      records,
+      fundBalances || [],
+    );
     const url = URL.createObjectURL(blob);
     const fileName = `expense-summary-${format(dateRange.from, 'yyyyMMdd')}-${format(dateRange.to, 'yyyyMMdd')}.pdf`;
     const link = document.createElement('a');
@@ -113,6 +114,7 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
         loading={isLoading}
         exportOptions={{ enabled: true, excel: true, pdf: false, fileName: 'expense-summary' }}
       />
+      <FundBalances title="Fund Balances Summary" funds={fundBalances} currency={currency} />
     </div>
   );
 }

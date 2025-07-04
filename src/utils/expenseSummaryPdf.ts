@@ -20,6 +20,7 @@ export async function generateExpenseSummaryPdf(
   tenantName: string,
   dateRange: { from: Date; to: Date },
   records: ExpenseSummaryRecord[],
+  fundBalances: { id: string; name: string; balance: number }[],
 ): Promise<Blob> {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -29,7 +30,7 @@ export async function generateExpenseSummaryPdf(
 
   const margin = 40;
   const rowHeight = 18;
-  const columnWidth = (width - margin * 2) / 5;
+  const columnWidth = (width - margin * 2) / 4;
 
   const pages: any[] = [];
   let page = pdfDoc.addPage([width, height]);
@@ -68,7 +69,7 @@ export async function generateExpenseSummaryPdf(
   };
 
   const drawTableHeader = () => {
-    const headers = ['Expense Description', 'Expense Category', 'Fund', 'Fund Balance', 'Amount'];
+    const headers = ['Expense Description', 'Expense Category', 'Fund', 'Amount'];
     headers.forEach((h, idx) => {
       page.drawText(h, { x: margin + idx * columnWidth, y, size: 10, font: boldFont });
     });
@@ -91,7 +92,6 @@ export async function generateExpenseSummaryPdf(
       r.description || '',
       r.category_name || '',
       r.fund_name || '',
-      formatAmount(r.fund_balance),
       formatAmount(r.amount),
     ];
     cells.forEach((c, idx) => {
@@ -105,16 +105,29 @@ export async function generateExpenseSummaryPdf(
   const total = records.reduce((sum, r) => sum + (r.amount || 0), 0);
   if (y - rowHeight < margin) addPage();
   page.drawText('Expense Grand Total', {
-    x: margin + 3 * columnWidth,
+    x: margin + 2 * columnWidth,
     y,
     size: 10,
     font: boldFont,
   });
   page.drawText(formatAmount(total), {
-    x: margin + 4 * columnWidth,
+    x: margin + 3 * columnWidth,
     y,
     size: 10,
     font: boldFont,
+  });
+
+  y -= rowHeight * 2;
+  if (y - rowHeight < margin) addPage();
+  page.drawText('Fund Balances Summary', { x: margin, y, size: 12, font: boldFont });
+  y -= rowHeight;
+  fundBalances.forEach(f => {
+    if (y - rowHeight < margin) addPage();
+    page.drawText(f.name, { x: margin, y, size: 10, font });
+    const bal = formatAmount(f.balance);
+    const tw = font.widthOfTextAtSize(bal, 10);
+    page.drawText(bal, { x: width - margin - tw, y, size: 10, font });
+    y -= rowHeight;
   });
 
   pages.forEach((p, idx) => {
