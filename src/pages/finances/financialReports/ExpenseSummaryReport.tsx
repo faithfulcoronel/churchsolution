@@ -56,6 +56,7 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
   const records = React.useMemo<ExpenseSummaryRecord[]>(
     () =>
       (txRes?.data || []).map(tx => ({
+        transaction_date: tx.transaction_date,
         description: tx.description,
         category_name: tx.categories?.name || '',
         fund_name: tx.funds?.name || '',
@@ -67,8 +68,24 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
 
   const columns = React.useMemo<ColumnDef<ExpenseSummaryRecord>[]>(
     () => [
+      {
+        accessorKey: 'transaction_date',
+        header: 'Date',
+        cell: ({ row }) =>
+          format(new Date(row.original.transaction_date), 'MMM dd, yyyy'),
+        size: 120,
+      },
       { accessorKey: 'description', header: 'Expense Description' },
-      { accessorKey: 'category_name', header: 'Expense Category' },
+      {
+        accessorKey: 'category_name',
+        header: 'Expense Category',
+        cell: info => (
+          <span className="whitespace-normal break-words">
+            {String(info.getValue() ?? '')}
+          </span>
+        ),
+        size: 200,
+      },
       {
         accessorKey: 'fund_name',
         header: 'Fund',
@@ -114,7 +131,11 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
         loading={isLoading}
         exportOptions={{ enabled: true, excel: true, pdf: false, fileName: 'expense-summary' }}
       />
-      <FundBalances title="Fund Balances Summary" funds={fundBalances} currency={currency} />
+      <FundBalances
+        title="Fund Balances Summary"
+        funds={(fundBalances || []).filter(f => f.balance !== 0)}
+        currency={currency}
+      />
     </div>
   );
 }
