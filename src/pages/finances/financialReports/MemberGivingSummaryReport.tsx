@@ -4,8 +4,9 @@ import { ColumnDef } from '@tanstack/react-table';
 import { DataGrid } from '../../../components/ui2/data-grid';
 import { Button } from '../../../components/ui2/button';
 import { Printer, Download } from 'lucide-react';
-import { useFinancialReports } from '../../../hooks/useFinancialReports';
-import { exportReportPdf } from '../../../utils';
+import { useContributionStatements } from '../../../hooks/useContributionStatements';
+import { generateMemberGivingSummaryPdf } from '../../../utils';
+import { tenantUtils } from '../../../utils/tenantUtils';
 
 interface Props {
   tenantId: string | null;
@@ -14,34 +15,50 @@ interface Props {
 }
 
 export default function MemberGivingSummaryReport({ tenantId, dateRange, memberId }: Props) {
-  const { useMemberGivingSummary } = useFinancialReports(tenantId);
+  const { useStatements } = useContributionStatements();
   const memberParam = Array.isArray(memberId)
     ? memberId.length === 1
       ? memberId[0]
       : undefined
     : memberId;
-  const { data, isLoading } = useMemberGivingSummary(
+  const { data: rawData = [], isLoading } = useStatements(
     format(dateRange.from, 'yyyy-MM-dd'),
     format(dateRange.to, 'yyyy-MM-dd'),
-    memberParam || undefined,
+  );
+  const data = React.useMemo(
+    () =>
+      memberParam ? rawData.filter(r => r.member_id === memberParam) : rawData,
+    [rawData, memberParam],
   );
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       { accessorKey: 'first_name', header: 'First Name' },
       { accessorKey: 'last_name', header: 'Last Name' },
+      { accessorKey: 'fund_name', header: 'Fund' },
       { accessorKey: 'total_amount', header: 'Total Amount' },
     ],
     [],
   );
 
   const handlePrint = () => window.print();
-  const handlePdf = () =>
-    exportReportPdf(
+  const handlePdf = async () => {
+    const tenant = await tenantUtils.getCurrentTenant();
+    const blob = await generateMemberGivingSummaryPdf(
+      tenant?.name || '',
+      dateRange,
       data,
-      columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
-      { title: 'Member Giving Summary', fileName: 'member-giving' },
     );
+    const url = URL.createObjectURL(blob);
+    const fileName = `member-giving-summary-${memberParam || 'all'}-${format(new Date(), 'yyyyMMdd')}.pdf`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-4">
