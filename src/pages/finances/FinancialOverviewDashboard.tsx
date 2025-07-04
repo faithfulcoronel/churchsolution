@@ -206,6 +206,14 @@ function FinancialOverviewDashboard() {
     };
   }, [filteredTrends, currency]);
 
+  const expenseBreakdownHeight = React.useMemo(() => {
+    const count =
+      (expenseCategoryChartData.options?.xaxis?.categories || []).length;
+    const perItem = 40;
+    const minHeight = 350;
+    return Math.max(minHeight, count * perItem);
+  }, [expenseCategoryChartData]);
+
   return (
     <Container className="space-y-6 max-w-[1200px]" size="xl">
       <div className="sm:flex sm:items-center">
@@ -414,7 +422,11 @@ function FinancialOverviewDashboard() {
           </div>
 
           {isLoading ? (
-            <ChartCardSkeleton title="Expense Breakdown" description="Current month expense categories" />
+            <ChartCardSkeleton
+              title="Expense Breakdown"
+              description="Current month expense categories"
+              height={expenseBreakdownHeight}
+            />
           ) : (
             <Card>
               <CardHeader>
@@ -428,7 +440,7 @@ function FinancialOverviewDashboard() {
                   type="bar"
                   series={expenseCategoryChartData.series}
                   options={expenseCategoryChartData.options}
-                  height={350}
+                  height={expenseBreakdownHeight}
                 />
               </CardContent>
             </Card>
