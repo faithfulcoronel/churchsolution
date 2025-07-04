@@ -51,6 +51,13 @@ function OfferingsDashboard() {
     filters: { transaction_type: { operator: 'eq', value: 'income' } },
     order: { column: 'transaction_date', ascending: false },
     pagination: { page: 1, pageSize: 5 },
+    relationships: [
+      {
+        table: 'financial_transaction_headers',
+        foreignKey: 'header_id',
+        select: ['id', 'status'],
+      },
+    ],
     enabled: !!tenant?.id,
   });
   const recentDonations = (recentResult?.data || []) as DonationItem[];
@@ -67,6 +74,13 @@ function OfferingsDashboard() {
     },
     order: { column: 'transaction_date', ascending: false },
     pagination: { page: 1, pageSize: 5 },
+    relationships: [
+      {
+        table: 'financial_transaction_headers',
+        foreignKey: 'header_id',
+        select: ['id', 'status'],
+      },
+    ],
     enabled: !!tenant?.id,
   });
   const historyDonations = (historyResult?.data || []) as DonationItem[];

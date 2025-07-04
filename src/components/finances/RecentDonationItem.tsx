@@ -1,13 +1,27 @@
-import React from "react";
-import { Card, CardContent } from "../ui2/card";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui2/avatar";
-import { useCurrencyStore } from "../../stores/currencyStore";
-import { formatCurrency } from "../../utils/currency";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '../ui2/card';
+import { Avatar, AvatarImage, AvatarFallback } from '../ui2/avatar';
+import { Button } from '../ui2/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '../ui2/dropdown-menu';
+import { Eye, Edit, MoreHorizontal, Check, X, Trash2 } from 'lucide-react';
+import { useCurrencyStore } from '../../stores/currencyStore';
+import { formatCurrency } from '../../utils/currency';
+import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
+import { useIncomeExpenseTransactionRepository } from '../../hooks/useIncomeExpenseTransactionRepository';
+import { usePermissions } from '../../hooks/usePermissions';
 
 export interface DonationItem {
   id: string;
   transaction_date: string;
   amount: number;
+  header_id: string | null;
+  header?: { status: string } | null;
   member?: {
     first_name: string;
     last_name: string;
@@ -26,7 +40,31 @@ interface Props {
 }
 
 export default function RecentDonationItem({ donation }: Props) {
+  const navigate = useNavigate();
   const { currency } = useCurrencyStore();
+  const {
+    approveTransaction,
+    postTransaction,
+    useUpdate,
+  } = useFinancialTransactionHeaderRepository();
+  const { useDelete } = useIncomeExpenseTransactionRepository();
+  const updateMutation = useUpdate();
+  const deleteMutation = useDelete();
+  const { hasPermission } = usePermissions();
+  const [deleting, setDeleting] = React.useState(false);
+
+  const canEdit = donation.header?.status === 'draft';
+
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      await deleteMutation.mutateAsync(donation.id);
+    } catch (err) {
+      console.error('Failed to delete donation', err);
+    } finally {
+      setDeleting(false);
+    }
+  };
   const name = donation.member
     ? `${donation.member.first_name} ${donation.member.last_name}`
     : "Anonymous";
@@ -72,13 +110,85 @@ export default function RecentDonationItem({ donation }: Props) {
             </p>
           </div>
         </div>
-        <div className="text-right">
-          <p className="font-semibold text-foreground">
-            {formatCurrency(donation.amount, currency)}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {donation.categories?.name || "Uncategorized"}
-          </p>
+        <div className="flex items-center gap-2">
+          <div className="text-right">
+            <p className="font-semibold text-foreground">
+              {formatCurrency(donation.amount, currency)}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {donation.categories?.name || 'Uncategorized'}
+            </p>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => navigate(`/finances/giving/${donation.header_id}`)}
+                className="flex items-center"
+              >
+                <Eye className="h-4 w-4 mr-2" /> View
+              </DropdownMenuItem>
+              {canEdit && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    navigate(`/finances/giving/${donation.header_id}/edit`)
+                  }
+                  className="flex items-center"
+                >
+                  <Edit className="h-4 w-4 mr-2" /> Edit
+                </DropdownMenuItem>
+              )}
+              {donation.header?.status === 'submitted' &&
+                hasPermission('finance.approve') && (
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await approveTransaction(donation.header_id!);
+                    }}
+                    className="flex items-center"
+                  >
+                    <Check className="h-4 w-4 mr-2" /> Approve
+                  </DropdownMenuItem>
+                )}
+              {donation.header?.status === 'submitted' &&
+                hasPermission('finance.approve') && (
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await updateMutation.mutateAsync({
+                        id: donation.header_id!,
+                        data: { status: 'draft' },
+                      });
+                    }}
+                    className="flex items-center"
+                  >
+                    <X className="h-4 w-4 mr-2" /> Reject
+                  </DropdownMenuItem>
+                )}
+              {donation.header?.status === 'approved' &&
+                hasPermission('finance.approve') && (
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await postTransaction(donation.header_id!);
+                    }}
+                    className="flex items-center"
+                  >
+                    <Check className="h-4 w-4 mr-2" /> Post
+                  </DropdownMenuItem>
+                )}
+              {canEdit && (
+                <DropdownMenuItem
+                  onClick={handleDelete}
+                  className="flex items-center text-destructive"
+                  disabled={deleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardContent>
     </Card>
