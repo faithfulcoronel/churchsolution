@@ -159,6 +159,38 @@ describe('IncomeExpenseTransactionService', () => {
     expect(mappingRepo.delete).toHaveBeenCalledWith('m1');
   });
 
+  it('deletes batches with all related records', async () => {
+    mappingRepo.getByHeaderId.mockResolvedValue([
+      {
+        id: 'm1',
+        transaction_id: 't1',
+        transaction_header_id: 'h1',
+        debit_transaction_id: 'd1',
+        credit_transaction_id: 'c1',
+      },
+      {
+        id: 'm2',
+        transaction_id: 't2',
+        transaction_header_id: 'h1',
+        debit_transaction_id: 'd2',
+        credit_transaction_id: 'c2',
+      },
+    ]);
+
+    await service.deleteBatch('h1');
+
+    expect(mappingRepo.getByHeaderId).toHaveBeenCalledWith('h1');
+    expect(ftRepo.delete).toHaveBeenCalledWith('d1');
+    expect(ftRepo.delete).toHaveBeenCalledWith('c1');
+    expect(ftRepo.delete).toHaveBeenCalledWith('d2');
+    expect(ftRepo.delete).toHaveBeenCalledWith('c2');
+    expect(ieRepo.delete).toHaveBeenCalledWith('t1');
+    expect(ieRepo.delete).toHaveBeenCalledWith('t2');
+    expect(mappingRepo.delete).toHaveBeenCalledWith('m1');
+    expect(mappingRepo.delete).toHaveBeenCalledWith('m2');
+    expect(headerRepo.delete).toHaveBeenCalledWith('h1');
+  });
+
   it('updates batches by updating existing lines and creating new ones', async () => {
     mappingRepo.getByHeaderId.mockResolvedValue([
       {

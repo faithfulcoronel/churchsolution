@@ -13,7 +13,7 @@ import { Eye, Edit, MoreHorizontal, Check, X, Trash2 } from 'lucide-react';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
 import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
-import { useIncomeExpenseTransactionRepository } from '../../hooks/useIncomeExpenseTransactionRepository';
+import { useIncomeExpenseService } from '../../hooks/useIncomeExpenseService';
 import { usePermissions } from '../../hooks/usePermissions';
 
 export interface DonationItem {
@@ -47,9 +47,8 @@ export default function RecentDonationItem({ donation }: Props) {
     postTransaction,
     useUpdate,
   } = useFinancialTransactionHeaderRepository();
-  const { useDelete } = useIncomeExpenseTransactionRepository();
+  const { deleteTransaction } = useIncomeExpenseService('income');
   const updateMutation = useUpdate();
-  const deleteMutation = useDelete();
   const { hasPermission } = usePermissions();
   const [deleting, setDeleting] = React.useState(false);
 
@@ -58,7 +57,7 @@ export default function RecentDonationItem({ donation }: Props) {
   const handleDelete = async () => {
     try {
       setDeleting(true);
-      await deleteMutation.mutateAsync(donation.id);
+      await deleteTransaction(donation.id);
     } catch (err) {
       console.error('Failed to delete donation', err);
     } finally {

@@ -38,6 +38,30 @@ export function useIncomeExpenseService(transactionType: TransactionType) {
     }
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => service.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
+      queryClient.invalidateQueries({ queryKey: ['income_expense_transactions'] });
+      NotificationService.showSuccess('Transaction deleted successfully');
+    },
+    onError: (error: Error) => {
+      NotificationService.showError(error.message, 5000);
+    }
+  });
+
+  const deleteBatchMutation = useMutation({
+    mutationFn: (id: string) => service.deleteBatch(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
+      queryClient.invalidateQueries({ queryKey: ['income_expense_transactions'] });
+      NotificationService.showSuccess('Transaction deleted successfully');
+    },
+    onError: (error: Error) => {
+      NotificationService.showError(error.message, 5000);
+    }
+  });
+
   const createBatch = async (
     header: Partial<FinancialTransactionHeader>,
     entries: IncomeExpenseEntryBase[],
@@ -49,5 +73,17 @@ export function useIncomeExpenseService(transactionType: TransactionType) {
     entries: IncomeExpenseEntryBase[],
   ) => updateMutation.mutateAsync({ id, header, entries });
 
-  return { createBatch, updateBatch, createMutation, updateMutation };
+  const deleteTransaction = async (id: string) => deleteMutation.mutateAsync(id);
+
+  const deleteBatch = async (id: string) => deleteBatchMutation.mutateAsync(id);
+  return {
+    createBatch,
+    updateBatch,
+    deleteTransaction,
+    deleteBatch,
+    createMutation,
+    updateMutation,
+    deleteMutation,
+    deleteBatchMutation,
+  };
 }

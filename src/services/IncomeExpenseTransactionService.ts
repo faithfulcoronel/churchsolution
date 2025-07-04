@@ -248,5 +248,22 @@ export class IncomeExpenseTransactionService {
     await this.ieRepo.delete(transactionId);
     await this.mappingRepo.delete(mapping.id);
   }
+
+  public async deleteBatch(headerId: string) {
+    const mappings = await this.mappingRepo.getByHeaderId(headerId);
+
+    for (const m of mappings) {
+      if (m.debit_transaction_id) {
+        await this.ftRepo.delete(m.debit_transaction_id);
+      }
+      if (m.credit_transaction_id) {
+        await this.ftRepo.delete(m.credit_transaction_id);
+      }
+      await this.ieRepo.delete(m.transaction_id);
+      await this.mappingRepo.delete(m.id);
+    }
+
+    await this.headerRepo.delete(headerId);
+  }
 }
 
