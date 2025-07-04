@@ -26,6 +26,13 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
+function generateAccountNumber(name: string): string {
+  const sanitized = name.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const prefix = sanitized.slice(0, 3);
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `${prefix}-${random}`;
+}
+
 function AccountAddEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -75,11 +82,22 @@ function AccountAddEdit() {
   useEffect(() => {
     if (isEditMode && accountData?.data?.[0]) {
       setFormData(accountData.data[0]);
-      
+
       // Set account type tab
       setActiveTab('basic');
     }
   }, [isEditMode, accountData]);
+
+  // Auto-generate account number when a new account name is provided
+  useEffect(() => {
+    if (!isEditMode && formData.name && formData.name.trim().length >= 3 && !formData.account_number) {
+      const generated = generateAccountNumber(formData.name);
+      setFormData(prev => ({
+        ...prev,
+        account_number: generated
+      }));
+    }
+  }, [formData.name, formData.account_number, isEditMode]);
   
   const handleInputChange = (field: keyof Account, value: any) => {
     setFormData(prev => ({
