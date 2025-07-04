@@ -1,22 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { tenantUtils } from '../utils/tenantUtils';
-import { format, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek } from 'date-fns';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  subMonths,
+  startOfWeek,
+  endOfWeek,
+} from 'date-fns';
 import { useCurrencyStore } from '../stores/currencyStore';
 
 export function useExpenseDashboardData(dateRange: { from: Date; to: Date }) {
   const { currency } = useCurrencyStore();
 
-  const fetchTotals = async (from: Date, to: Date) => {
+  const fetchSummary = async (from: Date, to: Date) => {
     const tenantId = await tenantUtils.getTenantId();
     if (!tenantId) return [] as any[];
-    const { data, error } = await supabase
-      .from('income_expense_transactions')
-      .select('amount')
-      .eq('tenant_id', tenantId)
-      .eq('transaction_type', 'expense')
-      .gte('transaction_date', format(from, 'yyyy-MM-dd'))
-      .lte('transaction_date', format(to, 'yyyy-MM-dd'));
+    const { data, error } = await supabase.rpc('report_category_financial', {
+      p_tenant_id: tenantId,
+      p_start_date: format(from, 'yyyy-MM-dd'),
+      p_end_date: format(to, 'yyyy-MM-dd'),
+      p_category_id: null,
+    });
     if (error) throw error;
     return data || [];
   };
@@ -56,19 +62,19 @@ export function useExpenseDashboardData(dateRange: { from: Date; to: Date }) {
   const weekStart = startOfWeek(dateRange.to, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(dateRange.to, { weekStartsOn: 0 });
 
-  const { data: monthTotals } = useQuery({
+  const { data: monthSummary } = useQuery({
     queryKey: ['expense-summary', monthStart, monthEnd],
-    queryFn: () => fetchTotals(monthStart, monthEnd),
+    queryFn: () => fetchSummary(monthStart, monthEnd),
   });
 
-  const { data: prevMonthTotals } = useQuery({
+  const { data: prevMonthSummary } = useQuery({
     queryKey: ['expense-summary-prev', prevMonthStart, prevMonthEnd],
-    queryFn: () => fetchTotals(prevMonthStart, prevMonthEnd),
+    queryFn: () => fetchSummary(prevMonthStart, prevMonthEnd),
   });
 
-  const { data: weekTotals } = useQuery({
+  const { data: weekSummary } = useQuery({
     queryKey: ['expense-summary-week', weekStart, weekEnd],
-    queryFn: () => fetchTotals(weekStart, weekEnd),
+    queryFn: () => fetchSummary(weekStart, weekEnd),
   });
 
   const { data: monthCount } = useQuery({
@@ -87,11 +93,11 @@ export function useExpenseDashboardData(dateRange: { from: Date; to: Date }) {
   });
 
   const sumAmount = (rows: any[] | undefined) =>
-    rows?.reduce((sum, r) => sum + Number(r.amount), 0) || 0;
+    rows?.reduce((sum, r) => sum + Number(r.expenses), 0) || 0;
 
-  const thisMonthTotal = sumAmount(monthTotals);
-  const lastMonthTotal = sumAmount(prevMonthTotals);
-  const thisWeekTotal = sumAmount(weekTotals);
+  const thisMonthTotal = sumAmount(monthSummary);
+  const lastMonthTotal = sumAmount(prevMonthSummary);
+  const thisWeekTotal = sumAmount(weekSummary);
 
   const monthChange =
     lastMonthTotal > 0 ? ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100 : 0;
