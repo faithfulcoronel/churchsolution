@@ -1,7 +1,6 @@
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { format } from 'date-fns';
 import { useCurrencyStore } from '../stores/currencyStore';
-import { formatCurrency } from './currency';
 
 export interface ExpenseSummaryRecord {
   description: string;
@@ -10,6 +9,12 @@ export interface ExpenseSummaryRecord {
   fund_balance: number;
   amount: number;
 }
+
+const formatAmount = (amount: number) =>
+  amount.toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 export async function generateExpenseSummaryPdf(
   tenantName: string,
@@ -86,8 +91,8 @@ export async function generateExpenseSummaryPdf(
       r.description || '',
       r.category_name || '',
       r.fund_name || '',
-      formatCurrency(r.fund_balance, currency),
-      formatCurrency(r.amount, currency),
+      formatAmount(r.fund_balance),
+      formatAmount(r.amount),
     ];
     cells.forEach((c, idx) => {
       page.drawText(String(c), { x: margin + idx * columnWidth, y, size: 11, font });
@@ -105,7 +110,7 @@ export async function generateExpenseSummaryPdf(
     size: 12,
     font: boldFont,
   });
-  page.drawText(formatCurrency(total, currency), {
+  page.drawText(formatAmount(total), {
     x: margin + 4 * columnWidth,
     y,
     size: 12,
