@@ -6,7 +6,7 @@ export interface MemberGivingRecord {
   first_name: string;
   last_name: string;
   fund_name: string | null;
-  total_amount: number;
+  amount: number;
 }
 
 export async function generateMemberGivingSummaryPdf(
@@ -75,8 +75,8 @@ export async function generateMemberGivingSummaryPdf(
       groups.set(key, { name, funds: [], total: 0 });
     }
     const g = groups.get(key)!;
-    g.funds.push({ fund: rec.fund_name || '', amount: rec.total_amount });
-    g.total += rec.total_amount;
+    g.funds.push({ fund: rec.fund_name || '', amount: rec.amount });
+    g.total += rec.amount;
   }
 
   const members = Array.from(groups.values()).sort((a, b) =>

@@ -34,10 +34,13 @@ BEGIN
     LEFT JOIN categories c ON ft.category_id = c.id
     LEFT JOIN funds f ON ft.fund_id = f.id
     LEFT JOIN financial_sources fs ON ft.source_id = fs.id
+    LEFT JOIN membership_status ms ON m.membership_status_id = ms.id
+    LEFT JOIN membership_type mt ON m.membership_type_id = mt.id
     WHERE m.tenant_id = get_user_tenant_id()
       AND ft.tenant_id = m.tenant_id
-      AND ft.date BETWEEN p_start_date AND p_end_date
-      AND (SELECT code FROM membership_status WHERE id = m.membership_status_id) IN ('active','donor')
+      AND  ft.date BETWEEN p_start_date AND p_end_date
+      AND LOWER(mt.name) = 'member'
+      AND LOWER(ms.name) = 'active'
       AND ft.type = 'income'
     ORDER BY ft.date, m.last_name, m.first_name;
 END;
