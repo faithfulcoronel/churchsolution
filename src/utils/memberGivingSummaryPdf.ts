@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb, PDFPage } from 'pdf-lib';
 import { format } from 'date-fns';
 
 export interface MemberGivingRecord {
@@ -8,6 +8,41 @@ export interface MemberGivingRecord {
   category_name: string | null;
   amount: number;
   member_id?: string;
+}
+
+function splitTextIntoLines(
+  text: string,
+  font: any,
+  size: number,
+  maxWidth: number,
+) {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = '';
+
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(next, size) <= maxWidth) {
+      current = next;
+    } else {
+      if (current) lines.push(current);
+      current = word;
+      while (font.widthOfTextAtSize(current, size) > maxWidth) {
+        let i = 1;
+        while (
+          i <= current.length &&
+          font.widthOfTextAtSize(current.substring(0, i), size) <= maxWidth
+        ) {
+          i++;
+        }
+        const part = current.substring(0, i - 1);
+        lines.push(part);
+        current = current.substring(i - 1);
+      }
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
 }
 
 export async function generateMemberGivingSummaryPdf(
@@ -21,48 +56,102 @@ export async function generateMemberGivingSummaryPdf(
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  let page = pdfDoc.addPage([width, height]);
-  const pages = [page];
   const margin = 40;
   const rowHeight = 18;
-  let y = height - margin;
 
-  const drawHeader = () => {
+  const drawHeader = (p: PDFPage) => {
+    let headerY = height - margin;
     const title = 'Member Giving Summary Report';
     const titleWidth = boldFont.widthOfTextAtSize(title, 16);
-    page.drawText(title, {
+    p.drawText(title, {
       x: width / 2 - titleWidth / 2,
-      y,
+      y: headerY,
       size: 16,
       font: boldFont,
     });
-    y -= rowHeight;
+    headerY -= rowHeight;
 
     const rangeText = `${format(dateRange.from, 'MMM dd, yyyy')} - ${format(
       dateRange.to,
       'MMM dd, yyyy',
     )}`;
-    page.drawText(churchName, { x: margin, y, size: 12, font });
+    p.drawText(churchName, { x: margin, y: headerY, size: 12, font });
     const rangeWidth = font.widthOfTextAtSize(rangeText, 12);
-    page.drawText(rangeText, { x: width - margin - rangeWidth, y, size: 12, font });
-    y -= 6;
-    page.drawLine({
-      start: { x: margin, y },
-      end: { x: width - margin, y },
+    p.drawText(rangeText, { x: width - margin - rangeWidth, y: headerY, size: 12, font });
+    headerY -= 6;
+    p.drawLine({
+      start: { x: margin, y: headerY },
+      end: { x: width - margin, y: headerY },
       thickness: 1,
       color: rgb(0, 0, 0),
     });
-    y -= rowHeight;
+    headerY -= rowHeight;
+    return headerY;
   };
 
-  const newPage = () => {
-    page = pdfDoc.addPage([width, height]);
-    pages.push(page);
-    y = height - margin;
-    drawHeader();
+  const drawTitlePage = (name: string): PDFPage => {
+    const p = pdfDoc.addPage([width, height]);
+    let ty = height - margin * 2;
+    const center = (text: string, size: number, useBold = false) => {
+      const f = useBold ? boldFont : font;
+      const tw = f.widthOfTextAtSize(text, size);
+      p.drawText(text, { x: width / 2 - tw / 2, y: ty, size, font: f });
+      ty -= rowHeight * 1.5;
+    };
+
+    center('Calaca Baptist Church of Batangas, Inc.', 18, true);
+    center('Member Giving Summary Report', 16, true);
+    const coverage = `${format(dateRange.from, 'MMMM d, yyyy')} \u2013 ${format(
+      dateRange.to,
+      'MMMM d, yyyy',
+    )}`;
+    center(coverage, 12);
+    center(name, 14, true);
+
+    const thanks =
+      'Thank you for your faithful stewardship and generosity in support of the ministry and mission of our church. May the Lord continue to bless you richly.';
+    for (const line of splitTextIntoLines(thanks, font, 12, width - margin * 2)) {
+      const lw = font.widthOfTextAtSize(line, 12);
+      p.drawText(line, {
+        x: width / 2 - lw / 2,
+        y: ty,
+        size: 12,
+        font,
+      });
+      ty -= rowHeight;
+    }
+    ty -= rowHeight * 0.5;
+    const note =
+      'This document serves as an official record of your giving and may be used for reference or accountability purposes.';
+    for (const line of splitTextIntoLines(note, font, 12, width - margin * 2)) {
+      const lw = font.widthOfTextAtSize(line, 12);
+      p.drawText(line, {
+        x: width / 2 - lw / 2,
+        y: ty,
+        size: 12,
+        font,
+      });
+      ty -= rowHeight;
+    }
+    return p;
   };
 
-  drawHeader();
+  const addFooters = (pages: PDFPage[]) => {
+    const generated = `Generated via StewardTrack on: ${format(new Date(), 'MMM dd, yyyy')}`;
+    const pageCount = pages.length;
+    pages.forEach((p, idx) => {
+      const footerY = margin / 2;
+      p.drawText(generated, { x: margin, y: footerY, size: 10, font });
+      const pageText = `Page ${idx + 1} of ${pageCount}`;
+      const pageWidth = font.widthOfTextAtSize(pageText, 10);
+      p.drawText(pageText, {
+        x: width - margin - pageWidth,
+        y: footerY,
+        size: 10,
+        font,
+      });
+    });
+  };
 
   // Filter records by the provided date range
   const filtered = records.filter(r => {
@@ -115,7 +204,20 @@ export async function generateMemberGivingSummaryPdf(
   );
 
   for (const member of members) {
-    if (y - rowHeight < margin) newPage();
+    const memberPages: PDFPage[] = [];
+
+    memberPages.push(drawTitlePage(member.name));
+
+    let page: PDFPage;
+    let y: number;
+    const newPage = () => {
+      page = pdfDoc.addPage([width, height]);
+      memberPages.push(page);
+      y = drawHeader(page);
+    };
+
+    newPage();
+
     page.drawText(member.name, { x: margin, y, size: 12, font: boldFont });
     y -= rowHeight;
 
@@ -211,22 +313,9 @@ export async function generateMemberGivingSummaryPdf(
       font: boldFont,
     });
     y -= rowHeight * 1.5;
-  }
 
-  const generated = `Generated on: ${format(new Date(), 'MMM dd, yyyy')}`;
-  const pageCount = pages.length;
-  pages.forEach((p, idx) => {
-    const footerY = margin / 2;
-    p.drawText(generated, { x: margin, y: footerY, size: 10, font });
-    const pageText = `Page ${idx + 1} of ${pageCount}`;
-    const pageWidth = font.widthOfTextAtSize(pageText, 10);
-    p.drawText(pageText, {
-      x: width - margin - pageWidth,
-      y: footerY,
-      size: 10,
-      font,
-    });
-  });
+    addFooters(memberPages.slice(1));
+  }
 
   const pdfBytes = await pdfDoc.save();
   return new Blob([pdfBytes], { type: 'application/pdf' });
