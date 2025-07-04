@@ -26,12 +26,13 @@ export function useContributionStatements() {
 
           if (error) throw error;
           return (data || []) as {
-            member_id: string;
+            entry_date: string;
             first_name: string;
             last_name: string;
-            fund_id: string | null;
+            category_name: string | null;
             fund_name: string | null;
-            total_amount: number;
+            source_name: string | null;
+            amount: number;
           }[];
         } catch (error) {
           console.error('Error fetching member statements:', error);
