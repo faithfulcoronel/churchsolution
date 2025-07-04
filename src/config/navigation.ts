@@ -11,6 +11,7 @@ import {
   LifeBuoy,
   Shield,
   LucideIcon,
+  Settings,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -99,6 +100,13 @@ export const navigation: NavItem[] = [
     href: '/administration',
     icon: Shield,
     permission: 'user.view',
-    section: 'Administration',
+    section: 'System',
+  },
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+    permission: 'user.view',
+    section: 'System',
   },
 ];
