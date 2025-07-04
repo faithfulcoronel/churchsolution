@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { format } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
 import { FinancialSource } from '../../../models/financialSource.model';
@@ -22,7 +23,12 @@ function FinancialSourceList() {
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
   
   // Get sources
-  const { data: result, isLoading, error } = useSourcesQuery();
+  const { data: result, isLoading, error } = useSourcesQuery({
+    relationships: [
+      { table: 'auth.users', foreignKey: 'created_by', alias: 'created_by_user', select: ['email'] },
+      { table: 'auth.users', foreignKey: 'updated_by', alias: 'updated_by_user', select: ['email'] },
+    ],
+  });
   const sources = result?.data || [];
   
   // Filter sources
@@ -102,7 +108,7 @@ function FinancialSourceList() {
       flex: 1,
       minWidth: 120,
       renderCell: (params) => (
-        <Badge 
+        <Badge
           variant={params.value ? 'success' : 'secondary'}
           className="flex items-center"
         >
@@ -119,6 +125,22 @@ function FinancialSourceList() {
           )}
         </Badge>
       ),
+    },
+    { field: 'created_by_user', headerName: 'Created By', flex: 1.5, minWidth: 150, valueGetter: params => params.row.created_by_user?.email },
+    { field: 'updated_by_user', headerName: 'Modified By', flex: 1.5, minWidth: 150, valueGetter: params => params.row.updated_by_user?.email },
+    {
+      field: 'created_at',
+      headerName: 'Created Date',
+      flex: 1,
+      minWidth: 150,
+      valueFormatter: params => params.value ? format(new Date(params.value as string), 'MMM d, yyyy') : '',
+    },
+    {
+      field: 'updated_at',
+      headerName: 'Modified Date',
+      flex: 1,
+      minWidth: 150,
+      valueFormatter: params => params.value ? format(new Date(params.value as string), 'MMM d, yyyy') : '',
     },
   ];
 

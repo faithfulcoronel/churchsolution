@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { format } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
 import { useQuery as useReactQuery } from '@tanstack/react-query';
@@ -98,6 +99,20 @@ function MemberList() {
       ascending: !sorting[0].desc,
     } : undefined,
     filters,
+    relationships: [
+      {
+        table: 'auth.users',
+        foreignKey: 'created_by',
+        alias: 'created_by_user',
+        select: ['email'],
+      },
+      {
+        table: 'auth.users',
+        foreignKey: 'updated_by',
+        alias: 'updated_by_user',
+        select: ['email'],
+      },
+    ],
   });
 
   const deleteMemberMutation = useDelete();
@@ -205,6 +220,32 @@ function MemberList() {
             {value ? new Date(value).toLocaleDateString() : ''}
           </div>
         );
+      },
+    },
+    {
+      id: 'created_by_user',
+      header: 'Created By',
+      accessorFn: row => row.created_by_user?.email,
+    },
+    {
+      id: 'updated_by_user',
+      header: 'Modified By',
+      accessorFn: row => row.updated_by_user?.email,
+    },
+    {
+      accessorKey: 'created_at',
+      header: 'Created Date',
+      cell: ({ getValue }) => {
+        const value = getValue<string | null>();
+        return value ? format(new Date(value), 'MMM d, yyyy') : '';
+      },
+    },
+    {
+      accessorKey: 'updated_at',
+      header: 'Modified Date',
+      cell: ({ getValue }) => {
+        const value = getValue<string | null>();
+        return value ? format(new Date(value), 'MMM d, yyyy') : '';
       },
     },
   ];
