@@ -120,7 +120,7 @@ export default function SingleDonationDialog({ open, onOpenChange }: SingleDonat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[90vw] sm:w-full sm:max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Record Donation</DialogTitle>
         </DialogHeader>
