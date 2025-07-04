@@ -5,6 +5,8 @@ import { useFinanceDashboardData } from "../../hooks/useFinanceDashboardData";
 import { useCurrencyStore } from "../../stores/currencyStore";
 import { formatCurrency } from "../../utils/currency";
 import MetricCard from "../../components/dashboard/MetricCard";
+import { MetricCardSkeleton } from "../../components/dashboard/MetricCardSkeleton";
+import { ChartCardSkeleton } from "../../components/dashboard/ChartCardSkeleton";
 import { Container } from "../../components/ui2/container";
 import {
   Card,
@@ -30,6 +32,7 @@ import {
 } from "../../components/ui2/tabs";
 import { Input } from "../../components/ui2/input";
 import RecentTransactionItem from "../../components/finances/RecentFinancialTransactionItem";
+import { RecentFinancialTransactionItemSkeleton } from "../../components/finances/RecentFinancialTransactionItemSkeleton";
 import { useFinancialTransactionHeaderRepository } from "../../hooks/useFinancialTransactionHeaderRepository";
 import {
   TrendingUp,
@@ -37,7 +40,6 @@ import {
   Banknote,
   Percent,
   Settings,
-  Loader2,
   Search,
   ChevronRight,
 } from "lucide-react";
@@ -189,14 +191,6 @@ function FinancialOverviewDashboard() {
     };
   }, [filteredTrends, currency]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <Container className="space-y-6 max-w-[1200px]" size="xl">
       <div className="sm:flex sm:items-center">
@@ -257,38 +251,46 @@ function FinancialOverviewDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          label="Total Income"
-          value={formatCurrency(totalIncome, currency)}
-          icon={TrendingUp}
-          iconClassName="text-success"
-          subtext={`${incomeChange.toFixed(1)}% from last month`}
-          subtextClassName={incomeChangeColor}
-        />
-        <MetricCard
-          label="Total Expenses"
-          value={formatCurrency(totalExpenses, currency)}
-          icon={TrendingDown}
-          iconClassName="text-destructive"
-          subtext={`${expenseChange.toFixed(1)}% from last month`}
-          subtextClassName={expenseChangeColor}
-        />
-        <MetricCard
-          label="Net Income"
-          value={formatCurrency(netIncome, currency)}
-          icon={Banknote}
-          iconClassName={netIncome >= 0 ? 'text-success' : 'text-destructive'}
-          subtext={`${netChange.toFixed(1)}% from last month`}
-          subtextClassName={netChangeColor}
-        />
-        <MetricCard
-          label="Expense Ratio"
-          value={`${expenseRatio.toFixed(1)}%`}
-          icon={Percent}
-          iconClassName="text-warning"
-          subtext={getExpenseRating(expenseRatio)}
-          subtextClassName="text-warning/70"
-        />
+        {isLoading ? (
+          Array(4)
+            .fill(0)
+            .map((_, i) => <MetricCardSkeleton key={i} />)
+        ) : (
+          <>
+            <MetricCard
+              label="Total Income"
+              value={formatCurrency(totalIncome, currency)}
+              icon={TrendingUp}
+              iconClassName="text-success"
+              subtext={`${incomeChange.toFixed(1)}% from last month`}
+              subtextClassName={incomeChangeColor}
+            />
+            <MetricCard
+              label="Total Expenses"
+              value={formatCurrency(totalExpenses, currency)}
+              icon={TrendingDown}
+              iconClassName="text-destructive"
+              subtext={`${expenseChange.toFixed(1)}% from last month`}
+              subtextClassName={expenseChangeColor}
+            />
+            <MetricCard
+              label="Net Income"
+              value={formatCurrency(netIncome, currency)}
+              icon={Banknote}
+              iconClassName={netIncome >= 0 ? 'text-success' : 'text-destructive'}
+              subtext={`${netChange.toFixed(1)}% from last month`}
+              subtextClassName={netChangeColor}
+            />
+            <MetricCard
+              label="Expense Ratio"
+              value={`${expenseRatio.toFixed(1)}%`}
+              icon={Percent}
+              iconClassName="text-warning"
+              subtext={getExpenseRating(expenseRatio)}
+              subtextClassName="text-warning/70"
+            />
+          </>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -309,84 +311,106 @@ function FinancialOverviewDashboard() {
 
         <TabsContent value="overview" className="mt-4 space-y-6">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {isLoading ? (
+              <>
+                <ChartCardSkeleton title="Monthly financial trends" description="Income, expense, and net income over time" />
+                <ChartCardSkeleton title="Income Distribution" description="Breakdown of income categories" />
+              </>
+            ) : (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Monthly financial trends</CardTitle>
+                    <CardDescription>
+                      Income, expense, and net income over time
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Charts
+                      type="area"
+                      series={trendsChartData.series}
+                      options={trendsChartData.options}
+                      height={350}
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Income Distribution</CardTitle>
+                    <CardDescription>
+                      Breakdown of income categories
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Charts
+                      type="donut"
+                      series={incomeCategoryChartData.series}
+                      options={incomeCategoryChartData.options}
+                      height={350}
+                    />
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
+
+          {isLoading ? (
+            <ChartCardSkeleton title="Expense Breakdown" description="Current month expense categories" />
+          ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Monthly financial trends</CardTitle>
+                <CardTitle>Expense Breakdown</CardTitle>
                 <CardDescription>
-                  Income, expense, and net income over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Charts
-                  type="area"
-                  series={trendsChartData.series}
-                  options={trendsChartData.options}
-                  height={350}
-                />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Income Distribution</CardTitle>
-                <CardDescription>
-                  Breakdown of income categories
+                  Current month expense categories
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Charts
                   type="donut"
-                  series={incomeCategoryChartData.series}
-                  options={incomeCategoryChartData.options}
+                  series={expenseCategoryChartData.series}
+                  options={expenseCategoryChartData.options}
                   height={350}
                 />
               </CardContent>
             </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Expense Breakdown</CardTitle>
-              <CardDescription>
-                Current month expense categories
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Charts
-                type="donut"
-                series={expenseCategoryChartData.series}
-                options={expenseCategoryChartData.options}
-                height={350}
-              />
-            </CardContent>
-          </Card>
+          )}
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Financial Source Balances</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Charts
-                  type="bar"
-                  series={sourceBalanceChartData.series}
-                  options={sourceBalanceChartData.options}
-                  height={350}
-                />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Fund Balances</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Charts
-                  type="bar"
-                  series={fundBalanceChartData.series}
-                  options={fundBalanceChartData.options}
-                  height={350}
-                />
-              </CardContent>
-            </Card>
+            {isLoading ? (
+              <>
+                <ChartCardSkeleton title="Financial Source Balances" />
+                <ChartCardSkeleton title="Fund Balances" />
+              </>
+            ) : (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Financial Source Balances</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Charts
+                      type="bar"
+                      series={sourceBalanceChartData.series}
+                      options={sourceBalanceChartData.options}
+                      height={350}
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Fund Balances</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Charts
+                      type="bar"
+                      series={fundBalanceChartData.series}
+                      options={fundBalanceChartData.options}
+                      height={350}
+                    />
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </div>
         </TabsContent>
 
@@ -413,9 +437,11 @@ function FinancialOverviewDashboard() {
             </CardHeader>
             <CardContent className="space-y-2">
               {transactionsLoading ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
+                Array(3)
+                  .fill(0)
+                  .map((_, i) => (
+                    <RecentFinancialTransactionItemSkeleton key={i} />
+                  ))
               ) : filteredTransactions.length > 0 ? (
                 filteredTransactions.map((t) => (
                   <RecentTransactionItem key={t.id} transaction={t} />
