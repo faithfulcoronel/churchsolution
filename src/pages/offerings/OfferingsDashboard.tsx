@@ -15,7 +15,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/t
 import { Input } from '../../components/ui2/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../components/ui2/dropdown-menu';
 import { Button } from '../../components/ui2/button';
-import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
 import {
   Users,
   Calendar,
@@ -34,10 +33,10 @@ import { tenantUtils } from '../../utils/tenantUtils';
 function OfferingsDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState('overview');
-  const [dateRange, setDateRange] = React.useState<{ from: Date; to: Date }>({
-    from: startOfMonth(new Date()),
-    to: new Date(),
-  });
+  const dateRange = React.useMemo(
+    () => ({ from: startOfMonth(new Date()), to: new Date() }),
+    []
+  );
 
   const { data: tenant } = useQuery({
     queryKey: ['current-tenant'],
@@ -140,15 +139,6 @@ function OfferingsDashboard() {
           <p className="mt-2 text-sm text-muted-foreground">Track and manage church donations and offerings</p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-2 items-center">
-          <DateRangePickerField
-            value={{ from: dateRange.from, to: dateRange.to }}
-            onChange={(range) => {
-              if (range.from && range.to) {
-                setDateRange({ from: range.from, to: range.to });
-              }
-            }}
-            showCompactInput
-          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
