@@ -7,10 +7,10 @@ export interface MemberOfferingRecord {
 }
 
 function formatAmount(amount: number) {
-  return `\u20B1${amount.toLocaleString('en-PH', {
+  return amount.toLocaleString('en-PH', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}`;
+  });
 }
 
 export async function generateMemberOfferingSummaryPdf(
@@ -28,7 +28,7 @@ export async function generateMemberOfferingSummaryPdf(
   const margin = 72; // 1 inch
   const rowHeight = 18;
   // Additional offset to align text within table cells (1.8 cm in points)
-  const textShift = 51;
+  const textShift = 0;
   const tableWidth = width - margin * 2;
 
   const categories = Array.from(
