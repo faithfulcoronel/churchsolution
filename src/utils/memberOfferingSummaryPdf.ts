@@ -7,10 +7,10 @@ export interface MemberOfferingRecord {
 }
 
 function formatAmount(amount: number) {
-  return amount.toLocaleString('en-PH', {
+  return `\u20B1${amount.toLocaleString('en-PH', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  });
+  })}`;
 }
 
 export async function generateMemberOfferingSummaryPdf(
@@ -21,8 +21,9 @@ export async function generateMemberOfferingSummaryPdf(
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const width = 595.28;
-  const height = 841.89;
+  // Landscape A4 dimensions
+  const width = 841.89;
+  const height = 595.28;
 
   const margin = 72; // 1 inch
   const rowHeight = 18;
@@ -46,14 +47,18 @@ export async function generateMemberOfferingSummaryPdf(
     page.drawText(title, { x: width / 2 - tw / 2, y: ty, size: 16, font: boldFont });
     ty -= rowHeight;
 
-    page.drawText(tenantName, { x: margin, y: ty, size: 12, font });
+    const churchW = font.widthOfTextAtSize(tenantName, 12);
+    page.drawText(tenantName, { x: width / 2 - churchW / 2, y: ty, size: 12, font });
+    ty -= rowHeight;
+
     const dateStr = format(sundayDate, 'MMMM d, yyyy');
-    const dw = font.widthOfTextAtSize(dateStr, 12);
-    page.drawText(dateStr, { x: width - margin - dw, y: ty, size: 12, font });
+    const dateW = font.widthOfTextAtSize(dateStr, 12);
+    page.drawText(dateStr, { x: width / 2 - dateW / 2, y: ty, size: 12, font });
     ty -= rowHeight;
 
     const genText = `Generated via StewardTrack on: ${format(new Date(), 'MMMM d, yyyy')}`;
-    page.drawText(genText, { x: margin, y: ty, size: 10, font });
+    const genW = font.widthOfTextAtSize(genText, 10);
+    page.drawText(genText, { x: width - margin - genW, y: ty, size: 10, font });
     ty -= 6;
     page.drawLine({
       start: { x: margin, y: ty },
