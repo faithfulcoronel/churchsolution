@@ -212,12 +212,12 @@ export async function generateChurchFinancialStatementPdf(
     drawFundHeader();
   };
   drawFundHeader();
-  data.funds
-    .filter(f =>
-      f.opening_balance !== 0 || f.income !== 0 || f.expenses !== 0 || f.ending_balance !== 0,
-    )
-    .forEach(f => {
-      if (y - rowHeight < margin) newFundPage();
+    data.funds
+      .filter(f =>
+        f.opening_balance !== 0 || f.income !== 0 || f.expenses !== 0 || f.ending_balance !== 0,
+      )
+      .forEach(f => {
+        if (y - rowHeight < margin) newFundPage();
       const vals = [
         f.fund_name,
         formatAmount(f.opening_balance),
@@ -233,6 +233,9 @@ export async function generateChurchFinancialStatementPdf(
       });
       y -= rowHeight;
     });
+
+  y -= rowHeight;
+  if (y - rowHeight < margin) newFundPage();
 
   const totals = data.funds
     .filter(f =>
