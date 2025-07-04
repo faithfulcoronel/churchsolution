@@ -18,3 +18,9 @@ export interface FundBalance {
   name: string;
   balance: number;
 }
+
+export interface SourceBalance {
+  id: string;
+  name: string;
+  balance: number;
+}
