@@ -64,6 +64,7 @@ export async function generateMemberGivingSummaryPdf(
 
   const margin = 40;
   const rowHeight = 18;
+  const rowPadding = 2;
 
   const drawHeader = (p: PDFPage) => {
     let headerY = height - margin;
@@ -252,9 +253,9 @@ export async function generateMemberGivingSummaryPdf(
           rowIdx % 2 === 1 ? rgb(249 / 255, 249 / 255, 249 / 255) : rgb(1, 1, 1);
         page.drawRectangle({
           x: margin,
-          y: y - rowHeight + 4,
+          y: y - rowHeight + rowPadding,
           width: width - margin * 2,
-          height: rowHeight,
+          height: rowHeight - rowPadding * 2,
           color: fill,
         });
         page.drawText(cat, { x: margin + 8, y, size: 11, font });
@@ -275,9 +276,9 @@ export async function generateMemberGivingSummaryPdf(
         rowIdx % 2 === 1 ? rgb(249 / 255, 249 / 255, 249 / 255) : rgb(1, 1, 1);
       page.drawRectangle({
         x: margin,
-        y: y - rowHeight + 4,
+        y: y - rowHeight + rowPadding,
         width: width - margin * 2,
-        height: rowHeight,
+        height: rowHeight - rowPadding * 2,
         color: fill,
       });
       const subLabel = 'Sub Total';
@@ -322,9 +323,9 @@ export async function generateMemberGivingSummaryPdf(
         const fill = rowIdx % 2 === 1 ? rgb(249 / 255, 249 / 255, 249 / 255) : rgb(1, 1, 1);
         page.drawRectangle({
           x: margin,
-          y: y - rowHeight + 4,
+          y: y - rowHeight + rowPadding,
           width: width - margin * 2,
-          height: rowHeight,
+          height: rowHeight - rowPadding * 2,
           color: fill,
         });
         page.drawText(cat, { x: margin + 8, y, size: 11, font });
@@ -350,9 +351,9 @@ export async function generateMemberGivingSummaryPdf(
       const fill = rowIdx % 2 === 1 ? rgb(249 / 255, 249 / 255, 249 / 255) : rgb(1, 1, 1);
       page.drawRectangle({
         x: margin,
-        y: y - rowHeight + 4,
+        y: y - rowHeight + rowPadding,
         width: width - margin * 2,
-        height: rowHeight,
+        height: rowHeight - rowPadding * 2,
         color: fill,
       });
       page.drawText('Grand Total', { x: margin + 8, y, size: 11, font: boldFont });
