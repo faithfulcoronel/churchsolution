@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { useFinanceDashboardData } from '../../hooks/useFinanceDashboardData';
 import { useCurrencyStore } from '../../stores/currencyStore';
@@ -17,6 +17,10 @@ import { Charts } from '../../components/ui2/charts';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../components/ui2/dropdown-menu';
 import { Button } from '../../components/ui2/button';
 import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
+import { Input } from '../../components/ui2/input';
+import RecentTransactionItem from '../../components/finances/RecentTransactionItem';
+import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
 import {
   TrendingUp,
   TrendingDown,
@@ -24,6 +28,8 @@ import {
   Percent,
   Settings,
   Loader2,
+  Search,
+  ChevronRight,
 } from 'lucide-react';
 
 function getExpenseRating(ratio: number) {
@@ -37,12 +43,31 @@ function getExpenseRating(ratio: number) {
 function FinancialOverviewDashboard() {
   const navigate = useNavigate();
   const { currency } = useCurrencyStore();
+  const [activeTab, setActiveTab] = React.useState('overview');
+  const [transactionSearch, setTransactionSearch] = React.useState('');
   const {
     monthlyTrends,
     incomeCategoryChartData,
     expenseCategoryChartData,
     isLoading,
   } = useFinanceDashboardData();
+  const { useQuery: useTransactionQuery } = useFinancialTransactionHeaderRepository();
+  const { data: transactionResult, isLoading: transactionsLoading } = useTransactionQuery({
+    order: { column: 'transaction_date', ascending: false },
+    pagination: { page: 1, pageSize: 20 },
+    relationships: [
+      { table: 'financial_sources', foreignKey: 'source_id', select: ['id', 'name', 'source_type'] },
+    ],
+  });
+  const transactions = transactionResult?.data || [];
+  const filteredTransactions = React.useMemo(() => {
+    const term = transactionSearch.toLowerCase();
+    return transactions.filter(t =>
+      t.transaction_number.toLowerCase().includes(term) ||
+      (t.description || '').toLowerCase().includes(term) ||
+      (t.reference || '').toLowerCase().includes(term)
+    );
+  }, [transactions, transactionSearch]);
 
   const initialFrom = React.useMemo(() => {
     const d = new Date();
@@ -193,36 +218,85 @@ function FinancialOverviewDashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Monthly financial trends</CardTitle>
-            <CardDescription>Income, expense, and net income over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Charts type="area" series={trendsChartData.series} options={trendsChartData.options} height={350} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Income Distribution</CardTitle>
-            <CardDescription>Breakdown of income categories</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Charts type="donut" series={incomeCategoryChartData.series} options={incomeCategoryChartData.options} height={350} />
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full grid grid-cols-2 bg-muted p-1 rounded-full">
+          <TabsTrigger value="overview" className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
+          <TabsTrigger value="transactions" className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">All Transactions</TabsTrigger>
+        </TabsList>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Expense Breakdown</CardTitle>
-          <CardDescription>Current month expense categories</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Charts type="donut" series={expenseCategoryChartData.series} options={expenseCategoryChartData.options} height={350} />
-        </CardContent>
-      </Card>
+        <TabsContent value="overview" className="mt-4 space-y-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Monthly financial trends</CardTitle>
+                <CardDescription>Income, expense, and net income over time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Charts type="area" series={trendsChartData.series} options={trendsChartData.options} height={350} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Income Distribution</CardTitle>
+                <CardDescription>Breakdown of income categories</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Charts type="donut" series={incomeCategoryChartData.series} options={incomeCategoryChartData.options} height={350} />
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Expense Breakdown</CardTitle>
+              <CardDescription>Current month expense categories</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Charts type="donut" series={expenseCategoryChartData.series} options={expenseCategoryChartData.options} height={350} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="transactions" className="mt-4">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full space-y-4 md:space-y-0">
+                <div className="text-gray-900 dark:text-gray-100">
+                  <CardTitle>Transaction Records</CardTitle>
+                  <CardDescription>Search and review transactions</CardDescription>
+                </div>
+                <div className="w-full md:w-auto">
+                  <Input
+                    value={transactionSearch}
+                    onChange={(e) => setTransactionSearch(e.target.value)}
+                    placeholder="Search transactions..."
+                    icon={<Search className="h-4 w-4" />}
+                    className="w-full md:w-64"
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {transactionsLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : filteredTransactions.length > 0 ? (
+                filteredTransactions.map(t => (
+                  <RecentTransactionItem key={t.id} transaction={t} />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No transactions found.</p>
+              )}
+              <div className="pt-4">
+                <Link to="/finances/transactions" className="text-sm text-primary font-medium flex items-center hover:underline">
+                  View all transactions <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </Container>
   );
 }
