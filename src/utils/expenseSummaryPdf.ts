@@ -1,8 +1,37 @@
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { format } from 'date-fns';
-import { useCurrencyStore } from '../stores/currencyStore';
+
+function splitTextIntoLines(text: string, font: any, size: number, maxWidth: number) {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = '';
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(next, size) <= maxWidth) {
+      current = next;
+    } else {
+      if (current) lines.push(current);
+      current = word;
+      while (font.widthOfTextAtSize(current, size) > maxWidth) {
+        let i = 1;
+        while (
+          i <= current.length &&
+          font.widthOfTextAtSize(current.substring(0, i), size) <= maxWidth
+        ) {
+          i++;
+        }
+        const part = current.substring(0, i - 1);
+        lines.push(part);
+        current = current.substring(i - 1);
+      }
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
 
 export interface ExpenseSummaryRecord {
+  transaction_date: string | Date;
   description: string;
   category_name: string | null;
   fund_name: string | null;
@@ -30,14 +59,19 @@ export async function generateExpenseSummaryPdf(
 
   const margin = 40;
   const rowHeight = 18;
-  const columnWidth = (width - margin * 2) / 4;
+  const tableWidth = width - margin * 2;
+  const columnWidths = [
+    tableWidth * 0.25,
+    tableWidth * 0.35,
+    tableWidth * 0.2,
+    tableWidth * 0.2,
+  ];
 
   const pages: any[] = [];
   let page = pdfDoc.addPage([width, height]);
   pages.push(page);
   let y = height - margin;
 
-  const { currency } = useCurrencyStore.getState();
 
   const headerText = 'Expense Summary Report';
 
@@ -71,7 +105,7 @@ export async function generateExpenseSummaryPdf(
   const drawTableHeader = () => {
     const headers = ['Expense Description', 'Expense Category', 'Fund', 'Amount'];
     headers.forEach((h, idx) => {
-      page.drawText(h, { x: margin + idx * columnWidth, y, size: 10, font: boldFont });
+      page.drawText(h, { x: margin + columnWidths.slice(0, idx).reduce((a, b) => a + b, 0), y, size: 10, font: boldFont });
     });
     y -= rowHeight;
   };
@@ -87,31 +121,56 @@ export async function generateExpenseSummaryPdf(
   drawTableHeader();
 
   const drawRow = (r: ExpenseSummaryRecord) => {
-    if (y - rowHeight < margin) addPage();
-    const cells = [
-      r.description || '',
-      r.category_name || '',
-      r.fund_name || '',
-      formatAmount(r.amount),
+    const cellLines = [
+      splitTextIntoLines(r.description || '', font, 8, columnWidths[0] - 2),
+      splitTextIntoLines(r.category_name || '', font, 8, columnWidths[1] - 2),
+      splitTextIntoLines(r.fund_name || '', font, 8, columnWidths[2] - 2),
+      [formatAmount(r.amount)],
     ];
-    cells.forEach((c, idx) => {
-      page.drawText(String(c), { x: margin + idx * columnWidth, y, size: 8, font });
+    const lines = Math.max(...cellLines.map(l => l.length));
+    if (y - rowHeight * lines < margin) addPage();
+    cellLines.forEach((linesArr, idx) => {
+      linesArr.forEach((line, lidx) => {
+        page.drawText(line, {
+          x: margin + columnWidths.slice(0, idx).reduce((a, b) => a + b, 0),
+          y: y - lidx * rowHeight,
+          size: 8,
+          font,
+        });
+      });
     });
-    y -= rowHeight;
+    y -= rowHeight * lines;
   };
 
-  records.forEach(rec => drawRow(rec));
+  const grouped = new Map<string, ExpenseSummaryRecord[]>();
+  records.forEach(r => {
+    const key = typeof r.transaction_date === 'string'
+      ? r.transaction_date.substring(0, 10)
+      : format(r.transaction_date, 'yyyy-MM-dd');
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key)!.push(r);
+  });
+
+  Array.from(grouped.entries())
+    .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+    .forEach(([dateKey, recs]) => {
+      if (y - rowHeight < margin) addPage();
+      const dateStr = format(new Date(dateKey), 'MMMM dd, yyyy');
+      page.drawText(dateStr, { x: margin, y, size: 10, font: boldFont });
+      y -= rowHeight;
+      recs.forEach(r => drawRow(r));
+    });
 
   const total = records.reduce((sum, r) => sum + (r.amount || 0), 0);
   if (y - rowHeight < margin) addPage();
   page.drawText('Expense Grand Total', {
-    x: margin + 2 * columnWidth,
+    x: margin + columnWidths[0] + columnWidths[1],
     y,
     size: 10,
     font: boldFont,
   });
   page.drawText(formatAmount(total), {
-    x: margin + 3 * columnWidth,
+    x: margin + columnWidths[0] + columnWidths[1] + columnWidths[2],
     y,
     size: 10,
     font: boldFont,
@@ -121,14 +180,16 @@ export async function generateExpenseSummaryPdf(
   if (y - rowHeight < margin) addPage();
   page.drawText('Fund Balances Summary', { x: margin, y, size: 12, font: boldFont });
   y -= rowHeight;
-  fundBalances.forEach(f => {
-    if (y - rowHeight < margin) addPage();
-    page.drawText(f.name, { x: margin, y, size: 10, font });
-    const bal = formatAmount(f.balance);
-    const tw = font.widthOfTextAtSize(bal, 10);
-    page.drawText(bal, { x: width - margin - tw, y, size: 10, font });
-    y -= rowHeight;
-  });
+  fundBalances
+    .filter(f => f.balance !== 0)
+    .forEach(f => {
+      if (y - rowHeight < margin) addPage();
+      page.drawText(f.name, { x: margin, y, size: 10, font });
+      const bal = formatAmount(f.balance);
+      const tw = font.widthOfTextAtSize(bal, 10);
+      page.drawText(bal, { x: width - margin - tw, y, size: 10, font });
+      y -= rowHeight;
+    });
 
   pages.forEach((p, idx) => {
     const text = `Page ${idx + 1} of ${pages.length}`;
