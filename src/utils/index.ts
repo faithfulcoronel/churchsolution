@@ -18,3 +18,4 @@ export * from './accounting';
 export * from './reportPdf';
 export * from './memberGivingSummaryPdf';
 export * from './memberOfferingSummaryPdf';
+export * from './expenseSummaryPdf';

@@ -83,6 +83,9 @@ and show the total amount at the bottom.
 The `FinancialReportsPage` component now generates the PDF directly in the
 browser using [pdf-lib](https://pdf-lib.js.org/) when you click the **PDF** button.
 
+The new **Expense Summary** report lists expenses with their fund balances and
+can also be exported to PDF.
+
 ## Changelog
 
 - Dates are now stored and parsed using local `yyyy-MM-dd` format instead of ISO strings.
