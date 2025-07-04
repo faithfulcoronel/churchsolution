@@ -286,7 +286,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                   <th className="px-4 py-2 text-left">Fund</th>
                   <th className="px-4 py-2 text-left">Category</th>
                   <th className="px-4 py-2 text-left">Source</th>
-                  <th className="px-4 py-2 text-left">Description</th>
+                  <th className="px-4 py-2 text-left min-w-[200px]">Description</th>
                   <th className="px-4 py-2 text-right">Amount</th>
                   <th className="px-4 py-2"></th>
                 </tr>
@@ -330,7 +330,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                         placeholder="Select source"
                       />
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 min-w-[200px]">
                       <Input
                         value={entry.description || ''}
                         onChange={e => handleEntryChange(idx, 'description', e.target.value)}
