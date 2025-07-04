@@ -90,7 +90,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         >
           {/* Gradient overlay for hover effect */}
           {hoverable && (
-            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/0 to-primary-500/0 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-5 transition-opacity duration-200 rounded-2xl" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/0 to-primary-500/0 opacity-0 group-hover:opacity-5 dark:group-hover:opacity-5 transition-opacity duration-200 rounded-2xl" />
           )}
 
           {/* Loading overlay */}
