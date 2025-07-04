@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 import { useFinanceDashboardData } from "../../hooks/useFinanceDashboardData";
 import { useCurrencyStore } from "../../stores/currencyStore";
 import { formatCurrency } from "../../utils/currency";
@@ -75,6 +75,13 @@ function FinancialOverviewDashboard() {
   } = useFinanceDashboardData(dateRange);
   const { useQuery: useTransactionQuery } = useFinancialTransactionHeaderRepository();
   const { data: transactionResult, isLoading: transactionsLoading } = useTransactionQuery({
+    filters: {
+      transaction_date: {
+        operator: 'between',
+        value: format(dateRange.from, 'yyyy-MM-dd'),
+        valueTo: format(dateRange.to, 'yyyy-MM-dd'),
+      },
+    },
     order: { column: 'transaction_date', ascending: false },
     pagination: { page: 1, pageSize: 20 },
     relationships: [
