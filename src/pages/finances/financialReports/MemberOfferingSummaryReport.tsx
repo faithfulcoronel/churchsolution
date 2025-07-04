@@ -29,47 +29,91 @@ export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Pro
     return Array.from(set).sort();
   }, [rawData]);
 
-  const records = React.useMemo(() => {
-    const map = new Map<string, Record<string, number>>();
+  const grouped = React.useMemo(() => {
+    const map = new Map<string, Map<string, Record<string, number>>>();
     rawData.forEach(rec => {
+      const date = rec.entry_date.substring(0, 10);
       const member = `${rec.first_name} ${rec.last_name}`;
       const cat = rec.category_name || 'Uncategorized';
-      if (!map.has(member)) map.set(member, {});
-      const m = map.get(member)!;
+      if (!map.has(date)) map.set(date, new Map());
+      const dateMap = map.get(date)!;
+      if (!dateMap.has(member)) dateMap.set(member, {});
+      const m = dateMap.get(member)!;
       m[cat] = (m[cat] || 0) + Number(rec.amount);
     });
-    return Array.from(map.entries()).map(([member_name, offerings]) => ({
-      member_name,
-      offerings,
-    }));
+    return map;
   }, [rawData]);
 
-  const tableData = React.useMemo(() =>
-    records.map(rec => {
-      const row: any = { member_name: rec.member_name };
-      let total = 0;
-      categories.forEach(cat => {
-        const val = rec.offerings[cat] || 0;
-        row[cat] = val;
-        total += val;
+  const tableData = React.useMemo(() => {
+    const rows: any[] = [];
+    Array.from(grouped.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .forEach(([date, members]) => {
+        const subTotals: Record<string, number> = {};
+        Array.from(members.entries())
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .forEach(([member_name, offerings], idx) => {
+            const row: any = { entry_date: date, member_name };
+            let total = 0;
+            categories.forEach(cat => {
+              const val = offerings[cat] || 0;
+              row[cat] = val;
+              total += val;
+              subTotals[cat] = (subTotals[cat] || 0) + val;
+            });
+            row.total = total;
+            rows.push(row);
+          });
+        const subRow: any = { entry_date: date, member_name: 'Sub Total', isSubtotal: true };
+        let tot = 0;
+        categories.forEach(cat => {
+          const val = subTotals[cat] || 0;
+          subRow[cat] = val;
+          tot += val;
+        });
+        subRow.total = tot;
+        rows.push(subRow);
       });
-      row.total = total;
-      return row;
-    }),
-  [records, categories]);
+    return rows;
+  }, [grouped, categories]);
+
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'member_name', header: 'Member Name' },
+      {
+        accessorKey: 'entry_date',
+        header: 'Date',
+        cell: ({ row }) =>
+          format(new Date(row.original.entry_date), 'MMM dd, yyyy'),
+        size: 120,
+      },
+      {
+        accessorKey: 'member_name',
+        header: 'Member Name',
+        cell: ({ row }) =>
+          row.original.isSubtotal ? (
+            <span className="font-bold">Sub Total</span>
+          ) : (
+            row.original.member_name
+          ),
+      },
       ...categories.map(cat => ({
         accessorKey: cat,
         header: cat,
-        cell: ({ row }) => formatCurrency(row.original[cat], currency),
+        cell: ({ row }) => (
+          <span className={row.original.isSubtotal ? 'font-bold' : undefined}>
+            {formatCurrency(row.original[cat], currency)}
+          </span>
+        ),
       })),
       {
         accessorKey: 'total',
         header: 'Total',
-        cell: ({ row }) => formatCurrency(row.original.total, currency),
+        cell: ({ row }) => (
+          <span className={row.original.isSubtotal ? 'font-bold' : undefined}>
+            {formatCurrency(row.original.total, currency)}
+          </span>
+        ),
       },
     ],
     [categories, currency],
@@ -80,8 +124,8 @@ export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Pro
     const tenant = await tenantUtils.getCurrentTenant();
     const blob = await generateMemberOfferingSummaryPdf(
       tenant?.name || '',
-      dateRange.from,
-      records,
+      dateRange,
+      rawData,
     );
     const url = URL.createObjectURL(blob);
     const fileName = `member-offering-summary-${format(dateRange.from, 'yyyyMMdd')}.pdf`;
