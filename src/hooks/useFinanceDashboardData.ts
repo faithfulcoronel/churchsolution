@@ -157,9 +157,8 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
   }, [stats, expenseCategories, currency]);
 
   const fundBalanceChartData = useMemo(() => {
-    const sorted = [...(fundBalances || [])].sort(
-      (a, b) => b.balance - a.balance,
-    );
+    const filtered = (fundBalances || []).filter((f) => f.balance !== 0);
+    const sorted = [...filtered].sort((a, b) => b.balance - a.balance);
 
     return {
       series: [
