@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useMessageStore } from '../components/MessageHandler';
 import { FundSummary } from '../models/financialReport.model';
+import type { ChurchFinancialStatementData } from '../utils/churchFinancialStatementPdf';
 
 interface QueryOptions {
   enabled?: boolean;
@@ -201,6 +202,23 @@ export function useFinancialReports(tenantId: string | null) {
       staleTime: 5 * 60 * 1000,
     });
 
+  const useChurchFinancialStatement = (
+    startDate: string,
+    endDate: string,
+    options?: QueryOptions,
+  ) =>
+    useQuery<ChurchFinancialStatementData>({
+      queryKey: ['church-financial-statement', tenantId, startDate, endDate],
+      queryFn: () =>
+        fetchReport('report_church_financial_statement', {
+          p_tenant_id: tenantId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+        }) as Promise<ChurchFinancialStatementData>,
+      enabled: !!tenantId && (options?.enabled ?? true),
+      staleTime: 5 * 60 * 1000,
+    });
+
   return {
     useTrialBalance,
     useGeneralLedger,
@@ -212,6 +230,7 @@ export function useFinancialReports(tenantId: string | null) {
     useGivingStatement,
     useOfferingSummary,
     useCategoryFinancialReport,
+    useChurchFinancialStatement,
     useCashFlowSummary,
   };
 }
