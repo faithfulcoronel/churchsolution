@@ -186,7 +186,7 @@ function OfferingsDashboard() {
   const highlights = [
     {
       name: 'This Month',
-      value: metrics.currency ? `${metrics.currency.symbol}${metrics.thisMonthTotal.toFixed(2)}` : metrics.thisMonthTotal.toFixed(2),
+      value: formatCurrency(metrics.thisMonthTotal, currency),
       icon: DollarSign,
       iconClassName: 'text-success',
       subtext: `${metrics.monthChange.toFixed(1)}% from last month`,
@@ -202,7 +202,7 @@ function OfferingsDashboard() {
     },
     {
       name: 'This Week',
-      value: metrics.currency ? `${metrics.currency.symbol}${metrics.thisWeekTotal.toFixed(2)}` : metrics.thisWeekTotal.toFixed(2),
+      value: formatCurrency(metrics.thisWeekTotal, currency),
       icon: Calendar,
       iconClassName: 'text-info',
       subtext: `From ${metrics.weekCount} donations`,
@@ -210,7 +210,7 @@ function OfferingsDashboard() {
     },
     {
       name: 'Avg. Donation',
-      value: metrics.currency ? `${metrics.currency.symbol}${metrics.avgDonation.toFixed(2)}` : metrics.avgDonation.toFixed(2),
+      value: formatCurrency(metrics.avgDonation, currency),
       icon: HandCoins,
       iconClassName: 'text-warning',
       subtext: 'Per contribution',
