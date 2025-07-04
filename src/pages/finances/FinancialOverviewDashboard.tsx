@@ -59,9 +59,7 @@ function FinancialOverviewDashboard() {
   const [transactionSearch, setTransactionSearch] = React.useState('');
 
   const initialFrom = React.useMemo(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - 11);
-    return startOfMonth(d);
+    return startOfMonth(new Date());
   }, []);
 
   const [dateRange, setDateRange] = React.useState<{ from: Date; to: Date }>({
