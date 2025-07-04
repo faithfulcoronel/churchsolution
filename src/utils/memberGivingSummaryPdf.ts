@@ -1,4 +1,5 @@
-import { PDFDocument, StandardFonts, rgb, PDFPage } from 'pdf-lib';
+import { PDFDocument, rgb, PDFPage } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import { format } from 'date-fns';
 
 export interface MemberGivingRecord {
@@ -57,10 +58,14 @@ export async function generateMemberGivingSummaryPdf(
   records: MemberGivingRecord[],
 ): Promise<Blob> {
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
+  const fontBytes = await fetch('/fonts/Inter_18pt-Regular.ttf').then(r =>
+    r.arrayBuffer(),
+  );
+  const font = await pdfDoc.embedFont(fontBytes);
+  const boldFont = font;
   const width = 595.28;
   const height = 841.89;
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const margin = 40;
   const rowHeight = 18;
@@ -233,7 +238,7 @@ export async function generateMemberGivingSummaryPdf(
 
     for (const [dateKey, dateGroup] of dates) {
       if (y - rowHeight < margin) newPage();
-      page.drawText(format(new Date(dateKey), 'MMM dd, yyyy'), {
+      page.drawText(format(new Date(dateKey), 'MMMM dd, yyyy'), {
         x: margin + 4,
         y,
         size: 11,
@@ -245,13 +250,20 @@ export async function generateMemberGivingSummaryPdf(
       const cats = Array.from(dateGroup.categories.entries()).sort((a, b) =>
         a[0].localeCompare(b[0]),
       );
+      let rowIdx = 0;
       for (const [cat, amt] of cats) {
         if (y - rowHeight < margin) newPage();
-        page.drawText(cat, { x: margin + 8, y, size: 11, font });
-        const amtStr = amt.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
+        const fill =
+          rowIdx % 2 === 1 ? rgb(249 / 255, 249 / 255, 249 / 255) : rgb(1, 1, 1);
+        page.drawRectangle({
+          x: margin,
+          y: y - rowHeight + 4,
+          width: width - margin * 2,
+          height: rowHeight,
+          color: fill,
         });
+        page.drawText(cat, { x: margin + 8, y, size: 11, font });
+        const amtStr = formatPeso(amt);
         const amtWidth = font.widthOfTextAtSize(amtStr, 11);
         page.drawText(amtStr, {
           x: width - margin - amtWidth,
@@ -260,14 +272,21 @@ export async function generateMemberGivingSummaryPdf(
           font,
         });
         y -= rowHeight;
+        rowIdx++;
       }
 
       if (y - rowHeight < margin) newPage();
-      const subLabel = 'Sub Total';
-      const subStr = dateGroup.total.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+      const fill =
+        rowIdx % 2 === 1 ? rgb(249 / 255, 249 / 255, 249 / 255) : rgb(1, 1, 1);
+      page.drawRectangle({
+        x: margin,
+        y: y - rowHeight + 4,
+        width: width - margin * 2,
+        height: rowHeight,
+        color: fill,
       });
+      const subLabel = 'Sub Total';
+      const subStr = formatPeso(dateGroup.total);
       page.drawText(subLabel, { x: margin + 8, y, size: 11, font: boldFont });
       const subWidth = boldFont.widthOfTextAtSize(subStr, 11);
       page.drawText(subStr, {
@@ -276,7 +295,7 @@ export async function generateMemberGivingSummaryPdf(
         size: 11,
         font: boldFont,
       });
-      y -= rowHeight * 1.25;
+      y -= rowHeight * 1.5;
     }
 
     const summaryCats = Array.from(member.categoryTotals.entries()).sort((a, b) =>
