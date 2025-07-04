@@ -87,6 +87,19 @@ describe('IncomeExpenseTransactionService', () => {
     });
   });
 
+  it('uses header description for blank entry descriptions', async () => {
+    const entry: IncomeExpenseEntry = {
+      ...baseEntry,
+      transaction_type: 'income',
+      description: '  '
+    };
+    await service.create(header, [entry]);
+
+    expect(ieRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ description: header.description })
+    );
+  });
+
   it('creates expense transactions and records on update', async () => {
     const entry: IncomeExpenseEntry = { ...baseEntry, transaction_type: 'expense' };
     await service.update('t1', header, entry);

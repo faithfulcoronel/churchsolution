@@ -40,6 +40,11 @@ export class IncomeExpenseTransactionService {
     line: IncomeExpenseEntry,
     headerId: string,
   ) {
+    const detailDescription =
+      line.description && line.description.trim()
+        ? line.description.trim()
+        : undefined;
+
     const base = {
       type: line.transaction_type,
       accounts_account_id: line.accounts_account_id,
@@ -47,7 +52,7 @@ export class IncomeExpenseTransactionService {
       source_id: line.source_id,
       category_id: line.category_id,
       date: header.transaction_date!,
-      description: line.description ?? header.description ?? '',
+      description: detailDescription ?? header.description ?? '',
       batch_id: line.batch_id ?? null,
       header_id: headerId,
     } as any;
@@ -90,11 +95,16 @@ export class IncomeExpenseTransactionService {
     line: IncomeExpenseEntry,
     headerId: string,
   ) {
+    const detailDescription =
+      line.description && line.description.trim()
+        ? line.description.trim()
+        : undefined;
+
     return {
       transaction_type: line.transaction_type,
       transaction_date: header.transaction_date!,
       amount: line.amount,
-      description: line.description ?? header.description ?? '',
+      description: detailDescription ?? header.description ?? '',
       reference: (header as any).reference ?? null,
       member_id: line.member_id ?? null,
       category_id: line.category_id,
