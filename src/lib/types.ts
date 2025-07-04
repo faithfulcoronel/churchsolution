@@ -45,6 +45,8 @@ export const TYPES = {
   IMessageAdapter: 'IMessageAdapter',
   IMessageThreadRepository: 'IMessageThreadRepository',
   IMessageRepository: 'IMessageRepository',
+  ISettingAdapter: 'ISettingAdapter',
+  ISettingRepository: 'ISettingRepository',
   IFinanceDashboardAdapter: 'IFinanceDashboardAdapter',
   IFinanceDashboardRepository: 'IFinanceDashboardRepository',
   ISourceRecentTransactionAdapter: 'ISourceRecentTransactionAdapter',
@@ -54,5 +56,6 @@ export const TYPES = {
   ActivityLogService: 'ActivityLogService',
   IncomeExpenseTransactionService: 'IncomeExpenseTransactionService',
   AnnouncementService: 'AnnouncementService',
-  DonationImportService: 'DonationImportService'
+  DonationImportService: 'DonationImportService',
+  SettingService: 'SettingService'
 };
