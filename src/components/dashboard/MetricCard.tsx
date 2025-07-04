@@ -2,14 +2,32 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { Card } from '../ui2/card';
 
+import { cn } from '@/lib/utils';
+
 interface MetricCardProps {
   label: string;
   value: React.ReactNode;
   icon?: LucideIcon;
+  /**
+   * Optional CSS classes for the icon element. Allows pages to
+   * colorize icons based on context.
+   */
+  iconClassName?: string;
   subtext?: string;
+  /**
+   * Optional CSS classes for the sub label element.
+   */
+  subtextClassName?: string;
 }
 
-export default function MetricCard({ label, value, icon: Icon, subtext }: MetricCardProps) {
+export default function MetricCard({
+  label,
+  value,
+  icon: Icon,
+  iconClassName,
+  subtext,
+  subtextClassName,
+}: MetricCardProps) {
   return (
     <Card
       hoverable
@@ -17,10 +35,19 @@ export default function MetricCard({ label, value, icon: Icon, subtext }: Metric
     >
       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</p>
       {Icon && (
-        <Icon className="absolute top-4 right-4 text-blue-600 dark:text-blue-400 text-xl" />
+        <Icon
+          className={cn(
+            'absolute top-4 right-4 text-blue-600 dark:text-blue-400 text-xl',
+            iconClassName,
+          )}
+        />
       )}
       <p className="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">{value}</p>
-      {subtext && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{subtext}</p>}
+      {subtext && (
+        <p className={cn('mt-1 text-sm text-gray-500 dark:text-gray-400', subtextClassName)}>
+          {subtext}
+        </p>
+      )}
     </Card>
   );
 }

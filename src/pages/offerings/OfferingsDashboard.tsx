@@ -109,25 +109,33 @@ function OfferingsDashboard() {
       name: 'This Month',
       value: metrics.currency ? `${metrics.currency.symbol}${metrics.thisMonthTotal.toFixed(2)}` : metrics.thisMonthTotal.toFixed(2),
       icon: DollarSign,
+      iconClassName: 'text-success',
       subtext: `${metrics.monthChange.toFixed(1)}% from last month`,
+      subtextClassName: 'text-success/70',
     },
     {
       name: 'Total Donors',
       value: metrics.donorCount,
       icon: Users,
+      iconClassName: 'text-primary',
       subtext: 'Active contributors',
+      subtextClassName: 'text-primary/70',
     },
     {
       name: 'This Week',
       value: metrics.currency ? `${metrics.currency.symbol}${metrics.thisWeekTotal.toFixed(2)}` : metrics.thisWeekTotal.toFixed(2),
       icon: Calendar,
+      iconClassName: 'text-info',
       subtext: `From ${metrics.weekCount} donations`,
+      subtextClassName: 'text-info/70',
     },
     {
       name: 'Avg. Donation',
       value: metrics.currency ? `${metrics.currency.symbol}${metrics.avgDonation.toFixed(2)}` : metrics.avgDonation.toFixed(2),
       icon: HandCoins,
+      iconClassName: 'text-warning',
       subtext: 'Per contribution',
+      subtextClassName: 'text-warning/70',
     },
   ];
 
@@ -159,7 +167,15 @@ function OfferingsDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {highlights.map((h) => (
-          <MetricCard key={h.name} label={h.name} value={h.value} icon={h.icon} subtext={h.subtext} />
+          <MetricCard
+            key={h.name}
+            label={h.name}
+            value={h.value}
+            icon={h.icon}
+            iconClassName={h.iconClassName}
+            subtext={h.subtext}
+            subtextClassName={h.subtextClassName}
+          />
         ))}
       </div>
 

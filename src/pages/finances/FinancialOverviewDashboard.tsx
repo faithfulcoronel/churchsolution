@@ -140,6 +140,10 @@ function FinancialOverviewDashboard() {
   const expenseRatio =
     totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
 
+  const incomeChangeColor = incomeChange >= 0 ? 'text-success' : 'text-danger';
+  const expenseChangeColor = expenseChange <= 0 ? 'text-success' : 'text-danger';
+  const netChangeColor = netChange >= 0 ? 'text-success' : 'text-danger';
+
   const trendsChartData = React.useMemo(() => {
     return {
       series: [
@@ -255,25 +259,33 @@ function FinancialOverviewDashboard() {
           label="Total Income"
           value={formatCurrency(totalIncome, currency)}
           icon={TrendingUp}
+          iconClassName="text-success"
           subtext={`${incomeChange.toFixed(1)}% from last month`}
+          subtextClassName={incomeChangeColor}
         />
         <MetricCard
           label="Total Expenses"
           value={formatCurrency(totalExpenses, currency)}
           icon={TrendingDown}
+          iconClassName="text-destructive"
           subtext={`${expenseChange.toFixed(1)}% from last month`}
+          subtextClassName={expenseChangeColor}
         />
         <MetricCard
           label="Net Income"
           value={formatCurrency(netIncome, currency)}
           icon={Banknote}
+          iconClassName={netIncome >= 0 ? 'text-success' : 'text-destructive'}
           subtext={`${netChange.toFixed(1)}% from last month`}
+          subtextClassName={netChangeColor}
         />
         <MetricCard
           label="Expense Ratio"
           value={`${expenseRatio.toFixed(1)}%`}
           icon={Percent}
+          iconClassName="text-warning"
           subtext={getExpenseRating(expenseRatio)}
+          subtextClassName="text-warning/70"
         />
       </div>
 
