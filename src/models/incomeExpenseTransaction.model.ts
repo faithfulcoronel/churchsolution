@@ -4,6 +4,7 @@ import { Fund } from './fund.model';
 import { FinancialSource } from './financialSource.model';
 import { Account } from './account.model';
 import type { TransactionType } from './financialTransaction.model';
+import type { FinancialTransactionHeader } from './financialTransactionHeader.model';
 
 export interface IncomeExpenseTransaction extends BaseModel {
   id: string;
@@ -27,4 +28,5 @@ export interface IncomeExpenseTransaction extends BaseModel {
   account_id: string | null;
   account?: Account;
   header_id: string | null;
+  header?: FinancialTransactionHeader;
 }
