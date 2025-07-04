@@ -53,6 +53,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '../../../components/ui2/select';
+import { useIncomeExpenseService } from '../../../hooks/useIncomeExpenseService';
 
 function TransactionList() {
   const navigate = useNavigate();
@@ -82,7 +83,6 @@ function TransactionList() {
   // Get transaction headers and actions
   const {
     useQuery,
-    useDelete,
     submitTransaction,
     approveTransaction,
     postTransaction,
@@ -114,8 +114,7 @@ function TransactionList() {
   
   const transactions = result?.data || [];
   
-  // Delete mutation
-  const deleteMutation = useDelete();
+  const { deleteBatch } = useIncomeExpenseService('income');
   
   // Filter transactions
   const filteredTransactions = useMemo(() => {
@@ -139,7 +138,7 @@ function TransactionList() {
       setDeleteInProgress(true);
       setDeleteError(null);
       
-      await deleteMutation.mutateAsync(transactionToDelete);
+      await deleteBatch(transactionToDelete);
       
       // Close dialog after successful deletion
       setDeleteDialogOpen(false);
