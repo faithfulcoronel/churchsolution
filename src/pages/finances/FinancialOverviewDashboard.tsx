@@ -90,6 +90,7 @@ function FinancialOverviewDashboard() {
     expenseCategoryChartData,
     fundBalanceChartData,
     sourceBalanceChartData,
+    fundBalances,
     isLoading,
   } = useFinanceDashboardData(dateRange);
   const { useQuery: useTransactionQuery } = useFinancialTransactionHeaderRepository();
@@ -162,6 +163,23 @@ function FinancialOverviewDashboard() {
   const incomeChangeColor = incomeChange >= 0 ? 'text-success' : 'text-danger';
   const expenseChangeColor = expenseChange <= 0 ? 'text-success' : 'text-danger';
   const netChangeColor = netChange >= 0 ? 'text-success' : 'text-danger';
+
+  const fundSummary = React.useMemo(() => {
+    const funds = fundBalances || [];
+    const total = funds.length;
+    if (total === 0) {
+      return { total: 0, average: 0, highest: null as any, lowest: null as any };
+    }
+    const totalBalance = funds.reduce((sum, f) => sum + f.balance, 0);
+    const average = totalBalance / total;
+    const sorted = [...funds].sort((a, b) => b.balance - a.balance);
+    return {
+      total,
+      average,
+      highest: sorted[0],
+      lowest: sorted[sorted.length - 1],
+    };
+  }, [fundBalances]);
 
   const trendsChartData = React.useMemo(() => {
     return {
@@ -446,7 +464,7 @@ function FinancialOverviewDashboard() {
             </Card>
           )}
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="space-y-6">
             {isLoading ? (
               <>
                 <ChartCardSkeleton title="Financial Source Balances" />
@@ -472,6 +490,36 @@ function FinancialOverviewDashboard() {
                     <CardTitle>Fund Balances</CardTitle>
                   </CardHeader>
                   <CardContent>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 text-center gap-4 mb-4">
+                      <div>
+                        <p className="text-lg font-semibold">{fundSummary.total}</p>
+                        <p className="text-sm text-muted-foreground">Total Funds</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold">{formatCurrency(fundSummary.average, currency)}</p>
+                        <p className="text-sm text-muted-foreground">Average Balance</p>
+                      </div>
+                      {fundSummary.highest && (
+                        <div>
+                          <p className="text-lg font-semibold">
+                            {formatCurrency(fundSummary.highest.balance, currency)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Highest: {fundSummary.highest.name}
+                          </p>
+                        </div>
+                      )}
+                      {fundSummary.lowest && (
+                        <div>
+                          <p className="text-lg font-semibold">
+                            {formatCurrency(fundSummary.lowest.balance, currency)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Lowest: {fundSummary.lowest.name}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                     <Charts
                       type="bar"
                       series={fundBalanceChartData.series}

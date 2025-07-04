@@ -151,16 +151,21 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
   }, [stats, expenseCategories, currency]);
 
   const fundBalanceChartData = useMemo(() => {
+    const sorted = [...(fundBalances || [])].sort(
+      (a, b) => b.balance - a.balance,
+    );
+
     return {
       series: [
         {
           name: "Balance",
-          data: (fundBalances || []).map((f) => f.balance),
+          data: sorted.map((f) => f.balance),
         },
       ],
       options: {
         chart: { type: "bar" },
-        xaxis: { categories: (fundBalances || []).map((f) => f.name) },
+        plotOptions: { bar: { horizontal: true } },
+        xaxis: { categories: sorted.map((f) => f.name) },
         yaxis: {
           labels: {
             formatter: (value: number) => formatCurrency(value, currency),
