@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { startOfMonth, endOfMonth, format, differenceInCalendarDays } from "date-fns";
 import { useFinanceDashboardData } from "../../hooks/useFinanceDashboardData";
 import { useCurrencyStore } from "../../stores/currencyStore";
 import { formatCurrency } from "../../utils/currency";
@@ -63,6 +63,10 @@ function FinancialOverviewDashboard() {
   }, []);
 
   const [dateRange, setDateRange] = React.useState<{ from: Date; to: Date }>({
+    from: initialFrom,
+    to: new Date(),
+  });
+  const prevDateRange = React.useRef<{ from: Date; to: Date }>({
     from: initialFrom,
     to: new Date(),
   });
@@ -205,6 +209,17 @@ function FinancialOverviewDashboard() {
             value={{ from: dateRange.from, to: dateRange.to }}
             onChange={(range) => {
               if (range.from && range.to) {
+                const diff = differenceInCalendarDays(range.to, range.from);
+                if (diff >= 365) {
+                  const proceed = window.confirm(
+                    'The selected date range is large and may slow down the response. Do you want to continue?'
+                  );
+                  if (!proceed) {
+                    setDateRange(prevDateRange.current);
+                    return;
+                  }
+                }
+                prevDateRange.current = { from: range.from, to: range.to };
                 setDateRange({ from: range.from, to: range.to });
               }
             }}
