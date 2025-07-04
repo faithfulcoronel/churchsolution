@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { format } from 'date-fns';
 import { Link, useNavigate } from "react-router-dom";
 import { useAccountRepository } from "../../../hooks/useAccountRepository";
 import { Account } from "../../../models/account.model";
@@ -53,7 +54,12 @@ function AccountList() {
   const { useQuery: useAccountsQuery, useDelete } = useAccountRepository();
 
   // Get accounts
-  const { data: result, isLoading, error } = useAccountsQuery();
+  const { data: result, isLoading, error } = useAccountsQuery({
+    relationships: [
+      { table: 'auth.users', foreignKey: 'created_by', alias: 'created_by_user', select: ['email'] },
+      { table: 'auth.users', foreignKey: 'updated_by', alias: 'updated_by_user', select: ['email'] },
+    ],
+  });
   const accounts = result?.data || [];
   const deleteAccountMutation = useDelete();
 
@@ -142,6 +148,22 @@ function AccountList() {
             <span>{params.value}</span>
           </div>
         ) : null,
+    },
+    { field: 'created_by_user', headerName: 'Created By', flex: 1.5, minWidth: 150, valueGetter: params => params.row.created_by_user?.email },
+    { field: 'updated_by_user', headerName: 'Modified By', flex: 1.5, minWidth: 150, valueGetter: params => params.row.updated_by_user?.email },
+    {
+      field: 'created_at',
+      headerName: 'Created Date',
+      flex: 1,
+      minWidth: 150,
+      valueFormatter: params => params.value ? format(new Date(params.value as string), 'MMM d, yyyy') : '',
+    },
+    {
+      field: 'updated_at',
+      headerName: 'Modified Date',
+      flex: 1,
+      minWidth: 150,
+      valueFormatter: params => params.value ? format(new Date(params.value as string), 'MMM d, yyyy') : '',
     },
     {
       field: "is_active",
