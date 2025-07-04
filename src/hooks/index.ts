@@ -29,5 +29,6 @@ export * from './useMembershipTypeRepository';
 export * from './useMembershipStatusRepository';
 export * from './useDonationImportService';
 export * from './useOfferingDashboardData';
+export * from './useExpenseDashboardData';
 export * from './useSettingRepository';
 export * from './useSettingService';
