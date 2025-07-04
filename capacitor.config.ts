@@ -5,7 +5,6 @@ const config: CapacitorConfig = {
   appName: 'StewardTrack',
   webDir: 'build',
   server: {
-    url: "https://stewardtrack.com",  
     cleartext: true
   },
   android: {
