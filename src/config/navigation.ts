@@ -89,7 +89,7 @@ export const navigation: NavItem[] = [
   },
   {
     name: 'Financial Reports',
-    href: '/financialreports',
+    href: '/finances/financial-reports',
     icon: FileBarChart,
     permission: 'finance.view',
     section: 'Financial',
