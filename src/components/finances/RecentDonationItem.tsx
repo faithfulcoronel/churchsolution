@@ -1,20 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../ui2/card';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui2/avatar';
-import { Button } from '../ui2/button';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '../ui2/dropdown-menu';
-import { Eye, Edit, MoreHorizontal, Check, X, Trash2 } from 'lucide-react';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
-import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
-import { useIncomeExpenseService } from '../../hooks/useIncomeExpenseService';
-import { usePermissions } from '../../hooks/usePermissions';
+import DonationActions from './DonationActions';
 
 export interface DonationItem {
   id: string;
@@ -40,30 +29,7 @@ interface Props {
 }
 
 export default function RecentDonationItem({ donation }: Props) {
-  const navigate = useNavigate();
   const { currency } = useCurrencyStore();
-  const {
-    approveTransaction,
-    postTransaction,
-    useUpdate,
-  } = useFinancialTransactionHeaderRepository();
-  const { deleteTransaction } = useIncomeExpenseService('income');
-  const updateMutation = useUpdate();
-  const { hasPermission } = usePermissions();
-  const [deleting, setDeleting] = React.useState(false);
-
-  const canEdit = donation.header?.status === 'draft';
-
-  const handleDelete = async () => {
-    try {
-      setDeleting(true);
-      await deleteTransaction(donation.id);
-    } catch (err) {
-      console.error('Failed to delete donation', err);
-    } finally {
-      setDeleting(false);
-    }
-  };
   const name = donation.member
     ? `${donation.member.first_name} ${donation.member.last_name}`
     : "Anonymous";
@@ -118,76 +84,7 @@ export default function RecentDonationItem({ donation }: Props) {
               {donation.categories?.name || 'Uncategorized'}
             </p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => navigate(`/finances/giving/${donation.header_id}`)}
-                className="flex items-center"
-              >
-                <Eye className="h-4 w-4 mr-2" /> View
-              </DropdownMenuItem>
-              {canEdit && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    navigate(`/finances/giving/${donation.header_id}/edit`)
-                  }
-                  className="flex items-center"
-                >
-                  <Edit className="h-4 w-4 mr-2" /> Edit
-                </DropdownMenuItem>
-              )}
-              {donation.header?.status === 'submitted' &&
-                hasPermission('finance.approve') && (
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      await approveTransaction(donation.header_id!);
-                    }}
-                    className="flex items-center"
-                  >
-                    <Check className="h-4 w-4 mr-2" /> Approve
-                  </DropdownMenuItem>
-                )}
-              {donation.header?.status === 'submitted' &&
-                hasPermission('finance.approve') && (
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      await updateMutation.mutateAsync({
-                        id: donation.header_id!,
-                        data: { status: 'draft' },
-                      });
-                    }}
-                    className="flex items-center"
-                  >
-                    <X className="h-4 w-4 mr-2" /> Reject
-                  </DropdownMenuItem>
-                )}
-              {donation.header?.status === 'approved' &&
-                hasPermission('finance.approve') && (
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      await postTransaction(donation.header_id!);
-                    }}
-                    className="flex items-center"
-                  >
-                    <Check className="h-4 w-4 mr-2" /> Post
-                  </DropdownMenuItem>
-                )}
-              {canEdit && (
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="flex items-center text-destructive"
-                  disabled={deleting}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" /> Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <DonationActions donation={donation} />
         </div>
       </CardContent>
     </Card>

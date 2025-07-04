@@ -26,7 +26,14 @@ import {
   FileText,
   Search,
 } from 'lucide-react';
-import RecentDonationItem, { DonationItem } from '../../components/finances/RecentDonationItem';
+import DonationActions from '../../components/finances/DonationActions';
+import { DonationItem } from '../../components/finances/RecentDonationItem';
+import { DataGrid } from '../../components/ui2/mui-datagrid';
+import { GridColDef } from '@mui/x-data-grid';
+import { Badge } from '../../components/ui2/badge';
+import { useCurrencyStore } from '../../stores/currencyStore';
+import { formatCurrency } from '../../utils/currency';
+import { format } from 'date-fns';
 import { useIncomeExpenseTransactionRepository } from '../../hooks/useIncomeExpenseTransactionRepository';
 import { useOfferingDashboardData } from '../../hooks/useOfferingDashboardData';
 import { tenantUtils } from '../../utils/tenantUtils';
@@ -46,6 +53,74 @@ function OfferingsDashboard() {
   });
 
   const metrics = useOfferingDashboardData(dateRange);
+  const { currency } = useCurrencyStore();
+
+  const [recentPage, setRecentPage] = React.useState(0);
+  const [recentPageSize, setRecentPageSize] = React.useState(5);
+  const [historyPage, setHistoryPage] = React.useState(0);
+  const [historyPageSize, setHistoryPageSize] = React.useState(5);
+
+  const statusVariantMap: Record<string, 'success' | 'warning' | 'info' | 'secondary' | 'destructive'> = {
+    posted: 'success',
+    approved: 'warning',
+    submitted: 'info',
+    draft: 'secondary',
+    voided: 'destructive',
+  };
+
+  const columns: GridColDef<DonationItem>[] = [
+    {
+      field: 'transaction_date',
+      headerName: 'Date',
+      flex: 1,
+      minWidth: 120,
+      renderCell: params => format(new Date(params.row.transaction_date), 'MMM d, yyyy'),
+    },
+    {
+      field: 'display_name',
+      headerName: 'Donor/Account',
+      flex: 1.5,
+      minWidth: 160,
+      valueGetter: params =>
+        params.row.accounts?.name ||
+        (params.row.member ? `${params.row.member.first_name} ${params.row.member.last_name}` : 'Anonymous'),
+    },
+    {
+      field: 'category',
+      headerName: 'Category',
+      flex: 1,
+      minWidth: 150,
+      valueGetter: params => params.row.categories?.name || 'Uncategorized',
+    },
+    {
+      field: 'amount',
+      headerName: 'Amount',
+      flex: 1,
+      minWidth: 120,
+      renderCell: params => formatCurrency(params.row.amount, currency),
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      flex: 1,
+      minWidth: 120,
+      valueGetter: params => params.row.header?.status || 'draft',
+      renderCell: params => (
+        <Badge variant={statusVariantMap[params.value] || 'secondary'} className="capitalize">
+          {params.value}
+        </Badge>
+      ),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      minWidth: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: params => <DonationActions donation={params.row} />,
+    },
+  ];
 
   const { useQuery: useTxQuery } = useIncomeExpenseTransactionRepository();
   const { data: recentResult } = useTxQuery({
@@ -220,13 +295,31 @@ function OfferingsDashboard() {
                 <CardTitle>Recent Donations</CardTitle>
                 <CardDescription>Latest donation entries</CardDescription>
               </div>
-              <div className="flex flex-col space-y-2">
-                {recentDonations && recentDonations.length > 0 ? (
-                  recentDonations.map((d) => <RecentDonationItem key={d.id} donation={d} />)
-                ) : (
-                  <p className="text-sm text-muted-foreground">No recent donations.</p>
-                )}
-              </div>
+              {recentDonations && recentDonations.length > 0 ? (
+                <DataGrid<DonationItem>
+                  columns={columns}
+                  data={recentDonations}
+                  totalRows={recentDonations.length}
+                  paginationMode="client"
+                  page={recentPage}
+                  pageSize={recentPageSize}
+                  onPageChange={setRecentPage}
+                  onPageSizeChange={setRecentPageSize}
+                  getRowId={(row) => row.id}
+                  autoHeight
+                  showQuickFilter={false}
+                  onRowClick={(params) =>
+                    navigate(
+                      params.row.header?.status === 'draft'
+                        ? `/finances/giving/${params.row.header_id}/edit`
+                        : `/finances/giving/${params.row.header_id}`
+                    )
+                  }
+                  storageKey="recent-donations-grid"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">No recent donations.</p>
+              )}
               <div className="pt-4">
                 <Link to="/finances/giving" className="text-sm text-primary font-medium flex items-center hover:underline">
                   View all donations <ChevronRight className="h-4 w-4 ml-1" />
@@ -257,7 +350,27 @@ function OfferingsDashboard() {
             </CardHeader>
             <CardContent className="space-y-2">
               {historyDonations && historyDonations.length > 0 ? (
-                historyDonations.map((d) => <RecentDonationItem key={d.id} donation={d} />)
+                <DataGrid<DonationItem>
+                  columns={columns}
+                  data={historyDonations}
+                  totalRows={historyDonations.length}
+                  paginationMode="client"
+                  page={historyPage}
+                  pageSize={historyPageSize}
+                  onPageChange={setHistoryPage}
+                  onPageSizeChange={setHistoryPageSize}
+                  getRowId={(row) => row.id}
+                  autoHeight
+                  showQuickFilter={false}
+                  onRowClick={(params) =>
+                    navigate(
+                      params.row.header?.status === 'draft'
+                        ? `/finances/giving/${params.row.header_id}/edit`
+                        : `/finances/giving/${params.row.header_id}`
+                    )
+                  }
+                  storageKey="donation-records-grid"
+                />
               ) : (
                 <p className="text-sm text-muted-foreground">No donations found.</p>
               )}
