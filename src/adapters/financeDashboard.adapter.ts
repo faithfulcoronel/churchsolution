@@ -6,11 +6,18 @@ import { format } from "date-fns";
 
 @injectable()
 export class FinanceDashboardAdapter {
-  async fetchMonthlyTrends() {
-    const { data, error } = await supabase
-      .from("finance_monthly_trends")
-      .select("*")
-      .order("month");
+  async fetchMonthlyTrends(startDate?: Date, endDate?: Date) {
+    let query = supabase.from("finance_monthly_trends").select("*");
+
+    if (startDate) {
+      query = query.gte("month", format(startDate, "yyyy-MM"));
+    }
+
+    if (endDate) {
+      query = query.lte("month", format(endDate, "yyyy-MM"));
+    }
+
+    const { data, error } = await query.order("month");
     if (error) throw error;
     return data || [];
   }

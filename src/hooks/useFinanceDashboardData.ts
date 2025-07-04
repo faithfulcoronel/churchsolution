@@ -18,8 +18,8 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
   const end = dateRange?.to ?? endOfMonth(new Date());
 
   const { data: monthlyTrends, isLoading: trendsLoading } = useQuery({
-    queryKey: ["monthly-trends"],
-    queryFn: () => repository.getMonthlyTrends(),
+    queryKey: ["monthly-trends", start, end],
+    queryFn: () => repository.getMonthlyTrends(start, end),
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({

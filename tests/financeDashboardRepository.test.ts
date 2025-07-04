@@ -3,7 +3,7 @@ import { FinanceDashboardRepository } from "../src/repositories/financeDashboard
 import type { IFinanceDashboardAdapter } from "../src/adapters/financeDashboard.adapter";
 
 const adapter: IFinanceDashboardAdapter = {
-  fetchMonthlyTrends: async () => [
+  fetchMonthlyTrends: async (_start?: Date, _end?: Date) => [
     {
       month: "2025-06",
       income: "100",
