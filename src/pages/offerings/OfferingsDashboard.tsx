@@ -10,6 +10,8 @@ import {
   CardDescription,
 } from '../../components/ui2/card';
 import MetricCard from '../../components/dashboard/MetricCard';
+import { MetricCardSkeleton } from '../../components/dashboard/MetricCardSkeleton';
+import { DataGridSkeleton } from '../../components/dashboard/DataGridSkeleton';
 import { Container } from '../../components/ui2/container';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
 import { Input } from '../../components/ui2/input';
@@ -52,7 +54,7 @@ function OfferingsDashboard() {
     queryFn: () => tenantUtils.getCurrentTenant(),
   });
 
-  const metrics = useOfferingDashboardData(dateRange);
+  const { isLoading: metricsLoading, ...metrics } = useOfferingDashboardData(dateRange);
   const { currency } = useCurrencyStore();
 
   const [recentPage, setRecentPage] = React.useState(0);
@@ -123,7 +125,7 @@ function OfferingsDashboard() {
   ];
 
   const { useQuery: useTxQuery } = useIncomeExpenseTransactionRepository();
-  const { data: recentResult } = useTxQuery({
+  const { data: recentResult, isLoading: recentLoading } = useTxQuery({
     filters: { transaction_type: { operator: 'eq', value: 'income' } },
     order: { column: 'transaction_date', ascending: false },
     pagination: { page: 1, pageSize: 5 },
@@ -149,7 +151,7 @@ function OfferingsDashboard() {
   const recentDonations = (recentResult?.data || []) as DonationItem[];
 
   const [historySearch, setHistorySearch] = React.useState('');
-  const { data: historyResult } = useTxQuery({
+  const { data: historyResult, isLoading: historyLoading } = useTxQuery({
     filters: {
       transaction_type: { operator: 'eq', value: 'income' },
       ...(historySearch.trim()
@@ -243,17 +245,21 @@ function OfferingsDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {highlights.map((h) => (
-          <MetricCard
-            key={h.name}
-            label={h.name}
-            value={h.value}
-            icon={h.icon}
-            iconClassName={h.iconClassName}
-            subtext={h.subtext}
-            subtextClassName={h.subtextClassName}
-          />
-        ))}
+        {metricsLoading
+          ? Array(4)
+              .fill(0)
+              .map((_, i) => <MetricCardSkeleton key={i} />)
+          : highlights.map((h) => (
+              <MetricCard
+                key={h.name}
+                label={h.name}
+                value={h.value}
+                icon={h.icon}
+                iconClassName={h.iconClassName}
+                subtext={h.subtext}
+                subtextClassName={h.subtextClassName}
+              />
+            ))}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -295,7 +301,9 @@ function OfferingsDashboard() {
                 <CardTitle>Recent Donations</CardTitle>
                 <CardDescription>Latest donation entries</CardDescription>
               </div>
-              {recentDonations && recentDonations.length > 0 ? (
+              {recentLoading ? (
+                <DataGridSkeleton />
+              ) : recentDonations && recentDonations.length > 0 ? (
                 <DataGrid<DonationItem>
                   columns={columns}
                   data={recentDonations}
@@ -316,6 +324,7 @@ function OfferingsDashboard() {
                     )
                   }
                   storageKey="recent-donations-grid"
+                  loading={recentLoading}
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">No recent donations.</p>
@@ -349,7 +358,9 @@ function OfferingsDashboard() {
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              {historyDonations && historyDonations.length > 0 ? (
+              {historyLoading ? (
+                <DataGridSkeleton />
+              ) : historyDonations && historyDonations.length > 0 ? (
                 <DataGrid<DonationItem>
                   columns={columns}
                   data={historyDonations}
@@ -370,6 +381,7 @@ function OfferingsDashboard() {
                     )
                   }
                   storageKey="donation-records-grid"
+                  loading={historyLoading}
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">No donations found.</p>
