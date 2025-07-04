@@ -70,7 +70,7 @@ export async function generateExpenseSummaryPdf(
   const drawTableHeader = () => {
     const headers = ['Expense Description', 'Expense Category', 'Fund', 'Fund Balance', 'Amount'];
     headers.forEach((h, idx) => {
-      page.drawText(h, { x: margin + idx * columnWidth, y, size: 12, font: boldFont });
+      page.drawText(h, { x: margin + idx * columnWidth, y, size: 10, font: boldFont });
     });
     y -= rowHeight;
   };
@@ -95,7 +95,7 @@ export async function generateExpenseSummaryPdf(
       formatAmount(r.amount),
     ];
     cells.forEach((c, idx) => {
-      page.drawText(String(c), { x: margin + idx * columnWidth, y, size: 11, font });
+      page.drawText(String(c), { x: margin + idx * columnWidth, y, size: 8, font });
     });
     y -= rowHeight;
   };
@@ -107,13 +107,13 @@ export async function generateExpenseSummaryPdf(
   page.drawText('Expense Grand Total', {
     x: margin + 3 * columnWidth,
     y,
-    size: 12,
+    size: 10,
     font: boldFont,
   });
   page.drawText(formatAmount(total), {
     x: margin + 4 * columnWidth,
     y,
-    size: 12,
+    size: 10,
     font: boldFont,
   });
 
