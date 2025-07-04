@@ -19,3 +19,4 @@ export * from './reportPdf';
 export * from './memberGivingSummaryPdf';
 export * from './memberOfferingSummaryPdf';
 export * from './expenseSummaryPdf';
+export * from './churchFinancialStatementPdf';
