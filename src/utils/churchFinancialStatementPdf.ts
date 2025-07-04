@@ -234,6 +234,37 @@ export async function generateChurchFinancialStatementPdf(
       y -= rowHeight;
     });
 
+  const totals = data.funds
+    .filter(f =>
+      f.opening_balance !== 0 || f.income !== 0 || f.expenses !== 0 || f.ending_balance !== 0,
+    )
+    .reduce(
+      (acc, f) => {
+        acc.opening += f.opening_balance;
+        acc.income += f.income;
+        acc.expenses += f.expenses;
+        acc.ending += f.ending_balance;
+        return acc;
+      },
+      { opening: 0, income: 0, expenses: 0, ending: 0 },
+    );
+
+  if (totals.opening !== 0 || totals.income !== 0 || totals.expenses !== 0 || totals.ending !== 0) {
+    if (y - rowHeight < margin) newFundPage();
+    const totalVals = [
+      'Subtotal',
+      formatAmount(totals.opening),
+      formatAmount(totals.income),
+      formatAmount(totals.expenses),
+      formatAmount(totals.ending),
+    ];
+    totalVals.forEach((v, i) => {
+      const x = margin + colWidth * i;
+      page.drawText(v, { x, y, size: 11, font: boldFont });
+    });
+    y -= rowHeight * 1.5;
+  }
+
   // Income Summary Page
   page = pdfDoc.addPage([width, height]);
   pages.push(page);
