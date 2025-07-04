@@ -86,6 +86,7 @@ function FinancialOverviewDashboard() {
 
   const {
     monthlyTrends,
+    stats,
     incomeCategoryChartData,
     expenseCategoryChartData,
     fundBalanceChartData,
@@ -129,13 +130,9 @@ function FinancialOverviewDashboard() {
     });
   }, [monthlyTrends, dateRange]);
 
-  const totalIncome = React.useMemo(() => {
-    return filteredTrends.reduce((sum, t) => sum + t.income, 0);
-  }, [filteredTrends]);
+  const totalIncome = stats?.monthlyIncome ?? 0;
 
-  const totalExpenses = React.useMemo(() => {
-    return filteredTrends.reduce((sum, t) => sum + t.expenses, 0);
-  }, [filteredTrends]);
+  const totalExpenses = stats?.monthlyExpenses ?? 0;
 
   const netIncome = totalIncome - totalExpenses;
 
