@@ -25,6 +25,16 @@ import {
 import { Button } from "../../components/ui2/button";
 import { DateRangePickerField } from "../../components/ui2/date-range-picker-field";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui2/alert-dialog";
+import {
   Tabs,
   TabsList,
   TabsTrigger,
@@ -70,6 +80,9 @@ function FinancialOverviewDashboard() {
     from: initialFrom,
     to: new Date(),
   });
+
+  const [showRangeWarningDialog, setShowRangeWarningDialog] = React.useState(false);
+  const pendingDateRange = React.useRef<{ from: Date; to: Date } | null>(null);
 
   const {
     monthlyTrends,
@@ -211,13 +224,9 @@ function FinancialOverviewDashboard() {
               if (range.from && range.to) {
                 const diff = differenceInCalendarDays(range.to, range.from);
                 if (diff >= 365) {
-                  const proceed = window.confirm(
-                    'The selected date range is large and may slow down the response. Do you want to continue?'
-                  );
-                  if (!proceed) {
-                    setDateRange(prevDateRange.current);
-                    return;
-                  }
+                  pendingDateRange.current = { from: range.from, to: range.to };
+                  setShowRangeWarningDialog(true);
+                  return;
                 }
                 prevDateRange.current = { from: range.from, to: range.to };
                 setDateRange({ from: range.from, to: range.to });
@@ -263,6 +272,40 @@ function FinancialOverviewDashboard() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <AlertDialog open={showRangeWarningDialog} onOpenChange={setShowRangeWarningDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle variant="warning">
+                  Large Date Range Selected
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  The selected date range is large and may slow down the response. Do you want to continue?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => {
+                    setShowRangeWarningDialog(false);
+                    pendingDateRange.current = null;
+                  }}
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    if (pendingDateRange.current) {
+                      prevDateRange.current = pendingDateRange.current;
+                      setDateRange(pendingDateRange.current);
+                    }
+                    pendingDateRange.current = null;
+                    setShowRangeWarningDialog(false);
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
