@@ -26,25 +26,27 @@ import ExpenseSummaryReport from './financialReports/ExpenseSummaryReport';
 import ChurchFinancialStatementReport from './financialReports/ChurchFinancialStatementReport';
 
 const reportOptions = [
-  { id: 'trial-balance', label: 'Trial Balance' },
-  { id: 'general-ledger', label: 'General Ledger' },
-  { id: 'journal', label: 'Journal Report' },
-  { id: 'income-statement', label: 'Income Statement' },
-  { id: 'budget-vs-actual', label: 'Budget vs Actual' },
+  { id: 'trial-balance', label: 'Trial Balance', disabled: true },
+  { id: 'general-ledger', label: 'General Ledger', disabled: true },
+  { id: 'journal', label: 'Journal Report', disabled: true },
+  { id: 'income-statement', label: 'Income Statement', disabled: true },
+  { id: 'budget-vs-actual', label: 'Budget vs Actual', disabled: true },
   { id: 'fund-summary', label: 'Fund Summary' },
   { id: 'member-giving', label: 'Member Giving Summary' },
-  { id: 'giving-statement', label: 'Giving Statement' },
-  { id: 'offering-summary', label: 'Offering Summary' },
+  { id: 'giving-statement', label: 'Giving Statement', disabled: true },
+  { id: 'offering-summary', label: 'Offering Summary', disabled: true },
   { id: 'member-offering-summary', label: 'Member Offering Summary' },
-  { id: 'category-financial', label: 'Category Based Report' },
+  { id: 'category-financial', label: 'Category Based Report', disabled: true },
   { id: 'church-financial-statement', label: 'Church Financial Statement' },
-  { id: 'cash-flow', label: 'Cash Flow Summary' },
+  { id: 'cash-flow', label: 'Cash Flow Summary', disabled: true },
   { id: 'expense-summary', label: 'Expense Summary' },
 ];
 
 function FinancialReportsPage() {
   const [tenantId, setTenantId] = useState<string | null>(null);
-  const [reportType, setReportType] = useState(reportOptions[0].id);
+  const [reportType, setReportType] = useState(
+    reportOptions.find(o => !o.disabled)?.id ?? reportOptions[0].id,
+  );
   const [dateRange, setDateRange] = useState({ from: new Date(), to: new Date() });
   const [memberId, setMemberId] = useState<string | null>(null);
   const [fundId, setFundId] = useState<string | null>(null);
@@ -104,7 +106,13 @@ function FinancialReportsPage() {
             </SelectTrigger>
             <SelectContent>
               {reportOptions.map(opt => (
-                <SelectItem key={opt.id} value={opt.id}>{opt.label}</SelectItem>
+                <SelectItem
+                  key={opt.id}
+                  value={opt.id}
+                  disabled={opt.disabled}
+                >
+                  {opt.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
