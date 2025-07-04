@@ -45,6 +45,12 @@ function splitTextIntoLines(
   return lines;
 }
 
+const formatPeso = (amount: number) =>
+  `₱${amount.toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
 export async function generateMemberGivingSummaryPdf(
   churchName: string,
   dateRange: { from: Date; to: Date },
@@ -278,15 +284,34 @@ export async function generateMemberGivingSummaryPdf(
     );
     if (summaryCats.length > 0) {
       if (y - rowHeight < margin) newPage();
-      page.drawText('Summary', { x: margin + 2, y, size: 11, font: boldFont });
+      page.drawText('Summary of Giving', { x: margin + 2, y, size: 11, font: boldFont });
       y -= rowHeight;
+
+      const headerCat = 'Offering Category';
+      const headerAmt = 'Total Amount';
+      page.drawText(headerCat, { x: margin + 8, y, size: 11, font: boldFont });
+      const headerAmtWidth = boldFont.widthOfTextAtSize(headerAmt, 11);
+      page.drawText(headerAmt, {
+        x: width - margin - headerAmtWidth,
+        y,
+        size: 11,
+        font: boldFont,
+      });
+      y -= rowHeight;
+
+      let rowIdx = 0;
       for (const [cat, amt] of summaryCats) {
         if (y - rowHeight < margin) newPage();
-        page.drawText(cat, { x: margin + 8, y, size: 11, font });
-        const amtStr = amt.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
+        const fill = rowIdx % 2 === 1 ? rgb(249 / 255, 249 / 255, 249 / 255) : rgb(1, 1, 1);
+        page.drawRectangle({
+          x: margin,
+          y: y - rowHeight + 4,
+          width: width - margin * 2,
+          height: rowHeight,
+          color: fill,
         });
+        page.drawText(cat, { x: margin + 8, y, size: 11, font });
+        const amtStr = formatPeso(amt);
         const amtWidth = font.widthOfTextAtSize(amtStr, 11);
         page.drawText(amtStr, {
           x: width - margin - amtWidth,
@@ -295,24 +320,35 @@ export async function generateMemberGivingSummaryPdf(
           font,
         });
         y -= rowHeight;
+        rowIdx++;
       }
-    }
 
-    if (y - rowHeight < margin) newPage();
-    const totalLabel = 'Grand Total';
-    const totalStr = member.total.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    page.drawText(totalLabel, { x: margin + 2, y, size: 11, font: boldFont });
-    const totalWidth = boldFont.widthOfTextAtSize(totalStr, 11);
-    page.drawText(totalStr, {
-      x: width - margin - totalWidth,
-      y,
-      size: 11,
-      font: boldFont,
-    });
-    y -= rowHeight * 1.5;
+      if (y - rowHeight < margin) newPage();
+      page.drawLine({
+        start: { x: margin, y: y + 2 },
+        end: { x: width - margin, y: y + 2 },
+        thickness: 0.5,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+      const fill = rowIdx % 2 === 1 ? rgb(249 / 255, 249 / 255, 249 / 255) : rgb(1, 1, 1);
+      page.drawRectangle({
+        x: margin,
+        y: y - rowHeight + 4,
+        width: width - margin * 2,
+        height: rowHeight,
+        color: fill,
+      });
+      page.drawText('Grand Total', { x: margin + 8, y, size: 11, font: boldFont });
+      const totalStr = formatPeso(member.total);
+      const totalWidth = boldFont.widthOfTextAtSize(totalStr, 11);
+      page.drawText(totalStr, {
+        x: width - margin - totalWidth,
+        y,
+        size: 11,
+        font: boldFont,
+      });
+      y -= rowHeight * 1.5;
+    }
 
     addFooters(memberPages.slice(1));
   }
