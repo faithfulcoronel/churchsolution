@@ -27,6 +27,8 @@ export async function generateMemberOfferingSummaryPdf(
 
   const margin = 72; // 1 inch
   const rowHeight = 18;
+  // Additional offset to align text within table cells (1.8 cm in points)
+  const textShift = 51;
   const tableWidth = width - margin * 2;
 
   const categories = Array.from(
@@ -85,7 +87,7 @@ export async function generateMemberOfferingSummaryPdf(
         borderWidth: 0.5,
       });
       const w = boldFont.widthOfTextAtSize(text, 11);
-      const tx = alignRight ? x + width - w - 2 : x + 2;
+      const tx = (alignRight ? x + width - w - 2 : x + 2) + textShift;
       page.drawText(text, { x: tx, y, font: boldFont, size: 11 });
       x += width;
     };
@@ -119,7 +121,7 @@ export async function generateMemberOfferingSummaryPdf(
       });
       const fontUsed = alignRight ? font : font;
       const w = fontUsed.widthOfTextAtSize(text, 11);
-      const tx = alignRight ? x + width - w - 2 : x + 2;
+      const tx = (alignRight ? x + width - w - 2 : x + 2) + textShift;
       page.drawText(text, { x: tx, y, size: 11, font: fontUsed });
       x += width;
     };
@@ -159,7 +161,7 @@ export async function generateMemberOfferingSummaryPdf(
       borderWidth: 0.5,
     });
     const w = boldFont.widthOfTextAtSize(text, 11);
-    const tx = alignRight ? x + width - w - 2 : x + 2;
+    const tx = (alignRight ? x + width - w - 2 : x + 2) + textShift;
     page.drawText(text, { x: tx, y, size: 11, font: boldFont });
     x += width;
   };
