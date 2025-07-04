@@ -56,8 +56,8 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
     () =>
       (txRes?.data || []).map(tx => ({
         description: tx.description,
-        category_name: tx.category?.name || '',
-        fund_name: tx.fund?.name || '',
+        category_name: tx.categories?.name || '',
+        fund_name: tx.funds?.name || '',
         fund_balance: fundMap.get(tx.fund_id || '') || 0,
         amount: tx.amount,
       })),
