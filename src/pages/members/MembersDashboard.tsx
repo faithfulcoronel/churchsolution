@@ -142,25 +142,33 @@ function MembersDashboard() {
       name: "Total Members",
       value: totalMembers || 0,
       icon: Users,
+      iconClassName: "text-primary",
       subtext: "Active members",
+      subtextClassName: "text-primary/70",
     },
     {
       name: "New This Month",
       value: newMembers || 0,
       icon: UserPlus,
+      iconClassName: "text-success",
       subtext: "Joined this month",
+      subtextClassName: "text-success/70",
     },
     {
       name: "Visitors",
       value: visitorCount || 0,
       icon: UserCheck,
+      iconClassName: "text-info",
       subtext: "Current visitors",
+      subtextClassName: "text-info/70",
     },
     {
       name: "Families",
       value: familyCount || 0,
       icon: Heart,
+      iconClassName: "text-warning",
       subtext: "Family groups",
+      subtextClassName: "text-warning/70",
     },
   ];
 
@@ -215,7 +223,9 @@ function MembersDashboard() {
             label={h.name}
             value={h.value}
             icon={h.icon}
+            iconClassName={h.iconClassName}
             subtext={h.subtext}
+            subtextClassName={h.subtextClassName}
           />
         ))}
       </div>
