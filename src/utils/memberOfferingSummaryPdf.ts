@@ -2,50 +2,22 @@ import { PDFDocument, StandardFonts, rgb, PDFPage } from 'pdf-lib';
 import { format } from 'date-fns';
 
 export interface MemberOfferingRecord {
-  member_name: string;
-  offerings: Record<string, number>;
+  entry_date: string | Date;
+  first_name: string;
+  last_name: string;
+  category_name: string | null;
+  amount: number;
 }
 
-function formatAmount(amount: number) {
-  return amount.toLocaleString('en-PH', {
+const formatAmount = (amount: number) =>
+  amount.toLocaleString('en-PH', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-}
-
-function splitTextIntoLines(text: string, font: any, size: number, maxWidth: number) {
-  const words = text.split(/\s+/);
-  const lines: string[] = [];
-  let current = '';
-  for (const word of words) {
-    const next = current ? `${current} ${word}` : word;
-    if (font.widthOfTextAtSize(next, size) <= maxWidth) {
-      current = next;
-    } else {
-      if (current) lines.push(current);
-      current = word;
-      while (font.widthOfTextAtSize(current, size) > maxWidth) {
-        let i = 1;
-        while (
-          i <= current.length &&
-          font.widthOfTextAtSize(current.substring(0, i), size) <= maxWidth
-        ) {
-          i++;
-        }
-        const part = current.substring(0, i - 1);
-        lines.push(part);
-        current = current.substring(i - 1);
-      }
-    }
-  }
-  if (current) lines.push(current);
-  return lines;
-}
-
 
 export async function generateMemberOfferingSummaryPdf(
   tenantName: string,
-  sundayDate: Date,
+  dateRange: { from: Date; to: Date },
   records: MemberOfferingRecord[],
 ): Promise<Blob> {
   const pdfDoc = await PDFDocument.create();
@@ -56,18 +28,38 @@ export async function generateMemberOfferingSummaryPdf(
 
   const margin = 60;
   const rowHeight = 18;
-  const tableYOffset = 51;
-  const textShift = 0;
   const spacing = 1;
-  const tableWidth = width - margin * 2 - spacing * (records.length + 1);
 
-  const categories = Array.from(new Set(records.flatMap(r => Object.keys(r.offerings)))).sort();
-  const memberColWidth = tableWidth * 0.10;
+  const categories = Array.from(
+    new Set(records.map(r => r.category_name || 'Uncategorized')),
+  ).sort();
+
+  const tableWidth = width - margin * 2 - spacing * (categories.length + 2);
+  const memberColWidth = tableWidth * 0.15;
   const colWidth = (tableWidth - memberColWidth) / (categories.length + 1);
 
-  const pages: PDFPage[] = [];
+  interface MemberTotals {
+    [cat: string]: number;
+  }
+
+  const grouped = new Map<string, Map<string, MemberTotals>>();
+  records.forEach(r => {
+    const dateKey =
+      typeof r.entry_date === 'string'
+        ? r.entry_date.substring(0, 10)
+        : format(r.entry_date, 'yyyy-MM-dd');
+    const member = `${r.first_name} ${r.last_name}`;
+    const cat = r.category_name || 'Uncategorized';
+    if (!grouped.has(dateKey)) grouped.set(dateKey, new Map());
+    const dateMap = grouped.get(dateKey)!;
+    if (!dateMap.has(member)) dateMap.set(member, {} as MemberTotals);
+    const m = dateMap.get(member)!;
+    m[cat] = (m[cat] || 0) + r.amount;
+  });
+
   let page: PDFPage;
-  let y: number;
+  let y = 0;
+  const pages: PDFPage[] = [];
 
   const drawHeader = () => {
     let ty = height - margin;
@@ -80,9 +72,12 @@ export async function generateMemberOfferingSummaryPdf(
     page.drawText(tenantName, { x: width / 2 - churchW / 2, y: ty, size: 12, font });
     ty -= rowHeight;
 
-    const dateStr = format(sundayDate, 'MMMM d, yyyy');
-    const dateW = font.widthOfTextAtSize(dateStr, 12);
-    page.drawText(dateStr, { x: width / 2 - dateW / 2, y: ty, size: 12, font });
+    const rangeStr = `${format(dateRange.from, 'MMM dd, yyyy')} - ${format(
+      dateRange.to,
+      'MMM dd, yyyy',
+    )}`;
+    const rangeW = font.widthOfTextAtSize(rangeStr, 12);
+    page.drawText(rangeStr, { x: width / 2 - rangeW / 2, y: ty, size: 12, font });
     ty -= rowHeight;
 
     const genText = `Generated via StewardTrack on: ${format(new Date(), 'MMMM d, yyyy')}`;
@@ -96,7 +91,7 @@ export async function generateMemberOfferingSummaryPdf(
       color: rgb(0, 0, 0),
     });
     ty -= rowHeight;
-    y = ty - tableYOffset;
+    y = ty;
   };
 
   const drawTableHeader = () => {
@@ -109,12 +104,13 @@ export async function generateMemberOfferingSummaryPdf(
       { text: 'Total', width: colWidth, alignRight: true },
     ];
 
-    const lineArrays = cells.map(c => splitTextIntoLines(c.text, boldFont, 10, c.width - 4));
-    const headerLines = Math.max(...lineArrays.map(l => l.length));
+    const lineArrays = cells.map(c => {
+      return [c.text];
+    });
+    const headerLines = 1;
     const headerHeight = rowHeight * headerLines;
 
     cells.forEach((cell, idx) => {
-      const lines = lineArrays[idx];
       page.drawRectangle({
         x,
         y: y - headerHeight + 4,
@@ -124,12 +120,10 @@ export async function generateMemberOfferingSummaryPdf(
         borderColor: border,
         borderWidth: 0.5,
       });
-      lines.forEach((line, lineIdx) => {
-        const w = boldFont.widthOfTextAtSize(line, 10);
-        const ty = y - lineIdx * rowHeight;
-        const tx = (cell.alignRight ? x + cell.width - w - 4 : x + 4) + textShift;
-        page.drawText(line, { x: tx, y: ty - 8, font: boldFont, size: 10 });
-      });
+      const line = lineArrays[idx][0];
+      const w = boldFont.widthOfTextAtSize(line, 10);
+      const tx = cell.alignRight ? x + cell.width - w - 4 : x + 4;
+      page.drawText(line, { x: tx, y: y - 8, font: boldFont, size: 10 });
       x += cell.width + spacing;
     });
     y -= headerHeight;
@@ -142,11 +136,17 @@ export async function generateMemberOfferingSummaryPdf(
     drawTableHeader();
   };
 
-  const drawRow = (rec: MemberOfferingRecord, rowIdx: number) => {
+  const drawRow = (
+    label: string,
+    data: MemberTotals,
+    rowIdx: number,
+    bold = false,
+  ) => {
     if (y - rowHeight < margin) addPage();
     let x = margin;
     const fillColor = rowIdx % 2 === 0 ? rgb(1, 1, 1) : rgb(0.98, 0.98, 0.98);
     const border = rgb(0, 0, 0);
+    const f = bold ? boldFont : font;
     const drawCell = (text: string, width: number, alignRight = false) => {
       page.drawRectangle({
         x,
@@ -157,15 +157,15 @@ export async function generateMemberOfferingSummaryPdf(
         borderColor: border,
         borderWidth: 0.5,
       });
-      const w = font.widthOfTextAtSize(text, 10);
-      const tx = (alignRight ? x + width - w - 4 : x + 4) + textShift;
-      page.drawText(text, { x: tx, y: y - 8, size: 10, font });
+      const w = f.widthOfTextAtSize(text, 10);
+      const tx = alignRight ? x + width - w - 4 : x + 4;
+      page.drawText(text, { x: tx, y: y - 8, size: 10, font: f });
       x += width + spacing;
     };
-    drawCell(rec.member_name, memberColWidth);
+    drawCell(label, memberColWidth);
     let total = 0;
     categories.forEach(cat => {
-      const amt = rec.offerings[cat] || 0;
+      const amt = data[cat] || 0;
       total += amt;
       drawCell(formatAmount(amt), colWidth, true);
     });
@@ -174,41 +174,39 @@ export async function generateMemberOfferingSummaryPdf(
   };
 
   addPage();
-  const sorted = [...records].sort((a, b) => a.member_name.localeCompare(b.member_name));
-  sorted.forEach((rec, idx) => drawRow(rec, idx));
 
-  const summary: Record<string, number> = {};
-  categories.forEach(cat => {
-    summary[cat] = records.reduce((sum, r) => sum + (r.offerings[cat] || 0), 0);
-  });
-  const summaryTotal = Object.values(summary).reduce((a, b) => a + b, 0);
+  const summary: MemberTotals = {};
 
-  if (y - rowHeight < margin) addPage();
-  let x = margin;
-  const fill = rgb(0.9, 0.9, 0.9);
-  const border = rgb(0, 0, 0);
-  const drawSumCell = (text: string, width: number, alignRight = false) => {
-    page.drawRectangle({
-      x,
-      y: y - rowHeight + 4,
-      width,
-      height: rowHeight,
-      color: fill,
-      borderColor: border,
-      borderWidth: 0.5,
+  Array.from(grouped.entries())
+    .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+    .forEach(([dateKey, members]) => {
+      if (y - rowHeight < margin) addPage();
+      page.drawText(format(new Date(dateKey), 'MMMM dd, yyyy'), {
+        x: margin,
+        y,
+        size: 10,
+        font: boldFont,
+      });
+      y -= rowHeight;
+
+      const dateTotals: MemberTotals = {};
+      let idx = 0;
+      Array.from(members.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .forEach(([name, vals]) => {
+          drawRow(name, vals, idx);
+          categories.forEach(cat => {
+            const v = vals[cat] || 0;
+            dateTotals[cat] = (dateTotals[cat] || 0) + v;
+            summary[cat] = (summary[cat] || 0) + v;
+          });
+          idx++;
+        });
+      drawRow('Sub Total', dateTotals, idx, true);
+      y -= rowHeight * 0.5;
     });
-    const w = boldFont.widthOfTextAtSize(text, 10);
-    const tx = (alignRight ? x + width - w - 4 : x + 4) + textShift;
-    page.drawText(text, { x: tx, y: y - 8, size: 10, font: boldFont });
-    x += width + spacing;
-  };
 
-  drawSumCell('Summary Total', memberColWidth);
-  [...categories, '__TOTAL__'].forEach(cat => {
-    const value = cat === '__TOTAL__' ? formatAmount(summaryTotal) : formatAmount(summary[cat]);
-    drawSumCell(value, colWidth, true);
-  });
-  y -= rowHeight;
+  drawRow('Summary Total', summary, 0, true);
 
   const pageCount = pages.length;
   pages.forEach((p, idx) => {
@@ -220,3 +218,4 @@ export async function generateMemberOfferingSummaryPdf(
   const pdfBytes = await pdfDoc.save();
   return new Blob([pdfBytes], { type: 'application/pdf' });
 }
+
