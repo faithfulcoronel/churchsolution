@@ -41,10 +41,14 @@ describe('IncomeExpenseTransactionRepository validation', () => {
     expect(data.reference).toBe('Ref');
   });
 
-  it('validates on update', async () => {
+  it('allows blank descriptions on update', async () => {
     const repo = new TestRepo({} as IIncomeExpenseTransactionAdapter);
     await expect(
       repo.runBeforeUpdate('1', { description: ' ', transaction_date: '2025-06-01', amount: 10 })
-    ).rejects.toThrow('Description is required');
+    ).resolves.toEqual({
+      transaction_date: '2025-06-01',
+      description: '',
+      amount: 10
+    });
   });
 });

@@ -5,9 +5,9 @@ export class IncomeExpenseTransactionValidator {
     if (data.transaction_date !== undefined && !data.transaction_date) {
       throw new Error('Transaction date is required');
     }
-    if (data.description !== undefined && !data.description.trim()) {
-      throw new Error('Description is required');
-    }
+    // Description is optional for individual income/expense entries.
+    // When not provided or blank, it will default to the header description at
+    // the service layer, so no validation error should be raised here.
     if (
       data.amount !== undefined &&
       (isNaN(Number(data.amount)) || data.amount === null)
