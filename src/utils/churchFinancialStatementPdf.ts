@@ -109,10 +109,26 @@ export async function generateChurchFinancialStatementPdf(
     'MMM dd, yyyy',
   )}`;
 
-  // Summary Page
+  // Cover Page
   let page = pdfDoc.addPage([width, height]);
   pages.push(page);
-  let y = drawHeader(
+  let y = height - margin * 2;
+  const centerCover = (text: string, size: number, useBold = false) => {
+    const f = useBold ? boldFont : font;
+    const tw = f.widthOfTextAtSize(text, size);
+    page.drawText(text, { x: width / 2 - tw / 2, y, size, font: f });
+    y -= rowHeight * 1.5;
+  };
+  centerCover(churchName, 18, true);
+  centerCover('Comprehensive Church Financial Statement', 16, true);
+  centerCover(rangeStr, 12);
+  centerCover(`Generated on: ${format(new Date(), 'MMM dd, yyyy')}`, 10);
+  y -= rowHeight;
+
+  // Summary Page
+  page = pdfDoc.addPage([width, height]);
+  pages.push(page);
+  y = drawHeader(
     page,
     'Comprehensive Church Financial Statement',
     churchName,
@@ -140,8 +156,10 @@ export async function generateChurchFinancialStatementPdf(
     data.summary.ending_balance,
   ];
   summaryLabels.forEach((label, idx) => {
+    const value = summaryValues[idx];
+    if (value === 0) return;
     page.drawText(label, { x: margin, y, size: 12, font });
-    const val = formatAmount(summaryValues[idx]);
+    const val = formatAmount(value);
     const vw = font.widthOfTextAtSize(val, 12);
     page.drawText(val, { x: width - margin - vw, y, size: 12, font: boldFont });
     y -= rowHeight;
@@ -164,30 +182,71 @@ export async function generateChurchFinancialStatementPdf(
   );
   const fundHeaders = ['Fund', 'Opening', 'Income', 'Expenses', 'Ending'];
   const colWidth = (width - margin * 2) / fundHeaders.length;
-  fundHeaders.forEach((h, i) => {
-    page.drawText(h, { x: margin + colWidth * i, y, size: 12, font: boldFont });
-  });
-  y -= rowHeight;
-  data.funds.forEach(f => {
-    const vals = [
-      f.fund_name,
-      formatAmount(f.opening_balance),
-      formatAmount(f.income),
-      formatAmount(f.expenses),
-      formatAmount(f.ending_balance),
-    ];
-    vals.forEach((v, i) => {
-      const fnt = i === 0 ? font : boldFont;
-      const x = margin + colWidth * i;
-      const val = typeof v === 'string' ? v : String(v);
-      page.drawText(val, { x, y, size: 11, font: fnt });
+  const drawFundHeader = () => {
+    fundHeaders.forEach((h, i) => {
+      page.drawText(h, { x: margin + colWidth * i, y, size: 12, font: boldFont });
     });
     y -= rowHeight;
-  });
+  };
+  const newFundPage = () => {
+    page = pdfDoc.addPage([width, height]);
+    pages.push(page);
+    y = drawHeader(
+      page,
+      'Fund Balances',
+      churchName,
+      rangeStr,
+      width,
+      height,
+      font,
+      boldFont,
+      margin,
+      rowHeight,
+    );
+    drawFundHeader();
+  };
+  drawFundHeader();
+  data.funds
+    .filter(f =>
+      f.opening_balance !== 0 || f.income !== 0 || f.expenses !== 0 || f.ending_balance !== 0,
+    )
+    .forEach(f => {
+      if (y - rowHeight < margin) newFundPage();
+      const vals = [
+        f.fund_name,
+        formatAmount(f.opening_balance),
+        formatAmount(f.income),
+        formatAmount(f.expenses),
+        formatAmount(f.ending_balance),
+      ];
+      vals.forEach((v, i) => {
+        const fnt = i === 0 ? font : boldFont;
+        const x = margin + colWidth * i;
+        const val = typeof v === 'string' ? v : String(v);
+        page.drawText(val, { x, y, size: 11, font: fnt });
+      });
+      y -= rowHeight;
+    });
 
   // Income Summary Page
   page = pdfDoc.addPage([width, height]);
   pages.push(page);
+  const addIncomePage = () => {
+    page = pdfDoc.addPage([width, height]);
+    pages.push(page);
+    y = drawHeader(
+      page,
+      'Income Summary',
+      churchName,
+      rangeStr,
+      width,
+      height,
+      font,
+      boldFont,
+      margin,
+      rowHeight,
+    );
+  };
   y = drawHeader(
     page,
     'Income Summary',
@@ -200,27 +259,52 @@ export async function generateChurchFinancialStatementPdf(
     margin,
     rowHeight,
   );
-  data.income.forEach(acc => {
-    page.drawText(acc.account_name, { x: margin, y, size: 12, font: boldFont });
-    y -= rowHeight;
-    acc.categories.forEach(cat => {
-      const label = `- ${cat.category_name}`;
-      page.drawText(label, { x: margin + 20, y, size: 11, font });
-      const amt = formatAmount(cat.amount);
-      const aw = font.widthOfTextAtSize(amt, 11);
-      page.drawText(amt, { x: width - margin - aw, y, size: 11, font });
+  data.income
+    .map(acc => ({
+      ...acc,
+      categories: acc.categories.filter(c => c.amount !== 0),
+    }))
+    .filter(acc => acc.subtotal !== 0 && acc.categories.length > 0)
+    .forEach(acc => {
+      if (y - rowHeight < margin) addIncomePage();
+      page.drawText(acc.account_name, { x: margin, y, size: 12, font: boldFont });
       y -= rowHeight;
+      acc.categories.forEach(cat => {
+        if (y - rowHeight < margin) addIncomePage();
+        const label = `- ${cat.category_name}`;
+        page.drawText(label, { x: margin + 20, y, size: 11, font });
+        const amt = formatAmount(cat.amount);
+        const aw = font.widthOfTextAtSize(amt, 11);
+        page.drawText(amt, { x: width - margin - aw, y, size: 11, font });
+        y -= rowHeight;
+      });
+      const sub = formatAmount(acc.subtotal);
+      const sw = boldFont.widthOfTextAtSize(sub, 11);
+      if (y - rowHeight < margin) addIncomePage();
+      page.drawText('Subtotal', { x: margin + 20, y, size: 11, font: boldFont });
+      page.drawText(sub, { x: width - margin - sw, y, size: 11, font: boldFont });
+      y -= rowHeight * 1.5;
     });
-    const sub = formatAmount(acc.subtotal);
-    const sw = boldFont.widthOfTextAtSize(sub, 11);
-    page.drawText('Subtotal', { x: margin + 20, y, size: 11, font: boldFont });
-    page.drawText(sub, { x: width - margin - sw, y, size: 11, font: boldFont });
-    y -= rowHeight * 1.5;
-  });
 
   // Expense Summary Page
   page = pdfDoc.addPage([width, height]);
   pages.push(page);
+  const addExpensePage = () => {
+    page = pdfDoc.addPage([width, height]);
+    pages.push(page);
+    y = drawHeader(
+      page,
+      'Expense Summary',
+      churchName,
+      rangeStr,
+      width,
+      height,
+      font,
+      boldFont,
+      margin,
+      rowHeight,
+    );
+  };
   y = drawHeader(
     page,
     'Expense Summary',
@@ -233,27 +317,52 @@ export async function generateChurchFinancialStatementPdf(
     margin,
     rowHeight,
   );
-  data.expenses.forEach(acc => {
-    page.drawText(acc.account_name, { x: margin, y, size: 12, font: boldFont });
-    y -= rowHeight;
-    acc.categories.forEach(cat => {
-      const label = `- ${cat.category_name}`;
-      page.drawText(label, { x: margin + 20, y, size: 11, font });
-      const amt = formatAmount(cat.amount);
-      const aw = font.widthOfTextAtSize(amt, 11);
-      page.drawText(amt, { x: width - margin - aw, y, size: 11, font });
+  data.expenses
+    .map(acc => ({
+      ...acc,
+      categories: acc.categories.filter(c => c.amount !== 0),
+    }))
+    .filter(acc => acc.subtotal !== 0 && acc.categories.length > 0)
+    .forEach(acc => {
+      if (y - rowHeight < margin) addExpensePage();
+      page.drawText(acc.account_name, { x: margin, y, size: 12, font: boldFont });
       y -= rowHeight;
+      acc.categories.forEach(cat => {
+        if (y - rowHeight < margin) addExpensePage();
+        const label = `- ${cat.category_name}`;
+        page.drawText(label, { x: margin + 20, y, size: 11, font });
+        const amt = formatAmount(cat.amount);
+        const aw = font.widthOfTextAtSize(amt, 11);
+        page.drawText(amt, { x: width - margin - aw, y, size: 11, font });
+        y -= rowHeight;
+      });
+      const sub = formatAmount(acc.subtotal);
+      const sw = boldFont.widthOfTextAtSize(sub, 11);
+      if (y - rowHeight < margin) addExpensePage();
+      page.drawText('Subtotal', { x: margin + 20, y, size: 11, font: boldFont });
+      page.drawText(sub, { x: width - margin - sw, y, size: 11, font: boldFont });
+      y -= rowHeight * 1.5;
     });
-    const sub = formatAmount(acc.subtotal);
-    const sw = boldFont.widthOfTextAtSize(sub, 11);
-    page.drawText('Subtotal', { x: margin + 20, y, size: 11, font: boldFont });
-    page.drawText(sub, { x: width - margin - sw, y, size: 11, font: boldFont });
-    y -= rowHeight * 1.5;
-  });
 
   // Member Giving Summary Page
   page = pdfDoc.addPage([width, height]);
   pages.push(page);
+  const addGivingPage = () => {
+    page = pdfDoc.addPage([width, height]);
+    pages.push(page);
+    y = drawHeader(
+      page,
+      'Member Giving Summary',
+      churchName,
+      rangeStr,
+      width,
+      height,
+      font,
+      boldFont,
+      margin,
+      rowHeight,
+    );
+  };
   y = drawHeader(
     page,
     'Member Giving Summary',
@@ -266,43 +375,55 @@ export async function generateChurchFinancialStatementPdf(
     margin,
     rowHeight,
   );
-  data.memberGiving.forEach(m => {
-    page.drawText(m.member_name, { x: margin, y, size: 12, font: boldFont });
-    y -= rowHeight;
-    m.categories.forEach(cat => {
-      const label = `- ${cat.category_name}`;
-      page.drawText(label, { x: margin + 20, y, size: 11, font });
-      const amt = formatAmount(cat.amount);
-      const aw = font.widthOfTextAtSize(amt, 11);
-      page.drawText(amt, { x: width - margin - aw, y, size: 11, font });
+  data.memberGiving
+    .map(m => ({
+      ...m,
+      categories: m.categories.filter(c => c.amount !== 0),
+    }))
+    .filter(m => m.total !== 0 && m.categories.length > 0)
+    .forEach(m => {
+      if (y - rowHeight < margin) addGivingPage();
+      page.drawText(m.member_name, { x: margin, y, size: 12, font: boldFont });
       y -= rowHeight;
+      m.categories.forEach(cat => {
+        if (y - rowHeight < margin) addGivingPage();
+        const label = `- ${cat.category_name}`;
+        page.drawText(label, { x: margin + 20, y, size: 11, font });
+        const amt = formatAmount(cat.amount);
+        const aw = font.widthOfTextAtSize(amt, 11);
+        page.drawText(amt, { x: width - margin - aw, y, size: 11, font });
+        y -= rowHeight;
+      });
+      const tot = formatAmount(m.total);
+      const twidth = boldFont.widthOfTextAtSize(tot, 11);
+      if (y - rowHeight < margin) addGivingPage();
+      page.drawText('Total', { x: margin + 20, y, size: 11, font: boldFont });
+      page.drawText(tot, { x: width - margin - twidth, y, size: 11, font: boldFont });
+      y -= rowHeight * 1.5;
     });
-    const tot = formatAmount(m.total);
-    const twidth = boldFont.widthOfTextAtSize(tot, 11);
-    page.drawText('Total', { x: margin + 20, y, size: 11, font: boldFont });
-    page.drawText(tot, { x: width - margin - twidth, y, size: 11, font: boldFont });
-    y -= rowHeight * 1.5;
-  });
 
   // Remarks Page
   if (data.remarks) {
-    page = pdfDoc.addPage([width, height]);
-    pages.push(page);
-    y = drawHeader(
-      page,
-      'Treasurer / Pastoral Remarks',
-      churchName,
-      rangeStr,
-      width,
-      height,
-      font,
-      boldFont,
-      margin,
-      rowHeight,
-    );
+    const addRemarksPage = () => {
+      page = pdfDoc.addPage([width, height]);
+      pages.push(page);
+      y = drawHeader(
+        page,
+        'Treasurer / Pastoral Remarks',
+        churchName,
+        rangeStr,
+        width,
+        height,
+        font,
+        boldFont,
+        margin,
+        rowHeight,
+      );
+    };
+    addRemarksPage();
     const lines = data.remarks.split(/\n+/);
     lines.forEach(line => {
-      const lineWidth = font.widthOfTextAtSize(line, 12);
+      if (y - rowHeight < margin) addRemarksPage();
       page.drawText(line, { x: margin, y, size: 12, font });
       y -= rowHeight;
     });
