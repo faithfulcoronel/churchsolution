@@ -36,9 +36,13 @@ export class FinanceDashboardAdapter {
   }
 
   async fetchFundBalances() {
+    const tenantId = await tenantUtils.getTenantId();
+    if (!tenantId) return [];
+
     const { data, error } = await supabase
       .from("fund_balances_view")
       .select("*")
+      .eq("tenant_id", tenantId)
       .order("name");
     if (error) throw error;
     return data || [];
