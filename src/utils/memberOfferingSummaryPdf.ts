@@ -13,6 +13,35 @@ function formatAmount(amount: number) {
   });
 }
 
+function splitTextIntoLines(text: string, font: any, size: number, maxWidth: number) {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = '';
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(next, size) <= maxWidth) {
+      current = next;
+    } else {
+      if (current) lines.push(current);
+      current = word;
+      while (font.widthOfTextAtSize(current, size) > maxWidth) {
+        let i = 1;
+        while (
+          i <= current.length &&
+          font.widthOfTextAtSize(current.substring(0, i), size) <= maxWidth
+        ) {
+          i++;
+        }
+        const part = current.substring(0, i - 1);
+        lines.push(part);
+        current = current.substring(i - 1);
+      }
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
 export async function generateMemberOfferingSummaryPdf(
   tenantName: string,
   sundayDate: Date,
@@ -27,7 +56,7 @@ export async function generateMemberOfferingSummaryPdf(
 
   const margin = 72; // 1 inch
   const rowHeight = 18;
-  // Additional offset to align text within table cells (1.8 cm in points)
+  const tableYOffset = 51; // shift table downward by ~1.8 cm
   const textShift = 0;
   const tableWidth = width - margin * 2;
 
@@ -69,32 +98,45 @@ export async function generateMemberOfferingSummaryPdf(
       color: rgb(0, 0, 0),
     });
     ty -= rowHeight;
-    y = ty;
+    y = ty - tableYOffset;
   };
 
   const drawTableHeader = () => {
     let x = margin;
     const headerBg = rgb(0.9, 0.9, 0.9);
     const border = rgb(0, 0, 0);
-    const drawCell = (text: string, width: number, alignRight = false) => {
+    const cells = [
+      { text: 'Member Name', width: memberColWidth, alignRight: false },
+      ...categories.map(cat => ({ text: cat, width: colWidth, alignRight: true })),
+      { text: 'Total', width: colWidth, alignRight: true },
+    ];
+
+    const lineArrays = cells.map(c =>
+      splitTextIntoLines(c.text, boldFont, 11, c.width - 4),
+    );
+    const headerLines = Math.max(...lineArrays.map(l => l.length));
+    const headerHeight = rowHeight * headerLines;
+
+    cells.forEach((cell, idx) => {
+      const lines = lineArrays[idx];
       page.drawRectangle({
         x,
-        y: y - rowHeight + 4,
-        width,
-        height: rowHeight,
+        y: y - headerHeight + 4,
+        width: cell.width,
+        height: headerHeight,
         color: headerBg,
         borderColor: border,
         borderWidth: 0.5,
       });
-      const w = boldFont.widthOfTextAtSize(text, 11);
-      const tx = (alignRight ? x + width - w - 2 : x + 2) + textShift;
-      page.drawText(text, { x: tx, y, font: boldFont, size: 11 });
-      x += width;
-    };
-    drawCell('Member Name', memberColWidth);
-    categories.forEach(cat => drawCell(cat, colWidth, true));
-    drawCell('Total', colWidth, true);
-    y -= rowHeight;
+      lines.forEach((line, lineIdx) => {
+        const w = boldFont.widthOfTextAtSize(line, 11);
+        const ty = y - lineIdx * rowHeight;
+        const tx = (cell.alignRight ? x + cell.width - w - 2 : x + 2) + textShift;
+        page.drawText(line, { x: tx, y: ty, font: boldFont, size: 11 });
+      });
+      x += cell.width;
+    });
+    y -= headerHeight;
   };
 
   const addPage = () => {
