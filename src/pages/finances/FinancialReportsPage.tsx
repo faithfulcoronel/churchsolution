@@ -22,6 +22,7 @@ import GivingStatementReport from './financialReports/GivingStatementReport';
 import OfferingSummaryReport from './financialReports/OfferingSummaryReport';
 import CategoryFinancialReport from './financialReports/CategoryFinancialReport';
 import CashFlowSummaryReport from './financialReports/CashFlowSummaryReport';
+import ExpenseSummaryReport from './financialReports/ExpenseSummaryReport';
 
 const reportOptions = [
   { id: 'trial-balance', label: 'Trial Balance' },
@@ -36,6 +37,7 @@ const reportOptions = [
   { id: 'member-offering-summary', label: 'Member Offering Summary' },
   { id: 'category-financial', label: 'Category Based Report' },
   { id: 'cash-flow', label: 'Cash Flow Summary' },
+  { id: 'expense-summary', label: 'Expense Summary' },
 ];
 
 function FinancialReportsPage() {
@@ -184,6 +186,9 @@ function FinancialReportsPage() {
           )}
           {reportType === 'cash-flow' && (
             <CashFlowSummaryReport tenantId={tenantId} dateRange={dateRange} />
+          )}
+          {reportType === 'expense-summary' && (
+            <ExpenseSummaryReport tenantId={tenantId} dateRange={dateRange} />
           )}
         </CardContent>
       </Card>
