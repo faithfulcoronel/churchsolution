@@ -18,7 +18,11 @@ const adapter: IFinanceDashboardAdapter = {
     income_by_category: { Tithe: 120, Offerings: 80 },
     expenses_by_category: { Utilities: 50, Uncategorized: 25 },
   }),
-  fetchFundBalances: async () => [{ id: "f1", name: "General", balance: "25" }],
+  fetchFundBalances: async () => [
+    { id: "f1", name: "General", balance: "25" },
+    { id: "f1", name: "General", balance: "30" },
+    { id: "f2", name: "Missions", balance: "40" },
+  ],
   fetchSourceBalances: async () => [
     { id: "s1", name: "Bank", balance: "100" },
     { id: "s2", name: "Cash", balance: "50" },
@@ -57,7 +61,11 @@ describe("FinanceDashboardRepository mapping", () => {
 
   it("maps fund balances", async () => {
     const funds = await repo.getFundBalances();
-    expect(funds[0]).toEqual({ id: "f1", name: "General", balance: 25 });
+    expect(funds).toEqual([
+      { id: "f1", name: "General", balance: 30 },
+      { id: "f2", name: "Missions", balance: 40 },
+    ]);
+    expect(funds.length).toBe(2);
   });
 
   it("maps source balances", async () => {
