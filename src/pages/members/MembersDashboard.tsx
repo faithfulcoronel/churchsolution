@@ -46,6 +46,7 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui2/dropdown-menu";
 import { Button } from "../../components/ui2/button";
+import AddMemberDialog from "./AddMemberDialog";
 
 interface MemberSummary {
   id: string;
@@ -62,6 +63,7 @@ interface MemberSummary {
 
 function MembersDashboard() {
   const [activeTab, setActiveTab] = React.useState("overview");
+  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
   const navigate = useNavigate();
   const { data: tenant } = useQuery({
     queryKey: ["current-tenant"],
@@ -255,10 +257,11 @@ function MembersDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col md:flex-row gap-4">
-              <Link to="/members/add" className="w-full md:w-1/2">
+              <div className="w-full md:w-1/2">
                 <Card
                   className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1"
                   hoverable
+                  onClick={() => setAddDialogOpen(true)}
                 >
                   <UserPlus className="text-white text-xl" />
                   <span>Add Single Member</span>
@@ -266,7 +269,7 @@ function MembersDashboard() {
                     Individual entry form
                   </span>
                 </Card>
-              </Link>
+              </div>
               <Link to="/members/batch" className="w-full md:w-1/2">
                 <Card
                   className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1"
@@ -354,6 +357,7 @@ function MembersDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+      <AddMemberDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
     </Container>
   );
 }
