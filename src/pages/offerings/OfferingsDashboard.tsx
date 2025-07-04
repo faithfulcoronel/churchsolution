@@ -27,7 +27,7 @@ import {
   Search,
 } from 'lucide-react';
 import DonationActions from '../../components/finances/DonationActions';
-import { DonationItem } from '../../components/finances/RecentDonationItem';
+import { TransactionItem as DonationItem } from '../../components/finances/RecentTransactionItem';
 import { DataGrid } from '../../components/ui2/mui-datagrid';
 import { GridColDef } from '@mui/x-data-grid';
 import { Badge } from '../../components/ui2/badge';

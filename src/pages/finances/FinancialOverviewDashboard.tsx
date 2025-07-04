@@ -29,7 +29,7 @@ import {
   TabsContent,
 } from "../../components/ui2/tabs";
 import { Input } from "../../components/ui2/input";
-import RecentTransactionItem from "../../components/finances/RecentTransactionItem";
+import RecentTransactionItem from "../../components/finances/RecentFinancialTransactionItem";
 import { useFinancialTransactionHeaderRepository } from "../../hooks/useFinancialTransactionHeaderRepository";
 import {
   TrendingUp,

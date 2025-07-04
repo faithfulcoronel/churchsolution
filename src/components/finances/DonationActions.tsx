@@ -22,7 +22,7 @@ import { useIncomeExpenseService } from '../../hooks/useIncomeExpenseService';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
-import type { DonationItem } from './RecentDonationItem';
+import type { TransactionItem as DonationItem } from './RecentTransactionItem';
 import {
   Eye,
   Edit,
