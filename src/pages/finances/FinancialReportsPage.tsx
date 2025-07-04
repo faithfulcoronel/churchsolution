@@ -17,6 +17,7 @@ import IncomeStatementReport from './financialReports/IncomeStatementReport';
 import BudgetVsActualReport from './financialReports/BudgetVsActualReport';
 import FundSummaryReport from './financialReports/FundSummaryReport';
 import MemberGivingSummaryReport from './financialReports/MemberGivingSummaryReport';
+import MemberOfferingSummaryReport from './financialReports/MemberOfferingSummaryReport';
 import GivingStatementReport from './financialReports/GivingStatementReport';
 import OfferingSummaryReport from './financialReports/OfferingSummaryReport';
 import CategoryFinancialReport from './financialReports/CategoryFinancialReport';
@@ -32,6 +33,7 @@ const reportOptions = [
   { id: 'member-giving', label: 'Member Giving Summary' },
   { id: 'giving-statement', label: 'Giving Statement' },
   { id: 'offering-summary', label: 'Offering Summary' },
+  { id: 'member-offering-summary', label: 'Member Offering Summary' },
   { id: 'category-financial', label: 'Category Based Report' },
   { id: 'cash-flow', label: 'Cash Flow Summary' },
 ];
@@ -173,6 +175,9 @@ function FinancialReportsPage() {
           )}
           {reportType === 'offering-summary' && (
             <OfferingSummaryReport tenantId={tenantId} dateRange={dateRange} />
+          )}
+          {reportType === 'member-offering-summary' && (
+            <MemberOfferingSummaryReport tenantId={tenantId} dateRange={dateRange} />
           )}
           {reportType === 'category-financial' && (
             <CategoryFinancialReport tenantId={tenantId} dateRange={dateRange} categoryId={categoryId || undefined} />
