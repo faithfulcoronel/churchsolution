@@ -36,6 +36,37 @@ export class FinanceDashboardAdapter {
     if (error) throw error;
     return data || [];
   }
+
+  async fetchSourceBalances() {
+    const tenantId = await tenantUtils.getTenantId();
+    if (!tenantId) return [];
+
+    const { data: sources, error: srcErr } = await supabase
+      .from("financial_sources")
+      .select("id, name, account_id")
+      .eq("tenant_id", tenantId)
+      .order("name");
+    if (srcErr) throw srcErr;
+
+    const { data: trial, error: trialErr } = await supabase.rpc(
+      "report_trial_balance",
+      { p_tenant_id: tenantId, p_end_date: format(new Date(), "yyyy-MM-dd") },
+    );
+    if (trialErr) throw trialErr;
+
+    const balanceMap = new Map(
+      (trial || []).map((t: any) => [
+        t.account_id,
+        Number(t.debit_balance) - Number(t.credit_balance),
+      ]),
+    );
+
+    return (sources || []).map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      balance: balanceMap.get(s.account_id) || 0,
+    }));
+  }
 }
 
 export interface IFinanceDashboardAdapter extends FinanceDashboardAdapter {}

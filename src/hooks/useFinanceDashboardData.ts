@@ -42,6 +42,11 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
     queryFn: () => repository.getFundBalances(),
   });
 
+  const { data: sourceBalances, isLoading: sourcesLoading } = useQuery({
+    queryKey: ["source-balances"],
+    queryFn: () => repository.getSourceBalances(),
+  });
+
   const monthlyTrendsChartData = useMemo(() => {
     return {
       series: [
@@ -144,10 +149,51 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
     };
   }, [stats, expenseCategories, currency]);
 
+  const fundBalanceChartData = useMemo(() => {
+    return {
+      series: [
+        {
+          name: "Balance",
+          data: (fundBalances || []).map((f) => f.balance),
+        },
+      ],
+      options: {
+        chart: { type: "bar" },
+        xaxis: { categories: (fundBalances || []).map((f) => f.name) },
+        yaxis: {
+          labels: {
+            formatter: (value: number) => formatCurrency(value, currency),
+          },
+        },
+      },
+    };
+  }, [fundBalances, currency]);
+
+  const sourceBalanceChartData = useMemo(() => {
+    return {
+      series: [
+        {
+          name: "Balance",
+          data: (sourceBalances || []).map((s) => s.balance),
+        },
+      ],
+      options: {
+        chart: { type: "bar" },
+        xaxis: { categories: (sourceBalances || []).map((s) => s.name) },
+        yaxis: {
+          labels: {
+            formatter: (value: number) => formatCurrency(value, currency),
+          },
+        },
+      },
+    };
+  }, [sourceBalances, currency]);
+
   const isLoading =
     trendsLoading ||
     statsLoading ||
     fundsLoading ||
+    sourcesLoading ||
     incomeCatsLoading ||
     expenseCatsLoading;
 
@@ -156,9 +202,12 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
     monthlyTrends,
     stats,
     fundBalances,
+    sourceBalances,
     monthlyTrendsChartData,
     incomeCategoryChartData,
     expenseCategoryChartData,
+    fundBalanceChartData,
+    sourceBalanceChartData,
     isLoading,
   };
 }

@@ -5,12 +5,14 @@ import {
   MonthlyTrend,
   FinanceStats,
   FundBalance,
+  SourceBalance,
 } from "../models/financeDashboard.model";
 
 export interface IFinanceDashboardRepository {
   getMonthlyTrends(): Promise<MonthlyTrend[]>;
   getMonthlyStats(startDate: Date, endDate: Date): Promise<FinanceStats | null>;
   getFundBalances(): Promise<FundBalance[]>;
+  getSourceBalances(): Promise<SourceBalance[]>;
 }
 
 @injectable()
@@ -51,6 +53,15 @@ export class FinanceDashboardRepository implements IFinanceDashboardRepository {
 
   async getFundBalances(): Promise<FundBalance[]> {
     const rows = await this.adapter.fetchFundBalances();
+    return rows.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      balance: Number(r.balance),
+    }));
+  }
+
+  async getSourceBalances(): Promise<SourceBalance[]> {
+    const rows = await this.adapter.fetchSourceBalances();
     return rows.map((r: any) => ({
       id: r.id,
       name: r.name,

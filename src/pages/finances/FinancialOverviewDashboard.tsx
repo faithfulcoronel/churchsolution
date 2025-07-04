@@ -71,6 +71,8 @@ function FinancialOverviewDashboard() {
     monthlyTrends,
     incomeCategoryChartData,
     expenseCategoryChartData,
+    fundBalanceChartData,
+    sourceBalanceChartData,
     isLoading,
   } = useFinanceDashboardData(dateRange);
   const { useQuery: useTransactionQuery } = useFinancialTransactionHeaderRepository();
@@ -357,6 +359,35 @@ function FinancialOverviewDashboard() {
               />
             </CardContent>
           </Card>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Financial Source Balances</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Charts
+                  type="bar"
+                  series={sourceBalanceChartData.series}
+                  options={sourceBalanceChartData.options}
+                  height={350}
+                />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Fund Balances</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Charts
+                  type="bar"
+                  series={fundBalanceChartData.series}
+                  options={fundBalanceChartData.options}
+                  height={350}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="transactions" className="mt-4">
