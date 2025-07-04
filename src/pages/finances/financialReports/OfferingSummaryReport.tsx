@@ -32,7 +32,7 @@ export default function OfferingSummaryReport({ tenantId, dateRange }: Props) {
     exportReportPdf(
       data,
       columns.map(c => ({ key: c.accessorKey as string, header: String(c.header) })),
-      { title: 'Offering Summary', fileName: 'offering-summary' },
+      { title: 'Offering Summary', fileName: 'offering-summary', cellFontSize: 8 },
     );
 
   return (
