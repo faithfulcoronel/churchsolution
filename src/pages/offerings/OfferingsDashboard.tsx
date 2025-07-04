@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/t
 import { Input } from '../../components/ui2/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../components/ui2/dropdown-menu';
 import { Button } from '../../components/ui2/button';
+import SingleDonationDialog from './SingleDonationDialog';
 import {
   Users,
   Calendar,
@@ -33,6 +34,7 @@ import { tenantUtils } from '../../utils/tenantUtils';
 function OfferingsDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState('overview');
+  const [showDonationDialog, setShowDonationDialog] = React.useState(false);
   const dateRange = React.useMemo(
     () => ({ from: startOfMonth(new Date()), to: new Date() }),
     []
@@ -192,8 +194,12 @@ function OfferingsDashboard() {
               <CardDescription>Choose how you’d like to record donations</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col md:flex-row gap-4">
-              <Link to="/finances/giving/add" className="w-full md:w-1/2">
-                <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1" hoverable>
+              <div className="w-full md:w-1/2">
+                <Card
+                  className="bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-sm py-5 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-1"
+                  hoverable
+                  onClick={() => setShowDonationDialog(true)}
+                >
                   <HandCoins className="text-white text-xl" />
                   <span>Record Single Donation</span>
                   <span className="text-xs font-normal">Individual entry form</span>
@@ -264,6 +270,10 @@ function OfferingsDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+      <SingleDonationDialog
+        open={showDonationDialog}
+        onOpenChange={setShowDonationDialog}
+      />
     </Container>
   );
 }
