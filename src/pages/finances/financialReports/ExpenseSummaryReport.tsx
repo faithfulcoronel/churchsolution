@@ -75,7 +75,6 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
           format(new Date(row.original.transaction_date), 'MMM dd, yyyy'),
         size: 120,
       },
-      { accessorKey: 'description', header: 'Expense Description' },
       {
         accessorKey: 'category_name',
         header: 'Expense Category',
@@ -86,6 +85,7 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
         ),
         size: 200,
       },
+      { accessorKey: 'description', header: 'Expense Description' },
       {
         accessorKey: 'fund_name',
         header: 'Fund',

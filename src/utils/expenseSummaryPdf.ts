@@ -103,7 +103,7 @@ export async function generateExpenseSummaryPdf(
   };
 
   const drawTableHeader = () => {
-    const headers = ['Expense Description', 'Expense Category', 'Fund', 'Amount'];
+    const headers = ['Expense Category', 'Expense Description', 'Fund', 'Amount'];
     headers.forEach((h, idx) => {
       page.drawText(h, { x: margin + columnWidths.slice(0, idx).reduce((a, b) => a + b, 0), y, size: 10, font: boldFont });
     });
@@ -122,8 +122,8 @@ export async function generateExpenseSummaryPdf(
 
   const drawRow = (r: ExpenseSummaryRecord) => {
     const cellLines = [
-      splitTextIntoLines(r.description || '', font, 8, columnWidths[0] - 2),
-      splitTextIntoLines(r.category_name || '', font, 8, columnWidths[1] - 2),
+      splitTextIntoLines(r.category_name || '', font, 8, columnWidths[0] - 2),
+      splitTextIntoLines(r.description || '', font, 8, columnWidths[1] - 2),
       splitTextIntoLines(r.fund_name || '', font, 8, columnWidths[2] - 2),
       [formatAmount(r.amount)],
     ];
@@ -159,6 +159,22 @@ export async function generateExpenseSummaryPdf(
       page.drawText(dateStr, { x: margin, y, size: 10, font: boldFont });
       y -= rowHeight;
       recs.forEach(r => drawRow(r));
+
+      const subTotal = recs.reduce((sum, r) => sum + r.amount, 0);
+      if (y - rowHeight < margin) addPage();
+      page.drawText('Sub Total', {
+        x: margin + columnWidths[0] + columnWidths[1],
+        y,
+        size: 10,
+        font: boldFont,
+      });
+      page.drawText(formatAmount(subTotal), {
+        x: margin + columnWidths[0] + columnWidths[1] + columnWidths[2],
+        y,
+        size: 10,
+        font: boldFont,
+      });
+      y -= rowHeight * 1.5;
     });
 
   const total = records.reduce((sum, r) => sum + (r.amount || 0), 0);
