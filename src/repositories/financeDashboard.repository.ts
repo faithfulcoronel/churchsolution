@@ -9,7 +9,7 @@ import {
 } from "../models/financeDashboard.model";
 
 export interface IFinanceDashboardRepository {
-  getMonthlyTrends(): Promise<MonthlyTrend[]>;
+  getMonthlyTrends(startDate?: Date, endDate?: Date): Promise<MonthlyTrend[]>;
   getMonthlyStats(startDate: Date, endDate: Date): Promise<FinanceStats | null>;
   getFundBalances(): Promise<FundBalance[]>;
   getSourceBalances(): Promise<SourceBalance[]>;
@@ -22,8 +22,11 @@ export class FinanceDashboardRepository implements IFinanceDashboardRepository {
     private adapter: IFinanceDashboardAdapter,
   ) {}
 
-  async getMonthlyTrends(): Promise<MonthlyTrend[]> {
-    const rows = await this.adapter.fetchMonthlyTrends();
+  async getMonthlyTrends(
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<MonthlyTrend[]> {
+    const rows = await this.adapter.fetchMonthlyTrends(startDate, endDate);
     return rows.map((r: any) => ({
       month: new Date(`${r.month}-01`).toLocaleString("en-US", {
         month: "short",
