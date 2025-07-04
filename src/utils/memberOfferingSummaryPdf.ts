@@ -1,6 +1,41 @@
 import { PDFDocument, StandardFonts, rgb, PDFPage } from 'pdf-lib';
 import { format } from 'date-fns';
 
+function splitTextIntoLines(
+  text: string,
+  font: any,
+  size: number,
+  maxWidth: number,
+) {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = '';
+
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(next, size) <= maxWidth) {
+      current = next;
+    } else {
+      if (current) lines.push(current);
+      current = word;
+      while (font.widthOfTextAtSize(current, size) > maxWidth) {
+        let i = 1;
+        while (
+          i <= current.length &&
+          font.widthOfTextAtSize(current.substring(0, i), size) <= maxWidth
+        ) {
+          i++;
+        }
+        const part = current.substring(0, i - 1);
+        lines.push(part);
+        current = current.substring(i - 1);
+      }
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
 export interface MemberOfferingRecord {
   entry_date: string | Date;
   first_name: string;
@@ -104,10 +139,10 @@ export async function generateMemberOfferingSummaryPdf(
       { text: 'Total', width: colWidth, alignRight: true },
     ];
 
-    const lineArrays = cells.map(c => {
-      return [c.text];
-    });
-    const headerLines = 1;
+    const lineArrays = cells.map(c =>
+      splitTextIntoLines(c.text, boldFont, 10, c.width - 8),
+    );
+    const headerLines = Math.max(...lineArrays.map(l => l.length));
     const headerHeight = rowHeight * headerLines;
 
     cells.forEach((cell, idx) => {
@@ -120,10 +155,17 @@ export async function generateMemberOfferingSummaryPdf(
         borderColor: border,
         borderWidth: 0.5,
       });
-      const line = lineArrays[idx][0];
-      const w = boldFont.widthOfTextAtSize(line, 10);
-      const tx = cell.alignRight ? x + cell.width - w - 4 : x + 4;
-      page.drawText(line, { x: tx, y: y - 8, font: boldFont, size: 10 });
+      const lines = lineArrays[idx];
+      lines.forEach((line, li) => {
+        const w = boldFont.widthOfTextAtSize(line, 10);
+        const tx = cell.alignRight ? x + cell.width - w - 4 : x + 4;
+        page.drawText(line, {
+          x: tx,
+          y: y - rowHeight * li - 8,
+          font: boldFont,
+          size: 10,
+        });
+      });
       x += cell.width + spacing;
     });
     y -= headerHeight;
