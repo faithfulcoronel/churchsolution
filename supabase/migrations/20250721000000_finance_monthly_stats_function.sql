@@ -41,7 +41,7 @@ BEGIN
     SUM(CASE WHEN type = 'income' THEN total ELSE 0 END) AS monthly_income,
     SUM(CASE WHEN type = 'expense' THEN total ELSE 0 END) AS monthly_expenses,
     COALESCE(
-      (SELECT COUNT(*) FROM budgets b
+      (SELECT COUNT(*)::integer FROM budgets b
          WHERE b.tenant_id = tx.tenant_id
            AND p_end_date BETWEEN b.start_date AND b.end_date),
       0
