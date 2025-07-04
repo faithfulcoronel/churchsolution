@@ -57,6 +57,16 @@ function OfferingsDashboard() {
         foreignKey: 'header_id',
         select: ['id', 'status'],
       },
+      {
+        table: 'accounts',
+        foreignKey: 'account_id',
+        select: ['id', 'name'],
+      },
+      {
+        table: 'categories',
+        foreignKey: 'category_id',
+        select: ['id','code', 'name'],
+      },
     ],
     enabled: !!tenant?.id,
   });
@@ -79,6 +89,16 @@ function OfferingsDashboard() {
         table: 'financial_transaction_headers',
         foreignKey: 'header_id',
         select: ['id', 'status'],
+      },
+      {
+        table: 'accounts',
+        foreignKey: 'account_id',
+        select: ['id', 'name'],
+      },
+      {
+        table: 'categories',
+        foreignKey: 'category_id',
+        select: ['id','code', 'name'],
       },
     ],
     enabled: !!tenant?.id,
