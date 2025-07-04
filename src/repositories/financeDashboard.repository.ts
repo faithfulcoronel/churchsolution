@@ -56,11 +56,17 @@ export class FinanceDashboardRepository implements IFinanceDashboardRepository {
 
   async getFundBalances(): Promise<FundBalance[]> {
     const rows = await this.adapter.fetchFundBalances();
-    return rows.map((r: any) => ({
-      id: r.id,
-      name: r.name,
-      balance: Number(r.balance),
-    }));
+    const map = new Map<string, FundBalance>();
+
+    for (const r of rows) {
+      map.set(r.id, {
+        id: r.id,
+        name: r.name,
+        balance: Number(r.balance),
+      });
+    }
+
+    return Array.from(map.values());
   }
 
   async getSourceBalances(): Promise<SourceBalance[]> {
