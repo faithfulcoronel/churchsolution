@@ -204,7 +204,7 @@ function OfferingsDashboard() {
                   <span>Record Single Donation</span>
                   <span className="text-xs font-normal">Individual entry form</span>
                 </Card>
-              </Link>
+              </div>
               <Link to="/finances/giving/add" className="w-full md:w-1/2">
                 <Card className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium py-5 px-6 rounded-lg flex flex-col items-center justify-center gap-1" hoverable>
                   <FileText className="text-xl text-gray-600 dark:text-gray-300" />
