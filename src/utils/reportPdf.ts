@@ -6,6 +6,8 @@ import { useCurrencyStore } from '../stores/currencyStore';
 export interface PdfOptions {
   title: string;
   fileName: string;
+  /** Font size for table cell contents */
+  cellFontSize?: number;
 }
 
 export interface PdfColumn {
@@ -51,7 +53,7 @@ function splitTextIntoLines(
 export async function exportReportPdf(
   data: Record<string, any>[] | undefined,
   columns: PdfColumn[],
-  { title, fileName }: PdfOptions,
+  { title, fileName, cellFontSize = 12 }: PdfOptions,
 ) {
   if (!data || data.length === 0) return;
   if (columns.length === 0) return;
@@ -109,7 +111,12 @@ export async function exportReportPdf(
       ) {
         value = formatCurrency(Number(value) || 0, currency);
       }
-      return splitTextIntoLines(String(value ?? ''), font, 12, columnWidth - 2);
+      return splitTextIntoLines(
+        String(value ?? ''),
+        font,
+        cellFontSize,
+        columnWidth - 2,
+      );
     });
 
     const maxLines = Math.max(...cellLines.map(l => l.length));
@@ -127,7 +134,7 @@ export async function exportReportPdf(
           x: margin + index * columnWidth,
           y: y - lineIdx * rowHeight,
           font,
-          size: 12,
+          size: cellFontSize,
         });
       });
     });
@@ -148,7 +155,7 @@ export async function exportReportPdf(
     page.drawText(`Total: ${formatCurrency(total, currency)}`, {
       x: margin + amountIndex * columnWidth,
       y,
-      size: 12,
+      size: cellFontSize,
       font,
     });
   }
