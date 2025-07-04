@@ -5,7 +5,7 @@ import { MonthlyTrend, FinanceStats, FundBalance } from '../models/financeDashbo
 
 export interface IFinanceDashboardRepository {
   getMonthlyTrends(): Promise<MonthlyTrend[]>;
-  getMonthlyStats(): Promise<FinanceStats | null>;
+  getMonthlyStats(startDate: Date, endDate: Date): Promise<FinanceStats | null>;
   getFundBalances(): Promise<FundBalance[]>;
 }
 
@@ -29,8 +29,8 @@ export class FinanceDashboardRepository implements IFinanceDashboardRepository {
     }));
   }
 
-  async getMonthlyStats(): Promise<FinanceStats | null> {
-    const row = await this.adapter.fetchMonthlyStats();
+  async getMonthlyStats(startDate: Date, endDate: Date): Promise<FinanceStats | null> {
+    const row = await this.adapter.fetchMonthlyStats(startDate, endDate);
     if (!row) return null;
     return {
       monthlyIncome: Number(row.monthly_income),
