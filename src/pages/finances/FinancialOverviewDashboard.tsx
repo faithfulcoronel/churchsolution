@@ -53,38 +53,8 @@ function getExpenseRating(ratio: number) {
 function FinancialOverviewDashboard() {
   const navigate = useNavigate();
   const { currency } = useCurrencyStore();
-  const [activeTab, setActiveTab] = React.useState("overview");
-  const [transactionSearch, setTransactionSearch] = React.useState("");
-  const {
-    monthlyTrends,
-    incomeCategoryChartData,
-    expenseCategoryChartData,
-    isLoading,
-  } = useFinanceDashboardData();
-  const { useQuery: useTransactionQuery } =
-    useFinancialTransactionHeaderRepository();
-  const { data: transactionResult, isLoading: transactionsLoading } =
-    useTransactionQuery({
-      order: { column: "transaction_date", ascending: false },
-      pagination: { page: 1, pageSize: 20 },
-      relationships: [
-        {
-          table: "financial_sources",
-          foreignKey: "source_id",
-          select: ["id", "name", "source_type"],
-        },
-      ],
-    });
-  const transactions = transactionResult?.data || [];
-  const filteredTransactions = React.useMemo(() => {
-    const term = transactionSearch.toLowerCase();
-    return transactions.filter(
-      (t) =>
-        t.transaction_number.toLowerCase().includes(term) ||
-        (t.description || "").toLowerCase().includes(term) ||
-        (t.reference || "").toLowerCase().includes(term),
-    );
-  }, [transactions, transactionSearch]);
+  const [activeTab, setActiveTab] = React.useState('overview');
+  const [transactionSearch, setTransactionSearch] = React.useState('');
 
   const initialFrom = React.useMemo(() => {
     const d = new Date();
@@ -96,6 +66,33 @@ function FinancialOverviewDashboard() {
     from: initialFrom,
     to: new Date(),
   });
+
+  const {
+    monthlyTrends,
+    incomeCategoryChartData,
+    expenseCategoryChartData,
+    isLoading,
+  } = useFinanceDashboardData(dateRange);
+  const { useQuery: useTransactionQuery } = useFinancialTransactionHeaderRepository();
+  const { data: transactionResult, isLoading: transactionsLoading } = useTransactionQuery({
+    order: { column: 'transaction_date', ascending: false },
+    pagination: { page: 1, pageSize: 20 },
+    relationships: [
+      { table: 'financial_sources', foreignKey: 'source_id', select: ['id', 'name', 'source_type'] },
+    ],
+  });
+  
+  const transactions = transactionResult?.data || [];
+  const filteredTransactions = React.useMemo(() => {
+    const term = transactionSearch.toLowerCase();
+    return transactions.filter(
+      (t) =>
+        t.transaction_number.toLowerCase().includes(term) ||
+        (t.description || "").toLowerCase().includes(term) ||
+        (t.reference || "").toLowerCase().includes(term),
+    );
+  }, [transactions, transactionSearch]);
+
 
   const filteredTrends = React.useMemo(() => {
     if (!monthlyTrends) return [];
