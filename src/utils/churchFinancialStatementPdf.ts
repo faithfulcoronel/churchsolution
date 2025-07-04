@@ -82,10 +82,13 @@ const addFooters = (
   margin: number,
   font: any,
 ) => {
+  const generated = `Generated via StewardTrack on: ${format(new Date(), 'MMM dd, yyyy')}`;
   pages.forEach((p, i) => {
+    const footerY = margin / 2;
+    p.drawText(generated, { x: margin, y: footerY, size: 10, font });
     const text = `Page ${i + 1} of ${pages.length}`;
     const tw = font.widthOfTextAtSize(text, 10);
-    p.drawText(text, { x: width - margin - tw, y: margin / 2, size: 10, font });
+    p.drawText(text, { x: width - margin - tw, y: footerY, size: 10, font });
   });
 };
 
@@ -122,7 +125,10 @@ export async function generateChurchFinancialStatementPdf(
   centerCover(churchName, 18, true);
   centerCover('Comprehensive Church Financial Statement', 16, true);
   centerCover(rangeStr, 12);
-  centerCover(`Generated on: ${format(new Date(), 'MMM dd, yyyy')}`, 10);
+  centerCover(
+    `Generated via StewardTrack on: ${format(new Date(), 'MMM dd, yyyy')}`,
+    10,
+  );
   y -= rowHeight;
 
   // Summary Page
