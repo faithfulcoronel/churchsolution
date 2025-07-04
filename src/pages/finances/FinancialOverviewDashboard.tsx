@@ -42,7 +42,7 @@ function FinancialOverviewDashboard() {
     incomeCategoryChartData,
     expenseCategoryChartData,
     isLoading,
-  } = useFinanceDashboardData();
+  } = useFinanceDashboardData(dateRange);
 
   const initialFrom = React.useMemo(() => {
     const d = new Date();
