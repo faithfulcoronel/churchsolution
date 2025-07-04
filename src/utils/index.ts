@@ -17,3 +17,4 @@ export * from './supabaseErrorHandler';
 export * from './accounting';
 export * from './reportPdf';
 export * from './memberGivingSummaryPdf';
+export * from './memberOfferingSummaryPdf';
