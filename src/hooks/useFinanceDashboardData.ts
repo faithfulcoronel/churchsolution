@@ -6,10 +6,14 @@ import type { IFinanceDashboardRepository } from '../repositories/financeDashboa
 import { useCurrencyStore } from '../stores/currencyStore';
 import { formatCurrency } from '../utils/currency';
 import { categoryUtils } from '../utils/categoryUtils';
+import { startOfMonth, endOfMonth } from 'date-fns';
 
-export function useFinanceDashboardData() {
+export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
   const { currency } = useCurrencyStore();
   const repository = container.get<IFinanceDashboardRepository>(TYPES.IFinanceDashboardRepository);
+
+  const start = dateRange?.from ?? startOfMonth(new Date());
+  const end = dateRange?.to ?? endOfMonth(new Date());
 
   const { data: monthlyTrends, isLoading: trendsLoading } = useQuery({
     queryKey: ['monthly-trends'],
@@ -17,8 +21,8 @@ export function useFinanceDashboardData() {
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['finance-stats'],
-    queryFn: () => repository.getMonthlyStats(),
+    queryKey: ['finance-stats', start, end],
+    queryFn: () => repository.getMonthlyStats(start, end),
   });
 
   const { data: incomeCategories, isLoading: incomeCatsLoading } = useQuery({

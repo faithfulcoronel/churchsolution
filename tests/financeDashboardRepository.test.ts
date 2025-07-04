@@ -6,7 +6,7 @@ const adapter: IFinanceDashboardAdapter = {
   fetchMonthlyTrends: async () => [
     { month: '2025-06', income: '100', expenses: '50', percentage_change: '10' },
   ],
-  fetchMonthlyStats: async () => ({
+  fetchMonthlyStats: async (_start: Date, _end: Date) => ({
     monthly_income: '200',
     monthly_expenses: '75',
     active_budgets: 1,
@@ -32,7 +32,7 @@ describe('FinanceDashboardRepository mapping', () => {
   });
 
   it('maps monthly stats', async () => {
-    const stats = await repo.getMonthlyStats();
+    const stats = await repo.getMonthlyStats(new Date('2025-06-01'), new Date('2025-06-30'));
     expect(stats).toEqual({
       monthlyIncome: 200,
       monthlyExpenses: 75,
