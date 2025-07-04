@@ -121,30 +121,31 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
 
   const expenseCategoryChartData = useMemo(() => {
     const totals = stats?.expensesByCategory || {};
-    const merged = (expenseCategories || []).reduce<Record<string, number>>(
-      (acc, c) => {
-        acc[c.name] = totals[c.name] ?? 0;
-        return acc;
-      },
-      {},
-    );
+    const items = (expenseCategories || [])
+      .map((c) => ({ name: c.name, value: totals[c.name] ?? 0 }))
+      .sort((a, b) => b.value - a.value);
 
     return {
-      series: Object.values(merged),
+      series: [
+        {
+          name: "Amount",
+          data: items.map((i) => i.value),
+        },
+      ],
       options: {
-        chart: { type: "donut" },
-        labels: Object.keys(merged),
-        legend: {
-          position: "bottom",
-          labels: { colors: "hsl(var(--foreground))" },
+        chart: { type: "bar" },
+        plotOptions: { bar: { horizontal: true } },
+        xaxis: { categories: items.map((i) => i.name) },
+        yaxis: {
+          labels: {
+            formatter: (value: number) => formatCurrency(value, currency),
+          },
         },
         dataLabels: {
           enabled: true,
-          formatter: (value: number) => `${value.toFixed(2)}%`,
+          formatter: (value: number) => formatCurrency(value, currency),
         },
-        tooltip: {
-          y: { formatter: (value: number) => formatCurrency(value, currency) },
-        },
+        legend: { show: false },
       },
     };
   }, [stats, expenseCategories, currency]);

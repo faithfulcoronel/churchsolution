@@ -425,7 +425,7 @@ function FinancialOverviewDashboard() {
               </CardHeader>
               <CardContent>
                 <Charts
-                  type="donut"
+                  type="bar"
                   series={expenseCategoryChartData.series}
                   options={expenseCategoryChartData.options}
                   height={350}
