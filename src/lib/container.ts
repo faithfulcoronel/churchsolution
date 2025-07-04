@@ -122,6 +122,9 @@ import {
 } from '../repositories/sourceRecentTransaction.repository';
 import { MessageThreadRepository, type IMessageThreadRepository } from '../repositories/messageThread.repository';
 import { MessageRepository, type IMessageRepository } from '../repositories/message.repository';
+import { SettingAdapter, type ISettingAdapter } from '../adapters/setting.adapter';
+import { SettingRepository, type ISettingRepository } from '../repositories/setting.repository';
+import { SupabaseSettingService, type SettingService } from '../services/SettingService';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
 import { DonationImportService } from '../services/DonationImportService';
@@ -235,6 +238,10 @@ container
   .bind<IMessageAdapter>(TYPES.IMessageAdapter)
   .to(MessageAdapter)
   .inSingletonScope();
+container
+  .bind<ISettingAdapter>(TYPES.ISettingAdapter)
+  .to(SettingAdapter)
+  .inSingletonScope();
 
 // Register services
 container
@@ -260,6 +267,10 @@ container
 container
   .bind<AnnouncementService>(TYPES.AnnouncementService)
   .to(SupabaseAnnouncementService)
+  .inSingletonScope();
+container
+  .bind<SettingService>(TYPES.SettingService)
+  .to(SupabaseSettingService)
   .inSingletonScope();
 
 // Register repositories
@@ -368,6 +379,10 @@ container
 container
   .bind<IMessageRepository>(TYPES.IMessageRepository)
   .to(MessageRepository)
+  .inSingletonScope();
+container
+  .bind<ISettingRepository>(TYPES.ISettingRepository)
+  .to(SettingRepository)
   .inSingletonScope();
 
 export { container };
