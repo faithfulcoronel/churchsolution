@@ -15,7 +15,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/t
 import { Input } from '../../components/ui2/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../components/ui2/dropdown-menu';
 import { Button } from '../../components/ui2/button';
-import { DateRangePickerField } from '../../components/ui2/date-range-picker-field';
+import { MonthlyTrendsChart } from '../finances/dashboard/MonthlyTrendsChart';
+import { CategoryDistributionCharts } from '../finances/dashboard/CategoryDistributionCharts';
+import { Charts } from '../../components/ui2/charts';
+import { useFinanceDashboardData } from '../../hooks/useFinanceDashboardData';
 import {
   Users,
   Calendar,
@@ -27,17 +30,20 @@ import {
   Search,
 } from 'lucide-react';
 import RecentDonationItem, { DonationItem } from '../../components/finances/RecentDonationItem';
+import TransactionCardItem from '../../components/finances/TransactionCardItem';
 import { useIncomeExpenseTransactionRepository } from '../../hooks/useIncomeExpenseTransactionRepository';
+import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
 import { useOfferingDashboardData } from '../../hooks/useOfferingDashboardData';
+import type { FinancialTransactionHeader } from '../../models/financialTransactionHeader.model';
 import { tenantUtils } from '../../utils/tenantUtils';
 
 function OfferingsDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState('overview');
-  const [dateRange, setDateRange] = React.useState<{ from: Date; to: Date }>({
+  const dateRange = React.useMemo(() => ({
     from: startOfMonth(new Date()),
     to: new Date(),
-  });
+  }), []);
 
   const { data: tenant } = useQuery({
     queryKey: ['current-tenant'],
@@ -45,6 +51,12 @@ function OfferingsDashboard() {
   });
 
   const metrics = useOfferingDashboardData(dateRange);
+  const {
+    monthlyTrendsChartData,
+    incomeCategoryChartData,
+    expenseCategoryChartData,
+    isLoading: chartLoading,
+  } = useFinanceDashboardData();
 
   const { useQuery: useTxQuery } = useIncomeExpenseTransactionRepository();
   const { data: recentResult } = useTxQuery({
@@ -55,21 +67,21 @@ function OfferingsDashboard() {
   });
   const recentDonations = (recentResult?.data || []) as DonationItem[];
 
-  const [historySearch, setHistorySearch] = React.useState('');
-  const { data: historyResult } = useTxQuery({
+  const [transactionSearch, setTransactionSearch] = React.useState('');
+  const { useQuery: useHeaderQuery } = useFinancialTransactionHeaderRepository();
+  const { data: txResult } = useHeaderQuery({
     filters: {
-      transaction_type: { operator: 'eq', value: 'income' },
-      ...(historySearch.trim()
+      ...(transactionSearch.trim()
         ? {
-            or: `description.ilike.*${historySearch.trim()}*,members.first_name.ilike.*${historySearch.trim()}*,members.last_name.ilike.*${historySearch.trim()}*`,
+            or: `transaction_number.ilike.*${transactionSearch.trim()}*,description.ilike.*${transactionSearch.trim()}*,reference.ilike.*${transactionSearch.trim()}*`,
           }
         : {}),
     },
     order: { column: 'transaction_date', ascending: false },
-    pagination: { page: 1, pageSize: 5 },
+    pagination: { page: 1, pageSize: 20 },
     enabled: !!tenant?.id,
   });
-  const historyDonations = (historyResult?.data || []) as DonationItem[];
+  const topTransactions = (txResult?.data || []) as FinancialTransactionHeader[];
 
   const highlights = [
     {
@@ -106,15 +118,6 @@ function OfferingsDashboard() {
           <p className="mt-2 text-sm text-muted-foreground">Track and manage church donations and offerings</p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-2 items-center">
-          <DateRangePickerField
-            value={{ from: dateRange.from, to: dateRange.to }}
-            onChange={(range) => {
-              if (range.from && range.to) {
-                setDateRange({ from: range.from, to: range.to });
-              }
-            }}
-            showCompactInput
-          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -141,8 +144,18 @@ function OfferingsDashboard() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full grid grid-cols-2 bg-muted p-1 rounded-full">
-          <TabsTrigger value="overview" className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
-          <TabsTrigger value="history" className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">History</TabsTrigger>
+          <TabsTrigger
+            value="overview"
+            className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="transactions"
+            className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            All Transactions
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
@@ -188,21 +201,43 @@ function OfferingsDashboard() {
               </div>
             </CardContent>
           </Card>
+          {chartLoading ? (
+            <div className="flex justify-center py-8">
+              <span className="text-sm text-muted-foreground">Loading charts...</span>
+            </div>
+          ) : (
+            <>
+              <MonthlyTrendsChart data={monthlyTrendsChartData} />
+              <CategoryDistributionCharts
+                incomeData={incomeCategoryChartData}
+                expenseData={expenseCategoryChartData}
+              />
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Expense Breakdown</CardTitle>
+                  <CardDescription>Current month expense categories</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Charts type="donut" series={expenseCategoryChartData.series} options={expenseCategoryChartData.options} height={350} />
+                </CardContent>
+              </Card>
+            </>
+          )}
         </TabsContent>
 
-        <TabsContent value="history" className="mt-4">
+        <TabsContent value="transactions" className="mt-4">
           <Card>
             <CardHeader>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full space-y-4 md:space-y-0">
                 <div className="text-gray-900 dark:text-gray-100">
-                  <CardTitle>Donation Records</CardTitle>
-                  <CardDescription>Search and review donations</CardDescription>
+                  <CardTitle>Top Transactions</CardTitle>
+                  <CardDescription>Recent financial transactions</CardDescription>
                 </div>
                 <div className="w-full md:w-auto">
                   <Input
-                    value={historySearch}
-                    onChange={(e) => setHistorySearch(e.target.value)}
-                    placeholder="Search donations..."
+                    value={transactionSearch}
+                    onChange={(e) => setTransactionSearch(e.target.value)}
+                    placeholder="Search transactions..."
                     icon={<Search className="h-4 w-4" />}
                     className="w-full md:w-64"
                   />
@@ -210,14 +245,16 @@ function OfferingsDashboard() {
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              {historyDonations && historyDonations.length > 0 ? (
-                historyDonations.map((d) => <RecentDonationItem key={d.id} donation={d} />)
+              {topTransactions && topTransactions.length > 0 ? (
+                topTransactions.map((t) => (
+                  <TransactionCardItem key={t.id} transaction={t} />
+                ))
               ) : (
-                <p className="text-sm text-muted-foreground">No donations found.</p>
+                <p className="text-sm text-muted-foreground">No transactions found.</p>
               )}
               <div className="pt-4">
-                <Link to="/finances/giving" className="text-sm text-primary font-medium flex items-center hover:underline">
-                  View all donations <ChevronRight className="h-4 w-4 ml-1" />
+                <Link to="/finances/transactions" className="text-sm text-primary font-medium flex items-center hover:underline">
+                  View all transactions <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
               </div>
             </CardContent>
