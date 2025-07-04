@@ -42,6 +42,7 @@ function splitTextIntoLines(text: string, font: any, size: number, maxWidth: num
   return lines;
 }
 
+
 export async function generateMemberOfferingSummaryPdf(
   tenantName: string,
   sundayDate: Date,
@@ -50,21 +51,18 @@ export async function generateMemberOfferingSummaryPdf(
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  // Landscape A4 dimensions
   const width = 841.89;
   const height = 595.28;
 
-  const margin = 72; // 1 inch
+  const margin = 60;
   const rowHeight = 18;
-  const tableYOffset = 51; // shift table downward by ~1.8 cm
+  const tableYOffset = 51;
   const textShift = 0;
-  const tableWidth = width - margin * 2;
+  const spacing = 1;
+  const tableWidth = width - margin * 2 - spacing * (records.length + 1);
 
-  const categories = Array.from(
-    new Set(records.flatMap(r => Object.keys(r.offerings)))
-  ).sort();
-
-  const memberColWidth = tableWidth * 0.3;
+  const categories = Array.from(new Set(records.flatMap(r => Object.keys(r.offerings)))).sort();
+  const memberColWidth = tableWidth * 0.10;
   const colWidth = (tableWidth - memberColWidth) / (categories.length + 1);
 
   const pages: PDFPage[] = [];
@@ -111,9 +109,7 @@ export async function generateMemberOfferingSummaryPdf(
       { text: 'Total', width: colWidth, alignRight: true },
     ];
 
-    const lineArrays = cells.map(c =>
-      splitTextIntoLines(c.text, boldFont, 11, c.width - 4),
-    );
+    const lineArrays = cells.map(c => splitTextIntoLines(c.text, boldFont, 10, c.width - 4));
     const headerLines = Math.max(...lineArrays.map(l => l.length));
     const headerHeight = rowHeight * headerLines;
 
@@ -129,12 +125,12 @@ export async function generateMemberOfferingSummaryPdf(
         borderWidth: 0.5,
       });
       lines.forEach((line, lineIdx) => {
-        const w = boldFont.widthOfTextAtSize(line, 11);
+        const w = boldFont.widthOfTextAtSize(line, 10);
         const ty = y - lineIdx * rowHeight;
-        const tx = (cell.alignRight ? x + cell.width - w - 2 : x + 2) + textShift;
-        page.drawText(line, { x: tx, y: ty, font: boldFont, size: 11 });
+        const tx = (cell.alignRight ? x + cell.width - w - 4 : x + 4) + textShift;
+        page.drawText(line, { x: tx, y: ty - 8, font: boldFont, size: 10 });
       });
-      x += cell.width;
+      x += cell.width + spacing;
     });
     y -= headerHeight;
   };
@@ -161,11 +157,10 @@ export async function generateMemberOfferingSummaryPdf(
         borderColor: border,
         borderWidth: 0.5,
       });
-      const fontUsed = alignRight ? font : font;
-      const w = fontUsed.widthOfTextAtSize(text, 11);
-      const tx = (alignRight ? x + width - w - 2 : x + 2) + textShift;
-      page.drawText(text, { x: tx, y, size: 11, font: fontUsed });
-      x += width;
+      const w = font.widthOfTextAtSize(text, 10);
+      const tx = (alignRight ? x + width - w - 4 : x + 4) + textShift;
+      page.drawText(text, { x: tx, y: y - 8, size: 10, font });
+      x += width + spacing;
     };
     drawCell(rec.member_name, memberColWidth);
     let total = 0;
@@ -202,14 +197,17 @@ export async function generateMemberOfferingSummaryPdf(
       borderColor: border,
       borderWidth: 0.5,
     });
-    const w = boldFont.widthOfTextAtSize(text, 11);
-    const tx = (alignRight ? x + width - w - 2 : x + 2) + textShift;
-    page.drawText(text, { x: tx, y, size: 11, font: boldFont });
-    x += width;
+    const w = boldFont.widthOfTextAtSize(text, 10);
+    const tx = (alignRight ? x + width - w - 4 : x + 4) + textShift;
+    page.drawText(text, { x: tx, y: y - 8, size: 10, font: boldFont });
+    x += width + spacing;
   };
+
   drawSumCell('Summary Total', memberColWidth);
-  categories.forEach(cat => drawSumCell(formatAmount(summary[cat]), colWidth, true));
-  drawSumCell(formatAmount(summaryTotal), colWidth, true);
+  [...categories, '__TOTAL__'].forEach(cat => {
+    const value = cat === '__TOTAL__' ? formatAmount(summaryTotal) : formatAmount(summary[cat]);
+    drawSumCell(value, colWidth, true);
+  });
   y -= rowHeight;
 
   const pageCount = pages.length;
@@ -222,4 +220,3 @@ export async function generateMemberOfferingSummaryPdf(
   const pdfBytes = await pdfDoc.save();
   return new Blob([pdfBytes], { type: 'application/pdf' });
 }
-
