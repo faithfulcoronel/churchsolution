@@ -1,5 +1,4 @@
-import { PDFDocument, rgb, PDFPage } from 'pdf-lib';
-import fontkit from '@pdf-lib/fontkit';
+import { PDFDocument, StandardFonts, rgb, PDFPage } from 'pdf-lib';
 import { format } from 'date-fns';
 
 export interface MemberGivingRecord {
@@ -46,11 +45,11 @@ function splitTextIntoLines(
   return lines;
 }
 
-const formatPeso = (amount: number) =>
-  `₱${amount.toLocaleString('en-PH', {
+const formatAmount = (amount: number) =>
+  amount.toLocaleString('en-PH', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}`;
+  });
 
 export async function generateMemberGivingSummaryPdf(
   churchName: string,
@@ -58,12 +57,8 @@ export async function generateMemberGivingSummaryPdf(
   records: MemberGivingRecord[],
 ): Promise<Blob> {
   const pdfDoc = await PDFDocument.create();
-  pdfDoc.registerFontkit(fontkit);
-  const fontBytes = await fetch('/fonts/Inter_18pt-Regular.ttf').then(r =>
-    r.arrayBuffer(),
-  );
-  const font = await pdfDoc.embedFont(fontBytes);
-  const boldFont = font;
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const width = 595.28;
   const height = 841.89;
 
@@ -263,7 +258,7 @@ export async function generateMemberGivingSummaryPdf(
           color: fill,
         });
         page.drawText(cat, { x: margin + 8, y, size: 11, font });
-        const amtStr = formatPeso(amt);
+        const amtStr = formatAmount(amt);
         const amtWidth = font.widthOfTextAtSize(amtStr, 11);
         page.drawText(amtStr, {
           x: width - margin - amtWidth,
@@ -286,7 +281,7 @@ export async function generateMemberGivingSummaryPdf(
         color: fill,
       });
       const subLabel = 'Sub Total';
-      const subStr = formatPeso(dateGroup.total);
+      const subStr = formatAmount(dateGroup.total);
       page.drawText(subLabel, { x: margin + 8, y, size: 11, font: boldFont });
       const subWidth = boldFont.widthOfTextAtSize(subStr, 11);
       page.drawText(subStr, {
@@ -297,6 +292,9 @@ export async function generateMemberGivingSummaryPdf(
       });
       y -= rowHeight * 1.5;
     }
+
+    // add space before summary section
+    y -= rowHeight;
 
     const summaryCats = Array.from(member.categoryTotals.entries()).sort((a, b) =>
       a[0].localeCompare(b[0]),
@@ -330,7 +328,7 @@ export async function generateMemberGivingSummaryPdf(
           color: fill,
         });
         page.drawText(cat, { x: margin + 8, y, size: 11, font });
-        const amtStr = formatPeso(amt);
+        const amtStr = formatAmount(amt);
         const amtWidth = font.widthOfTextAtSize(amtStr, 11);
         page.drawText(amtStr, {
           x: width - margin - amtWidth,
@@ -358,7 +356,7 @@ export async function generateMemberGivingSummaryPdf(
         color: fill,
       });
       page.drawText('Grand Total', { x: margin + 8, y, size: 11, font: boldFont });
-      const totalStr = formatPeso(member.total);
+      const totalStr = formatAmount(member.total);
       const totalWidth = boldFont.widthOfTextAtSize(totalStr, 11);
       page.drawText(totalStr, {
         x: width - margin - totalWidth,
