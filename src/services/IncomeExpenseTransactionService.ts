@@ -14,6 +14,7 @@ export interface IncomeExpenseEntry {
   fund_id: string | null;
   category_id: string | null;
   source_id: string | null;
+  description?: string;
   amount: number;
   source_account_id: string | null;
   category_account_id: string | null;
@@ -46,7 +47,7 @@ export class IncomeExpenseTransactionService {
       source_id: line.source_id,
       category_id: line.category_id,
       date: header.transaction_date!,
-      description: header.description || '',
+      description: line.description ?? header.description ?? '',
       batch_id: line.batch_id ?? null,
       header_id: headerId,
     } as any;
@@ -93,7 +94,7 @@ export class IncomeExpenseTransactionService {
       transaction_type: line.transaction_type,
       transaction_date: header.transaction_date!,
       amount: line.amount,
-      description: header.description || '',
+      description: line.description ?? header.description ?? '',
       reference: (header as any).reference ?? null,
       member_id: line.member_id ?? null,
       category_id: line.category_id,
