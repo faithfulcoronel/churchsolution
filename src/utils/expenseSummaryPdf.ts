@@ -207,10 +207,13 @@ export async function generateExpenseSummaryPdf(
       y -= rowHeight;
     });
 
+  const generated = `Generated via StewardTrack on: ${format(new Date(), 'MMM dd, yyyy')}`;
   pages.forEach((p, idx) => {
+    const footerY = margin / 2;
+    p.drawText(generated, { x: margin, y: footerY, size: 10, font });
     const text = `Page ${idx + 1} of ${pages.length}`;
     const tw = font.widthOfTextAtSize(text, 10);
-    p.drawText(text, { x: width / 2 - tw / 2, y: margin / 2, size: 10, font });
+    p.drawText(text, { x: width / 2 - tw / 2, y: footerY, size: 10, font });
   });
 
   const pdfBytes = await pdfDoc.save();
