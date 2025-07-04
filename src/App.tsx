@@ -18,6 +18,7 @@ const Settings = React.lazy(() => import('./pages/Settings'));
 const Members = React.lazy(() => import('./pages/members/Members'));
 const Finances = React.lazy(() => import('./pages/finances/Finances'));
 const Offerings = React.lazy(() => import('./pages/offerings/Offerings'));
+const Expenses = React.lazy(() => import('./pages/expenses/Expenses'));
 const Accounts = React.lazy(() => import('./pages/accounts/Accounts'));
 const Administration = React.lazy(() => import('./pages/admin/Administration'));
 const AnnouncementList = React.lazy(() => import('./pages/announcements/AnnouncementList'));
@@ -146,6 +147,7 @@ function App() {
                   <Route path="/dashboard/*" element={<Dashboard />} />
                   <Route path="/members/*" element={<Members />} />
                   <Route path="/finances/*" element={<Finances />} />
+                  <Route path="/expenses/*" element={<Expenses />} />
                   <Route path="/offerings/*" element={<Offerings />} />
                   <Route path="/accounts/*" element={<Accounts />} />
                   <Route path="/announcements" element={<AnnouncementList />} />
