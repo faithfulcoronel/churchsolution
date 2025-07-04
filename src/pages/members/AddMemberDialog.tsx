@@ -180,7 +180,7 @@ export default function AddMemberDialog({ open, onOpenChange }: AddMemberDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="w-[90vw] sm:w-full sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Member</DialogTitle>
         </DialogHeader>
