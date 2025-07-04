@@ -134,7 +134,13 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
       ],
       options: {
         chart: { type: "bar" },
-        plotOptions: { bar: { horizontal: true } },
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            barHeight: '60%',
+            borderRadius: 8,
+          },
+        },
         xaxis: { categories: items.map((i) => i.name) },
         yaxis: {
           labels: {
