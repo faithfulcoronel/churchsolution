@@ -62,32 +62,32 @@ export function useExpenseDashboardData(dateRange: { from: Date; to: Date }) {
   const weekStart = startOfWeek(dateRange.to, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(dateRange.to, { weekStartsOn: 0 });
 
-  const { data: monthSummary } = useQuery({
+  const { data: monthSummary, isLoading: monthSummaryLoading } = useQuery({
     queryKey: ['expense-summary', monthStart, monthEnd],
     queryFn: () => fetchSummary(monthStart, monthEnd),
   });
 
-  const { data: prevMonthSummary } = useQuery({
+  const { data: prevMonthSummary, isLoading: prevMonthSummaryLoading } = useQuery({
     queryKey: ['expense-summary-prev', prevMonthStart, prevMonthEnd],
     queryFn: () => fetchSummary(prevMonthStart, prevMonthEnd),
   });
 
-  const { data: weekSummary } = useQuery({
+  const { data: weekSummary, isLoading: weekSummaryLoading } = useQuery({
     queryKey: ['expense-summary-week', weekStart, weekEnd],
     queryFn: () => fetchSummary(weekStart, weekEnd),
   });
 
-  const { data: monthCount } = useQuery({
+  const { data: monthCount, isLoading: monthCountLoading } = useQuery({
     queryKey: ['expense-count', monthStart, monthEnd],
     queryFn: () => fetchCount(monthStart, monthEnd),
   });
 
-  const { data: weekCount } = useQuery({
+  const { data: weekCount, isLoading: weekCountLoading } = useQuery({
     queryKey: ['expense-count-week', weekStart, weekEnd],
     queryFn: () => fetchCount(weekStart, weekEnd),
   });
 
-  const { data: payeeCount } = useQuery({
+  const { data: payeeCount, isLoading: payeeCountLoading } = useQuery({
     queryKey: ['expense-payees'],
     queryFn: fetchPayees,
   });
@@ -104,6 +104,14 @@ export function useExpenseDashboardData(dateRange: { from: Date; to: Date }) {
 
   const avgExpense = monthCount && monthCount > 0 ? thisMonthTotal / monthCount : 0;
 
+  const isLoading =
+    monthSummaryLoading ||
+    prevMonthSummaryLoading ||
+    weekSummaryLoading ||
+    monthCountLoading ||
+    weekCountLoading ||
+    payeeCountLoading;
+
   return {
     currency,
     thisMonthTotal,
@@ -112,5 +120,6 @@ export function useExpenseDashboardData(dateRange: { from: Date; to: Date }) {
     thisWeekTotal,
     weekCount: weekCount || 0,
     avgExpense,
+    isLoading,
   };
 }
