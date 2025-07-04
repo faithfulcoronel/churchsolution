@@ -231,6 +231,9 @@ function FinancialOverviewDashboard() {
               >
                 Setup chart of accounts
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/accounts")}>
+                Manage accounts
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() =>
                   navigate("/finances/configuration/donation-categories")
