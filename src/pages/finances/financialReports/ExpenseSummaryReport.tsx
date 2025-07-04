@@ -40,7 +40,11 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
   });
 
   const financeRepo = container.get<IFinanceDashboardRepository>(TYPES.IFinanceDashboardRepository);
-  const { data: fundBalances } = useQuery(['fund-balances'], () => financeRepo.getFundBalances());
+  const { data: fundBalances } = useQuery({
+    queryKey: ['fund-balances'],
+    queryFn: () => financeRepo.getFundBalances(),
+    enabled: !!tenantId,
+  });
 
   const fundMap = React.useMemo(() => {
     const map = new Map<string, number>();
