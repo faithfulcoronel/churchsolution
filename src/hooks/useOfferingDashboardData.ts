@@ -53,32 +53,32 @@ export function useOfferingDashboardData(dateRange: { from: Date; to: Date }) {
   const weekStart = startOfWeek(dateRange.to, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(dateRange.to, { weekStartsOn: 0 });
 
-  const { data: monthSummary } = useQuery({
+  const { data: monthSummary, isLoading: monthSummaryLoading } = useQuery({
     queryKey: ['offering-summary', monthStart, monthEnd],
     queryFn: () => fetchSummary(monthStart, monthEnd),
   });
 
-  const { data: prevMonthSummary } = useQuery({
+  const { data: prevMonthSummary, isLoading: prevMonthSummaryLoading } = useQuery({
     queryKey: ['offering-summary-prev', prevMonthStart, prevMonthEnd],
     queryFn: () => fetchSummary(prevMonthStart, prevMonthEnd),
   });
 
-  const { data: weekSummary } = useQuery({
+  const { data: weekSummary, isLoading: weekSummaryLoading } = useQuery({
     queryKey: ['offering-summary-week', weekStart, weekEnd],
     queryFn: () => fetchSummary(weekStart, weekEnd),
   });
 
-  const { data: monthCount } = useQuery({
+  const { data: monthCount, isLoading: monthCountLoading } = useQuery({
     queryKey: ['offering-count', monthStart, monthEnd],
     queryFn: () => fetchCount(monthStart, monthEnd),
   });
 
-  const { data: weekCount } = useQuery({
+  const { data: weekCount, isLoading: weekCountLoading } = useQuery({
     queryKey: ['offering-count-week', weekStart, weekEnd],
     queryFn: () => fetchCount(weekStart, weekEnd),
   });
 
-  const { data: donorCount } = useQuery({
+  const { data: donorCount, isLoading: donorCountLoading } = useQuery({
     queryKey: ['offering-donors'],
     queryFn: fetchDonors,
   });
@@ -95,6 +95,14 @@ export function useOfferingDashboardData(dateRange: { from: Date; to: Date }) {
 
   const avgDonation = monthCount && monthCount > 0 ? thisMonthTotal / monthCount : 0;
 
+  const isLoading =
+    monthSummaryLoading ||
+    prevMonthSummaryLoading ||
+    weekSummaryLoading ||
+    monthCountLoading ||
+    weekCountLoading ||
+    donorCountLoading;
+
   return {
     currency,
     thisMonthTotal,
@@ -103,5 +111,6 @@ export function useOfferingDashboardData(dateRange: { from: Date; to: Date }) {
     thisWeekTotal,
     weekCount: weekCount || 0,
     avgDonation,
+    isLoading,
   };
 }
