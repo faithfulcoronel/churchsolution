@@ -45,12 +45,24 @@ function FinancialOverviewDashboard() {
   const { currency } = useCurrencyStore();
   const [activeTab, setActiveTab] = React.useState('overview');
   const [transactionSearch, setTransactionSearch] = React.useState('');
+
+  const initialFrom = React.useMemo(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 11);
+    return startOfMonth(d);
+  }, []);
+
+  const [dateRange, setDateRange] = React.useState<{ from: Date; to: Date }>({
+    from: initialFrom,
+    to: new Date(),
+  });
+
   const {
     monthlyTrends,
     incomeCategoryChartData,
     expenseCategoryChartData,
     isLoading,
-  } = useFinanceDashboardData();
+  } = useFinanceDashboardData(dateRange);
   const { useQuery: useTransactionQuery } = useFinancialTransactionHeaderRepository();
   const { data: transactionResult, isLoading: transactionsLoading } = useTransactionQuery({
     order: { column: 'transaction_date', ascending: false },
@@ -69,16 +81,6 @@ function FinancialOverviewDashboard() {
     );
   }, [transactions, transactionSearch]);
 
-  const initialFrom = React.useMemo(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - 11);
-    return startOfMonth(d);
-  }, []);
-
-  const [dateRange, setDateRange] = React.useState<{ from: Date; to: Date }>({
-    from: initialFrom,
-    to: new Date(),
-  });
 
   const filteredTrends = React.useMemo(() => {
     if (!monthlyTrends) return [];
