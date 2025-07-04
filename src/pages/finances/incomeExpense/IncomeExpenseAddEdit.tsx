@@ -24,6 +24,7 @@ interface Entry {
   fund_id: string;
   category_id: string;
   source_id: string;
+  description?: string;
   amount: number;
   source_account_id: string | null;
   category_account_id: string | null;
@@ -100,6 +101,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
       fund_id: '',
       category_id: '',
       source_id: '',
+      description: '',
       amount: 0,
       source_account_id: null,
       category_account_id: null,
@@ -130,6 +132,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           fund_id: e.fund_id || '',
           category_id: e.category_id || '',
           source_id: e.source_id || '',
+          description: e.description || '',
           amount: e.amount || 0,
           source_account_id: e.source_account_id || null,
           category_account_id: e.category_account_id || null,
@@ -195,6 +198,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
         fund_id: '',
         category_id: '',
         source_id: '',
+        description: '',
         amount: 0,
         source_account_id: null,
         category_account_id: null,
@@ -282,6 +286,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                   <th className="px-4 py-2 text-left">Fund</th>
                   <th className="px-4 py-2 text-left">Category</th>
                   <th className="px-4 py-2 text-left">Source</th>
+                  <th className="px-4 py-2 text-left">Description</th>
                   <th className="px-4 py-2 text-right">Amount</th>
                   <th className="px-4 py-2"></th>
                 </tr>
@@ -325,6 +330,14 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                         placeholder="Select source"
                       />
                     </td>
+                    <td className="px-4 py-2">
+                      <Input
+                        value={entry.description || ''}
+                        onChange={e => handleEntryChange(idx, 'description', e.target.value)}
+                        disabled={isDisabled}
+                        placeholder="Description"
+                      />
+                    </td>
                     <td className="px-4 py-2 text-right">
                       <Input
                         type="number"
@@ -344,7 +357,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-border font-medium">
-                  <td className="px-4 py-2" colSpan={4}>Total</td>
+                  <td className="px-4 py-2" colSpan={5}>Total</td>
                   <td className="px-4 py-2 text-right">
                     {formatCurrency(totalAmount, currency)}
                   </td>
