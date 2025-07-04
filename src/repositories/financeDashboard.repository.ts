@@ -1,7 +1,11 @@
-import { injectable, inject } from 'inversify';
-import type { IFinanceDashboardAdapter } from '../adapters/financeDashboard.adapter';
-import { TYPES } from '../lib/types';
-import { MonthlyTrend, FinanceStats, FundBalance } from '../models/financeDashboard.model';
+import { injectable, inject } from "inversify";
+import type { IFinanceDashboardAdapter } from "../adapters/financeDashboard.adapter";
+import { TYPES } from "../lib/types";
+import {
+  MonthlyTrend,
+  FinanceStats,
+  FundBalance,
+} from "../models/financeDashboard.model";
 
 export interface IFinanceDashboardRepository {
   getMonthlyTrends(): Promise<MonthlyTrend[]>;
@@ -19,17 +23,21 @@ export class FinanceDashboardRepository implements IFinanceDashboardRepository {
   async getMonthlyTrends(): Promise<MonthlyTrend[]> {
     const rows = await this.adapter.fetchMonthlyTrends();
     return rows.map((r: any) => ({
-      month: new Date(`${r.month}-01`).toLocaleString('en-US', {
-        month: 'short',
-        year: 'numeric',
+      month: new Date(`${r.month}-01`).toLocaleString("en-US", {
+        month: "short",
+        year: "numeric",
       }),
       income: Number(r.income),
       expenses: Number(r.expenses),
-      percentageChange: r.percentage_change !== null ? Number(r.percentage_change) : null,
+      percentageChange:
+        r.percentage_change !== null ? Number(r.percentage_change) : null,
     }));
   }
 
-  async getMonthlyStats(startDate: Date, endDate: Date): Promise<FinanceStats | null> {
+  async getMonthlyStats(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<FinanceStats | null> {
     const row = await this.adapter.fetchMonthlyStats(startDate, endDate);
     if (!row) return null;
     return {
