@@ -2,11 +2,12 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { format } from 'date-fns';
 
 export interface MemberGivingRecord {
-  member_id: string;
   first_name: string;
   last_name: string;
-  fund_name: string | null;
+  entry_date: string | Date;
+  category_name: string | null;
   amount: number;
+  member_id?: string;
 }
 
 export async function generateMemberGivingSummaryPdf(
@@ -63,19 +64,49 @@ export async function generateMemberGivingSummaryPdf(
 
   drawHeader();
 
+  // Filter records by the provided date range
+  const filtered = records.filter(r => {
+    const d = new Date(r.entry_date);
+    return d >= dateRange.from && d <= dateRange.to;
+  });
+
+  interface DateGroup {
+    categories: Map<string, number>;
+    total: number;
+  }
+
   const groups = new Map<
     string,
-    { name: string; funds: { fund: string; amount: number }[]; total: number }
+    {
+      name: string;
+      dates: Map<string, DateGroup>;
+      categoryTotals: Map<string, number>;
+      total: number;
+    }
   >();
 
-  for (const rec of records) {
-    const key = rec.member_id;
+  for (const rec of filtered) {
+    const key = rec.member_id || `${rec.first_name} ${rec.last_name}`;
     const name = `${rec.first_name} ${rec.last_name}`;
     if (!groups.has(key)) {
-      groups.set(key, { name, funds: [], total: 0 });
+      groups.set(key, {
+        name,
+        dates: new Map(),
+        categoryTotals: new Map(),
+        total: 0,
+      });
     }
     const g = groups.get(key)!;
-    g.funds.push({ fund: rec.fund_name || '', amount: rec.amount });
+    const dateKey = format(new Date(rec.entry_date), 'yyyy-MM-dd');
+    if (!g.dates.has(dateKey)) {
+      g.dates.set(dateKey, { categories: new Map(), total: 0 });
+    }
+    const d = g.dates.get(dateKey)!;
+    const cat = rec.category_name || '';
+    d.categories.set(cat, (d.categories.get(cat) || 0) + rec.amount);
+    d.total += rec.amount;
+
+    g.categoryTotals.set(cat, (g.categoryTotals.get(cat) || 0) + rec.amount);
     g.total += rec.amount;
   }
 
@@ -84,52 +115,89 @@ export async function generateMemberGivingSummaryPdf(
   );
 
   for (const member of members) {
-    const neededSpace =
-      rowHeight * (member.funds.length + 3) + rowHeight; // header + table + gap
-    if (y - neededSpace < margin) newPage();
-
+    if (y - rowHeight < margin) newPage();
     page.drawText(member.name, { x: margin, y, size: 12, font: boldFont });
     y -= rowHeight;
 
-    // table header
-    page.drawText('Fund', { x: margin + 2, y, size: 11, font: boldFont });
-    const amtHeader = 'Amount';
-    const amtHeaderWidth = boldFont.widthOfTextAtSize(amtHeader, 11);
-    page.drawText(amtHeader, {
-      x: width - margin - amtHeaderWidth,
-      y,
-      size: 11,
-      font: boldFont,
-    });
-    y -= rowHeight;
+    const dates = Array.from(member.dates.entries()).sort(
+      (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime(),
+    );
 
-    member.funds.forEach((f, idx) => {
+    for (const [dateKey, dateGroup] of dates) {
       if (y - rowHeight < margin) newPage();
-      if (idx % 2 === 0) {
-        page.drawRectangle({
-          x: margin,
-          y: y - 4,
-          width: width - margin * 2,
-          height: rowHeight,
-          color: rgb(0.95, 0.95, 0.95),
+      page.drawText(format(new Date(dateKey), 'MMM dd, yyyy'), {
+        x: margin + 4,
+        y,
+        size: 11,
+        font: boldFont,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+      y -= rowHeight;
+
+      const cats = Array.from(dateGroup.categories.entries()).sort((a, b) =>
+        a[0].localeCompare(b[0]),
+      );
+      for (const [cat, amt] of cats) {
+        if (y - rowHeight < margin) newPage();
+        page.drawText(cat, { x: margin + 8, y, size: 11, font });
+        const amtStr = amt.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
         });
+        const amtWidth = font.widthOfTextAtSize(amtStr, 11);
+        page.drawText(amtStr, {
+          x: width - margin - amtWidth,
+          y,
+          size: 11,
+          font,
+        });
+        y -= rowHeight;
       }
-      page.drawText(f.fund, { x: margin + 2, y, size: 11, font });
-      const amount = f.amount.toLocaleString(undefined, {
+
+      if (y - rowHeight < margin) newPage();
+      const subLabel = 'Sub Total';
+      const subStr = dateGroup.total.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
-      const amtWidth = font.widthOfTextAtSize(amount, 11);
-      page.drawText(amount, {
-        x: width - margin - amtWidth,
+      page.drawText(subLabel, { x: margin + 8, y, size: 11, font: boldFont });
+      const subWidth = boldFont.widthOfTextAtSize(subStr, 11);
+      page.drawText(subStr, {
+        x: width - margin - subWidth,
         y,
         size: 11,
-        font,
+        font: boldFont,
       });
-      y -= rowHeight;
-    });
+      y -= rowHeight * 1.25;
+    }
 
-    const totalLabel = 'Total';
+    const summaryCats = Array.from(member.categoryTotals.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0]),
+    );
+    if (summaryCats.length > 0) {
+      if (y - rowHeight < margin) newPage();
+      page.drawText('Summary', { x: margin + 2, y, size: 11, font: boldFont });
+      y -= rowHeight;
+      for (const [cat, amt] of summaryCats) {
+        if (y - rowHeight < margin) newPage();
+        page.drawText(cat, { x: margin + 8, y, size: 11, font });
+        const amtStr = amt.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        const amtWidth = font.widthOfTextAtSize(amtStr, 11);
+        page.drawText(amtStr, {
+          x: width - margin - amtWidth,
+          y,
+          size: 11,
+          font,
+        });
+        y -= rowHeight;
+      }
+    }
+
+    if (y - rowHeight < margin) newPage();
+    const totalLabel = 'Grand Total';
     const totalStr = member.total.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
