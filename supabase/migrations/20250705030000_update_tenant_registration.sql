@@ -22,6 +22,7 @@ DECLARE
   member_role_id uuid;
   v_membership_category_id uuid;
   v_status_category_id uuid;
+  v_member_id uuid;
 BEGIN
   -- Input validation
   IF p_tenant_subdomain !~ '^[a-z0-9-]+$' THEN
@@ -266,7 +267,13 @@ BEGIN
     v_status_category_id,
     CURRENT_DATE,
     p_user_id
-  );
+  ) RETURNING id INTO v_member_id;
+
+  -- Link member to tenant_users record
+  UPDATE tenant_users
+  SET member_id = v_member_id
+  WHERE tenant_id = new_tenant_id
+    AND user_id = p_user_id;
 
   RETURN new_tenant_id;
 EXCEPTION
