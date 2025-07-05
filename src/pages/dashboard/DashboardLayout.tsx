@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { Building2, User } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
+import { getCurrentUserMember } from '../../utils/memberUtils';
 import { useAuthStore } from '../../stores/authStore';
 import { Tabs } from '../../components/ui2/tabs';
 import { Card, CardContent } from '../../components/ui2/card';
@@ -14,25 +14,9 @@ function DashboardLayout() {
 
   // Get associated member data
   const { data: memberData } = useQuery({
-    queryKey: ['current-user-member', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-
-      const { data, error } = await supabase
-        .from('members')
-        .select('id, first_name, last_name')
-        .eq('email', user.email)
-        .is('deleted_at', null)
-        .single();
-
-      if (error) {
-        console.error('Error fetching member data:', error);
-        return null;
-      }
-
-      return data;
-    },
-    enabled: !!user?.email,
+    queryKey: ['current-user-member', user?.id],
+    queryFn: getCurrentUserMember,
+    enabled: !!user?.id,
   });
 
   const tabs = [

@@ -1,31 +1,13 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
+import { getCurrentUserMember } from '../utils/memberUtils';
 import { Cake, Book } from 'lucide-react';
 import { Card } from './ui2/card';
 
 function WelcomeGreeting() {
   const { data: member } = useQuery({
     queryKey: ['current-user-member'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) return null;
-
-      // Then get the member details
-      const { data: member, error: memberError } = await supabase
-        .from('members')
-        .select('id, first_name, last_name, birthday')
-        .eq('email', user.email)
-        .is('deleted_at', null)
-        .single();
-
-      if (memberError) {
-        console.error('Error fetching member data:', memberError);
-        return null;
-      }
-
-      return member;
-    },
+    queryFn: getCurrentUserMember,
   });
 
   // Get time-based greeting

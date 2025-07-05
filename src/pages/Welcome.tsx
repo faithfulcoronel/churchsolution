@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { getCurrentUserMember } from '../utils/memberUtils';
 import { tenantUtils } from '../utils/tenantUtils';
 import { usePermissions } from '../hooks/usePermissions';
 import { container } from '../lib/container';
@@ -36,21 +36,7 @@ function Welcome() {
   // Fetch the logged in member
   const { data: member, isLoading: memberLoading } = useQuery({
     queryKey: ['current-user-member'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) return null;
-      const { data, error } = await supabase
-        .from('members')
-        .select('first_name, last_name, email')
-        .eq('email', user.email)
-        .is('deleted_at', null)
-        .single();
-      if (error) {
-        console.error('Error fetching member data:', error);
-        return null;
-      }
-      return data;
-    },
+    queryFn: getCurrentUserMember,
   });
 
   // Fetch current tenant info
