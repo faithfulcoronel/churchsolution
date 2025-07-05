@@ -39,6 +39,9 @@ function getErrorType(error: any): ErrorType {
 // Function to get user-friendly message
 function getUserFriendlyMessage(error: any): string {
   const errorType = getErrorType(error);
+  if (errorType === 'unknown' && error?.message) {
+    return error.message;
+  }
   return USER_FRIENDLY_MESSAGES[errorType];
 }
 
