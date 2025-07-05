@@ -21,8 +21,8 @@ export default function OfferingSummaryReport({ tenantId, dateRange }: Props) {
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'category_name', header: 'Category' },
-      { accessorKey: 'total_amount', header: 'Total Amount' },
+      { accessorKey: 'category_name', header: 'Category', enableSorting: false },
+      { accessorKey: 'total_amount', header: 'Total Amount', enableSorting: false },
     ],
     [],
   );

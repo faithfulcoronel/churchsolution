@@ -21,12 +21,12 @@ export default function JournalReport({ tenantId, dateRange }: Props) {
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'entry_date', header: 'Date' },
-      { accessorKey: 'account_code', header: 'Account Code' },
-      { accessorKey: 'account_name', header: 'Account Name' },
-      { accessorKey: 'description', header: 'Description' },
-      { accessorKey: 'debit', header: 'Debit' },
-      { accessorKey: 'credit', header: 'Credit' },
+      { accessorKey: 'entry_date', header: 'Date', enableSorting: false },
+      { accessorKey: 'account_code', header: 'Account Code', enableSorting: false },
+      { accessorKey: 'account_name', header: 'Account Name', enableSorting: false },
+      { accessorKey: 'description', header: 'Description', enableSorting: false },
+      { accessorKey: 'debit', header: 'Debit', enableSorting: false },
+      { accessorKey: 'credit', header: 'Credit', enableSorting: false },
     ],
     [],
   );

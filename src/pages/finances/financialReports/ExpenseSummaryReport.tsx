@@ -74,6 +74,7 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
         cell: ({ row }) =>
           format(new Date(row.original.transaction_date), 'MMM dd, yyyy'),
         size: 120,
+        enableSorting: false,
       },
       {
         accessorKey: 'category_name',
@@ -84,16 +85,19 @@ export default function ExpenseSummaryReport({ tenantId, dateRange }: Props) {
           </span>
         ),
         size: 200,
+        enableSorting: false,
       },
-      { accessorKey: 'description', header: 'Expense Description' },
+      { accessorKey: 'description', header: 'Expense Description', enableSorting: false },
       {
         accessorKey: 'fund_name',
         header: 'Fund',
+        enableSorting: false,
       },
       {
         accessorKey: 'amount',
         header: 'Amount',
         cell: ({ row }) => formatCurrency(row.original.amount, currency),
+        enableSorting: false,
       },
     ],
     [currency],
