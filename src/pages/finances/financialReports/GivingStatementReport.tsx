@@ -29,10 +29,10 @@ export default function GivingStatementReport({ tenantId, dateRange, memberId }:
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'entry_date', header: 'Date' },
-      { accessorKey: 'fund_name', header: 'Fund' },
-      { accessorKey: 'amount', header: 'Amount' },
-      { accessorKey: 'description', header: 'Description' },
+      { accessorKey: 'entry_date', header: 'Date', enableSorting: false },
+      { accessorKey: 'fund_name', header: 'Fund', enableSorting: false },
+      { accessorKey: 'amount', header: 'Amount', enableSorting: false },
+      { accessorKey: 'description', header: 'Description', enableSorting: false },
     ],
     [],
   );

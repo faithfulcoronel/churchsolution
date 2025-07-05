@@ -18,11 +18,11 @@ export default function TrialBalanceReport({ tenantId, dateRange }: Props) {
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'account_code', header: 'Account Code' },
-      { accessorKey: 'account_name', header: 'Account Name' },
-      { accessorKey: 'account_type', header: 'Account Type' },
-      { accessorKey: 'debit_balance', header: 'Debit' },
-      { accessorKey: 'credit_balance', header: 'Credit' },
+      { accessorKey: 'account_code', header: 'Account Code', enableSorting: false },
+      { accessorKey: 'account_name', header: 'Account Name', enableSorting: false },
+      { accessorKey: 'account_type', header: 'Account Type', enableSorting: false },
+      { accessorKey: 'debit_balance', header: 'Debit', enableSorting: false },
+      { accessorKey: 'credit_balance', header: 'Credit', enableSorting: false },
     ],
     [],
   );

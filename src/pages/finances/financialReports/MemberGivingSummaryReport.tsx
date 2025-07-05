@@ -33,10 +33,10 @@ export default function MemberGivingSummaryReport({ tenantId, dateRange, memberI
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'first_name', header: 'First Name' },
-      { accessorKey: 'last_name', header: 'Last Name' },
-      { accessorKey: 'fund_name', header: 'Fund' },
-      { accessorKey: 'total_amount', header: 'Total Amount' },
+      { accessorKey: 'first_name', header: 'First Name', enableSorting: false },
+      { accessorKey: 'last_name', header: 'Last Name', enableSorting: false },
+      { accessorKey: 'fund_name', header: 'Fund', enableSorting: false },
+      { accessorKey: 'total_amount', header: 'Total Amount', enableSorting: false },
     ],
     [],
   );

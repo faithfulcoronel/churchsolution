@@ -144,10 +144,12 @@ function MemberList() {
           </span>
         </div>
       ),
+      enableSorting: false,
     },
     {
       accessorKey: 'preferred_name',
       header: 'Preferred Name',
+      enableSorting: false,
     },
     {
       accessorKey: 'email',
@@ -158,6 +160,7 @@ function MemberList() {
           {getValue<string>()}
         </div>
       ),
+      enableSorting: false,
     },
     {
       accessorKey: 'contact_number',
@@ -168,6 +171,7 @@ function MemberList() {
           {getValue<string>()}
         </div>
       ),
+      enableSorting: false,
     },
     {
       id: 'membership_status.name',
@@ -180,6 +184,7 @@ function MemberList() {
           </Badge>
         </div>
       ),
+      enableSorting: false,
     },
     {
       accessorKey: 'membership_date',
@@ -193,6 +198,7 @@ function MemberList() {
           </div>
         );
       },
+      enableSorting: false,
     },
     {
       accessorKey: 'birthday',
@@ -206,6 +212,7 @@ function MemberList() {
           </div>
         );
       },
+      enableSorting: false,
     },
   ];
 

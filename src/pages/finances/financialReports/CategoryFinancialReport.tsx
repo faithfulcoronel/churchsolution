@@ -28,9 +28,9 @@ export default function CategoryFinancialReport({ tenantId, dateRange, categoryI
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'category_name', header: 'Category' },
-      { accessorKey: 'income', header: 'Income' },
-      { accessorKey: 'expenses', header: 'Expenses' },
+      { accessorKey: 'category_name', header: 'Category', enableSorting: false },
+      { accessorKey: 'income', header: 'Income', enableSorting: false },
+      { accessorKey: 'expenses', header: 'Expenses', enableSorting: false },
     ],
     [],
   );

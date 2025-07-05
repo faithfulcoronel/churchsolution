@@ -21,10 +21,10 @@ export default function BudgetVsActualReport({ tenantId, dateRange }: Props) {
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'budget_name', header: 'Budget' },
-      { accessorKey: 'budget_amount', header: 'Budgeted' },
-      { accessorKey: 'actual_amount', header: 'Actual' },
-      { accessorKey: 'variance', header: 'Variance' },
+      { accessorKey: 'budget_name', header: 'Budget', enableSorting: false },
+      { accessorKey: 'budget_amount', header: 'Budgeted', enableSorting: false },
+      { accessorKey: 'actual_amount', header: 'Actual', enableSorting: false },
+      { accessorKey: 'variance', header: 'Variance', enableSorting: false },
     ],
     [],
   );

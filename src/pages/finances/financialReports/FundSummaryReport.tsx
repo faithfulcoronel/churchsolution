@@ -22,10 +22,10 @@ export default function FundSummaryReport({ tenantId, dateRange }: Props) {
 
   const columns = React.useMemo<ColumnDef<FundSummary>[]>(
     () => [
-      { accessorKey: 'fund_name', header: 'Fund' },
-      { accessorKey: 'income', header: 'Income' },
-      { accessorKey: 'expenses', header: 'Expenses' },
-      { accessorKey: 'net_change', header: 'Net Change' },
+      { accessorKey: 'fund_name', header: 'Fund', enableSorting: false },
+      { accessorKey: 'income', header: 'Income', enableSorting: false },
+      { accessorKey: 'expenses', header: 'Expenses', enableSorting: false },
+      { accessorKey: 'net_change', header: 'Net Change', enableSorting: false },
     ],
     [],
   );

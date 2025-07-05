@@ -21,10 +21,10 @@ export default function IncomeStatementReport({ tenantId, dateRange }: Props) {
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'account_code', header: 'Account Code' },
-      { accessorKey: 'account_name', header: 'Account Name' },
-      { accessorKey: 'account_type', header: 'Account Type' },
-      { accessorKey: 'amount', header: 'Amount' },
+      { accessorKey: 'account_code', header: 'Account Code', enableSorting: false },
+      { accessorKey: 'account_name', header: 'Account Name', enableSorting: false },
+      { accessorKey: 'account_type', header: 'Account Type', enableSorting: false },
+      { accessorKey: 'amount', header: 'Amount', enableSorting: false },
     ],
     [],
   );

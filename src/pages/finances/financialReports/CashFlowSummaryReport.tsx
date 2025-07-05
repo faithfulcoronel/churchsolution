@@ -21,10 +21,10 @@ export default function CashFlowSummaryReport({ tenantId, dateRange }: Props) {
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
-      { accessorKey: 'month', header: 'Month' },
-      { accessorKey: 'inflow', header: 'Inflow' },
-      { accessorKey: 'outflow', header: 'Outflow' },
-      { accessorKey: 'net_change', header: 'Net Change' },
+      { accessorKey: 'month', header: 'Month', enableSorting: false },
+      { accessorKey: 'inflow', header: 'Inflow', enableSorting: false },
+      { accessorKey: 'outflow', header: 'Outflow', enableSorting: false },
+      { accessorKey: 'net_change', header: 'Net Change', enableSorting: false },
     ],
     [],
   );
