@@ -13,7 +13,8 @@ function Statements() {
 
   const { data: result, isLoading } = useStatements(
     format(dateRange.startDate, 'yyyy-MM-dd'),
-    format(dateRange.endDate, 'yyyy-MM-dd')
+    format(dateRange.endDate, 'yyyy-MM-dd'),
+    undefined
   );
   const statements = result?.data || [];
 
