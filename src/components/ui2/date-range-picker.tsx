@@ -9,14 +9,13 @@ import {
   addDays,
   parse,
 } from 'date-fns';
-import { Calendar as CalendarIcon, ChevronDown, X } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Calendar } from './calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { Input } from './input';
 import { Badge } from './badge';
-import { Separator } from './separator';
 
 export type DateRange = {
   from: Date | undefined;
