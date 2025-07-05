@@ -101,7 +101,11 @@ describe('IncomeExpenseTransactionService', () => {
   });
 
   it('creates expense transactions and records on update', async () => {
-    const entry: IncomeExpenseEntry = { ...baseEntry, transaction_type: 'expense' };
+    const entry: IncomeExpenseEntry = {
+      ...baseEntry,
+      transaction_type: 'expense',
+      isDirty: true,
+    };
     await service.update('t1', header, entry);
 
     expect(mappingRepo.getByTransactionId).toHaveBeenCalledWith('t1');
@@ -114,6 +118,22 @@ describe('IncomeExpenseTransactionService', () => {
       't1',
       expect.objectContaining({ header_id: 'h1' })
     );
+  });
+
+  it('deletes transaction when update called with isDeleted', async () => {
+    const entry: IncomeExpenseEntry = {
+      ...baseEntry,
+      transaction_type: 'expense',
+      isDeleted: true,
+    };
+    await service.update('t1', header, entry);
+
+    expect(mappingRepo.getByTransactionId).toHaveBeenCalledWith('t1');
+    expect(headerRepo.update).toHaveBeenCalledWith('h1', header);
+    expect(ftRepo.delete).toHaveBeenCalledWith('d1');
+    expect(ftRepo.delete).toHaveBeenCalledWith('c1');
+    expect(ieRepo.delete).toHaveBeenCalledWith('t1');
+    expect(mappingRepo.delete).toHaveBeenCalledWith('m1');
   });
 
 
@@ -223,7 +243,19 @@ describe('IncomeExpenseTransactionService', () => {
     ]);
 
     const entries: IncomeExpenseEntry[] = [
-      { id: 't1', ...baseEntry, amount: 15, transaction_type: 'income' },
+      {
+        id: 't1',
+        ...baseEntry,
+        amount: 15,
+        transaction_type: 'income',
+        isDirty: true,
+      },
+      {
+        id: 't2',
+        ...baseEntry,
+        transaction_type: 'income',
+        isDeleted: true,
+      },
       { ...baseEntry, transaction_type: 'expense' }
     ];
 
