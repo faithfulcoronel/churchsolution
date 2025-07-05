@@ -11,10 +11,11 @@ function Statements() {
   const { currency } = useCurrencyStore();
   const { dateRange, setDateRange, useStatements } = useContributionStatements();
 
-  const { data: statements = [], isLoading } = useStatements(
+  const { data: result, isLoading } = useStatements(
     format(dateRange.startDate, 'yyyy-MM-dd'),
     format(dateRange.endDate, 'yyyy-MM-dd')
   );
+  const statements = result?.data || [];
 
   const pdfContent = {
     sections: [
