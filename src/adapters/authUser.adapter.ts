@@ -40,7 +40,6 @@ export class AuthUserAdapter
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       const users = (data || []) as User[];
@@ -67,7 +66,6 @@ export class AuthUserAdapter
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       const user = (data || []).find((u: any) => u.id === id) || null;
@@ -147,7 +145,6 @@ export class AuthUserAdapter
         await supabase.from('user_roles').delete().eq('user_id', userId);
         await supabase.rpc('delete_user', { user_id: userId });
         handleSupabaseError(insertError as any);
-        throw insertError;
       }
 
       const { data: userData, error: fetchError } = await supabase.rpc('get_tenant_user', {
@@ -157,7 +154,6 @@ export class AuthUserAdapter
 
       if (fetchError) {
         handleSupabaseError(fetchError);
-        throw fetchError;
       }
 
       const user = (userData as any)?.[0] as User;
@@ -179,7 +175,6 @@ export class AuthUserAdapter
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       const user = (updated as any) as User;
@@ -196,7 +191,6 @@ export class AuthUserAdapter
       const { error } = await supabase.rpc('delete_user', { user_id: id });
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       await this.auditService.logAuditEvent('delete', 'user', id, { id });

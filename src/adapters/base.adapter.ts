@@ -230,7 +230,6 @@ export class BaseAdapter<T extends BaseModel> {
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       return { data: data || [], count };
@@ -252,7 +251,6 @@ export class BaseAdapter<T extends BaseModel> {
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       return data;
@@ -299,7 +297,6 @@ export class BaseAdapter<T extends BaseModel> {
 
       if (createError) {
         handleSupabaseError(createError);
-        throw createError;
       }
 
       // Handle relations if provided
@@ -352,7 +349,6 @@ export class BaseAdapter<T extends BaseModel> {
 
       if (updateError) {
         handleSupabaseError(updateError);
-        throw updateError;
       }
 
       // Handle relations if provided
@@ -396,7 +392,6 @@ export class BaseAdapter<T extends BaseModel> {
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       // Run post-delete hook

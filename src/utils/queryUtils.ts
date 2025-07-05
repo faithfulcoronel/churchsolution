@@ -212,7 +212,6 @@ export class QueryUtils {
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       return { data: data || [], count };
@@ -239,7 +238,6 @@ export class QueryUtils {
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       return data;
@@ -425,7 +423,6 @@ export class QueryUtils {
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
     } catch (error) {
       console.error(`Error deleting ${table}:`, error);
@@ -446,7 +443,6 @@ export class QueryUtils {
 
       if (error) {
         handleSupabaseError(error);
-        throw error;
       }
 
       return (count || 0) > 0;
