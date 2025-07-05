@@ -15,6 +15,7 @@ import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinan
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import BackButton from '../../../components/BackButton';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { ProgressDialog } from '../../../components/ui2/progress-dialog';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
 
@@ -107,6 +108,8 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
       category_account_id: null,
     },
   ]);
+
+  const [processing, setProcessing] = useState(false);
 
   const header = headerResponse?.data?.[0];
   const entryRecords = entryResponse?.data || [];
@@ -216,12 +219,17 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isEditMode && id) {
-      await updateBatch(id, headerData, entries);
-    } else {
-      await createBatch(headerData, entries);
+    setProcessing(true);
+    try {
+      if (isEditMode && id) {
+        await updateBatch(id, headerData, entries);
+      } else {
+        await createBatch(headerData, entries);
+      }
+      navigate(`/finances/${basePath}`);
+    } catch (error) {
+      setProcessing(false);
     }
-    navigate(`/finances/${basePath}`);
   };
 
   const backLabel = transactionType === 'income' ? 'Back to Donations' : 'Back to Expenses';
@@ -392,6 +400,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           </CardFooter>
         </Card>
       </form>
+      <ProgressDialog open={processing} message="Saving transaction..." />
     </div>
   );
 }
