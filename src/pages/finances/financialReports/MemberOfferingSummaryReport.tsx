@@ -18,10 +18,16 @@ interface Props {
 export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Props) {
   const { useStatements } = useContributionStatements();
   const { currency } = useCurrencyStore();
-  const { data: rawData = [], isLoading } = useStatements(
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(10);
+  const { data: result, isLoading } = useStatements(
     format(dateRange.from, 'yyyy-MM-dd'),
     format(dateRange.to, 'yyyy-MM-dd'),
+    pageSize,
+    pageIndex * pageSize,
   );
+  const rawData = result?.data || [];
+  const recordCount = result?.count ?? rawData.length;
 
   const categories = React.useMemo(() => {
     const set = new Set<string>();
@@ -146,8 +152,15 @@ export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Pro
       </div>
       <DataGrid
         data={tableData}
+        recordCount={recordCount}
         columns={columns}
         loading={isLoading}
+        onPageChange={setPageIndex}
+        onPageSizeChange={size => {
+          setPageSize(size);
+          setPageIndex(0);
+        }}
+        pagination={{ pageSize }}
         exportOptions={{ enabled: true, excel: true, pdf: false, fileName: 'member-offering-summary' }}
       />
     </div>

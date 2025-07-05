@@ -21,13 +21,13 @@ export default function MemberGivingSummaryReport({ tenantId, dateRange, memberI
       ? memberId[0]
       : undefined
     : memberId;
-  const { data: rawData = [], isLoading } = useStatements(
+  const { data: result, isLoading } = useStatements(
     format(dateRange.from, 'yyyy-MM-dd'),
     format(dateRange.to, 'yyyy-MM-dd'),
   );
+  const rawData = result?.data || [];
   const data = React.useMemo(
-    () =>
-      memberParam ? rawData.filter(r => r.member_id === memberParam) : rawData,
+    () => (memberParam ? rawData.filter(r => r.member_id === memberParam) : rawData),
     [rawData, memberParam],
   );
 

@@ -11,21 +11,33 @@ export function useContributionStatements() {
     endDate: format(new Date(), 'yyyy-MM-dd'),
   });
 
-  const useStatements = (startDate?: string, endDate?: string) => {
+  const useStatements = (
+    startDate?: string,
+    endDate?: string,
+    limit?: number,
+    offset?: number,
+  ) => {
     const start = startDate || dateRange.startDate;
     const end = endDate || dateRange.endDate;
 
     return useQuery({
-      queryKey: ['member-statements', start, end],
+      queryKey: ['member-statements', start, end, limit, offset],
       queryFn: async () => {
         try {
-          const { data, error } = await supabase.rpc('get_member_statement', {
-            p_start_date: start,
-            p_end_date: end,
-          });
+          const { data, error, count } = await supabase.rpc(
+            'get_member_statement',
+            {
+              p_start_date: start,
+              p_end_date: end,
+              p_limit: limit,
+              p_offset: offset,
+            },
+            { count: 'exact' },
+          );
 
           if (error) throw error;
-          return (data || []) as {
+          return {
+            data: (data || []) as {
             entry_date: string;
             first_name: string;
             last_name: string;
@@ -33,7 +45,9 @@ export function useContributionStatements() {
             fund_name: string | null;
             source_name: string | null;
             amount: number;
-          }[];
+            }[],
+            count: count ?? 0,
+          };
         } catch (error) {
           console.error('Error fetching member statements:', error);
           addMessage({
