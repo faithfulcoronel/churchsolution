@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
+import { getCurrentUserMember } from '../../utils/memberUtils';
 import { format, subMonths, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
@@ -32,21 +33,9 @@ function PersonalDashboard() {
 
   // Get associated member data
   const { data: memberData } = useQuery({
-    queryKey: ['current-user-member', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-
-      const { data, error } = await supabase
-        .from('members')
-        .select('id, first_name, last_name')
-        .eq('email', user.email)
-        .is('deleted_at', null)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.email,
+    queryKey: ['current-user-member', user?.id],
+    queryFn: getCurrentUserMember,
+    enabled: !!user?.id,
   });
 
   // Get personal monthly trends
