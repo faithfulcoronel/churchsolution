@@ -74,6 +74,12 @@ BEGIN
     p_user_id
   ) RETURNING id INTO v_member_id;
 
+  -- Link member to tenant_users record
+  UPDATE tenant_users
+  SET member_id = v_member_id
+  WHERE tenant_id = p_tenant_id
+    AND user_id = p_user_id;
+
   RETURN jsonb_build_object(
     'member_id', v_member_id,
     'user_id', p_user_id,

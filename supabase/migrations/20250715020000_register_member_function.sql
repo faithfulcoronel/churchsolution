@@ -23,6 +23,7 @@ DECLARE
   password_hash text;
   v_member_type_id uuid;
   v_status_id uuid;
+  v_member_id uuid;
 BEGIN
   -- Ensure email is unique
   IF EXISTS (SELECT 1 FROM auth.users WHERE email = p_email) THEN
@@ -81,9 +82,6 @@ BEGIN
   VALUES (new_user_id, member_role_id, new_user_id)
   ON CONFLICT DO NOTHING;
 
-  -- Tenant relationship
-  INSERT INTO tenant_users (tenant_id, user_id, admin_role, created_by)
-  VALUES (p_tenant_id, new_user_id, 'member', new_user_id);
 
   -- Default membership type and status
   SELECT id INTO v_member_type_id
@@ -117,9 +115,14 @@ BEGIN
     'Not provided',
     v_member_type_id,
     v_status_id,
+
     CURRENT_DATE,
     new_user_id
-  );
+  ) RETURNING id INTO v_member_id;
+
+  -- Tenant relationship linked to member
+  INSERT INTO tenant_users (tenant_id, user_id, admin_role, member_id, created_by)
+  VALUES (p_tenant_id, new_user_id, 'member', v_member_id, new_user_id);
 
   RETURN result;
 END;

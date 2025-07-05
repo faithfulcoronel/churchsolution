@@ -136,6 +136,7 @@ export class AuthUserAdapter
             tenant_id: tenantId,
             user_id: userId,
             admin_role: (data as any).admin_role || 'member',
+            member_id: (data as any).member_id || null,
             created_by: currentUser,
           },
         ]);
