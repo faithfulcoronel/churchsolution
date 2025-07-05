@@ -78,39 +78,6 @@ CREATE POLICY "Membership statuses can be managed by tenant admins" ON membershi
     true
   );
 
--- Update initialize_tenant_categories to also populate new tables
-DROP FUNCTION IF EXISTS initialize_tenant_categories(uuid);
-CREATE OR REPLACE FUNCTION initialize_tenant_categories(p_tenant_id uuid)
-RETURNS void
-SECURITY DEFINER
-SET search_path = public, auth
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  -- Membership Types
-  INSERT INTO membership_type (tenant_id, code, name, is_system, created_by)
-  VALUES
-    (p_tenant_id, 'transfer', 'Transfer', true, auth.uid()),
-    (p_tenant_id, 'baptism', 'Baptism', true, auth.uid()),
-    (p_tenant_id, 'non_member', 'Non-Member', true, auth.uid()),
-    (p_tenant_id, 'non_baptized_member', 'Non-Baptized Member', true, auth.uid());
-
-  -- Member Statuses
-  INSERT INTO membership_status (tenant_id, code, name, is_system, created_by)
-  VALUES
-    (p_tenant_id, 'active', 'Active', true, auth.uid()),
-    (p_tenant_id, 'inactive', 'Inactive', true, auth.uid()),
-    (p_tenant_id, 'under_discipline', 'Under Discipline', true, auth.uid()),
-    (p_tenant_id, 'regular_attender', 'Regular Attender', true, auth.uid()),
-    (p_tenant_id, 'visitor', 'Visitor', true, auth.uid()),
-    (p_tenant_id, 'withdrawn', 'Withdrawn', true, auth.uid()),
-    (p_tenant_id, 'removed', 'Removed', true, auth.uid()),
-    (p_tenant_id, 'donor', 'Donor', true, auth.uid());
-END;
-$$;
-
--- Grant execute permission
-GRANT EXECUTE ON FUNCTION initialize_tenant_categories(uuid) TO authenticated;
 
 -- Update tenant registration function to insert into new tables
 DROP FUNCTION IF EXISTS handle_new_tenant_registration(uuid, text, text, text, text, text, text);
@@ -221,18 +188,22 @@ BEGIN
     (p_user_id, member_role_id, p_user_id)
   ON CONFLICT DO NOTHING;
 
-  -- Insert membership types
+ -- Create membership type and status and capture IDs
+  INSERT INTO membership_type (tenant_id, code, name, is_system, created_by)
+  VALUES (new_tenant_id, 'member', 'Member', true, auth.uid())
+  RETURNING id INTO v_membership_category_id;
+
   INSERT INTO membership_type (tenant_id, code, name, is_system, created_by)
   VALUES
-    (new_tenant_id, 'transfer', 'Transfer', true, p_user_id),
-    (new_tenant_id, 'baptism', 'Baptism', true, p_user_id),
-    (new_tenant_id, 'non_member', 'Non-Member', true, p_user_id),
-    (new_tenant_id, 'non_baptized_member', 'Non-Baptized Member', true, p_user_id);
+    (new_tenant_id, 'non_member', 'Non-Member', true, auth.uid()),
+    (new_tenant_id, 'visitor', 'visitor', true, auth.uid());
 
-  -- Insert membership statuses
+  INSERT INTO membership_status (tenant_id, code, name, is_system, created_by)
+  VALUES (new_tenant_id, 'active', 'Active', true, p_user_id)
+  RETURNING id INTO v_status_category_id;
+
   INSERT INTO membership_status (tenant_id, code, name, is_system, created_by)
   VALUES
-    (new_tenant_id, 'active', 'Active', true, p_user_id),
     (new_tenant_id, 'inactive', 'Inactive', true, p_user_id),
     (new_tenant_id, 'under_discipline', 'Under Discipline', true, p_user_id),
     (new_tenant_id, 'regular_attender', 'Regular Attender', true, p_user_id),
@@ -240,31 +211,6 @@ BEGIN
     (new_tenant_id, 'withdrawn', 'Withdrawn', true, p_user_id),
     (new_tenant_id, 'removed', 'Removed', true, p_user_id),
     (new_tenant_id, 'donor', 'Donor', true, p_user_id);
-
-  -- Create membership categories and capture IDs
-  INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
-  VALUES (new_tenant_id, 'membership', 'baptism', 'Baptism', true, p_user_id)
-  RETURNING id INTO v_membership_category_id;
-
-  INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
-  VALUES (new_tenant_id, 'member_status', 'active', 'Active', true, p_user_id)
-  RETURNING id INTO v_status_category_id;
-
-  INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
-  VALUES
-    (new_tenant_id, 'membership', 'transfer', 'Transfer', true, p_user_id),
-    (new_tenant_id, 'membership', 'non_member', 'Non-Member', true, p_user_id),
-    (new_tenant_id, 'membership', 'non_baptized_member', 'Non-Baptized Member', true, p_user_id);
-
-  INSERT INTO categories (tenant_id, type, code, name, is_system, created_by)
-  VALUES
-    (new_tenant_id, 'member_status', 'inactive', 'Inactive', true, p_user_id),
-    (new_tenant_id, 'member_status', 'under_discipline', 'Under Discipline', true, p_user_id),
-    (new_tenant_id, 'member_status', 'regular_attender', 'Regular Attender', true, p_user_id),
-    (new_tenant_id, 'member_status', 'visitor', 'Visitor', true, p_user_id),
-    (new_tenant_id, 'member_status', 'withdrawn', 'Withdrawn', true, p_user_id),
-    (new_tenant_id, 'member_status', 'removed', 'Removed', true, p_user_id),
-    (new_tenant_id, 'member_status', 'donor', 'Donor', true, p_user_id);
 
   -- Income transaction categories
   INSERT INTO categories (
@@ -372,3 +318,4 @@ GRANT EXECUTE ON FUNCTION handle_new_tenant_registration(uuid, text, text, text,
 
 COMMENT ON FUNCTION handle_new_tenant_registration IS
   'Creates a new tenant with roles, default categories, membership records, and links to default chart of accounts.';
+
