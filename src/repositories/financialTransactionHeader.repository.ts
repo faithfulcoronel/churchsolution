@@ -41,8 +41,7 @@ export class FinancialTransactionHeaderRepository
   }
 
   protected override async afterCreate(data: FinancialTransactionHeader): Promise<void> {
-    // Additional repository-level operations after creation
-    NotificationService.showSuccess(`Transaction "${data.transaction_number}" created successfully`);
+    // Notification handled at service level
   }
 
   protected override async beforeUpdate(id: string, data: Partial<FinancialTransactionHeader>): Promise<Partial<FinancialTransactionHeader>> {
@@ -54,8 +53,7 @@ export class FinancialTransactionHeaderRepository
   }
 
   protected override async afterUpdate(data: FinancialTransactionHeader): Promise<void> {
-    // Additional repository-level operations after update
-    NotificationService.showSuccess(`Transaction "${data.transaction_number}" updated successfully`);
+    // Notification handled at service level
   }
 
   protected override async beforeDelete(id: string): Promise<void> {
@@ -71,8 +69,7 @@ export class FinancialTransactionHeaderRepository
   }
 
   protected override async afterDelete(id: string): Promise<void> {
-    // Additional repository-level cleanup after delete
-    NotificationService.showSuccess('Transaction deleted successfully');
+    // Notification handled at service level
   }
 
   public async createWithTransactions(

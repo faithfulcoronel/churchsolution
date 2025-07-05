@@ -31,7 +31,7 @@ export class IncomeExpenseTransactionMappingRepository
   protected override async afterCreate(
     data: IncomeExpenseTransactionMapping
   ): Promise<void> {
-    NotificationService.showSuccess('Mapping created successfully');
+    // Notification handled at service level
   }
 
   protected override async beforeUpdate(
@@ -45,11 +45,11 @@ export class IncomeExpenseTransactionMappingRepository
   protected override async afterUpdate(
     data: IncomeExpenseTransactionMapping
   ): Promise<void> {
-    NotificationService.showSuccess('Mapping updated successfully');
+    // Notification handled at service level
   }
 
   protected override async afterDelete(id: string): Promise<void> {
-    NotificationService.showSuccess('Mapping deleted successfully');
+    // Notification handled at service level
   }
 
   public async getByTransactionId(
