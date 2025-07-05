@@ -87,6 +87,7 @@ export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Pro
         cell: ({ row }) =>
           format(new Date(row.original.entry_date), 'MMM dd, yyyy'),
         size: 120,
+        enableSorting: false,
       },
       {
         accessorKey: 'member_name',
@@ -97,6 +98,7 @@ export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Pro
           ) : (
             row.original.member_name
           ),
+        enableSorting: false,
       },
       ...categories.map(cat => ({
         accessorKey: cat,
@@ -106,6 +108,7 @@ export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Pro
             {formatCurrency(row.original[cat], currency)}
           </span>
         ),
+        enableSorting: false,
       })),
       {
         accessorKey: 'total',
@@ -115,6 +118,7 @@ export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Pro
             {formatCurrency(row.original.total, currency)}
           </span>
         ),
+        enableSorting: false,
       },
     ],
     [categories, currency],
