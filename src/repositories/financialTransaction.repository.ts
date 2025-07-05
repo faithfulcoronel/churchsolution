@@ -28,7 +28,7 @@ export class FinancialTransactionRepository
   protected override async afterCreate(
     data: FinancialTransaction
   ): Promise<void> {
-    NotificationService.showSuccess('Transaction entry created successfully');
+    // Notification handled at service level
   }
 
   protected override async beforeUpdate(
@@ -42,11 +42,11 @@ export class FinancialTransactionRepository
   protected override async afterUpdate(
     data: FinancialTransaction
   ): Promise<void> {
-    NotificationService.showSuccess('Transaction entry updated successfully');
+    // Notification handled at service level
   }
 
   protected override async afterDelete(id: string): Promise<void> {
-    NotificationService.showSuccess('Transaction entry deleted successfully');
+    // Notification handled at service level
   }
 
   private formatData(
