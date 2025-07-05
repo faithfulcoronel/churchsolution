@@ -7,6 +7,7 @@ import {
   isBefore,
   isAfter,
   addDays,
+  parse,
 } from 'date-fns';
 import { Calendar as CalendarIcon, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -64,6 +65,21 @@ export function DateRangePicker({
   helperText,
 }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false);
+  const [range, setRange] = React.useState<DateRange>(value);
+  const [fromInput, setFromInput] = React.useState(
+    value.from ? format(value.from, 'yyyy-MM-dd') : ''
+  );
+  const [toInput, setToInput] = React.useState(
+    value.to ? format(value.to, 'yyyy-MM-dd') : ''
+  );
+
+  React.useEffect(() => {
+    if (open) {
+      setRange(value);
+      setFromInput(value.from ? format(value.from, 'yyyy-MM-dd') : '');
+      setToInput(value.to ? format(value.to, 'yyyy-MM-dd') : '');
+    }
+  }, [open, value]);
   
   // Default presets if none provided
   const defaultPresets: DateRangePreset[] = [
@@ -155,28 +171,61 @@ export function DateRangePicker({
   const finalPresets = presets || defaultPresets;
 
   const handleClear = () => {
+    setRange({ from: undefined, to: undefined });
+    setFromInput('');
+    setToInput('');
     onChange({ from: undefined, to: undefined });
     setOpen(false);
   };
 
   const handlePresetSelect = (preset: DateRangePreset) => {
-    onChange(preset.range());
-    setOpen(false);
+    const r = preset.range();
+    setRange(r);
+    setFromInput(r.from ? format(r.from, 'yyyy-MM-dd') : '');
+    setToInput(r.to ? format(r.to, 'yyyy-MM-dd') : '');
   };
 
-  const handleSelect = (day: Date) => {
-    const date = startOfDay(day);
-
-    if (!value.from) {
-      onChange({ from: date, to: undefined });
-    } else if (value.from && !value.to) {
-      if (isBefore(date, value.from)) {
-        onChange({ from: date, to: value.from });
-      } else {
-        onChange({ from: value.from, to: date });
-      }
+  const handleCalendarSelect = (r: { from?: Date; to?: Date } | undefined) => {
+    if (r?.from) {
+      const from = startOfDay(r.from);
+      const to = r.to ? endOfDay(r.to) : undefined;
+      setRange({ from, to });
+      setFromInput(format(from, 'yyyy-MM-dd'));
+      setToInput(to ? format(to, 'yyyy-MM-dd') : '');
     } else {
-      onChange({ from: date, to: undefined });
+      setRange({ from: undefined, to: undefined });
+      setFromInput('');
+      setToInput('');
+    }
+  };
+
+  const handleFromInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFromInput(val);
+    const parsed = parse(val, 'yyyy-MM-dd', new Date());
+    if (isValid(parsed)) {
+      const from = startOfDay(parsed);
+      let to = range.to;
+      if (to && isAfter(from, to)) {
+        to = undefined;
+        setToInput('');
+      }
+      setRange({ from, to });
+    }
+  };
+
+  const handleToInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setToInput(val);
+    const parsed = parse(val, 'yyyy-MM-dd', new Date());
+    if (isValid(parsed)) {
+      const to = endOfDay(parsed);
+      let from = range.from;
+      if (from && isAfter(from, to)) {
+        from = undefined;
+        setFromInput('');
+      }
+      setRange({ from, to });
     }
   };
 
@@ -268,39 +317,42 @@ export function DateRangePicker({
               </div>
             )}
             <div className="p-2 sm:p-3">
+              <div className="flex items-center gap-2 mb-3">
+                <Input
+                  type="text"
+                  value={fromInput}
+                  placeholder="From"
+                  onChange={handleFromInputChange}
+                  className="w-[150px] dark:bg-muted dark:border-border"
+                />
+                <span className="text-sm text-muted-foreground">to</span>
+                <Input
+                  type="text"
+                  value={toInput}
+                  placeholder="To"
+                  onChange={handleToInputChange}
+                  className="w-[150px] dark:bg-muted dark:border-border"
+                />
+              </div>
               <Calendar
                 mode="range"
                 captionLayout="dropdown-buttons"
                 fromYear={1900}
                 toYear={new Date().getFullYear() + 10}
                 selected={{
-                  from: value.from,
-                  to: value.to,
+                  from: range.from,
+                  to: range.to,
                 }}
-                onSelect={(range) => {
-                  if (range?.from) {
-                    if (range.to) {
-                      onChange({ 
-                        from: startOfDay(range.from), 
-                        to: endOfDay(range.to) 
-                      });
-                      setOpen(false);
-                    } else {
-                      onChange({ from: startOfDay(range.from), to: undefined });
-                    }
-                  } else {
-                    onChange({ from: undefined, to: undefined });
-                  }
-                }}
+                onSelect={handleCalendarSelect}
                 initialFocus
                 numberOfMonths={2}
                 className="flex flex-col sm:flex-row gap-2"
               />
               <div className="flex items-center justify-between pt-4 border-t mt-4 dark:border-border">
                 <div className="text-sm text-muted-foreground">
-                  {value.from && value.to && (
+                  {range.from && range.to && (
                     <Badge variant="secondary" className="font-normal dark:bg-muted dark:text-muted-foreground">
-                      {`${format(value.from, 'MMM d, yyyy')} - ${format(value.to, 'MMM d, yyyy')}`}
+                      {`${format(range.from, 'MMM d, yyyy')} - ${format(range.to, 'MMM d, yyyy')}`}
                     </Badge>
                   )}
                 </div>
@@ -309,14 +361,17 @@ export function DateRangePicker({
                     variant="outline"
                     size="sm"
                     onClick={handleClear}
-                    disabled={!value.from}
+                    disabled={!range.from}
                     className="dark:border-border dark:bg-muted"
                   >
                     Clear
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      onChange(range);
+                      setOpen(false);
+                    }}
                   >
                     Apply
                   </Button>
