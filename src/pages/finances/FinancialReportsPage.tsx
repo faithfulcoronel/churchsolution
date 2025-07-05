@@ -49,6 +49,7 @@ function FinancialReportsPage() {
   );
   const [dateRange, setDateRange] = useState({ from: new Date(), to: new Date() });
   const [memberId, setMemberId] = useState<string | null>(null);
+  const [memberIds, setMemberIds] = useState<string[]>([]);
   const [fundId, setFundId] = useState<string | null>(null);
   const [accountIds, setAccountIds] = useState<string[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -132,7 +133,17 @@ function FinancialReportsPage() {
               className="max-w-xs"
             />
           )}
-          {['member-giving', 'giving-statement'].includes(reportType) && (
+          {reportType === 'member-giving' && (
+            <MultiSelect
+              label="Member"
+              options={memberOptions}
+              value={memberIds}
+              onChange={setMemberIds}
+              placeholder="Select member"
+              className="max-w-xs"
+            />
+          )}
+          {reportType === 'giving-statement' && (
             <Combobox
               options={memberOptions}
               value={memberId || ''}
@@ -180,7 +191,7 @@ function FinancialReportsPage() {
             <FundSummaryReport tenantId={tenantId} dateRange={dateRange} />
           )}
           {reportType === 'member-giving' && (
-            <MemberGivingSummaryReport tenantId={tenantId} dateRange={dateRange} memberId={memberId || undefined} />
+            <MemberGivingSummaryReport tenantId={tenantId} dateRange={dateRange} memberId={memberIds} />
           )}
           {reportType === 'giving-statement' && (
             <GivingStatementReport tenantId={tenantId} dateRange={dateRange} memberId={memberId || undefined} />
