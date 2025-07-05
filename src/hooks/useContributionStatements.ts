@@ -14,6 +14,7 @@ export function useContributionStatements() {
   const useStatements = (
     startDate?: string,
     endDate?: string,
+    memberIds?: string | string[],
     limit?: number,
     offset?: number,
   ) => {
@@ -21,7 +22,7 @@ export function useContributionStatements() {
     const end = endDate || dateRange.endDate;
 
     return useQuery({
-      queryKey: ['member-statements', start, end, limit, offset],
+      queryKey: ['member-statements', start, end, memberIds, limit, offset],
       queryFn: async () => {
         try {
           const { data, error, count } = await supabase.rpc(
@@ -29,6 +30,11 @@ export function useContributionStatements() {
             {
               p_start_date: start,
               p_end_date: end,
+              p_member_ids: Array.isArray(memberIds)
+                ? memberIds
+                : memberIds
+                ? [memberIds]
+                : null,
               p_limit: limit,
               p_offset: offset,
             },
@@ -38,13 +44,14 @@ export function useContributionStatements() {
           if (error) throw error;
           return {
             data: (data || []) as {
-            entry_date: string;
-            first_name: string;
-            last_name: string;
-            category_name: string | null;
-            fund_name: string | null;
-            source_name: string | null;
-            amount: number;
+              entry_date: string;
+              member_id: string;
+              first_name: string;
+              last_name: string;
+              category_name: string | null;
+              fund_name: string | null;
+              source_name: string | null;
+              amount: number;
             }[],
             count: count ?? 0,
           };

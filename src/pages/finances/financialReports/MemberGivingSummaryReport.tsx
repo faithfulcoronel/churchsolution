@@ -24,12 +24,18 @@ export default function MemberGivingSummaryReport({ tenantId, dateRange, memberI
   const { data: result, isLoading } = useStatements(
     format(dateRange.from, 'yyyy-MM-dd'),
     format(dateRange.to, 'yyyy-MM-dd'),
+    memberId,
   );
   const rawData = result?.data || [];
-  const data = React.useMemo(
-    () => (memberParam ? rawData.filter(r => r.member_id === memberParam) : rawData),
-    [rawData, memberParam],
-  );
+  const filtered = React.useMemo(() => {
+    if (Array.isArray(memberId) && memberId.length > 0) {
+      return rawData.filter(r => memberId.includes(r.member_id));
+    }
+    if (typeof memberId === 'string' && memberId) {
+      return rawData.filter(r => r.member_id === memberId);
+    }
+    return rawData;
+  }, [rawData, memberId]);
 
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
@@ -47,7 +53,7 @@ export default function MemberGivingSummaryReport({ tenantId, dateRange, memberI
     const blob = await generateMemberGivingSummaryPdf(
       tenant?.name || '',
       dateRange,
-      data,
+      filtered,
     );
     const url = URL.createObjectURL(blob);
     const fileName = `member-giving-summary-${memberParam || 'all'}-${format(new Date(), 'yyyyMMdd')}.pdf`;
@@ -67,7 +73,7 @@ export default function MemberGivingSummaryReport({ tenantId, dateRange, memberI
         <Button variant="outline" onClick={handlePdf} icon={<Download className="h-4 w-4" />}>PDF</Button>
       </div>
       <DataGrid
-        data={data || []}
+        data={filtered || []}
         columns={columns}
         loading={isLoading}
         exportOptions={{ enabled: true, excel: true, pdf: false, fileName: 'member-giving' }}

@@ -21,6 +21,7 @@ export default function MemberOfferingSummaryReport({ tenantId, dateRange }: Pro
   const { data: result, isLoading } = useStatements(
     format(dateRange.from, 'yyyy-MM-dd'),
     format(dateRange.to, 'yyyy-MM-dd'),
+    undefined,
   );
   const rawData = result?.data || [];
 
