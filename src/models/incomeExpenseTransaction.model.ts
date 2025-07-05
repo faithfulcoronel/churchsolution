@@ -29,4 +29,5 @@ export interface IncomeExpenseTransaction extends BaseModel {
   account?: Account;
   header_id: string | null;
   header?: FinancialTransactionHeader;
+  line: number | null;
 }

@@ -20,6 +20,7 @@ export interface IncomeExpenseEntry {
   category_account_id: string | null;
   batch_id?: string | null;
   member_id?: string | null;
+  line?: number | null;
   isDirty?: boolean;
   isDeleted?: boolean;
 }
@@ -114,6 +115,7 @@ export class IncomeExpenseTransactionService {
       source_id: line.source_id,
       account_id: line.accounts_account_id,
       header_id: headerId,
+      line: line.line ?? null,
     };
   }
 
