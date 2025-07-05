@@ -37,6 +37,7 @@ export function DatePickerInput({
     value ? format(value, 'yyyy-MM-dd') : ''
   );
   const [isOpen, setIsOpen] = React.useState(false);
+  const id = React.useId();
 
   React.useEffect(() => {
     setDate(value);
@@ -60,11 +61,12 @@ export function DatePickerInput({
   };
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn('relative', className)}>
       {label && (
-        <label 
+        <label
+          htmlFor={id}
           className={cn(
-            "block text-sm font-medium mb-1.5 dark:text-muted-foreground",
+            'block text-sm font-medium mb-1.5 dark:text-muted-foreground',
             error ? 'text-destructive' : 'text-foreground',
             disabled && 'opacity-50'
           )}
@@ -78,11 +80,12 @@ export function DatePickerInput({
         <PopoverTrigger asChild>
           <div className="relative">
             <Input
+              id={id}
               type="text"
               value={inputValue}
               onChange={handleInputChange}
               placeholder={placeholder}
-              className={cn(error && "border-destructive", "dark:bg-muted dark:border-border")}
+              className={cn(error && 'border-destructive', 'dark:bg-muted dark:border-border')}
               disabled={disabled}
               icon={<CalendarIcon className="h-4 w-4" />}
               clearable={clearable && !!date}
@@ -99,7 +102,7 @@ export function DatePickerInput({
             selected={date}
             onSelect={handleSelect}
             initialFocus
-            captionLayout="dropdown"
+            captionLayout="dropdown-buttons"
             fromYear={1900}
             toYear={new Date().getFullYear() + 10}
           />
