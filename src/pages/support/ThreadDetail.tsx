@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMessageThreadRepository } from '../../hooks/useMessageThreadRepository';
 import { useMessageRepository } from '../../hooks/useMessageRepository';
@@ -9,7 +9,11 @@ import { Textarea } from '../../components/ui2/textarea';
 import { Button } from '../../components/ui2/button';
 import { Badge } from '../../components/ui2/badge';
 import { Separator } from '../../components/ui2/separator';
-import { Avatar, AvatarFallback } from '../../components/ui2/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui2/avatar';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../../components/ui2/tooltip';
+import { useUserRepository } from '../../hooks/useUserRepository';
+import { supabase } from '../../lib/supabase';
+import type { User } from '../../models/user.model';
 import { Loader2, Send, MessageCircle, AlertTriangle, User, Calendar, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
@@ -37,6 +41,20 @@ function ThreadDetail() {
     order: { column: 'created_at', ascending: true }
   });
   const messages = messagesResult?.data as Message[] | undefined;
+
+  // Fetch user details for message senders
+  const { useQuery: useUsersQuery } = useUserRepository();
+  const senderIds = Array.from(new Set(messages?.map(m => m.sender_id) || []));
+  const { data: usersResult } = useUsersQuery({
+    filters: { id: { operator: 'isAnyOf', value: senderIds } },
+    enabled: senderIds.length > 0
+  });
+  const users = (usersResult?.data || []) as User[];
+  const userMap = useMemo(() => {
+    const map = new Map<string, User>();
+    users.forEach(u => map.set(u.id, u));
+    return map;
+  }, [users]);
   
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -47,7 +65,7 @@ function ThreadDetail() {
 
   const handleSend = async () => {
     if (!body.trim() || !id) return;
-    
+
     try {
       // Create the message
       await createMutation.mutateAsync({ data: { thread_id: id, body } });
@@ -62,6 +80,36 @@ function ThreadDetail() {
       
       // Clear the input
       setBody('');
+
+      // Schedule notification if no reply within 5 minutes
+      if (user && thread) {
+        const other = messages?.find(m => m.sender_id !== user.id)?.sender_id;
+        const recipientId = thread.created_by === user.id ? other || thread.created_by : thread.created_by;
+        if (recipientId) {
+          setTimeout(async () => {
+            const { data: latest } = await supabase
+              .from('messages')
+              .select('sender_id')
+              .eq('thread_id', id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (latest && latest.sender_id === user.id) {
+              await supabase.from('notifications').insert({
+                user_id: recipientId,
+                tenant_id: thread.tenant_id,
+                title: 'New Support Message',
+                message: `New message in thread "${thread.subject}"`,
+                type: 'info',
+                action_type: 'redirect',
+                action_payload: `/support/${id}`,
+                is_read: false
+              });
+            }
+          }, 5 * 60 * 1000);
+        }
+      }
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -108,7 +156,6 @@ function ThreadDetail() {
       e.preventDefault();
       handleSend();
     }
-    setBody('');
   };
 
   if (threadLoading || messagesLoading) {
@@ -174,12 +221,13 @@ function ThreadDetail() {
           <div className="max-h-[60vh] overflow-y-auto p-6 space-y-6">
             {messages && messages.length > 0 ? (
               messages.map((message) => (
-                <MessageBubble 
-                  key={message.id} 
-                  message={message} 
+                <MessageBubble
+                  key={message.id}
+                  message={message}
                   isCurrentUser={isCurrentUserMessage(message)}
                   formatDate={formatMessageDate}
                   getInitials={getInitials}
+                  sender={userMap.get(message.sender_id)}
                 />
               ))
             ) : (
@@ -235,17 +283,39 @@ interface MessageBubbleProps {
   isCurrentUser: boolean;
   formatDate: (date: string) => string;
   getInitials: (email: string) => string;
+  sender?: User;
 }
 
-function MessageBubble({ message, isCurrentUser, formatDate, getInitials }: MessageBubbleProps) {
+function MessageBubble({ message, isCurrentUser, formatDate, getInitials, sender }: MessageBubbleProps) {
   return (
     <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex items-start gap-3 max-w-[80%] ${isCurrentUser ? 'flex-row-reverse' : ''}`}>
-        <Avatar className="h-8 w-8 mt-1">
-          <AvatarFallback className={isCurrentUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}>
-            <User className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Avatar className="h-8 w-8 mt-1">
+                {sender?.raw_user_meta_data?.profile_picture_url && (
+                  <AvatarImage
+                    src={sender.raw_user_meta_data.profile_picture_url}
+                    alt={sender.raw_user_meta_data?.first_name || sender.email}
+                    crossOrigin="anonymous"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                <AvatarFallback className={isCurrentUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}>
+                  {sender ? getInitials(sender.email) : <User className="h-4 w-4" />}
+                </AvatarFallback>
+              </Avatar>
+            </TooltipTrigger>
+            {sender && (
+              <TooltipContent>{
+                `${(sender.raw_user_meta_data as any)?.first_name || ''} ${(sender.raw_user_meta_data as any)?.last_name || ''}`.trim() || sender.email
+              }</TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
         
         <div className={`space-y-1 ${isCurrentUser ? 'items-end' : 'items-start'}`}>
           <div className={`rounded-lg p-3 ${
