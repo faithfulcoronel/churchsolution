@@ -29,6 +29,8 @@ interface Entry {
   amount: number;
   source_account_id: string | null;
   category_account_id: string | null;
+  isDirty?: boolean;
+  isDeleted?: boolean;
 }
 
 interface IncomeExpenseAddEditProps {
@@ -106,6 +108,8 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
       amount: 0,
       source_account_id: null,
       category_account_id: null,
+      isDirty: true,
+      isDeleted: false,
     },
   ]);
 
@@ -139,6 +143,8 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           amount: e.amount || 0,
           source_account_id: e.source_account_id || null,
           category_account_id: e.category_account_id || null,
+          isDirty: false,
+          isDeleted: false,
         }))
       );
     }
@@ -183,7 +189,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
 
   const handleEntryChange = (index: number, field: keyof Entry, value: any) => {
     const newEntries = [...entries];
-    newEntries[index] = { ...newEntries[index], [field]: value };
+    newEntries[index] = { ...newEntries[index], [field]: value, isDirty: true };
     if (field === 'source_id') {
       newEntries[index].source_account_id = sources.find(s => s.id === value)?.account_id || null;
     }
@@ -205,13 +211,20 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
         amount: 0,
         source_account_id: null,
         category_account_id: null,
+        isDirty: true,
+        isDeleted: false,
       },
     ]);
   };
 
   const removeEntry = (index: number) => {
+    const entry = entries[index];
     const newEntries = [...entries];
-    newEntries.splice(index, 1);
+    if (entry.id) {
+      newEntries[index] = { ...entry, isDeleted: true };
+    } else {
+      newEntries.splice(index, 1);
+    }
     setEntries(newEntries);
   };
 
@@ -300,7 +313,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                 </tr>
               </thead>
               <tbody>
-                {entries.map((entry, idx) => (
+                {entries.filter(e => !e.isDeleted).map((entry, idx) => (
                   <tr key={idx} className="border-b border-border dark:border-slate-700">
                     <td className="px-4 py-2">
                       <Combobox

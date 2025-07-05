@@ -6,7 +6,11 @@ import { TYPES } from '../lib/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { NotificationService } from '../services/NotificationService';
 
-export interface IncomeExpenseEntryBase extends Omit<IncomeExpenseEntry, 'transaction_type'> {}
+export interface IncomeExpenseEntryBase
+  extends Omit<IncomeExpenseEntry, 'transaction_type'> {
+  isDirty?: boolean;
+  isDeleted?: boolean;
+}
 
 export function useIncomeExpenseService(transactionType: TransactionType) {
   const service = container.get<IncomeExpenseTransactionService>(TYPES.IncomeExpenseTransactionService);

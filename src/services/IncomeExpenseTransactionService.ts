@@ -20,6 +20,8 @@ export interface IncomeExpenseEntry {
   category_account_id: string | null;
   batch_id?: string | null;
   member_id?: string | null;
+  isDirty?: boolean;
+  isDeleted?: boolean;
 }
 
 @injectable()
@@ -155,23 +157,37 @@ export class IncomeExpenseTransactionService {
 
     await this.headerRepo.update(mapping.transaction_header_id, header);
 
+    if (line.isDeleted) {
+      if (mapping.debit_transaction_id) {
+        await this.ftRepo.delete(mapping.debit_transaction_id);
+      }
+      if (mapping.credit_transaction_id) {
+        await this.ftRepo.delete(mapping.credit_transaction_id);
+      }
+      await this.ieRepo.delete(transactionId);
+      await this.mappingRepo.delete(mapping.id);
+      return { id: mapping.transaction_header_id } as any;
+    }
+
     const [debitData, creditData] = this.buildTransactions(
       header,
       line,
       mapping.transaction_header_id,
     );
 
-    if (mapping.debit_transaction_id) {
-      await this.ftRepo.update(mapping.debit_transaction_id, debitData);
-    }
-    if (mapping.credit_transaction_id) {
-      await this.ftRepo.update(mapping.credit_transaction_id, creditData);
-    }
+    if (line.isDirty) {
+      if (mapping.debit_transaction_id) {
+        await this.ftRepo.update(mapping.debit_transaction_id, debitData);
+      }
+      if (mapping.credit_transaction_id) {
+        await this.ftRepo.update(mapping.credit_transaction_id, creditData);
+      }
 
-    await this.ieRepo.update(
-      transactionId,
-      this.buildEntry(header, line, mapping.transaction_header_id),
-    );
+      await this.ieRepo.update(
+        transactionId,
+        this.buildEntry(header, line, mapping.transaction_header_id),
+      );
+    }
 
     return { id: mapping.transaction_header_id } as any;
   }
@@ -188,12 +204,9 @@ export class IncomeExpenseTransactionService {
     const mappingByTxId = new Map(
       mappings.map(m => [m.transaction_id, m]),
     );
-    const incomingIds = new Set(
-      lines.map(l => l.id).filter((id): id is string => !!id),
-    );
-
     for (const m of mappings) {
-      if (!incomingIds.has(m.transaction_id)) {
+      const line = lines.find(l => l.id === m.transaction_id);
+      if (!line || line.isDeleted) {
         if (m.debit_transaction_id) {
           await this.ftRepo.delete(m.debit_transaction_id);
         }
@@ -206,6 +219,7 @@ export class IncomeExpenseTransactionService {
     }
 
     for (const line of lines) {
+      if (line.isDeleted) continue;
       const existing = line.id ? mappingByTxId.get(line.id) : undefined;
       const [debitData, creditData] = this.buildTransactions(
         header,
@@ -214,17 +228,19 @@ export class IncomeExpenseTransactionService {
       );
 
       if (existing) {
-        if (existing.debit_transaction_id) {
-          await this.ftRepo.update(existing.debit_transaction_id, debitData);
-        }
-        if (existing.credit_transaction_id) {
-          await this.ftRepo.update(existing.credit_transaction_id, creditData);
-        }
+        if (line.isDirty) {
+          if (existing.debit_transaction_id) {
+            await this.ftRepo.update(existing.debit_transaction_id, debitData);
+          }
+          if (existing.credit_transaction_id) {
+            await this.ftRepo.update(existing.credit_transaction_id, creditData);
+          }
 
-        await this.ieRepo.update(
-          existing.transaction_id,
-          this.buildEntry(header, line, headerId),
-        );
+          await this.ieRepo.update(
+            existing.transaction_id,
+            this.buildEntry(header, line, headerId),
+          );
+        }
       } else {
         const debitTx = await this.ftRepo.create(debitData);
         const creditTx = await this.ftRepo.create(creditData);
