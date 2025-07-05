@@ -14,7 +14,7 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../../
 import { useUserRepository } from '../../hooks/useUserRepository';
 import { supabase } from '../../lib/supabase';
 import type { User } from '../../models/user.model';
-import { Loader2, Send, MessageCircle, AlertTriangle, User, Calendar, Clock } from 'lucide-react';
+import { Loader2, Send, MessageCircle, AlertTriangle, User as UserIcon, Calendar, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -305,7 +305,7 @@ function MessageBubble({ message, isCurrentUser, formatDate, getInitials, sender
                   />
                 )}
                 <AvatarFallback className={isCurrentUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}>
-                  {sender ? getInitials(sender.email) : <User className="h-4 w-4" />}
+                  {sender ? getInitials(sender.email) : <UserIcon className="h-4 w-4" />}
                 </AvatarFallback>
               </Avatar>
             </TooltipTrigger>
