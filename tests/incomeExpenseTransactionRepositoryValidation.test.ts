@@ -29,6 +29,18 @@ describe('IncomeExpenseTransactionRepository validation', () => {
     ).rejects.toThrow('Amount must be a valid number');
   });
 
+  it('throws error for invalid line', async () => {
+    const repo = new TestRepo({} as IIncomeExpenseTransactionAdapter);
+    await expect(
+      repo.runBeforeCreate({
+        transaction_date: '2024-01-01',
+        description: 't',
+        amount: 1,
+        line: 'abc' as any,
+      })
+    ).rejects.toThrow('Line must be a valid number');
+  });
+
   it('formats data on create', async () => {
     const repo = new TestRepo({} as IIncomeExpenseTransactionAdapter);
     const data = await repo.runBeforeCreate({

@@ -21,6 +21,7 @@ export class IncomeExpenseTransactionAdapter
     id,
     transaction_type,
     transaction_date,
+    line,
     amount,
     description,
     reference,
@@ -46,7 +47,8 @@ export class IncomeExpenseTransactionAdapter
 
   public async getByHeaderId(headerId: string): Promise<IncomeExpenseTransaction[]> {
     const result = await this.fetch({
-      filters: { header_id: { operator: 'eq', value: headerId } }
+      filters: { header_id: { operator: 'eq', value: headerId } },
+      order: { column: 'line', ascending: true }
     });
     return result.data;
   }

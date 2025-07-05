@@ -14,5 +14,12 @@ export class IncomeExpenseTransactionValidator {
     ) {
       throw new Error('Amount must be a valid number');
     }
+
+    if (
+      data.line !== undefined &&
+      (isNaN(Number(data.line)) || data.line === null)
+    ) {
+      throw new Error('Line must be a valid number');
+    }
   }
 }

@@ -29,6 +29,7 @@ interface Entry {
   amount: number;
   source_account_id: string | null;
   category_account_id: string | null;
+  line?: number;
   isDirty?: boolean;
   isDeleted?: boolean;
 }
@@ -108,6 +109,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
       amount: 0,
       source_account_id: null,
       category_account_id: null,
+      line: 1,
       isDirty: true,
       isDeleted: false,
     },
@@ -143,6 +145,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           amount: e.amount || 0,
           source_account_id: e.source_account_id || null,
           category_account_id: e.category_account_id || null,
+          line: e.line ?? undefined,
           isDirty: false,
           isDeleted: false,
         }))
@@ -211,6 +214,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
         amount: 0,
         source_account_id: null,
         category_account_id: null,
+        line: entries.length + 1,
         isDirty: true,
         isDeleted: false,
       },
