@@ -120,7 +120,8 @@ function AccountAddEdit() {
       if (isEditMode) {
         await updateMutation.mutateAsync({
           id: id!,
-          data: formData
+          data: formData,
+          fieldsToRemove: ['members']
         });
         navigate(`/accounts/${id}`);
       } else {
