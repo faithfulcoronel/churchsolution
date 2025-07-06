@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import { useIncomeExpenseService } from '../../../hooks/useIncomeExpenseService';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { hasAccess } from '../../../utils/access';
 import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { Input } from '../../../components/ui2/input';
@@ -65,7 +65,6 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
     useUpdate,
   } = useFinancialTransactionHeaderRepository();
   const updateMutation = useUpdate();
-  const { hasPermission } = usePermissions();
   const { deleteBatch } = useIncomeExpenseService(transactionType);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -300,7 +299,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   </DropdownMenuItem>
                 )}
 
-                {status === 'submitted' && hasPermission('finance.approve') && (
+                {status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
                   <DropdownMenuItem
                     onClick={() => {
                       setSelectedTransaction(params.row);
@@ -312,7 +311,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   </DropdownMenuItem>
                 )}
 
-                {status === 'submitted' && hasPermission('finance.approve') && (
+                {status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
                   <DropdownMenuItem
                     onClick={async () => {
                       await updateMutation.mutateAsync({ id: params.row.id, data: { status: 'draft' } });
@@ -324,7 +323,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   </DropdownMenuItem>
                 )}
 
-                {status === 'approved' && hasPermission('finance.approve') && (
+                {status === 'approved' && hasAccess('finance.approve', 'finance.approve') && (
                   <DropdownMenuItem
                     onClick={() => {
                       setSelectedTransaction(params.row);

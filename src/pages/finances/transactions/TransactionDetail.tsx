@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { hasAccess } from '../../../utils/access';
 import PermissionGate from '../../../components/PermissionGate';
 import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -63,7 +63,6 @@ function TransactionDetail() {
     voidTransaction
   } = useFinancialTransactionHeaderRepository();
   const updateMutation = useUpdate();
-  const { hasPermission } = usePermissions();
   
   const { data: headerData, isLoading: isHeaderLoading } = useQuery({
     filters: {
@@ -402,7 +401,7 @@ function TransactionDetail() {
                 </>
               )}
 
-              {header.status === 'submitted' && hasPermission('finance.approve') && (
+              {header.status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
                 <>
                   <Button
                     variant="outline"
@@ -423,7 +422,7 @@ function TransactionDetail() {
                 </>
               )}
 
-              {header.status === 'approved' && hasPermission('finance.approve') && (
+              {header.status === 'approved' && hasAccess('finance.approve', 'finance.approve') && (
                 <Button
                   variant="outline"
                   onClick={() => setShowPostDialog(true)}

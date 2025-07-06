@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { hasAccess } from '../../../utils/access';
 import PermissionGate from '../../../components/PermissionGate';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -98,7 +98,6 @@ function TransactionList() {
     useUpdate,
   } = useFinancialTransactionHeaderRepository();
   const updateMutation = useUpdate();
-  const { hasPermission } = usePermissions();
   
   const { data: result, isLoading, error } = useQuery({
     filters: {
@@ -414,7 +413,7 @@ function TransactionList() {
                   </DropdownMenuItem>
                 )}
 
-                {status === 'submitted' && hasPermission('finance.approve') && (
+                {status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
                   <DropdownMenuItem
                     onClick={() => {
                       setSelectedTransaction(params.row);
@@ -427,7 +426,7 @@ function TransactionList() {
                   </DropdownMenuItem>
                 )}
 
-                {status === 'submitted' && hasPermission('finance.approve') && (
+                {status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
                   <DropdownMenuItem
                     onClick={async () => {
                       await updateMutation.mutateAsync({ id: params.row.id, data: { status: 'draft' } });
@@ -440,7 +439,7 @@ function TransactionList() {
                   </DropdownMenuItem>
                 )}
 
-                {status === 'approved' && hasPermission('finance.approve') && (
+                {status === 'approved' && hasAccess('finance.approve', 'finance.approve') && (
                   <DropdownMenuItem
                     onClick={() => {
                       setSelectedTransaction(params.row);

@@ -20,6 +20,7 @@ import { Button } from '../ui2/button';
 import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
 import { useIncomeExpenseService } from '../../hooks/useIncomeExpenseService';
 import { usePermissions } from '../../hooks/usePermissions';
+import { hasAccess } from '../../utils/access';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
 import type { TransactionItem as DonationItem } from './RecentTransactionItem';
@@ -51,7 +52,6 @@ export default function DonationActions({ donation }: DonationActionsProps) {
   } = useFinancialTransactionHeaderRepository();
   const updateMutation = useUpdate();
   const { deleteTransaction } = useIncomeExpenseService('income');
-  const { hasPermission } = usePermissions();
 
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = React.useState(false);
@@ -189,17 +189,17 @@ export default function DonationActions({ donation }: DonationActionsProps) {
                 <FileText className="h-4 w-4 mr-2" /> Submit
               </DropdownMenuItem>
             )}
-            {donation.header?.status === 'submitted' && hasPermission('finance.approve') && (
+            {donation.header?.status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
               <DropdownMenuItem onClick={() => setShowApproveDialog(true)} className="flex items-center">
                 <Check className="h-4 w-4 mr-2" /> Approve
               </DropdownMenuItem>
             )}
-            {donation.header?.status === 'submitted' && hasPermission('finance.approve') && (
+            {donation.header?.status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
               <DropdownMenuItem onClick={handleReject} className="flex items-center">
                 <X className="h-4 w-4 mr-2" /> Reject
               </DropdownMenuItem>
             )}
-            {donation.header?.status === 'approved' && hasPermission('finance.approve') && (
+            {donation.header?.status === 'approved' && hasAccess('finance.approve', 'finance.approve') && (
               <DropdownMenuItem onClick={() => setShowPostDialog(true)} className="flex items-center">
                 <Check className="h-4 w-4 mr-2" /> Post
               </DropdownMenuItem>

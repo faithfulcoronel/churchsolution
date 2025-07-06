@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePermissions } from '../hooks/usePermissions';
+import { hasAccess } from '../utils/access';
 
 type PermissionGateProps = {
   permission?: string;
@@ -9,17 +10,17 @@ type PermissionGateProps = {
 };
 
 function PermissionGate({ permission, role, children, fallback = null }: PermissionGateProps) {
-  const { hasPermission, hasRole, isLoading } = usePermissions();
+  const { hasRole, isLoading } = usePermissions();
 
   if (isLoading) {
     return null;
   }
 
-  const hasAccess = 
-    (permission ? hasPermission(permission) : true) &&
+  const allowed =
+    (permission ? hasAccess(permission, permission) : true) &&
     (role ? hasRole(role) : true);
 
-  return hasAccess ? <>{children}</> : <>{fallback}</>;
+  return allowed ? <>{children}</> : <>{fallback}</>;
 }
 
 export default PermissionGate;
