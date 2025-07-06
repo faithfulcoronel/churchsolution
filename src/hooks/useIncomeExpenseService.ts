@@ -17,8 +17,8 @@ export function useIncomeExpenseService(transactionType: TransactionType) {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: ({ header, entries }: { header: Partial<FinancialTransactionHeader>; entries: IncomeExpenseEntryBase[] }) =>
-      service.create(header, entries.map(e => ({ ...e, transaction_type: transactionType }))),
+    mutationFn: ({ header, entries, onProgress }: { header: Partial<FinancialTransactionHeader>; entries: IncomeExpenseEntryBase[]; onProgress?: (p: number) => void }) =>
+      service.create(header, entries.map(e => ({ ...e, transaction_type: transactionType })), onProgress),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
         queryClient.invalidateQueries({ queryKey: ['income_expense_transactions'] });
@@ -30,8 +30,8 @@ export function useIncomeExpenseService(transactionType: TransactionType) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, header, entries }: { id: string; header: Partial<FinancialTransactionHeader>; entries: IncomeExpenseEntryBase[] }) =>
-      service.updateBatch(id, header, entries.map(e => ({ ...e, transaction_type: transactionType }))),
+    mutationFn: ({ id, header, entries, onProgress }: { id: string; header: Partial<FinancialTransactionHeader>; entries: IncomeExpenseEntryBase[]; onProgress?: (p: number) => void }) =>
+      service.updateBatch(id, header, entries.map(e => ({ ...e, transaction_type: transactionType })), onProgress),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['financial_transaction_headers'] });
         queryClient.invalidateQueries({ queryKey: ['income_expense_transactions'] });
@@ -69,13 +69,15 @@ export function useIncomeExpenseService(transactionType: TransactionType) {
   const createBatch = async (
     header: Partial<FinancialTransactionHeader>,
     entries: IncomeExpenseEntryBase[],
-  ) => createMutation.mutateAsync({ header, entries });
+    onProgress?: (p: number) => void,
+  ) => createMutation.mutateAsync({ header, entries, onProgress });
 
   const updateBatch = async (
     id: string,
     header: Partial<FinancialTransactionHeader>,
     entries: IncomeExpenseEntryBase[],
-  ) => updateMutation.mutateAsync({ id, header, entries });
+    onProgress?: (p: number) => void,
+  ) => updateMutation.mutateAsync({ id, header, entries, onProgress });
 
   const deleteTransaction = async (id: string) => deleteMutation.mutateAsync(id);
 
