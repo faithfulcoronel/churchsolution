@@ -248,13 +248,12 @@ CREATE OR REPLACE FUNCTION report_fund_summary(
   p_start_date date,
   p_end_date date
 )
-RETURNS TABLE (
-  fund_id uuid,
-  fund_name text,
-  income numeric,
-  expenses numeric,
-  net_change numeric
-)
+  RETURNS TABLE (
+    fund_name text,
+    income numeric,
+    expenses numeric,
+    net_change numeric
+  )
 SECURITY DEFINER
 SET search_path = public
 LANGUAGE plpgsql
@@ -265,19 +264,18 @@ BEGIN
   END IF;
 
   RETURN QUERY
-  SELECT
-    f.id,
-    f.name,
-    COALESCE(SUM(CASE WHEN ft.type = 'income' THEN ft.credit END),0) AS income,
-    COALESCE(SUM(CASE WHEN ft.type = 'expense' THEN ft.debit END),0) AS expenses,
-    COALESCE(SUM(CASE WHEN ft.type = 'income' THEN ft.credit ELSE -ft.debit END),0) AS net_change
-  FROM funds f
-  LEFT JOIN financial_transactions ft ON ft.fund_id = f.id
-    AND ft.date BETWEEN p_start_date AND p_end_date
-    AND ft.deleted_at IS NULL
-  WHERE f.tenant_id = p_tenant_id
-  GROUP BY f.id, f.name
-  ORDER BY f.name;
+    SELECT
+      f.name,
+      COALESCE(SUM(CASE WHEN ft.type = 'income' THEN ft.credit END),0) AS income,
+      COALESCE(SUM(CASE WHEN ft.type = 'expense' THEN ft.debit END),0) AS expenses,
+      COALESCE(SUM(CASE WHEN ft.type = 'income' THEN ft.credit ELSE -ft.debit END),0) AS net_change
+    FROM funds f
+    LEFT JOIN financial_transactions ft ON ft.fund_id = f.id
+      AND ft.date BETWEEN p_start_date AND p_end_date
+      AND ft.deleted_at IS NULL
+    WHERE f.tenant_id = p_tenant_id
+    GROUP BY f.name
+    ORDER BY f.name;
 END;
 $$;
 
@@ -513,6 +511,8 @@ SECURITY DEFINER
 SET search_path = public
 LANGUAGE plpgsql
 AS $$
+DECLARE
+  result jsonb;
 BEGIN
   IF NOT check_tenant_access(p_tenant_id) THEN
     RAISE EXCEPTION 'Permission denied';
@@ -626,12 +626,46 @@ BEGIN
       'total_income', (SELECT income FROM period),
       'total_expenses', (SELECT expenses FROM period),
       'net_result', (SELECT income - expenses FROM period),
-      'funds', (SELECT jsonb_agg(row_to_json(fund_data)) FROM fund_data)
+      'ending_balance', (SELECT (SELECT balance FROM opening) + income - expenses FROM period)
     ),
-    'income_by_account', (SELECT jsonb_agg(row_to_json(income_tot)) FROM income_tot),
-    'expenses_by_account', (SELECT jsonb_agg(row_to_json(expense_tot)) FROM expense_tot),
-    'member_contributions', (SELECT jsonb_agg(row_to_json(member_tot)) FROM member_tot)
-  );
+    'funds', (
+      SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'fund_name', fund_name,
+        'opening_balance', opening_balance,
+        'income', income,
+        'expenses', expenses,
+        'ending_balance', opening_balance + income - expenses
+      ) ORDER BY fund_name), '[]'::jsonb)
+      FROM fund_data
+    ),
+    'income', (
+      SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'account_name', account_name,
+        'categories', categories,
+        'subtotal', subtotal
+      ) ORDER BY account_name), '[]'::jsonb)
+      FROM income_tot
+    ),
+    'expenses', (
+      SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'account_name', account_name,
+        'categories', categories,
+        'subtotal', subtotal
+      ) ORDER BY account_name), '[]'::jsonb)
+      FROM expense_tot
+    ),
+    'memberGiving', (
+      SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'member_name', member_name,
+        'categories', categories,
+        'total', total
+      ) ORDER BY member_name), '[]'::jsonb)
+      FROM member_tot
+    ),
+    'remarks', NULL
+  ) INTO result;
+
+  RETURN result;
 END;
 $$;
 
