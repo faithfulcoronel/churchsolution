@@ -10,6 +10,7 @@ import {
   Bell,
   LifeBuoy,
   Shield,
+  ListChecks,
   LucideIcon,
 } from 'lucide-react';
 
@@ -99,6 +100,13 @@ export const navigation: NavItem[] = [
     href: '/administration',
     icon: Shield,
     permission: 'user.view',
+    section: 'Administration',
+  },
+  {
+    name: 'Menu Permissions',
+    href: '/administration/menu-permissions',
+    icon: ListChecks,
+    permission: 'role.edit',
     section: 'Administration',
   },
 ];
