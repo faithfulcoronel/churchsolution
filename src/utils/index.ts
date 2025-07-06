@@ -21,3 +21,4 @@ export * from './memberOfferingSummaryPdf';
 export * from './expenseSummaryPdf';
 export * from './churchFinancialStatementPdf';
 export * from './memberUtils';
+export * from './access';

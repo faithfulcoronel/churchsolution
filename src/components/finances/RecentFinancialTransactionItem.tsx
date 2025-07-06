@@ -16,7 +16,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
-import { usePermissions } from '../../hooks/usePermissions';
+import { hasAccess } from '../../utils/access';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,7 +52,6 @@ export default function RecentTransactionItem({ transaction }: Props) {
   } = useFinancialTransactionHeaderRepository();
   const updateMutation = useUpdate();
   const deleteMutation = useDelete();
-  const { hasPermission } = usePermissions();
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = React.useState(false);
   const [showApproveDialog, setShowApproveDialog] = React.useState(false);
@@ -166,7 +165,7 @@ export default function RecentTransactionItem({ transaction }: Props) {
                   <FileText className="h-4 w-4 mr-2" /> Submit Transaction
                 </DropdownMenuItem>
               )}
-              {transaction.status === 'submitted' && hasPermission('finance.approve') && (
+              {transaction.status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
                 <DropdownMenuItem
                   onClick={() => setShowApproveDialog(true)}
                   className="flex items-center"
@@ -174,12 +173,12 @@ export default function RecentTransactionItem({ transaction }: Props) {
                   <Check className="h-4 w-4 mr-2" /> Approve Transaction
                 </DropdownMenuItem>
               )}
-              {transaction.status === 'submitted' && hasPermission('finance.approve') && (
+              {transaction.status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
                 <DropdownMenuItem onClick={async () => { await updateMutation.mutateAsync({ id: transaction.id, data: { status: 'draft' } }); }} className="flex items-center">
                   <X className="h-4 w-4 mr-2" /> Reject to Draft
                 </DropdownMenuItem>
               )}
-              {transaction.status === 'approved' && hasPermission('finance.approve') && (
+              {transaction.status === 'approved' && hasAccess('finance.approve', 'finance.approve') && (
                 <DropdownMenuItem
                   onClick={() => setShowPostDialog(true)}
                   className="flex items-center"
