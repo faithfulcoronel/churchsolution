@@ -56,6 +56,10 @@ supabase db reset
    RESEND_FROM_EMAIL=<default from address>
    ```
 
+6. By default the sidebar menu items are loaded from the database. Set
+   `VITE_ENABLE_DYNAMIC_MENU=false` in your `.env` file to use the static
+   menu defined in the source code.
+
 ## Running tests
 
 This project uses [Vitest](https://vitest.dev) for unit testing. After installing

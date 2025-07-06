@@ -4,6 +4,8 @@ import { navigation as staticNavigation, NavItem } from '../config/navigation';
 import * as Icons from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+const enableDynamicMenu = import.meta.env.VITE_ENABLE_DYNAMIC_MENU !== 'false';
+
 function getIcon(name: string | null): LucideIcon {
   const icon = (Icons as Record<string, LucideIcon>)[name ?? ''];
   return icon || Icons.Circle;
@@ -15,6 +17,9 @@ export function useMenuItems(roleIds: string[]) {
   return useQuery({
     queryKey: ['menu-items', rolesKey],
     queryFn: async () => {
+      if (!enableDynamicMenu) {
+        return staticNavigation;
+      }
       const { data: tenantData, error: tenantError } = await supabase.rpc('get_current_tenant');
       if (tenantError) throw tenantError;
       const tenant = tenantData?.[0];
