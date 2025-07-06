@@ -40,6 +40,8 @@ export const TYPES = {
   IRoleRepository: 'IRoleRepository',
   IPermissionRepository: 'IPermissionRepository',
   IMenuItemRepository: 'IMenuItemRepository',
+  IMenuPermissionAdapter: 'IMenuPermissionAdapter',
+  IMenuPermissionRepository: 'IMenuPermissionRepository',
   IUserRepository: 'IUserRepository',
   IErrorLogRepository: 'IErrorLogRepository',
   IActivityLogRepository: 'IActivityLogRepository',
