@@ -32,3 +32,4 @@ export * from './useOfferingDashboardData';
 export * from './useExpenseDashboardData';
 export * from './useSettingRepository';
 export * from './useSettingService';
+export * from './useAuthorization';

@@ -86,6 +86,11 @@ browser using [pdf-lib](https://pdf-lib.js.org/) when you click the **PDF** butt
 The new **Expense Summary** report lists expenses with their fund balances and
 can also be exported to PDF.
 
+## Tenant Scoped RBAC
+
+StewardTrack now supports custom roles and permissions per tenant. The database schema includes tenant scoped `roles`, `permissions`, `user_roles` and `role_permissions` tables protected by RLS.
+A helper function `can_user(permission text)` allows the frontend to quickly verify access.
+
 ## Changelog
 
 - Dates are now stored and parsed using local `yyyy-MM-dd` format instead of ISO strings.
