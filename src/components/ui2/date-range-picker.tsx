@@ -16,6 +16,7 @@ import { Calendar } from './calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { Input } from './input';
 import { Badge } from './badge';
+import { useResponsive } from '@/hooks';
 
 export type DateRange = {
   from: Date | undefined;
@@ -71,6 +72,8 @@ export function DateRangePicker({
   const [toInput, setToInput] = React.useState(
     value.to ? format(value.to, 'yyyy-MM-dd') : ''
   );
+
+  const isMobile = useResponsive('down', 'sm');
 
   React.useEffect(() => {
     if (open) {
@@ -182,6 +185,8 @@ export function DateRangePicker({
     setRange(r);
     setFromInput(r.from ? format(r.from, 'yyyy-MM-dd') : '');
     setToInput(r.to ? format(r.to, 'yyyy-MM-dd') : '');
+    onChange(r);
+    setOpen(false);
   };
 
   const handleCalendarSelect = (r: { from?: Date; to?: Date } | undefined) => {
@@ -292,8 +297,11 @@ export function DateRangePicker({
             </div>
           )}
         </PopoverTrigger>
-        <PopoverContent 
-          className="w-auto p-0 dark:border-border" 
+        <PopoverContent
+          className={cn(
+            'p-0 dark:border-border',
+            isMobile ? 'w-[95vw]' : 'w-auto'
+          )}
           align={align}
           side={side}
         >
@@ -316,13 +324,13 @@ export function DateRangePicker({
               </div>
             )}
             <div className="p-2 sm:p-3">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
                 <Input
                   type="text"
                   value={fromInput}
                   placeholder="From"
                   onChange={handleFromInputChange}
-                  className="w-[150px] dark:bg-muted dark:border-border"
+                  className="w-full sm:w-[150px] dark:bg-muted dark:border-border"
                 />
                 <span className="text-sm text-muted-foreground">to</span>
                 <Input
@@ -330,7 +338,7 @@ export function DateRangePicker({
                   value={toInput}
                   placeholder="To"
                   onChange={handleToInputChange}
-                  className="w-[150px] dark:bg-muted dark:border-border"
+                  className="w-full sm:w-[150px] dark:bg-muted dark:border-border"
                 />
               </div>
               <Calendar
@@ -344,7 +352,7 @@ export function DateRangePicker({
                 }}
                 onSelect={handleCalendarSelect}
                 initialFocus
-                numberOfMonths={2}
+                numberOfMonths={isMobile ? 1 : 2}
                 className="flex flex-col sm:flex-row gap-2"
               />
               <div className="flex items-center justify-between pt-4 border-t mt-4 dark:border-border">
