@@ -51,6 +51,7 @@ import {
 } from '../adapters/membershipStatus.adapter';
 import { RoleAdapter, type IRoleAdapter } from '../adapters/role.adapter';
 import { PermissionAdapter, type IPermissionAdapter } from '../adapters/permission.adapter';
+import { MenuItemAdapter, type IMenuItemAdapter } from '../adapters/menuItem.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
 import { ActivityLogAdapter, type IActivityLogAdapter } from '../adapters/activityLog.adapter';
@@ -112,6 +113,7 @@ import {
 } from '../repositories/membershipStatus.repository';
 import { RoleRepository, type IRoleRepository } from '../repositories/role.repository';
 import { PermissionRepository, type IPermissionRepository } from '../repositories/permission.repository';
+import { MenuItemRepository, type IMenuItemRepository } from '../repositories/menuItem.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
 import { ActivityLogRepository, type IActivityLogRepository } from '../repositories/activityLog.repository';
@@ -205,6 +207,10 @@ container
 container
   .bind<IPermissionAdapter>(TYPES.IPermissionAdapter)
   .to(PermissionAdapter)
+  .inSingletonScope();
+container
+  .bind<IMenuItemAdapter>(TYPES.IMenuItemAdapter)
+  .to(MenuItemAdapter)
   .inSingletonScope();
 container
   .bind<IOfferingBatchAdapter>(TYPES.IOfferingBatchAdapter)
@@ -331,6 +337,10 @@ container
 container
   .bind<IPermissionRepository>(TYPES.IPermissionRepository)
   .to(PermissionRepository)
+  .inSingletonScope();
+container
+  .bind<IMenuItemRepository>(TYPES.IMenuItemRepository)
+  .to(MenuItemRepository)
   .inSingletonScope();
 container
   .bind<IFinancialTransactionRepository>(TYPES.IFinancialTransactionRepository)
