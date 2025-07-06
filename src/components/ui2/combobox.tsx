@@ -30,6 +30,7 @@ interface ComboboxProps {
   disabled?: boolean;
   onKeyDown?: (e: React.KeyboardEvent) => void;
   onSearchChange?: (value: string) => void;
+  onOpen?: () => void;
 }
 
 export function Combobox({
@@ -42,6 +43,7 @@ export function Combobox({
   disabled = false,
   onKeyDown,
   onSearchChange,
+  onOpen,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -71,8 +73,15 @@ export function Combobox({
     }
   }, [open, filteredOptions, handleSelect, onKeyDown]);
 
+  const handleOpenChange = React.useCallback((o: boolean) => {
+    setOpen(o);
+    if (o) {
+      onOpen?.();
+    }
+  }, [onOpen]);
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

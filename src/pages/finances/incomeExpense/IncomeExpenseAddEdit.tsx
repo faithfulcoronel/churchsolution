@@ -57,12 +57,28 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   const { useQuery: useCategoriesQuery } = useCategoryRepository();
   const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
 
-  const { data: accountsData, isLoading: accountsLoading } = useAccountsQuery();
-  const { data: fundsData, isLoading: fundsLoading } = useFundsQuery();
-  const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesQuery({
+  const {
+    data: accountsData,
+    isLoading: accountsLoading,
+    refetch: refetchAccounts,
+  } = useAccountsQuery();
+  const {
+    data: fundsData,
+    isLoading: fundsLoading,
+    refetch: refetchFunds,
+  } = useFundsQuery();
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    refetch: refetchCategories,
+  } = useCategoriesQuery({
     filters: { type: { operator: 'eq', value: transactionType === 'income' ? 'income_transaction' : 'expense_transaction' } },
   });
-  const { data: sourcesData, isLoading: sourcesLoading } = useSourcesQuery({
+  const {
+    data: sourcesData,
+    isLoading: sourcesLoading,
+    refetch: refetchSources,
+  } = useSourcesQuery({
     filters: { is_active: { operator: 'eq', value: true } },
   });
 
@@ -326,6 +342,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                         onChange={v => handleEntryChange(idx, 'accounts_account_id', v)}
                         disabled={isDisabled}
                         placeholder="Select account"
+                        onOpen={refetchAccounts}
                       />
                     </td>
                     <td className="px-4 py-2">
@@ -335,6 +352,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                         onChange={v => handleEntryChange(idx, 'fund_id', v)}
                         disabled={isDisabled}
                         placeholder="Select fund"
+                        onOpen={refetchFunds}
                       />
                     </td>
                     <td className="px-4 py-2">
@@ -344,6 +362,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                         onChange={v => handleEntryChange(idx, 'category_id', v)}
                         disabled={isDisabled}
                         placeholder="Select category"
+                        onOpen={refetchCategories}
                       />
                     </td>
                     <td className="px-4 py-2">
@@ -353,6 +372,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                         onChange={v => handleEntryChange(idx, 'source_id', v)}
                         disabled={isDisabled}
                         placeholder="Select source"
+                        onOpen={refetchSources}
                       />
                     </td>
                     <td className="px-4 py-2 min-w-[200px]">
