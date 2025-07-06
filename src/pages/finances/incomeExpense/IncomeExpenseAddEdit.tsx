@@ -116,6 +116,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   ]);
 
   const [processing, setProcessing] = useState(false);
+  const [progress, setProgress] = useState<number | undefined>(undefined);
 
   const header = headerResponse?.data?.[0];
   const entryRecords = entryResponse?.data || [];
@@ -237,15 +238,18 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setProcessing(true);
+    setProgress(0);
     try {
       if (isEditMode && id) {
-        await updateBatch(id, headerData, entries);
+        await updateBatch(id, headerData, entries, p => setProgress(p));
       } else {
-        await createBatch(headerData, entries);
+        await createBatch(headerData, entries, p => setProgress(p));
       }
+      setProgress(undefined);
       navigate(`/finances/${basePath}`);
     } catch (error) {
       setProcessing(false);
+      setProgress(undefined);
     }
   };
 
@@ -417,7 +421,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           </CardFooter>
         </Card>
       </form>
-      <ProgressDialog open={processing} message="Saving transaction..." />
+      <ProgressDialog open={processing} message="Saving transaction..." progress={progress} />
     </div>
   );
 }

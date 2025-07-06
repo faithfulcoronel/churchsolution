@@ -122,10 +122,12 @@ export class IncomeExpenseTransactionService {
   public async create(
     header: Partial<FinancialTransactionHeader>,
     lines: IncomeExpenseEntry[],
+    onProgress?: (percent: number) => void,
   ) {
     const headerRecord = await this.headerRepo.create(header);
 
-    for (const line of lines) {
+    const total = lines.length;
+    for (const [index, line] of lines.entries()) {
       const [debitData, creditData] = this.buildTransactions(
         header,
         line,
@@ -145,6 +147,8 @@ export class IncomeExpenseTransactionService {
         debit_transaction_id: debitTx.id,
         credit_transaction_id: creditTx.id,
       });
+
+      onProgress?.(Math.round(((index + 1) / total) * 100));
     }
 
     return headerRecord;
@@ -198,6 +202,7 @@ export class IncomeExpenseTransactionService {
     headerId: string,
     header: Partial<FinancialTransactionHeader>,
     lines: IncomeExpenseEntry[],
+    onProgress?: (percent: number) => void,
   ) {
     const mappings = await this.mappingRepo.getByHeaderId(headerId);
 
@@ -220,8 +225,15 @@ export class IncomeExpenseTransactionService {
       }
     }
 
+    const total = lines.length;
+    let processed = 0;
+
     for (const line of lines) {
-      if (line.isDeleted) continue;
+      if (line.isDeleted) {
+        processed++;
+        onProgress?.(Math.round((processed / total) * 100));
+        continue;
+      }
       const existing = line.id ? mappingByTxId.get(line.id) : undefined;
       const [debitData, creditData] = this.buildTransactions(
         header,
@@ -258,6 +270,9 @@ export class IncomeExpenseTransactionService {
           credit_transaction_id: creditTx.id,
         });
       }
+
+      processed++;
+      onProgress?.(Math.round((processed / total) * 100));
     }
 
     return { id: headerId } as any;

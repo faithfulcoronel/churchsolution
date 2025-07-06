@@ -3,11 +3,13 @@ import { Dialog, DialogHeader, DialogTitle, DialogOverlay } from './dialog';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { Progress } from './progress';
 
 interface ProgressDialogProps {
   open: boolean;
   title?: string;
   message?: string;
+  progress?: number;
 }
 
 const ProgressDialogContent = React.forwardRef<
@@ -32,7 +34,7 @@ const ProgressDialogContent = React.forwardRef<
 ));
 ProgressDialogContent.displayName = 'ProgressDialogContent';
 
-export function ProgressDialog({ open, title = 'Processing', message }: ProgressDialogProps) {
+export function ProgressDialog({ open, title = 'Processing', message, progress }: ProgressDialogProps) {
   return (
     <Dialog open={open}>
       <ProgressDialogContent className="flex flex-col items-center space-y-4">
@@ -41,7 +43,11 @@ export function ProgressDialog({ open, title = 'Processing', message }: Progress
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
         )}
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        {typeof progress === 'number' ? (
+          <Progress value={progress} showValue className="w-full" />
+        ) : (
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        )}
         {message && <p className="text-sm text-muted-foreground text-center">{message}</p>}
       </ProgressDialogContent>
     </Dialog>
