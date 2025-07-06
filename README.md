@@ -28,8 +28,8 @@ supabase start
 supabase db reset
 ```
 
-   Use `supabase db push` if you only want to apply migrations without resetting
-   the database.
+Use `supabase db push` if you only want to apply migrations without resetting
+the database.
 
 4. Define the `app.settings` values used by database functions. Either set them
    at the database level:
@@ -56,9 +56,10 @@ supabase db reset
    RESEND_FROM_EMAIL=<default from address>
    ```
 
-6. By default the sidebar menu items are loaded from the database. Set
-   `VITE_ENABLE_DYNAMIC_MENU=false` in your `.env` file to use the static
-   menu defined in the source code.
+6. The sidebar menu items are loaded from the database when
+   `VITE_ENABLE_DYNAMIC_MENU` is set to `true` (the default). Set it to
+   `false` in your `.env` file to use the static menu defined in the source
+   code.
 
 ## Running tests
 
@@ -98,4 +99,3 @@ A helper function `can_user(permission text)` allows the frontend to quickly ver
 ## Changelog
 
 - Dates are now stored and parsed using local `yyyy-MM-dd` format instead of ISO strings.
-
