@@ -7,6 +7,7 @@ import {
   PiggyBank,
   FileBarChart,
   LayoutDashboard,
+  ListChecks,
   Bell,
   LifeBuoy,
   Shield,
