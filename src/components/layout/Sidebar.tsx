@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
-import { usePermissions } from '../../hooks/usePermissions';
+import { useMenuItems } from '../../hooks/useMenuItems';
 import { useAuthStore } from '../../stores/authStore';
 import { Scrollable } from '../ui2/scrollable';
 import { Input } from '../ui2/input';
@@ -33,7 +33,6 @@ function Sidebar() {
     setPinned,
   } = useSidebar();
   const location = useLocation();
-  const { hasPermission } = usePermissions();
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -93,12 +92,8 @@ function Sidebar() {
     return userRoles?.[0]?.role_name || 'User';
   }, [userRoles]);
 
-  const navigation = useMemo(
-    () =>
-      baseNavigation.filter(
-        (item) => !item.permission || hasPermission(item.permission)
-      ),
-    [hasPermission]
+  const { data: navigation = baseNavigation } = useMenuItems(
+    userRoles?.map((r: any) => r.role_id) || []
   );
 
   const menuItemCount = useMemo(() => {
