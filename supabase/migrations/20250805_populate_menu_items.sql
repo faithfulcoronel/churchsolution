@@ -13,7 +13,8 @@ VALUES
   (NULL, 'offerings', 'Tithes & Offerings', '/offerings', 'hand-coins', 8, TRUE),
   (NULL, 'expenses', 'Expenses', '/expenses', 'piggy-bank', 9, TRUE),
   (NULL, 'financial-reports', 'Financial Reports', '/finances/financial-reports', 'file-bar-chart', 10, TRUE),
-  (NULL, 'administration', 'Admin Panel', '/administration', 'shield', 11, TRUE)
+  (NULL, 'administration', 'Admin Panel', '/administration', 'shield', 11, TRUE),
+  (NULL, 'menu-permissions', 'Menu Permissions', '/administration/menu-permissions', 'list-checks', 12, TRUE)
 ON CONFLICT (tenant_id, code) DO NOTHING;
 
 -- Map menu items to permissions
@@ -26,7 +27,8 @@ WITH perms(code, perm_code) AS (
     ('offerings', 'finance.view'),
     ('expenses', 'finance.view'),
     ('financial-reports', 'finance.view'),
-    ('administration', 'user.view')
+    ('administration', 'user.view'),
+    ('menu-permissions', 'role.edit')
 )
 INSERT INTO menu_permissions (tenant_id, menu_item_id, permission_id)
 SELECT NULL, mi.id, p.id
