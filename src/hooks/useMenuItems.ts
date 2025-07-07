@@ -4,10 +4,28 @@ import { navigation as staticNavigation, NavItem } from "../config/navigation";
 import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+function toPascalCase(value: string): string {
+  return value
+    .split(/[-_\s]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+}
+
 function getIcon(name: string | null): LucideIcon {
-  const icon = (Icons as Record<string, LucideIcon>)[name ?? ""];
+  if (!name) return Icons.Circle;
+  const pascal = toPascalCase(name);
+  const icon = (Icons as Record<string, LucideIcon>)[pascal];
   return icon || Icons.Circle;
 }
+
+const sectionMap = new Map<string, string>();
+function collectSections(items: NavItem[]) {
+  items.forEach((it) => {
+    if (it.href) sectionMap.set(it.href, it.section ?? "General");
+    if (it.submenu) collectSections(it.submenu);
+  });
+}
+collectSections(staticNavigation);
 
 export function useMenuItems(roleIds: string[]) {
   const enableDynamicMenu =
@@ -105,16 +123,19 @@ export function useMenuItems(roleIds: string[]) {
       };
       sortItems(roots);
 
-      const convert = (item: any): NavItem => ({
-        name: item.label,
-        href: item.path,
-        icon: getIcon(item.icon),
-        permission: null,
-        section: "General",
-        submenu: item.submenu.map(convert),
-      });
+      const convert = (item: any, parentSection?: string): NavItem => {
+        const section = parentSection ?? sectionMap.get(item.path) ?? "General";
+        return {
+          name: item.label,
+          href: item.path,
+          icon: getIcon(item.icon),
+          permission: null,
+          section,
+          submenu: item.submenu.map((sub: any) => convert(sub, section)),
+        };
+      };
 
-      return roots.map(convert) as NavItem[];
+      return roots.map((r) => convert(r)) as NavItem[];
     },
     staleTime: 5 * 60 * 1000,
   });
