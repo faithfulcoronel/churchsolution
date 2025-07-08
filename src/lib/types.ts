@@ -57,6 +57,8 @@ export const TYPES = {
   ISettingRepository: 'ISettingRepository',
   ILicenseRepository: 'ILicenseRepository',
   ILicenseFeatureRepository: 'ILicenseFeatureRepository',
+  IUserRoleAdapter: 'IUserRoleAdapter',
+  IUserRoleRepository: 'IUserRoleRepository',
   IFinanceDashboardAdapter: 'IFinanceDashboardAdapter',
   IFinanceDashboardRepository: 'IFinanceDashboardRepository',
   ISourceRecentTransactionAdapter: 'ISourceRecentTransactionAdapter',
@@ -67,5 +69,6 @@ export const TYPES = {
   IncomeExpenseTransactionService: 'IncomeExpenseTransactionService',
   AnnouncementService: 'AnnouncementService',
   DonationImportService: 'DonationImportService',
-  SettingService: 'SettingService'
+  SettingService: 'SettingService',
+  UserRoleService: 'UserRoleService'
 };

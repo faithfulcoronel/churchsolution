@@ -54,6 +54,7 @@ import { PermissionAdapter, type IPermissionAdapter } from '../adapters/permissi
 import { MenuItemAdapter, type IMenuItemAdapter } from '../adapters/menuItem.adapter';
 import { MenuPermissionAdapter, type IMenuPermissionAdapter } from '../adapters/menuPermission.adapter';
 import { RoleMenuItemAdapter, type IRoleMenuItemAdapter } from '../adapters/roleMenuItem.adapter';
+import { UserRoleAdapter, type IUserRoleAdapter } from '../adapters/userRole.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
 import { ActivityLogAdapter, type IActivityLogAdapter } from '../adapters/activityLog.adapter';
@@ -120,6 +121,7 @@ import { PermissionRepository, type IPermissionRepository } from '../repositorie
 import { MenuItemRepository, type IMenuItemRepository } from '../repositories/menuItem.repository';
 import { MenuPermissionRepository, type IMenuPermissionRepository } from '../repositories/menuPermission.repository';
 import { RoleMenuItemRepository, type IRoleMenuItemRepository } from '../repositories/roleMenuItem.repository';
+import { UserRoleRepository, type IUserRoleRepository } from '../repositories/userRole.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
 import { ActivityLogRepository, type IActivityLogRepository } from '../repositories/activityLog.repository';
@@ -141,6 +143,7 @@ import { DonationImportService } from '../services/DonationImportService';
 import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
 import { SupabaseAnnouncementService, type AnnouncementService } from '../services/AnnouncementService';
 import { SupabaseActivityLogService, type ActivityLogService } from '../services/ActivityLogService';
+import { UserRoleService } from '../services/UserRoleService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -229,6 +232,10 @@ container
   .to(RoleMenuItemAdapter)
   .inSingletonScope();
 container
+  .bind<IUserRoleAdapter>(TYPES.IUserRoleAdapter)
+  .to(UserRoleAdapter)
+  .inSingletonScope();
+container
   .bind<IOfferingBatchAdapter>(TYPES.IOfferingBatchAdapter)
   .to(OfferingBatchAdapter)
   .inSingletonScope();
@@ -302,6 +309,10 @@ container
   .bind<SettingService>(TYPES.SettingService)
   .to(SupabaseSettingService)
   .inSingletonScope();
+container
+  .bind<UserRoleService>(TYPES.UserRoleService)
+  .to(UserRoleService)
+  .inSingletonScope();
 
 // Register repositories
 container
@@ -373,6 +384,10 @@ container
 container
   .bind<IRoleMenuItemRepository>(TYPES.IRoleMenuItemRepository)
   .to(RoleMenuItemRepository)
+  .inSingletonScope();
+container
+  .bind<IUserRoleRepository>(TYPES.IUserRoleRepository)
+  .to(UserRoleRepository)
   .inSingletonScope();
 container
   .bind<IFinancialTransactionRepository>(TYPES.IFinancialTransactionRepository)
