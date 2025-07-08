@@ -42,6 +42,8 @@ export const TYPES = {
   IMenuItemRepository: 'IMenuItemRepository',
   IMenuPermissionAdapter: 'IMenuPermissionAdapter',
   IMenuPermissionRepository: 'IMenuPermissionRepository',
+  IRoleMenuItemAdapter: 'IRoleMenuItemAdapter',
+  IRoleMenuItemRepository: 'IRoleMenuItemRepository',
   IUserRepository: 'IUserRepository',
   IErrorLogRepository: 'IErrorLogRepository',
   IActivityLogRepository: 'IActivityLogRepository',

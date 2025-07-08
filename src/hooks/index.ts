@@ -36,3 +36,4 @@ export * from './useAuthorization';
 export * from './useMenuItemRepository';
 export * from './useMenuItems';
 export * from './useMenuPermissionRepository';
+export * from './useRoleMenuItemRepository';

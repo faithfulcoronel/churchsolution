@@ -53,6 +53,7 @@ import { RoleAdapter, type IRoleAdapter } from '../adapters/role.adapter';
 import { PermissionAdapter, type IPermissionAdapter } from '../adapters/permission.adapter';
 import { MenuItemAdapter, type IMenuItemAdapter } from '../adapters/menuItem.adapter';
 import { MenuPermissionAdapter, type IMenuPermissionAdapter } from '../adapters/menuPermission.adapter';
+import { RoleMenuItemAdapter, type IRoleMenuItemAdapter } from '../adapters/roleMenuItem.adapter';
 import { AuthUserAdapter, type IAuthUserAdapter } from '../adapters/authUser.adapter';
 import { ErrorLogAdapter, type IErrorLogAdapter } from '../adapters/errorLog.adapter';
 import { ActivityLogAdapter, type IActivityLogAdapter } from '../adapters/activityLog.adapter';
@@ -116,6 +117,7 @@ import { RoleRepository, type IRoleRepository } from '../repositories/role.repos
 import { PermissionRepository, type IPermissionRepository } from '../repositories/permission.repository';
 import { MenuItemRepository, type IMenuItemRepository } from '../repositories/menuItem.repository';
 import { MenuPermissionRepository, type IMenuPermissionRepository } from '../repositories/menuPermission.repository';
+import { RoleMenuItemRepository, type IRoleMenuItemRepository } from '../repositories/roleMenuItem.repository';
 import { UserRepository, type IUserRepository } from '../repositories/user.repository';
 import { ErrorLogRepository, type IErrorLogRepository } from '../repositories/errorLog.repository';
 import { ActivityLogRepository, type IActivityLogRepository } from '../repositories/activityLog.repository';
@@ -217,6 +219,10 @@ container
 container
   .bind<IMenuPermissionAdapter>(TYPES.IMenuPermissionAdapter)
   .to(MenuPermissionAdapter)
+  .inSingletonScope();
+container
+  .bind<IRoleMenuItemAdapter>(TYPES.IRoleMenuItemAdapter)
+  .to(RoleMenuItemAdapter)
   .inSingletonScope();
 container
   .bind<IOfferingBatchAdapter>(TYPES.IOfferingBatchAdapter)
@@ -351,6 +357,10 @@ container
 container
   .bind<IMenuPermissionRepository>(TYPES.IMenuPermissionRepository)
   .to(MenuPermissionRepository)
+  .inSingletonScope();
+container
+  .bind<IRoleMenuItemRepository>(TYPES.IRoleMenuItemRepository)
+  .to(RoleMenuItemRepository)
   .inSingletonScope();
 container
   .bind<IFinancialTransactionRepository>(TYPES.IFinancialTransactionRepository)

@@ -36,9 +36,9 @@ export class MenuItemAdapter
 
   protected defaultRelationships: QueryOptions['relationships'] = [
     {
-      table: 'menu_permissions',
+      table: 'role_menu_items',
       foreignKey: 'menu_item_id',
-      select: ['permission_id'],
+      select: ['role_id'],
     },
   ];
 
