@@ -5,5 +5,9 @@ import { useBaseRepository } from './useBaseRepository';
 
 export function useRoleRepository() {
   const repository = container.get<IRoleRepository>(TYPES.IRoleRepository);
-  return useBaseRepository(repository, 'Role', 'roles');
+  return {
+    ...useBaseRepository(repository, 'Role', 'roles'),
+    updatePermissions: (id: string, permissionIds: string[]) =>
+      repository.updateRolePermissions(id, permissionIds),
+  };
 }
