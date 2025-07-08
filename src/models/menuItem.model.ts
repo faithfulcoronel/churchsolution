@@ -9,4 +9,5 @@ export interface MenuItem extends BaseModel {
   icon: string | null;
   sort_order: number;
   is_system: boolean;
+  section: string | null;
 }
