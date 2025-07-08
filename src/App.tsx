@@ -136,6 +136,7 @@ function App() {
                   <Route path="/accounts/*" element={<Accounts />} />
                   <Route path="/announcements" element={<AnnouncementList />} />
                   <Route path="/support/*" element={<Support />} />
+                  <Route path="/admin/*" element={<Administration />} />
                   <Route path="/administration/*" element={<Administration />} />
                   <Route path="/settings/*" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/welcome" replace />} />
@@ -150,5 +151,4 @@ function App() {
     </QueryClientProvider>
   );
 }
-
 export default App;

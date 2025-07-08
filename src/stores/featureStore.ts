@@ -70,6 +70,12 @@ const defaultFeatures: Record<string, FeatureFlag> = {
     description: 'Allow custom role creation',
     tier: 'advanced'
   },
+  'admin.dashboard': {
+    key: 'admin.dashboard',
+    enabled: true,
+    description: 'Access to administrative dashboard',
+    tier: 'basic'
+  },
 
   // API Access
   'api.access': {
