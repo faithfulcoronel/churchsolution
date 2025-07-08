@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
-import { useMenuPermissionRepository } from '../../hooks/useMenuPermissionRepository';
+import { useRoleMenuItemRepository } from '../../hooks/useRoleMenuItemRepository';
 import { useMenuItemRepository } from '../../hooks/useMenuItemRepository';
 import { Card, CardContent } from '../../components/ui2/card';
 import {
@@ -12,7 +12,6 @@ import {
   SelectItem,
 } from '../../components/ui2/select';
 import { Checkbox } from '../../components/ui2/checkbox';
-import { Button } from '../../components/ui2/button';
 import { Loader2, ListChecks } from 'lucide-react';
 
 interface Role {
@@ -29,7 +28,7 @@ interface MenuItem {
 
 function MenuPermissions() {
   const [roleId, setRoleId] = useState<string>('');
-  const { useQuery: useMenuPermQuery, useCreate, useDelete } = useMenuPermissionRepository();
+  const { useQuery: useMenuPermQuery, useCreate, useDelete } = useRoleMenuItemRepository();
   const { useQuery: useMenuItemsQuery } = useMenuItemRepository();
 
   const { data: roles } = useQuery({
@@ -67,7 +66,7 @@ function MenuPermissions() {
   }, [featureRows]);
 
   const { data: permsRes } = useMenuPermQuery({
-    filters: roleId ? { permission_id: { operator: 'eq', value: roleId } } : {},
+    filters: roleId ? { role_id: { operator: 'eq', value: roleId } } : {},
     enabled: !!roleId,
   });
   const current = (permsRes?.data as any[]) || [];
@@ -81,7 +80,7 @@ function MenuPermissions() {
     if (existing) {
       await deleteMutation.mutateAsync(existing.id);
     } else {
-      await createMutation.mutateAsync({ data: { menu_item_id: item.id, permission_id: roleId } });
+      await createMutation.mutateAsync({ data: { menu_item_id: item.id, role_id: roleId } });
     }
   };
 

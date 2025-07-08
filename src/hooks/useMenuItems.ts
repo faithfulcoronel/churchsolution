@@ -47,7 +47,7 @@ export function useMenuItems(roleIds: string[]) {
       const { data: items, error } = await supabase
         .from("menu_items")
         .select(
-          `id,parent_id,code,label,path,icon,sort_order,is_system,section,menu_permissions(permission_id)`,
+          `id,parent_id,code,label,path,icon,sort_order,is_system,section,role_menu_items(role_id)`,
         )
         .eq("tenant_id", tenant.id)
         .is("deleted_at", null)
@@ -74,22 +74,12 @@ export function useMenuItems(roleIds: string[]) {
         )
         .map((f) => f.feature);
 
-      let permissionIds: string[] = [];
-      if (roleIds.length) {
-        const { data: rolePerms, error: rpError } = await supabase
-          .from("role_permissions")
-          .select("permission_id")
-          .in("role_id", roleIds);
-        if (rpError) throw rpError;
-        permissionIds = rolePerms?.map((rp) => rp.permission_id) || [];
-      }
-
       const allowed = items.filter((item) => {
-        const perms =
-          (item.menu_permissions as { permission_id: string }[]) || [];
+        const roleItems =
+          (item.role_menu_items as { role_id: string }[]) || [];
         if (
-          perms.length &&
-          !perms.some((p) => permissionIds.includes(p.permission_id))
+          roleItems.length &&
+          !roleItems.some((r) => roleIds.includes(r.role_id))
         ) {
           return false;
         }
