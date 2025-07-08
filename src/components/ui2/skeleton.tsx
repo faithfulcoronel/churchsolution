@@ -1,8 +1,17 @@
 // src/components/ui2/skeleton.tsx
 import { cn } from '@/lib/utils';
 
-function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('animate-pulse rounded-md bg-muted dark:bg-muted', className)} {...props} />;
+interface SkeletonProps extends React.HTMLAttributes<HTMLElement> {
+  as?: React.ElementType;
+}
+
+function Skeleton({ as: Component = 'div', className, ...props }: SkeletonProps) {
+  return (
+    <Component
+      className={cn('animate-pulse rounded-md bg-muted dark:bg-muted', className)}
+      {...props}
+    />
+  );
 }
 
 export { Skeleton };

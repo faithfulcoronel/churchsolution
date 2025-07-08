@@ -12,8 +12,16 @@ export function ChartCardSkeleton({ title, description, height = 350 }: Props) {
   return (
     <Card className="animate-pulse">
       <CardHeader>
-        {title && <CardTitle><Skeleton className="h-6 w-1/3" /></CardTitle>}
-        {description && <CardDescription><Skeleton className="h-4 w-1/2" /></CardDescription>}
+        {title && (
+          <CardTitle>
+            <Skeleton as="span" className="block h-6 w-1/3" />
+          </CardTitle>
+        )}
+        {description && (
+          <CardDescription>
+            <Skeleton as="span" className="block h-4 w-1/2" />
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent>
         <Skeleton className={`w-full rounded-md`} style={{ height }} />
