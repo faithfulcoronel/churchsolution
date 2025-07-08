@@ -96,8 +96,8 @@ export const navigation: NavItem[] = [
     section: 'Financial',
   },
   {
-    name: 'Admin Panel',
-    href: '/administration',
+    name: 'Admin Dashboard',
+    href: '/admin/dashboard',
     icon: Shield,
     permission: 'user.view',
     section: 'Administration',
