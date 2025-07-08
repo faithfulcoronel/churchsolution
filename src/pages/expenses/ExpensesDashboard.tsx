@@ -133,6 +133,7 @@ function ExpensesDashboard() {
       {
         table: 'financial_transaction_headers',
         foreignKey: 'header_id',
+        alias: 'header',
         select: ['id', 'status'],
       },
       {
@@ -166,6 +167,7 @@ function ExpensesDashboard() {
       {
         table: 'financial_transaction_headers',
         foreignKey: 'header_id',
+        alias: 'header',
         select: ['id', 'status'],
       },
       {
