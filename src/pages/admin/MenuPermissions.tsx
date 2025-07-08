@@ -24,6 +24,7 @@ interface MenuItem {
   code: string;
   label: string;
   is_system: boolean;
+  feature_key: string | null;
 }
 
 function MenuPermissions() {
@@ -63,7 +64,7 @@ function MenuPermissions() {
 
       const { data, error } = await supabase
         .from('license_features')
-        .select('feature_key')
+        .select('plan_name,feature_key')
         .in('plan_name', plans)
         .is('deleted_at', null);
       if (error) throw error;
@@ -129,8 +130,8 @@ function MenuPermissions() {
                   id={item.id}
                   checked={!!current.find(p => p.menu_item_id === item.id)}
                   onCheckedChange={() => toggle(item)}
-                  disabled={!item.is_system && !activeFeatures.includes(item.code)}
-                />
+                  disabled={!item.is_system && !activeFeatures.includes(item.feature_key ?? '')}
+                  />
                 <label htmlFor={item.id} className="capitalize">
                   {item.label}
                 </label>
