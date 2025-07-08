@@ -3,15 +3,6 @@ ALTER TABLE license_features
   ADD COLUMN IF NOT EXISTS plan_name text,
   ADD COLUMN IF NOT EXISTS feature_key text;
 
--- Backfill new columns using existing data
-UPDATE license_features lf
-SET plan_name = l.plan_name,
-    feature_key = mi.feature_key
-FROM licenses l
-LEFT JOIN menu_items mi ON mi.code = lf.feature AND mi.tenant_id IS NULL
-WHERE lf.license_id = l.id
-  AND lf.plan_name IS NULL;
-
 -- Enforce NOT NULL constraints
 ALTER TABLE license_features
   ALTER COLUMN plan_name SET NOT NULL,
