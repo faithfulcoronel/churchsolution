@@ -1,14 +1,11 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { useAuthStore } from './stores/authStore';
 import { supabase } from './lib/supabase';
 import { MessageHandler } from './components/MessageHandler';
 import { handleError } from './utils/errorHandler';
-import { Card, CardContent } from './components/ui2/card';
-import { Button } from './components/ui2/button';
-import { AlertTriangle } from 'lucide-react';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -35,11 +32,11 @@ const Support = React.lazy(() => import('./pages/support/Support'));
 // Error boundary component
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean; message?: string }
+  { hasError: boolean }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false, message: undefined };
+    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError() {
@@ -47,30 +44,27 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    const { message } = handleError(error, { errorInfo });
-    this.setState({ message });
+    handleError(error, { errorInfo });
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
-          <Card className="max-w-md w-full text-center">
-            <CardContent className="space-y-6 py-8">
-              <img src="/logo_square.svg" alt="StewardTrack logo" className="h-12 mx-auto" />
-              <AlertTriangle className="h-10 w-10 text-warning mx-auto" />
-              <h2 className="text-2xl font-semibold">Oops! Something went wrong</h2>
-              <p className="text-sm text-muted-foreground">
-                {this.state.message || 'An unexpected error occurred. Please try refreshing the page.'}
-              </p>
-              <div className="flex justify-center gap-4">
-                <Button onClick={() => window.location.reload()}>Refresh Page</Button>
-                <Button variant="outline" asChild>
-                  <Link to="/support/add">Contact Support</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md w-full space-y-8 text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900">
+              Something went wrong
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              We're sorry for the inconvenience. Please try refreshing the page.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              Refresh Page
+            </button>
+          </div>
         </div>
       );
     }
