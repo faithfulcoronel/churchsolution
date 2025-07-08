@@ -5,5 +5,9 @@ import { useBaseRepository } from './useBaseRepository';
 
 export function useRoleMenuItemRepository() {
   const repository = container.get<IRoleMenuItemRepository>(TYPES.IRoleMenuItemRepository);
-  return useBaseRepository(repository, 'Role Menu Item', 'role-menu-items');
+  return {
+    ...useBaseRepository(repository, 'Role Menu Item', 'role-menu-items'),
+    replaceForRole: (roleId: string, menuItemIds: string[]) =>
+      repository.replaceRoleMenuItems(roleId, menuItemIds),
+  };
 }
