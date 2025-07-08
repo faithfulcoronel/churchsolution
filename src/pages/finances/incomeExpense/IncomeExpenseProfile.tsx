@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { format, parse } from 'date-fns';
 import BackButton from '../../../components/BackButton';
-import { hasAccess } from '../../../utils/access';
+import { useAccess } from '../../../utils/access';
 
 interface IncomeExpenseProfileProps {
   transactionType: 'income' | 'expense';
@@ -36,6 +36,7 @@ interface IncomeExpenseProfileProps {
 function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { hasAccess } = useAccess();
   const {
     useQuery,
     submitTransaction,

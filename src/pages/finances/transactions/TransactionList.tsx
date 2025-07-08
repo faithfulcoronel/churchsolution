@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
-import { hasAccess } from '../../../utils/access';
+import { useAccess } from '../../../utils/access';
 import PermissionGate from '../../../components/PermissionGate';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -57,6 +57,7 @@ import { useIncomeExpenseService } from '../../../hooks/useIncomeExpenseService'
 
 function TransactionList() {
   const navigate = useNavigate();
+  const { hasAccess } = useAccess();
   const { currency } = useCurrencyStore();
   
   // State for filters

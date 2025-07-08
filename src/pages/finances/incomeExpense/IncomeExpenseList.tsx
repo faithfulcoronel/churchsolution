@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import { useIncomeExpenseService } from '../../../hooks/useIncomeExpenseService';
-import { hasAccess } from '../../../utils/access';
+import { useAccess } from '../../../utils/access';
 import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { Input } from '../../../components/ui2/input';
@@ -49,6 +49,7 @@ interface IncomeExpenseListProps {
 
 function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
   const navigate = useNavigate();
+  const { hasAccess } = useAccess();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
