@@ -32,6 +32,8 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [entriesError, setEntriesError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     const loadEntries = async () => {
@@ -144,6 +146,10 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
             autoHeight
             paginationMode="client"
             storageKey="income-expense-profile-entries"
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            page={page}
+            pageSize={pageSize}
           />
         </CardContent>
       </Card>
