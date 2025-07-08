@@ -46,9 +46,26 @@ function MenuPermissions() {
   const { data: featureRows } = useQuery({
     queryKey: ['license-features'],
     queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: licenses, error: licErr } = await supabase
+        .from('licenses')
+        .select('plan_name,status,expires_at')
+        .is('deleted_at', null);
+      if (licErr) throw licErr;
+
+      const plans = (licenses || [])
+        .filter(
+          l => l.status === 'active' && (!l.expires_at || l.expires_at >= today)
+        )
+        .map(l => l.plan_name);
+
+      if (plans.length === 0) return [];
+
       const { data, error } = await supabase
         .from('license_features')
-        .select('feature,licenses(status,expires_at)');
+        .select('feature_key')
+        .in('plan_name', plans)
+        .is('deleted_at', null);
       if (error) throw error;
       return data || [];
     },
@@ -56,13 +73,7 @@ function MenuPermissions() {
 
   const activeFeatures = React.useMemo(() => {
     if (!featureRows) return [] as string[];
-    const today = new Date().toISOString().slice(0, 10);
-    return featureRows
-      .filter(
-        (f: any) =>
-          f.licenses?.status === 'active' && (!f.licenses.expires_at || f.licenses.expires_at >= today)
-      )
-      .map((f: any) => f.feature);
+    return featureRows.map((f: any) => f.feature_key);
   }, [featureRows]);
 
   const { data: permsRes } = useMenuPermQuery({
