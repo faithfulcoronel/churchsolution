@@ -9,21 +9,25 @@ ON CONFLICT (tenant_id, name) DO NOTHING;
 
 -- 2. Remove assignments that would conflict after update
 DELETE FROM user_roles ur
-USING roles r
-JOIN roles tr ON tr.tenant_id = ur.tenant_id AND tr.name = r.name
+USING roles r, roles tr
 WHERE ur.role_id = r.id
   AND r.tenant_id IS NULL
+  AND tr.tenant_id = ur.tenant_id
+  AND tr.name = r.name
   AND EXISTS (
-    SELECT 1 FROM user_roles dup
+    SELECT 1
+    FROM user_roles dup
     WHERE dup.user_id = ur.user_id
       AND dup.role_id = tr.id
       AND dup.tenant_id = ur.tenant_id
   );
 
+
 -- 3. Update remaining assignments to tenant-specific role IDs
 UPDATE user_roles ur
 SET role_id = tr.id
-FROM roles r
-JOIN roles tr ON tr.tenant_id = ur.tenant_id AND tr.name = r.name
+FROM roles r, roles tr
 WHERE ur.role_id = r.id
-  AND r.tenant_id IS NULL;
+  AND r.tenant_id IS NULL
+  AND tr.tenant_id = ur.tenant_id
+  AND tr.name = r.name;
