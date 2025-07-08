@@ -27,6 +27,7 @@ export class MenuItemAdapter
     icon,
     sort_order,
     is_system,
+    section,
     created_by,
     updated_by,
     created_at,

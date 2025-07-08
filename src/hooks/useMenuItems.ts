@@ -47,7 +47,7 @@ export function useMenuItems(roleIds: string[]) {
       const { data: items, error } = await supabase
         .from("menu_items")
         .select(
-          `id,parent_id,code,label,path,icon,sort_order,is_system,menu_permissions(permission_id)`,
+          `id,parent_id,code,label,path,icon,sort_order,is_system,section,menu_permissions(permission_id)`,
         )
         .eq("tenant_id", tenant.id)
         .is("deleted_at", null)
@@ -124,7 +124,7 @@ export function useMenuItems(roleIds: string[]) {
       sortItems(roots);
 
       const convert = (item: any, parentSection?: string): NavItem => {
-        const section = parentSection ?? sectionMap.get(item.path) ?? "General";
+        const section = item.section ?? parentSection ?? sectionMap.get(item.path) ?? "General";
         return {
           name: item.label,
           href: item.path,

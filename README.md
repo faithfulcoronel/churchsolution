@@ -60,6 +60,8 @@ the database.
    `VITE_ENABLE_DYNAMIC_MENU` is set to `true` (the default). Set it to
    `false` in your `.env` file to use the static menu defined in the source
    code.
+   Menu items are grouped by a `section` column that mirrors the
+   configuration in `src/config/navigation.ts`.
 
 ## Running tests
 
