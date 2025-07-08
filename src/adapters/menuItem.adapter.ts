@@ -28,6 +28,8 @@ export class MenuItemAdapter
     sort_order,
     is_system,
     section,
+    permission_key,
+    feature_key,
     created_by,
     updated_by,
     created_at,
