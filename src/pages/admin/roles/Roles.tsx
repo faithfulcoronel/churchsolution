@@ -4,6 +4,7 @@ import RoleList from './RoleList';
 import RoleAddEdit from './RoleAddEdit';
 import RoleProfile from './RoleProfile';
 import RolePermissions from './RolePermissions';
+import RoleMenus from './RoleMenus';
 
 function Roles() {
   return (
@@ -14,6 +15,7 @@ function Roles() {
       <Route path=":id" element={<RoleProfile />} />
       <Route path=":id/edit" element={<RoleAddEdit />} />
       <Route path=":id/permissions" element={<RolePermissions />} />
+      <Route path=":id/menus" element={<RoleMenus />} />
       <Route path="*" element={<Navigate to="list" replace />} />
     </Routes>
   );
