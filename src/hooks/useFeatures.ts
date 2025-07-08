@@ -1,6 +1,7 @@
 import { useFeatureStore, type FeatureFlag } from '../stores/featureStore';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { useEffect } from 'react';
 
 export function useFeatures() {
   const { setFeatures, features, isEnabled, setFeature } = useFeatureStore();
@@ -18,7 +19,7 @@ export function useFeatures() {
   });
 
   // Enable/disable features based on subscription tier
-  React.useEffect(() => {
+  useEffect(() => {
     if (!tenant?.subscription_tier) return;
 
     const tiers = ['free', 'basic', 'advanced', 'premium', 'enterprise'];
