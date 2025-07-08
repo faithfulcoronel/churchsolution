@@ -58,21 +58,29 @@ export function useMenuItems(roleIds: string[]) {
         return staticNavigation;
       }
 
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: licenses, error: licErr } = await supabase
+        .from("licenses")
+        .select("plan_name,status,expires_at")
+        .eq("tenant_id", tenant.id)
+        .is("deleted_at", null);
+      if (licErr) throw licErr;
+
+      const plans = (licenses || [])
+        .filter(
+          (l) => l.status === "active" && (!l.expires_at || l.expires_at >= today)
+        )
+        .map((l) => l.plan_name);
+
       const { data: featureRows, error: featureError } = await supabase
         .from("license_features")
-        .select("feature,licenses(status,expires_at)")
+        .select("feature_key")
         .eq("tenant_id", tenant.id)
+        .in("plan_name", plans)
         .is("deleted_at", null);
 
       if (featureError) throw featureError;
-      const today = new Date().toISOString().slice(0, 10);
-      const features = (featureRows || [])
-        .filter(
-          (f) =>
-            f.licenses?.status === "active" &&
-            (!f.licenses.expires_at || f.licenses.expires_at >= today),
-        )
-        .map((f) => f.feature);
+      const features = (featureRows || []).map((f) => f.feature_key);
 
       const allowed = items.filter((item) => {
         const roleItems =
@@ -86,7 +94,7 @@ export function useMenuItems(roleIds: string[]) {
         if (
           features.length > 0 &&
           !item.is_system &&
-          !features.includes(item.code)
+          !features.includes(item.feature_key || '')
         ) {
           return false;
         }
