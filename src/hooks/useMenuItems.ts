@@ -74,7 +74,7 @@ export function useMenuItems(roleIds: string[]) {
 
       const { data: featureRows, error: featureError } = await supabase
         .from("license_features")
-        .select("feature_key")
+        .select("plan_name,feature_key")
         .eq("tenant_id", tenant.id)
         .in("plan_name", plans)
         .is("deleted_at", null);
