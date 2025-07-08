@@ -11,7 +11,6 @@ import {
   Bell,
   LifeBuoy,
   Shield,
-  ListChecks,
   LucideIcon,
 } from 'lucide-react';
 
