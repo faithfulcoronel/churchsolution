@@ -16,8 +16,10 @@ export class RoleRepository
     super(adapter);
   }
 
-  protected override async beforeCreate(data: Partial<Role>): Promise<Partial<Role>> {
-    RoleValidator.validate(data);
+  protected override async beforeCreate(
+    data: Partial<Role>
+  ): Promise<Partial<Role>> {
+    await RoleValidator.validate(data, this);
     return this.formatData(data);
   }
 
@@ -25,8 +27,11 @@ export class RoleRepository
     NotificationService.showSuccess(`Role "${data.name}" created successfully`);
   }
 
-  protected override async beforeUpdate(id: string, data: Partial<Role>): Promise<Partial<Role>> {
-    RoleValidator.validate(data);
+  protected override async beforeUpdate(
+    id: string,
+    data: Partial<Role>
+  ): Promise<Partial<Role>> {
+    await RoleValidator.validate(data, this, id);
     return this.formatData(data);
   }
 
