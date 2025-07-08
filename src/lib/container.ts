@@ -64,6 +64,8 @@ import {
 } from '../adapters/sourceRecentTransaction.adapter';
 import { MessageThreadAdapter, type IMessageThreadAdapter } from '../adapters/messageThread.adapter';
 import { MessageAdapter, type IMessageAdapter } from '../adapters/message.adapter';
+import { LicenseAdapter, type ILicenseAdapter } from '../adapters/license.adapter';
+import { LicenseFeatureAdapter, type ILicenseFeatureAdapter } from '../adapters/licenseFeature.adapter';
 import { MemberRepository, type IMemberRepository } from '../repositories/member.repository';
 import {
   NotificationRepository,
@@ -128,6 +130,8 @@ import {
 } from '../repositories/sourceRecentTransaction.repository';
 import { MessageThreadRepository, type IMessageThreadRepository } from '../repositories/messageThread.repository';
 import { MessageRepository, type IMessageRepository } from '../repositories/message.repository';
+import { LicenseRepository, type ILicenseRepository } from '../repositories/license.repository';
+import { LicenseFeatureRepository, type ILicenseFeatureRepository } from '../repositories/licenseFeature.repository';
 import { SettingAdapter, type ISettingAdapter } from '../adapters/setting.adapter';
 import { SettingRepository, type ISettingRepository } from '../repositories/setting.repository';
 import { SupabaseSettingService, type SettingService } from '../services/SettingService';
@@ -259,6 +263,14 @@ container
 container
   .bind<ISettingAdapter>(TYPES.ISettingAdapter)
   .to(SettingAdapter)
+  .inSingletonScope();
+container
+  .bind<ILicenseAdapter>(TYPES.ILicenseAdapter)
+  .to(LicenseAdapter)
+  .inSingletonScope();
+container
+  .bind<ILicenseFeatureAdapter>(TYPES.ILicenseFeatureAdapter)
+  .to(LicenseFeatureAdapter)
   .inSingletonScope();
 
 // Register services
@@ -409,6 +421,14 @@ container
 container
   .bind<IMessageRepository>(TYPES.IMessageRepository)
   .to(MessageRepository)
+  .inSingletonScope();
+container
+  .bind<ILicenseRepository>(TYPES.ILicenseRepository)
+  .to(LicenseRepository)
+  .inSingletonScope();
+container
+  .bind<ILicenseFeatureRepository>(TYPES.ILicenseFeatureRepository)
+  .to(LicenseFeatureRepository)
   .inSingletonScope();
 container
   .bind<ISettingRepository>(TYPES.ISettingRepository)
