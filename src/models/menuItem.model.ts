@@ -10,4 +10,6 @@ export interface MenuItem extends BaseModel {
   sort_order: number;
   is_system: boolean;
   section: string | null;
+  permission_key: string;
+  feature_key: string | null;
 }
