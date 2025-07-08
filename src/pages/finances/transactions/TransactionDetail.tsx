@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
-import { hasAccess } from '../../../utils/access';
+import { useAccess } from '../../../utils/access';
 import PermissionGate from '../../../components/PermissionGate';
 import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -38,6 +38,7 @@ import {
 function TransactionDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { hasAccess } = useAccess();
   const { currency } = useCurrencyStore();
   
   // State for dialogs

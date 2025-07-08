@@ -16,7 +16,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
-import { hasAccess } from '../../utils/access';
+import { useAccess } from '../../utils/access';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,6 +43,7 @@ const statusVariantMap: Record<string, 'success' | 'warning' | 'info' | 'seconda
 
 export default function RecentTransactionItem({ transaction }: Props) {
   const navigate = useNavigate();
+  const { hasAccess } = useAccess();
   const {
     submitTransaction,
     approveTransaction,

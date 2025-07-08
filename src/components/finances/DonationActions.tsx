@@ -19,8 +19,7 @@ import {
 import { Button } from '../ui2/button';
 import { useFinancialTransactionHeaderRepository } from '../../hooks/useFinancialTransactionHeaderRepository';
 import { useIncomeExpenseService } from '../../hooks/useIncomeExpenseService';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasAccess } from '../../utils/access';
+import { useAccess } from '../../utils/access';
 import { useCurrencyStore } from '../../stores/currencyStore';
 import { formatCurrency } from '../../utils/currency';
 import type { TransactionItem as DonationItem } from './RecentTransactionItem';
@@ -43,6 +42,7 @@ interface DonationActionsProps {
 
 export default function DonationActions({ donation }: DonationActionsProps) {
   const navigate = useNavigate();
+  const { hasAccess } = useAccess();
   const { currency } = useCurrencyStore();
   const {
     submitTransaction,
