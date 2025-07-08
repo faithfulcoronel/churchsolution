@@ -5,6 +5,9 @@ import { supabase } from '../../../lib/supabase';
 import { Save, Loader2, UserPlus } from 'lucide-react';
 import BackButton from '../../../components/BackButton';
 import { useUserRepository } from '../../../hooks/useUserRepository';
+import { container } from '../../../lib/container';
+import { TYPES } from '../../../lib/types';
+import { UserRoleService } from '../../../services/UserRoleService';
 import { Input } from '../../../components/ui2/input';
 import { Checkbox } from '../../../components/ui2/checkbox';
 import { Button } from '../../../components/ui2/button';
@@ -22,6 +25,7 @@ const UserAddEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { useFindById, useCreate, useUpdate } = useUserRepository();
+  const userRoleService = container.get<UserRoleService>(TYPES.UserRoleService);
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
     password: '',
@@ -76,18 +80,24 @@ const UserAddEdit = () => {
       delete (payload as any).password;
     }
 
-    if (roles && roles.length) {
-      payload.roles = roles
-        .filter(r => formData.roles.includes(r.name))
-        .map(r => r.id);
-    }
+    const selectedRoleIds = roles
+      ? roles.filter(r => formData.roles.includes(r.name)).map(r => r.id)
+      : [];
 
     try {
+      let userId = id;
       if (id) {
         await updateUserMutation.mutateAsync({ id, data: payload });
       } else {
-        await createUserMutation.mutateAsync({ data: payload });
+        const newUser = await createUserMutation.mutateAsync({ data: payload });
+        // @ts-ignore newUser shape from repo
+        userId = (newUser as any).id;
       }
+
+      if (userId) {
+        await userRoleService.assignRoles(userId, selectedRoleIds);
+      }
+
       navigate('/administration/users');
     } catch (error) {
       console.error('Error saving user:', error);
