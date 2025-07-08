@@ -8,6 +8,7 @@ import Announcements from './announcements/Announcements';
 import ChurchSettings from './account-management/ChurchSettings';
 import Permissions from './configuration/Permissions';
 import MenuPermissions from './MenuPermissions';
+import License from './license/License';
 
 function Administration() {
   return (
@@ -18,9 +19,9 @@ function Administration() {
       <Route path="menu-permissions" element={<MenuPermissions />} />
       <Route path="configuration/permissions/*" element={<Permissions />} />
       <Route path="account-management/church" element={<ChurchSettings />} />
+      <Route path="license" element={<License />} />
       <Route path="*" element={<Navigate to="users" replace />} />
     </Routes>
   );
 }
-
 export default Administration;

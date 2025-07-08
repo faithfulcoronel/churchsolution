@@ -70,5 +70,6 @@ export const TYPES = {
   AnnouncementService: 'AnnouncementService',
   DonationImportService: 'DonationImportService',
   SettingService: 'SettingService',
-  UserRoleService: 'UserRoleService'
+  UserRoleService: 'UserRoleService',
+  LicenseService: 'LicenseService'
 };
