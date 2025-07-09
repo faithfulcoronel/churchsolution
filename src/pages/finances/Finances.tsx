@@ -25,6 +25,12 @@ const CategoryList = React.lazy(() => import('./configuration/CategoryList'));
 const CategoryAddEdit = React.lazy(() => import('./configuration/CategoryAddEdit'));
 const CategoryProfile = React.lazy(() => import('./configuration/CategoryProfile'));
 const WeeklyGivingImport = React.lazy(() => import('./WeeklyGivingImport'));
+const OpeningBalanceList = React.lazy(() => import('./opening-balances/OpeningBalanceList'));
+const OpeningBalanceProfile = React.lazy(() => import('./opening-balances/OpeningBalanceProfile'));
+const OpeningBalanceAddEdit = React.lazy(() => import('./opening-balances/OpeningBalanceAddEdit'));
+const FiscalYearList = React.lazy(() => import('./fiscal-years/FiscalYearList'));
+const FiscalYearProfile = React.lazy(() => import('./fiscal-years/FiscalYearProfile'));
+const FiscalYearAddEdit = React.lazy(() => import('./fiscal-years/FiscalYearAddEdit'));
 
 function LoadingSpinner() {
   return (
@@ -67,6 +73,14 @@ function Finances() {
         <Route path="funds/add" element={<FundAddEdit />} />
         <Route path="funds/:id/edit" element={<FundAddEdit />} />
         <Route path="funds/:id" element={<FundProfile />} />
+        <Route path="opening-balances" element={<OpeningBalanceList />} />
+        <Route path="opening-balances/add" element={<OpeningBalanceAddEdit />} />
+        <Route path="opening-balances/:id/edit" element={<OpeningBalanceAddEdit />} />
+        <Route path="opening-balances/:id" element={<OpeningBalanceProfile />} />
+        <Route path="fiscal-years" element={<FiscalYearList />} />
+        <Route path="fiscal-years/add" element={<FiscalYearAddEdit />} />
+        <Route path="fiscal-years/:id/edit" element={<FiscalYearAddEdit />} />
+        <Route path="fiscal-years/:id" element={<FiscalYearProfile />} />
         <Route
           path="configuration/donation-categories"
           element={

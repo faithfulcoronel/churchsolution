@@ -36,6 +36,8 @@ import {
 } from '../adapters/incomeExpenseTransactionMapping.adapter';
 import { FundAdapter, type IFundAdapter } from '../adapters/fund.adapter';
 import { FundBalanceAdapter, type IFundBalanceAdapter } from '../adapters/fundBalance.adapter';
+import { OpeningBalanceAdapter, type IOpeningBalanceAdapter } from '../adapters/openingBalance.adapter';
+import { FiscalYearAdapter, type IFiscalYearAdapter } from '../adapters/fiscalYear.adapter';
 import {
   OfferingBatchAdapter,
   type IOfferingBatchAdapter,
@@ -103,6 +105,8 @@ import {
 } from '../repositories/incomeExpenseTransactionMapping.repository';
 import { FundRepository, type IFundRepository } from '../repositories/fund.repository';
 import { FundBalanceRepository, type IFundBalanceRepository } from '../repositories/fundBalance.repository';
+import { OpeningBalanceRepository, type IOpeningBalanceRepository } from '../repositories/openingBalance.repository';
+import { FiscalYearRepository, type IFiscalYearRepository } from '../repositories/fiscalYear.repository';
 import {
   OfferingBatchRepository,
   type IOfferingBatchRepository,
@@ -199,6 +203,14 @@ container
 container
   .bind<IFundBalanceAdapter>(TYPES.IFundBalanceAdapter)
   .to(FundBalanceAdapter)
+  .inSingletonScope();
+container
+  .bind<IOpeningBalanceAdapter>(TYPES.IOpeningBalanceAdapter)
+  .to(OpeningBalanceAdapter)
+  .inSingletonScope();
+container
+  .bind<IFiscalYearAdapter>(TYPES.IFiscalYearAdapter)
+  .to(FiscalYearAdapter)
   .inSingletonScope();
 container
   .bind<ICategoryAdapter>(TYPES.ICategoryAdapter)
@@ -357,6 +369,14 @@ container
 container
   .bind<IFundBalanceRepository>(TYPES.IFundBalanceRepository)
   .to(FundBalanceRepository)
+  .inSingletonScope();
+container
+  .bind<IOpeningBalanceRepository>(TYPES.IOpeningBalanceRepository)
+  .to(OpeningBalanceRepository)
+  .inSingletonScope();
+container
+  .bind<IFiscalYearRepository>(TYPES.IFiscalYearRepository)
+  .to(FiscalYearRepository)
   .inSingletonScope();
 container
   .bind<ICategoryRepository>(TYPES.ICategoryRepository)

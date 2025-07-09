@@ -39,3 +39,5 @@ export * from './useMenuPermissionRepository';
 export * from './useRoleMenuItemRepository';
 export * from './useLicenseRepository';
 export * from './useLicenseFeatureRepository';
+export * from './useOpeningBalanceRepository';
+export * from './useFiscalYearRepository';

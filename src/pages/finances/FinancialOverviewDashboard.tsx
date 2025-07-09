@@ -293,6 +293,12 @@ function FinancialOverviewDashboard() {
               >
                 Setup expense categories
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/finances/opening-balances")}> 
+                Manage Opening Balances
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/finances/fiscal-years")}> 
+                Manage Fiscal Years
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <AlertDialog open={showRangeWarningDialog} onOpenChange={setShowRangeWarningDialog}>
