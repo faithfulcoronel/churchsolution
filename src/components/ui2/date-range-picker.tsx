@@ -299,13 +299,13 @@ export function DateRangePicker({
         </PopoverTrigger>
         <PopoverContent
           className={cn(
-            'p-0 dark:border-border max-h-[80vh] overflow-y-auto',
+            'p-0 dark:border-border flex flex-col max-h-[80vh]',
             isMobile ? 'w-[95vw]' : 'w-auto'
           )}
           align={align}
           side={side}
         >
-          <div className="flex flex-col sm:flex-row max-h-[80vh] overflow-y-auto">
+          <div className="flex flex-col sm:flex-row flex-1 overflow-y-auto">
             {finalPresets.length > 0 && (
               <div className="p-2 sm:p-3 sm:border-r dark:border-border">
                 <div className="space-y-1.5">
@@ -355,35 +355,38 @@ export function DateRangePicker({
                 numberOfMonths={isMobile ? 1 : 2}
                 className="flex flex-col sm:flex-row gap-2"
               />
-              <div className="flex items-center justify-between pt-4 border-t mt-4 dark:border-border">
-                <div className="text-sm text-muted-foreground">
-                  {range.from && range.to && (
-                    <Badge variant="secondary" className="font-normal dark:bg-muted dark:text-muted-foreground">
-                      {`${format(range.from, 'MMM d, yyyy')} - ${format(range.to, 'MMM d, yyyy')}`}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClear}
-                    disabled={!range.from}
-                    className="dark:border-border dark:bg-muted"
-                  >
-                    Clear
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      onChange(range);
-                      setOpen(false);
-                    }}
-                  >
-                    Apply
-                  </Button>
-                </div>
-              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between p-3 border-t dark:border-border">
+            <div className="text-sm text-muted-foreground">
+              {range.from && range.to && (
+                <Badge
+                  variant="secondary"
+                  className="font-normal dark:bg-muted dark:text-muted-foreground"
+                >
+                  {`${format(range.from, 'MMM d, yyyy')} - ${format(range.to, 'MMM d, yyyy')}`}
+                </Badge>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClear}
+                disabled={!range.from}
+                className="dark:border-border dark:bg-muted"
+              >
+                Clear
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  onChange(range);
+                  setOpen(false);
+                }}
+              >
+                Apply
+              </Button>
             </div>
           </div>
         </PopoverContent>
@@ -400,5 +403,4 @@ export function DateRangePicker({
         </p>
       )}
     </div>
-  );
-}
+  );}
