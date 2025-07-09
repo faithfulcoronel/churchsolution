@@ -5,6 +5,7 @@ export type FiscalPeriodStatus = 'open' | 'closed';
 
 export interface FiscalPeriod extends BaseModel {
   id: string;
+  tenant_id: string;
   fiscal_year_id: string;
   name: string;
   start_date: string;
