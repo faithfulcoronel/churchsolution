@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   useMenuItemRepository,
   useRoleMenuItemRepository,
+  useRoleRepository,
 } from '../../../hooks';
 import { supabase } from '../../../lib/supabase';
 import BackButton from '../../../components/BackButton';
@@ -23,13 +24,27 @@ interface MenuItem {
   feature_key: string | null;
 }
 
-interface MenuNode extends MenuItem {
-  children: MenuNode[];
+interface Permission {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  module: string;
 }
 
-function buildTree(items: MenuItem[]): MenuNode[] {
+interface MenuNode extends MenuItem {
+  children: MenuNode[];
+  permissions: Permission[];
+}
+
+function buildTree(
+  items: MenuItem[],
+  permsByMenu: Record<string, Permission[]>
+): MenuNode[] {
   const map = new Map<string, MenuNode>();
-  items.forEach(i => map.set(i.id, { ...i, children: [] }));
+  items.forEach(i =>
+    map.set(i.id, { ...i, children: [], permissions: permsByMenu[i.id] || [] })
+  );
   const roots: MenuNode[] = [];
 
   map.forEach(item => {
@@ -52,7 +67,9 @@ function RoleMenus() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { useQuery: useMenuQuery } = useMenuItemRepository();
-  const { useQuery: useRoleMenuQuery, replaceForRole } = useRoleMenuItemRepository();
+  const { useQuery: useRoleMenuQuery, replaceForRole } =
+    useRoleMenuItemRepository();
+  const { updatePermissions } = useRoleRepository();
 
   const { data: itemsRes } = useMenuQuery({ order: { column: 'sort_order' } });
   const items = (itemsRes?.data as MenuItem[]) || [];
@@ -62,6 +79,51 @@ function RoleMenus() {
     enabled: !!id,
   });
   const currentIds = ((permsRes?.data as any[]) || []).map((p: any) => p.menu_item_id);
+
+  const { data: menuPermRows } = useQuery({
+    queryKey: ['menu-permissions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('menu_permissions')
+        .select(
+          'menu_item_id, permission:permissions(id,code,name,description,module)'
+        );
+      if (error) throw error;
+      return data as { menu_item_id: string; permission: Permission }[];
+    },
+  });
+
+  const permsByMenu = useMemo(() => {
+    const map: Record<string, Permission[]> = {};
+    (menuPermRows || []).forEach(r => {
+      if (r.permission) {
+        if (!map[r.menu_item_id]) map[r.menu_item_id] = [];
+        map[r.menu_item_id].push(r.permission);
+      }
+    });
+    return map;
+  }, [menuPermRows]);
+
+  const { data: rolePermRows } = useQuery({
+    queryKey: ['role-permissions', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('role_menu_items')
+        .select('menu_permissions(permission_id)')
+        .eq('role_id', id!);
+      if (error) throw error;
+      return data as { menu_permissions: { permission_id: string }[] }[];
+    },
+    enabled: !!id,
+  });
+
+  const currentPermIds = useMemo(
+    () =>
+      (rolePermRows || [])
+        .flatMap(r => r.menu_permissions || [])
+        .map(mp => mp.permission_id),
+    [rolePermRows]
+  );
 
   const { data: featureRows } = useQuery({
     queryKey: ['license-features'],
@@ -94,17 +156,28 @@ function RoleMenus() {
     return featureRows.map((f: any) => f.feature_key);
   }, [featureRows]);
 
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selectedMenus, setSelectedMenus] = useState<string[]>([]);
+  const [selectedPerms, setSelectedPerms] = useState<string[]>([]);
 
   useEffect(() => {
-    setSelected(currentIds);
+    setSelectedMenus(currentIds);
   }, [currentIds]);
 
-  const tree = useMemo(() => buildTree(items), [items]);
+  useEffect(() => {
+    setSelectedPerms(currentPermIds);
+  }, [currentPermIds]);
 
-  const toggle = (mid: string) => {
-    setSelected(prev =>
+  const tree = useMemo(() => buildTree(items, permsByMenu), [items, permsByMenu]);
+
+  const toggleMenu = (mid: string) => {
+    setSelectedMenus(prev =>
       prev.includes(mid) ? prev.filter(id => id !== mid) : [...prev, mid]
+    );
+  };
+
+  const togglePermission = (pid: string) => {
+    setSelectedPerms(prev =>
+      prev.includes(pid) ? prev.filter(id => id !== pid) : [...prev, pid]
     );
   };
 
@@ -119,8 +192,8 @@ function RoleMenus() {
             <Checkbox
               id={`chk-${node.id}`}
               size="sm"
-              checked={selected.includes(node.id)}
-              onCheckedChange={() => toggle(node.id)}
+              checked={selectedMenus.includes(node.id)}
+              onCheckedChange={() => toggleMenu(node.id)}
               disabled={disabled}
             />
             <label
@@ -132,6 +205,29 @@ function RoleMenus() {
           </div>
         }
       >
+        {node.permissions.map(p => (
+          <TreeItem
+            key={`perm-${p.id}`}
+            id={`perm-${p.id}`}
+            label={
+              <div className="flex items-center gap-2 ml-6">
+                <Checkbox
+                  id={`chk-perm-${p.id}`}
+                  size="sm"
+                  checked={selectedPerms.includes(p.id)}
+                  onCheckedChange={() => togglePermission(p.id)}
+                  disabled={disabled}
+                />
+                <label
+                  htmlFor={`chk-perm-${p.id}`}
+                  className={disabled ? 'text-muted-foreground capitalize' : 'capitalize'}
+                >
+                  {p.name}
+                </label>
+              </div>
+            }
+          />
+        ))}
         {node.children.map(child => renderNode(child))}
       </TreeItem>
     );
@@ -140,7 +236,8 @@ function RoleMenus() {
   const handleSave = async () => {
     if (!id) return;
     try {
-      await replaceForRole(id, selected);
+      await replaceForRole(id, selectedMenus);
+      await updatePermissions(id, selectedPerms);
       NotificationService.showSuccess('Menus updated');
       navigate(`/administration/roles/${id}`);
     } catch (error) {
