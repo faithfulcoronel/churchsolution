@@ -1,5 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useRef,
+  ReactNode
+} from 'react';
 import { useLocation } from 'react-router-dom';
 
 interface IPathnameContextProps {
@@ -12,11 +19,11 @@ const PathnameContext = createContext<IPathnameContextProps | undefined>(undefin
 const PathnameProvider = ({ children }: { children: ReactNode }) => {
   const { pathname } = useLocation();
   const [prevPathname, setPrevPathname] = useState<string | undefined>(undefined);
+  const prevRef = useRef<string>();
 
   useEffect(() => {
-    setPrevPathname(() => {
-      return pathname;
-    });
+    setPrevPathname(prevRef.current);
+    prevRef.current = pathname;
   }, [pathname]);
 
   return (
