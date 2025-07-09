@@ -357,7 +357,7 @@ export function DateRangePicker({
               />
             </div>
           </div>
-          <div className="flex items-center justify-between p-3 border-t dark:border-border">
+          <div className="flex flex-col items-center gap-2 p-3 border-t dark:border-border">
             <div className="text-sm text-muted-foreground">
               {range.from && range.to && (
                 <Badge
@@ -368,7 +368,7 @@ export function DateRangePicker({
                 </Badge>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 justify-center">
               <Button
                 variant="outline"
                 size="sm"
