@@ -7,6 +7,7 @@ import { useIncomeExpenseService } from "../../../hooks/useIncomeExpenseService"
 import { useAccess } from "../../../utils/access";
 import { Card, CardContent } from "../../../components/ui2/card";
 import { Button } from "../../../components/ui2/button";
+import { Textarea } from "../../../components/ui2/textarea";
 import { Input } from "../../../components/ui2/input";
 import { DateRangePickerField } from "../../../components/ui2/date-range-picker-field";
 import { DataGrid } from "../../../components/ui2/mui-datagrid";
@@ -82,6 +83,8 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
   const { currency } = useCurrencyStore();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showDeleteReasonDialog, setShowDeleteReasonDialog] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showPostDialog, setShowPostDialog] = useState(false);
@@ -489,7 +492,8 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                     onClick={() => {
                       setSelectedTransaction(params.row);
                       setTransactionToDelete(params.row.id);
-                      setDeleteDialogOpen(true);
+                      setDeleteReason("");
+                      setShowDeleteReasonDialog(true);
                     }}
                     className="flex items-center text-destructive"
                   >
@@ -614,6 +618,75 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
         </Card>
       </div>
 
+      {/* Delete Reason Dialog */}
+      <AlertDialog open={showDeleteReasonDialog} onOpenChange={setShowDeleteReasonDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="danger">
+              Delete Transaction
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Please provide a reason for deleting this transaction.
+              {selectedTransaction && (
+                <div className="mt-4 border rounded-md p-3 text-left space-y-1">
+                  <p className="font-medium">
+                    {selectedTransaction.transaction_number}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedTransaction.description}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(
+                      parse(
+                        selectedTransaction.transaction_date,
+                        "yyyy-MM-dd",
+                        new Date(),
+                      ),
+                      "MMM d, yyyy",
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(
+                      totalsByHeader[selectedTransaction.id] || 0,
+                      currency,
+                    )}
+                  </p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="px-6 py-2">
+            <Textarea
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+              placeholder="Enter reason for deleting"
+              rows={3}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowDeleteReasonDialog(false);
+                setDeleteReason("");
+                setTransactionToDelete(null);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!deleteReason.trim()) return;
+                setShowDeleteReasonDialog(false);
+                setDeleteDialogOpen(true);
+              }}
+              disabled={!deleteReason.trim()}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -642,6 +715,17 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                       "MMM d, yyyy",
                     )}
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(
+                      totalsByHeader[selectedTransaction.id] || 0,
+                      currency,
+                    )}
+                  </p>
+                  {deleteReason && (
+                    <p className="text-sm text-muted-foreground">
+                      Reason: {deleteReason}
+                    </p>
+                  )}
                 </div>
               )}
               {deleteError && (
@@ -708,6 +792,12 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                       "MMM d, yyyy",
                     )}
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(
+                      totalsByHeader[selectedTransaction.id] || 0,
+                      currency,
+                    )}
+                  </p>
                 </div>
               )}
               {actionError && (
@@ -771,6 +861,12 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                         new Date(),
                       ),
                       "MMM d, yyyy",
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(
+                      totalsByHeader[selectedTransaction.id] || 0,
+                      currency,
                     )}
                   </p>
                 </div>
@@ -839,6 +935,12 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                       "MMM d, yyyy",
                     )}
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(
+                      totalsByHeader[selectedTransaction.id] || 0,
+                      currency,
+                    )}
+                  </p>
                 </div>
               )}
               {actionError && (
@@ -902,6 +1004,12 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                         new Date(),
                       ),
                       "MMM d, yyyy",
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(
+                      totalsByHeader[selectedTransaction.id] || 0,
+                      currency,
                     )}
                   </p>
                 </div>

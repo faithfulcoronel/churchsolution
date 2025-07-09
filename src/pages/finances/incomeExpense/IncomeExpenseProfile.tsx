@@ -4,6 +4,7 @@ import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinan
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import { Card, CardContent, CardHeader } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
+import { Textarea } from '../../../components/ui2/textarea';
 import { Badge } from '../../../components/ui2/badge';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import {
@@ -72,6 +73,8 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showRejectReasonDialog, setShowRejectReasonDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -189,6 +192,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
       setActionError(null);
       await updateMutation.mutateAsync({ id, data: { status: 'draft' } });
       setShowRejectDialog(false);
+      setRejectReason('');
       window.location.reload();
     } catch (error) {
       console.error('Error rejecting transaction:', error);
@@ -358,7 +362,10 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
                     </Button>
                     <Button
                       variant="destructive"
-                      onClick={() => setShowRejectDialog(true)}
+                      onClick={() => {
+                        setRejectReason('');
+                        setShowRejectReasonDialog(true);
+                      }}
                       className="flex items-center"
                     >
                       <X className="h-4 w-4 mr-2" />
@@ -449,6 +456,9 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
                   <p className="text-sm text-muted-foreground">
                     {format(parse(header.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(totalAmount, currency)}
+                  </p>
                 </div>
               )}
               {actionError && (
@@ -500,6 +510,9 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
                   <p className="text-sm text-muted-foreground">
                     {format(parse(header.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(totalAmount, currency)}
+                  </p>
                 </div>
               )}
               {actionError && (
@@ -537,6 +550,58 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Reject Reason Dialog */}
+      <AlertDialog open={showRejectReasonDialog} onOpenChange={setShowRejectReasonDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle variant="destructive">Reject Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please provide a reason for rejecting this transaction.
+              {header && (
+                <div className="mt-4 border rounded-md p-3 text-left space-y-1">
+                  <p className="font-medium">{header.transaction_number}</p>
+                  <p className="text-sm text-muted-foreground">{header.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(parse(header.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(totalAmount, currency)}
+                  </p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="px-6 py-2">
+            <Textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Enter reason for rejection"
+              rows={3}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowRejectReasonDialog(false);
+                setRejectReason('');
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!rejectReason.trim()) return;
+                setShowRejectReasonDialog(false);
+                setShowRejectDialog(true);
+              }}
+              disabled={!rejectReason.trim()}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Reject Confirmation Dialog */}
       <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <AlertDialogContent>
@@ -544,6 +609,21 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
             <AlertDialogTitle variant="destructive">Reject Transaction</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to move this transaction back to draft?
+              {header && (
+                <div className="mt-4 border rounded-md p-3 text-left space-y-1">
+                  <p className="font-medium">{header.transaction_number}</p>
+                  <p className="text-sm text-muted-foreground">{header.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(parse(header.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(totalAmount, currency)}
+                  </p>
+                  {rejectReason && (
+                    <p className="text-sm text-muted-foreground">Reason: {rejectReason}</p>
+                  )}
+                </div>
+              )}
               {actionError && (
                 <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start">
                   <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
@@ -556,6 +636,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
             <AlertDialogCancel
               onClick={() => {
                 setShowRejectDialog(false);
+                setRejectReason('');
                 setActionError(null);
               }}
               disabled={actionInProgress}
@@ -593,6 +674,9 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
                   <p className="text-sm text-muted-foreground">{header.description}</p>
                   <p className="text-sm text-muted-foreground">
                     {format(parse(header.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(totalAmount, currency)}
                   </p>
                 </div>
               )}
