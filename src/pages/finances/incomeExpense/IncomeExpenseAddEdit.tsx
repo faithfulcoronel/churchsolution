@@ -152,7 +152,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   useEffect(() => {
     if (isEditMode && entryRecords.length > 0) {
       setEntries(
-        entryRecords.map((e: any) => ({
+        entryRecords.map((e: any, idx: number) => ({
           id: e.id,
           accounts_account_id: e.account_id || '',
           fund_id: e.fund_id || '',
@@ -162,8 +162,8 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           amount: e.amount || 0,
           source_account_id: e.source_account_id || null,
           category_account_id: e.category_account_id || null,
-          line: e.line ?? undefined,
-          isDirty: false,
+          line: e.line ?? idx + 1,
+          isDirty: e.line == null,
           isDeleted: false,
         }))
       );
@@ -220,6 +220,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   };
 
   const addEntry = () => {
+    const nextLine = entries.filter(e => !e.isDeleted).length + 1;
     setEntries([
       ...entries,
       {
@@ -231,7 +232,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
         amount: 0,
         source_account_id: null,
         category_account_id: null,
-        line: entries.length + 1,
+        line: nextLine,
         isDirty: true,
         isDeleted: false,
       },
@@ -256,10 +257,22 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     setProcessing(true);
     setProgress(0);
     try {
+      const preparedEntries = entries.map(e => ({ ...e }));
+      let currentLine = 1;
+      for (const entry of preparedEntries) {
+        if (!entry.isDeleted) {
+          const newLine = currentLine++;
+          if (entry.line !== newLine) {
+            entry.line = newLine;
+            entry.isDirty = true;
+          }
+        }
+      }
+
       if (isEditMode && id) {
-        await updateBatch(id, headerData, entries, p => setProgress(p));
+        await updateBatch(id, headerData, preparedEntries, p => setProgress(p));
       } else {
-        await createBatch(headerData, entries, p => setProgress(p));
+        await createBatch(headerData, preparedEntries, p => setProgress(p));
       }
       setProgress(undefined);
       navigate(`/finances/${basePath}`);
