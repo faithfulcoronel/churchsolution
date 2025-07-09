@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useRoleRepository } from '../../../hooks/useRoleRepository';
 import { usePermissions } from '../../../hooks/usePermissions';
 import PermissionGate from '../../../components/PermissionGate';
-import { Plus, Search, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Loader2, Eye } from 'lucide-react';
 import { Role } from '../../../models/role.model';
 import { Card, CardContent } from '../../../components/ui2/card';
 import { Input } from '../../../components/ui2/input';
@@ -112,6 +112,14 @@ function RoleList() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <PermissionGate permission="role.view">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/administration/roles/${role.id}`)}
+                            icon={<Eye className="h-4 w-4" />}
+                          />
+                        </PermissionGate>
                         <PermissionGate permission="role.edit">
                           <Button
                             variant="ghost"
