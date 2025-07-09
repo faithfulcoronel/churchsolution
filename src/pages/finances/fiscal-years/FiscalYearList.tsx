@@ -6,7 +6,7 @@ import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import { GridColDef } from '@mui/x-data-grid';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Eye, Edit } from 'lucide-react';
 
 function FiscalYearList() {
   const navigate = useNavigate();
@@ -25,6 +25,37 @@ function FiscalYearList() {
     { field: 'start_date', headerName: 'Start Date', flex: 1 },
     { field: 'end_date', headerName: 'End Date', flex: 1 },
     { field: 'status', headerName: 'Status', flex: 1 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <div className="flex justify-end gap-2 w-full">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`${params.row.id}`);
+            }}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`${params.row.id}/edit`);
+            }}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
   ];
 
   return (
