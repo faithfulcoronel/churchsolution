@@ -185,7 +185,13 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     );
   }, [sources, categories, entryRecords]);
 
-  const visibleEntries = React.useMemo(() => entries.filter(e => !e.isDeleted), [entries]);
+  const visibleEntries = React.useMemo(
+    () =>
+      entries
+        .filter(e => !e.isDeleted)
+        .sort((a, b) => (a.line ?? 0) - (b.line ?? 0)),
+    [entries]
+  );
 
   const totalAmount = React.useMemo(
     () => visibleEntries.reduce((sum, e) => sum + Number(e.amount || 0), 0),
@@ -353,7 +359,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                 </tr>
               </thead>
               <tbody>
-                {entries.filter(e => !e.isDeleted).map((entry) => {
+                {visibleEntries.map((entry, idx) => {
                   const rowIndex = entries.indexOf(entry);
                   return (
                   <tr key={rowIndex} className="border-b border-border dark:border-slate-700">
@@ -361,7 +367,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                       <Input
                         type="number"
                         readOnly
-                        value={entry.line ?? rowIndex + 1}
+                        value={idx + 1}
                         disabled={isDisabled}
                       />
                     </td>
