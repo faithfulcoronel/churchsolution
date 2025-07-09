@@ -28,6 +28,8 @@ import {
 import { format, parse } from 'date-fns';
 import BackButton from '../../../components/BackButton';
 import { useAccess } from '../../../utils/access';
+import { useCurrencyStore } from '../../../stores/currencyStore';
+import { formatCurrency } from '../../../utils/currency';
 
 interface IncomeExpenseProfileProps {
   transactionType: 'income' | 'expense';
@@ -67,6 +69,21 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const { currency } = useCurrencyStore();
+
+  const totalAmount = React.useMemo(
+    () => entries.reduce((sum, e) => sum + Number(e.amount || 0), 0),
+    [entries]
+  );
+
+  const categoryTotals = React.useMemo(() => {
+    const totals: Record<string, number> = {};
+    entries.forEach(e => {
+      const name = e.categories?.name || 'Uncategorized';
+      totals[name] = (totals[name] || 0) + Number(e.amount || 0);
+    });
+    return totals;
+  }, [entries]);
 
   useEffect(() => {
     const loadEntries = async () => {
@@ -310,6 +327,34 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
             page={page}
             pageSize={pageSize}
           />
+        </CardContent>
+      </Card>
+
+      <Card className="dark:bg-slate-800 mt-6">
+        <CardHeader>
+          <h3 className="text-lg font-medium">Summary</h3>
+        </CardHeader>
+        <CardContent>
+          <table className="w-full text-sm">
+            <tbody>
+              {Object.entries(categoryTotals).map(([name, amt]) => (
+                <tr key={name} className="border-b border-border">
+                  <td className="px-4 py-1">{name}</td>
+                  <td className="px-4 py-1 text-right">
+                    {formatCurrency(amt, currency)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-border font-medium">
+                <td className="px-4 py-2">Grand Total</td>
+                <td className="px-4 py-2 text-right">
+                  {formatCurrency(totalAmount, currency)}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
         </CardContent>
       </Card>
 
