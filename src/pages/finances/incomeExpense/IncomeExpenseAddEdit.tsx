@@ -327,6 +327,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-muted text-xs text-muted-foreground dark:bg-slate-700">
+                  <th className="px-4 py-2 text-left">Line</th>
                   <th className="px-4 py-2 text-left">Account</th>
                   <th className="px-4 py-2 text-left">Fund</th>
                   <th className="px-4 py-2 text-left">Category</th>
@@ -339,6 +340,14 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
               <tbody>
                 {entries.filter(e => !e.isDeleted).map((entry, idx) => (
                   <tr key={idx} className="border-b border-border dark:border-slate-700">
+                    <td className="px-4 py-2">
+                      <Input
+                        type="number"
+                        readOnly
+                        value={entry.line ?? idx + 1}
+                        disabled={isDisabled}
+                      />
+                    </td>
                     <td className="px-4 py-2">
                       <Combobox
                         options={accountOptions}
@@ -406,7 +415,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-border font-medium">
-                  <td className="px-4 py-2" colSpan={5}>Total</td>
+                  <td className="px-4 py-2" colSpan={6}>Total</td>
                   <td className="px-4 py-2 text-right">
                     {formatCurrency(totalAmount, currency)}
                   </td>
