@@ -7,6 +7,7 @@ import { supabase } from './lib/supabase';
 import { MessageHandler } from './components/MessageHandler';
 import ErrorFallback from './components/ErrorFallback';
 import { handleError } from './utils/errorHandler';
+import { PathnameProvider } from './providers';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -88,15 +89,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
         <Router>
-        <React.Suspense
-            fallback={
-              <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-              </div>
-            }
-          >
-            <MessageHandler />
-            <Routes>
+          <PathnameProvider>
+            <React.Suspense
+              fallback={
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+                </div>
+              }
+            >
+              <MessageHandler />
+              <Routes>
               {/* Public routes */}
                 <Route
                   path="/"
@@ -144,11 +146,11 @@ function App() {
               ) : (
                 <Route path="*" element={<Navigate to="/" replace />} />
               )}
-            </Routes>
+              </Routes>
             </React.Suspense>
+          </PathnameProvider>
         </Router>
       </ErrorBoundary>
     </QueryClientProvider>
   );
-}
-export default App;
+}export default App;
