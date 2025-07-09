@@ -29,6 +29,7 @@ import {
   Hash,
   HandCoins,
   PiggyBank,
+  BarChart3,
 } from 'lucide-react';
 import { format, parse } from 'date-fns';
 import BackButton from '../../../components/BackButton';
@@ -334,7 +335,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
                     Edit
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="default"
                     onClick={() => setShowSubmitDialog(true)}
                     className="flex items-center"
                   >
@@ -348,7 +349,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
                 hasAccess('finance.approve', 'finance.approve') && (
                   <>
                     <Button
-                      variant="outline"
+                      variant="default"
                       onClick={() => setShowApproveDialog(true)}
                       className="flex items-center"
                     >
@@ -356,7 +357,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
                       Approve
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="destructive"
                       onClick={() => setShowRejectDialog(true)}
                       className="flex items-center"
                     >
@@ -369,7 +370,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
               {header.status === 'approved' &&
                 hasAccess('finance.approve', 'finance.approve') && (
                   <Button
-                    variant="outline"
+                    variant="default"
                     onClick={() => setShowPostDialog(true)}
                     className="flex items-center"
                   >
@@ -381,35 +382,12 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-medium">Entries</h3>
-        </CardHeader>
-        <CardContent className="p-0">
-          <DataGrid<IncomeExpenseTransaction>
-            columns={columns}
-            data={entries}
-            totalRows={entries.length}
-            loading={loading}
-            error={
-              entriesError ?? (headerError instanceof Error ? headerError.message : undefined)
-            }
-            autoHeight
-            paginationMode="client"
-            storageKey="income-expense-profile-entries"
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-            page={page}
-            pageSize={pageSize}
-          />
-        </CardContent>
-      </Card>
-
       <Card className="mt-6">
-        <CardHeader>
-          <h3 className="text-lg font-medium">Summary</h3>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
+          <div className="flex items-center mb-4">
+            <BarChart3 className="h-5 w-5 text-muted-foreground mr-2" />
+            <h3 className="text-base font-medium text-foreground">Summary</h3>
+          </div>
           <table className="w-full text-sm">
             <tbody>
               {Object.entries(categoryTotals).map(([name, amt]) => (
@@ -430,6 +408,30 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
               </tr>
             </tfoot>
           </table>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <h3 className="text-lg font-medium">Entries</h3>
+        </CardHeader>
+        <CardContent className="p-0">
+          <DataGrid<IncomeExpenseTransaction>
+            columns={columns}
+            data={entries}
+            totalRows={entries.length}
+            loading={loading}
+            error={
+              entriesError ?? (headerError instanceof Error ? headerError.message : undefined)
+            }
+            autoHeight
+            paginationMode="client"
+            storageKey="income-expense-profile-entries"
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            page={page}
+            pageSize={pageSize}
+          />
         </CardContent>
       </Card>
 
