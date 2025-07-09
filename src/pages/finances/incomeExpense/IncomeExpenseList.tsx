@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { format, parse } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
 import { useFinancialTransactionHeaderRepository } from "../../../hooks/useFinancialTransactionHeaderRepository";
@@ -54,6 +54,8 @@ import {
 } from "lucide-react";
 import { useCurrencyStore } from "../../../stores/currencyStore";
 import { formatCurrency } from "../../../utils/currency";
+import { usePathname } from "../../../providers";
+import { useIncomeExpenseFilterStore } from "../../../stores/incomeExpenseFilterStore";
 
 interface IncomeExpenseListProps {
   transactionType: "income" | "expense";
@@ -62,14 +64,20 @@ interface IncomeExpenseListProps {
 function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
   const navigate = useNavigate();
   const { hasAccess } = useAccess();
+  const { prevPathname } = usePathname();
+  const filters = useIncomeExpenseFilterStore((state) => state[transactionType]);
+  const setFilter = useIncomeExpenseFilterStore((state) => state.setFilter);
+  const resetFilter = useIncomeExpenseFilterStore((state) => state.resetFilter);
+  const basePath = transactionType === "income" ? "giving" : "expenses";
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    to: new Date(),
-  });
+  const { searchTerm, statusFilter, dateRange } = filters;
+
+  useEffect(() => {
+    if (!prevPathname || !prevPathname.startsWith(`/finances/${basePath}`)) {
+      resetFilter(transactionType);
+    }
+  }, []);
   const { useQuery: useEntryQuery } = useIncomeExpenseTransactionRepository();
   const {
     useQuery: useHeaderQuery,
@@ -514,7 +522,6 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       ? "Manage contribution batches."
       : "Manage expense entries.";
   const addLabel = transactionType === "income" ? "Add Batch" : "Add Expense";
-  const basePath = transactionType === "income" ? "giving" : "expenses";
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -536,7 +543,9 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
           <Input
             placeholder="Search..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) =>
+              setFilter(transactionType, { searchTerm: e.target.value })
+            }
             icon={<Search className="h-4 w-4" />}
           />
         </div>
@@ -546,7 +555,9 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
             value={{ from: dateRange.from, to: dateRange.to }}
             onChange={(range) => {
               if (range.from && range.to) {
-                setDateRange({ from: range.from, to: range.to });
+                setFilter(transactionType, {
+                  dateRange: { from: range.from, to: range.to },
+                });
               }
             }}
             placeholder="Select date range"
@@ -554,7 +565,12 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
             showCompactInput
           />
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) =>
+              setFilter(transactionType, { statusFilter: value })
+            }
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by Status" />
             </SelectTrigger>
