@@ -18,6 +18,7 @@ import {
   SelectItem,
 } from "../../../components/ui2/select";
 import { Badge } from "../../../components/ui2/badge";
+import MetricCard from "../../../components/dashboard/MetricCard";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,6 +51,8 @@ import {
   Loader2,
   AlertTriangle,
 } from "lucide-react";
+import { useCurrencyStore } from "../../../stores/currencyStore";
+import { formatCurrency } from "../../../utils/currency";
 
 interface IncomeExpenseListProps {
   transactionType: "income" | "expense";
@@ -76,6 +79,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
   } = useFinancialTransactionHeaderRepository();
   const updateMutation = useUpdate();
   const { deleteBatch } = useIncomeExpenseService(transactionType);
+  const { currency } = useCurrencyStore();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
@@ -151,6 +155,66 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       return matchesSearch && matchesStatus;
     });
   }, [headers, searchTerm, statusFilter]);
+
+  const totalsByHeader = useMemo(() => {
+    const totals: Record<string, number> = {};
+    (entryResult?.data || []).forEach((e: any) => {
+      if (e.header_id) {
+        totals[e.header_id] = (totals[e.header_id] || 0) + Number(e.amount || 0);
+      }
+    });
+    return totals;
+  }, [entryResult]);
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      draft: 0,
+      submitted: 0,
+      approved: 0,
+      posted: 0,
+      voided: 0,
+    };
+    headers.forEach((h) => {
+      counts[h.status] = (counts[h.status] || 0) + 1;
+    });
+    return counts;
+  }, [headers]);
+
+  const statusMetrics = useMemo(
+    () => [
+      {
+        name: "Draft",
+        value: statusCounts.draft,
+        icon: FileText,
+        iconClassName: "text-secondary",
+      },
+      {
+        name: "Submitted",
+        value: statusCounts.submitted,
+        icon: FileText,
+        iconClassName: "text-info",
+      },
+      {
+        name: "Approved",
+        value: statusCounts.approved,
+        icon: Check,
+        iconClassName: "text-warning",
+      },
+      {
+        name: "Posted",
+        value: statusCounts.posted,
+        icon: Check,
+        iconClassName: "text-success",
+      },
+      {
+        name: "Voided",
+        value: statusCounts.voided,
+        icon: X,
+        iconClassName: "text-destructive",
+      },
+    ],
+    [statusCounts],
+  );
 
   const handleDeleteTransaction = async () => {
     if (!transactionToDelete) return;
@@ -246,6 +310,15 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       minWidth: 150,
     },
     { field: "description", headerName: "Description", flex: 2, minWidth: 200 },
+    {
+      field: "total",
+      headerName: "Total",
+      flex: 1,
+      minWidth: 120,
+      valueGetter: (params) => totalsByHeader[params.row.id] || 0,
+      renderCell: (params) =>
+        formatCurrency(totalsByHeader[params.row.id] || 0, currency),
+    },
     {
       field: "status",
       headerName: "Status",
@@ -491,6 +564,18 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {statusMetrics.map((m) => (
+          <MetricCard
+            key={m.name}
+            label={m.name}
+            value={m.value}
+            icon={m.icon}
+            iconClassName={m.iconClassName}
+          />
+        ))}
       </div>
 
       <div className="mt-6">
