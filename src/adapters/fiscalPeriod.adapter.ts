@@ -20,6 +20,7 @@ export class FiscalPeriodAdapter
 
   protected defaultSelect = `
     id,
+    tenant_id,
     fiscal_year_id,
     name,
     start_date,
