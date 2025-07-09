@@ -52,7 +52,7 @@ function RolePermissions() {
   }, {}) ?? {};
 
   useEffect(() => {
-    if (role) {
+    if (role?.permissions) {
       setSelected(role.permissions.map(rp => rp.permission.id));
     }
   }, [role]);

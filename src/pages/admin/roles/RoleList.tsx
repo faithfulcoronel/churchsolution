@@ -103,7 +103,7 @@ function RoleList() {
                     <TableCell>{role.description || '-'}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {role.permissions.map((rp, index) => (
+                        {role.permissions?.map((rp, index) => (
                           <Badge key={index} variant="secondary">
                             {rp.permission.name}
                           </Badge>
