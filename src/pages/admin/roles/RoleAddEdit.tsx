@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { useRoleRepository } from '../../../hooks/useRoleRepository';
 import { NotificationService } from '../../../services/NotificationService';
@@ -9,24 +8,12 @@ import BackButton from '../../../components/BackButton';
 import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
 import { Input } from '../../../components/ui2/input';
 import { Textarea } from '../../../components/ui2/textarea';
-import { Checkbox } from '../../../components/ui2/checkbox';
 import { Button } from '../../../components/ui2/button';
-
-type Permission = {
-  id: string;
-  code: string;
-  name: string;
-  description: string | null;
-  module: string;
-};
 
 type Role = {
   id: string;
   name: string;
   description: string | null;
-  permissions: {
-    permission: Permission;
-  }[];
 };
 
 function RoleAddEdit() {
@@ -36,7 +23,6 @@ function RoleAddEdit() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    permissions: [] as string[],
   });
 
   // Fetch role data if editing
@@ -49,35 +35,11 @@ function RoleAddEdit() {
   });
   const role = roleResult?.data?.[0] as Role | undefined;
 
-  // Fetch all available permissions
-  const { data: permissions } = useQuery({
-    queryKey: ['permissions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('permissions')
-        .select('*')
-        .order('module, name');
-
-      if (error) throw error;
-      return data as Permission[];
-    },
-  });
-
-  // Group permissions by module
-  const groupedPermissions = permissions?.reduce((acc, permission) => {
-    if (!acc[permission.module]) {
-      acc[permission.module] = [];
-    }
-    acc[permission.module].push(permission);
-    return acc;
-  }, {} as Record<string, Permission[]>) ?? {};
-
   useEffect(() => {
     if (role) {
       setFormData({
         name: role.name,
         description: role.description || '',
-        permissions: role.permissions.map((rp) => rp.permission.id),
       });
     }
   }, [role]);
@@ -95,7 +57,6 @@ function RoleAddEdit() {
 
     try {
       if (id) {
-        const user = (await supabase.auth.getUser()).data.user;
         await updateRoleMutation.mutateAsync({
           id,
           data: {
@@ -103,31 +64,13 @@ function RoleAddEdit() {
             description: formData.description || null,
           },
         });
-        await supabase.from('role_permissions').delete().eq('role_id', id);
-        if (formData.permissions.length > 0) {
-          const assignments = formData.permissions.map(pid => ({
-            role_id: id,
-            permission_id: pid,
-            created_by: user?.id,
-          }));
-          await supabase.from('role_permissions').insert(assignments);
-        }
       } else {
-        const role = await createRoleMutation.mutateAsync({
+        await createRoleMutation.mutateAsync({
           data: {
             name: formData.name.toLowerCase(),
             description: formData.description || null,
           },
         });
-        if (role && formData.permissions.length > 0) {
-          const user = (await supabase.auth.getUser()).data.user;
-          const assignments = formData.permissions.map(pid => ({
-            role_id: (role as any).id,
-            permission_id: pid,
-            created_by: user?.id,
-          }));
-          await supabase.from('role_permissions').insert(assignments);
-        }
       }
         navigate('/administration/roles');
     } catch (error) {
@@ -138,28 +81,6 @@ function RoleAddEdit() {
     }
   };
 
-  const handlePermissionToggle = (permissionId: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      permissions: prev.permissions.includes(permissionId)
-        ? prev.permissions.filter((id) => id !== permissionId)
-        : [...prev.permissions, permissionId],
-    }));
-  };
-
-  const handleModuleToggle = (module: string) => {
-    const modulePermissionIds = groupedPermissions[module].map((p) => p.id);
-    const allModulePermissionsSelected = modulePermissionIds.every((id) =>
-      formData.permissions.includes(id)
-    );
-
-    setFormData((prev) => ({
-      ...prev,
-      permissions: allModulePermissionsSelected
-        ? prev.permissions.filter((id) => !modulePermissionIds.includes(id))
-        : [...new Set([...prev.permissions, ...modulePermissionIds])],
-    }));
-  };
 
   if (roleLoading) {
     return (
@@ -185,9 +106,7 @@ function RoleAddEdit() {
               </h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              {id
-                ? 'Update role details and permission assignments'
-                : 'Define a new role and assign permissions'}
+              {id ? 'Update role details' : 'Define a new role'}
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -213,47 +132,6 @@ function RoleAddEdit() {
                   }
                   rows={3}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground">Permissions</label>
-                <div className="mt-4 space-y-6">
-                  {Object.entries(groupedPermissions).map(([module, modulePermissions]) => (
-                    <div key={module} className="space-y-2">
-                      <div className="flex items-center">
-                        <Checkbox
-                          id={`module-${module}`}
-                          checked={modulePermissions.every((p) => formData.permissions.includes(p.id))}
-                          onCheckedChange={() => handleModuleToggle(module)}
-                        />
-                        <label htmlFor={`module-${module}`} className="ml-2 text-sm font-medium capitalize">
-                          {module}
-                        </label>
-                      </div>
-                      <div className="ml-7 space-y-2">
-                        {modulePermissions.map((permission) => (
-                          <div key={permission.id} className="flex items-start space-x-2">
-                            <Checkbox
-                              id={`permission-${permission.id}`}
-                              checked={formData.permissions.includes(permission.id)}
-                              onCheckedChange={() => handlePermissionToggle(permission.id)}
-                              size="sm"
-                            />
-                            <div className="text-sm">
-                              <label htmlFor={`permission-${permission.id}`} className="font-medium text-foreground">
-                                {permission.name}
-                              </label>
-                              {permission.description && (
-                                <p className="text-muted-foreground">
-                                  {permission.description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </CardContent>
