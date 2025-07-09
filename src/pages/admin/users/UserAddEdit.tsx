@@ -1,22 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../../lib/supabase';
-import { Save, Loader2, UserPlus } from 'lucide-react';
-import BackButton from '../../../components/BackButton';
-import { useUserRepository } from '../../../hooks/useUserRepository';
-import { container } from '../../../lib/container';
-import { TYPES } from '../../../lib/types';
-import { UserRoleService } from '../../../services/UserRoleService';
-import { Input } from '../../../components/ui2/input';
-import { Checkbox } from '../../../components/ui2/checkbox';
-import { Button } from '../../../components/ui2/button';
-import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "../../../lib/supabase";
+import { Save, Loader2, UserPlus } from "lucide-react";
+import BackButton from "../../../components/BackButton";
+import { useUserRepository } from "../../../hooks/useUserRepository";
+import { container } from "../../../lib/container";
+import { TYPES } from "../../../lib/types";
+import { UserRoleService } from "../../../services/UserRoleService";
+import { Input } from "../../../components/ui2/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../../../components/ui2/select";
+import { Button } from "../../../components/ui2/button";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "../../../components/ui2/card";
 
 type UserFormData = {
   email: string;
   password: string;
-  roles: string[];
+  role: string;
   first_name: string;
   last_name: string;
 };
@@ -27,25 +38,25 @@ const UserAddEdit = () => {
   const { useFindById, useCreate, useUpdate } = useUserRepository();
   const userRoleService = container.get<UserRoleService>(TYPES.UserRoleService);
   const [formData, setFormData] = useState<UserFormData>({
-    email: '',
-    password: '',
-    roles: [],
-    first_name: '',
-    last_name: '',
+    email: "",
+    password: "",
+    role: "",
+    first_name: "",
+    last_name: "",
   });
 
-  const { data: userData, isLoading: userLoading } = useFindById(id || '', {
+  const { data: userData, isLoading: userLoading } = useFindById(id || "", {
     enabled: !!id,
   });
 
   // Fetch available roles
   const { data: roles } = useQuery({
-    queryKey: ['roles'],
+    queryKey: ["roles"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('roles')
-        .select('*')
-        .order('name');
+        .from("roles")
+        .select("*")
+        .order("name");
 
       if (error) throw error;
       return data;
@@ -55,15 +66,15 @@ const UserAddEdit = () => {
   useEffect(() => {
     if (userData) {
       (async () => {
-        const { data } = await supabase.rpc('get_user_roles', {
+        const { data } = await supabase.rpc("get_user_roles", {
           user_id: userData.id,
         });
         setFormData({
           email: userData.email,
-          password: '',
-          roles: (data || []).map((r: any) => r.role_name),
-          first_name: userData.raw_user_meta_data?.first_name || '',
-          last_name: userData.raw_user_meta_data?.last_name || '',
+          password: "",
+          role: (data || [])[0]?.role_name || "",
+          first_name: userData.raw_user_meta_data?.first_name || "",
+          last_name: userData.raw_user_meta_data?.last_name || "",
         });
       })();
     }
@@ -76,31 +87,39 @@ const UserAddEdit = () => {
     e.preventDefault();
 
     const payload = { ...formData };
-    if (id && payload.password === '') {
+    if (id && payload.password === "") {
       delete (payload as any).password;
     }
 
-    const selectedRoleIds = roles
-      ? roles.filter(r => formData.roles.includes(r.name)).map(r => r.id)
-      : [];
+    const selectedRoleId = roles?.find((r) => r.name === formData.role)?.id;
 
     try {
       let userId = id;
       if (id) {
-        await updateUserMutation.mutateAsync({ id, data: payload });
+        await updateUserMutation.mutateAsync({
+          id,
+          data: payload,
+          fieldsToRemove: ["role"],
+        });
       } else {
-        const newUser = await createUserMutation.mutateAsync({ data: payload });
+        const newUser = await createUserMutation.mutateAsync({
+          data: payload,
+          fieldsToRemove: ["role"],
+        });
         // @ts-ignore newUser shape from repo
         userId = (newUser as any).id;
       }
 
       if (userId) {
-        await userRoleService.assignRoles(userId, selectedRoleIds);
+        await userRoleService.assignRoles(
+          userId,
+          selectedRoleId ? [selectedRoleId] : [],
+        );
       }
 
-      navigate('/administration/users');
+      navigate("/administration/users");
     } catch (error) {
-      console.error('Error saving user:', error);
+      console.error("Error saving user:", error);
     }
   };
 
@@ -115,19 +134,22 @@ const UserAddEdit = () => {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <BackButton fallbackPath="/administration/users" label="Back to Users" />
+        <BackButton
+          fallbackPath="/administration/users"
+          label="Back to Users"
+        />
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
             <h3 className="text-lg font-medium text-foreground">
-              {id ? 'Edit User' : 'Create New User'}
+              {id ? "Edit User" : "Create New User"}
             </h3>
             <p className="text-sm text-muted-foreground">
               {id
-                ? 'Update user details and role assignments'
-                : 'Add a new user to the system'}
+                ? "Update user details and role assignments"
+                : "Add a new user to the system"}
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -135,9 +157,11 @@ const UserAddEdit = () => {
               <div className="sm:col-span-2">
                 <Input
                   type="email"
-                  label={`Email Address ${!id ? '*' : ''}`}
+                  label={`Email Address ${!id ? "*" : ""}`}
                   value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, email: e.target.value }))
+                  }
                   required={!id}
                   disabled={!!id}
                   placeholder="user@example.com"
@@ -148,7 +172,12 @@ const UserAddEdit = () => {
                 <Input
                   label="First Name"
                   value={formData.first_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      first_name: e.target.value,
+                    }))
+                  }
                 />
               </div>
 
@@ -156,57 +185,68 @@ const UserAddEdit = () => {
                 <Input
                   label="Last Name"
                   value={formData.last_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      last_name: e.target.value,
+                    }))
+                  }
                 />
               </div>
 
               <div className="sm:col-span-2">
                 <Input
                   type="password"
-                  label={id ? 'New Password (optional)' : 'Password *'}
+                  label={id ? "New Password (optional)" : "Password *"}
                   value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      password: e.target.value,
+                    }))
+                  }
                   required={!id}
                   minLength={6}
-                  placeholder={id ? 'Leave blank to keep current password' : '••••••'}
+                  placeholder={
+                    id ? "Leave blank to keep current password" : "••••••"
+                  }
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-foreground">
-                  Roles
-                </label>
-                <div className="mt-2 space-y-2">
-                  {roles?.map((role) => (
-                    <div key={role.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`role-${role.id}`}
-                        checked={formData.roles.includes(role.name)}
-                        onCheckedChange={(checked) => {
-                          setFormData(prev => ({
-                            ...prev,
-                            roles: checked
-                              ? [...prev.roles, role.name]
-                              : prev.roles.filter((name) => name !== role.name),
-                          }));
-                        }}
-                      />
-                      <label htmlFor={`role-${role.id}`} className="text-sm font-medium text-foreground">
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, role: value }))
+                  }
+                >
+                  <SelectTrigger label="Role">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles?.map((role) => (
+                      <SelectItem key={role.id} value={role.name}>
                         {role.name}
-                      </label>
-                    </div>
-                  ))}
-                </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-end space-x-3">
-            <Button variant="outline" type="button" onClick={() => navigate('/administration/users')}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => navigate("/administration/users")}
+            >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={createUserMutation.isPending || updateUserMutation.isPending}
+              disabled={
+                createUserMutation.isPending || updateUserMutation.isPending
+              }
             >
               {createUserMutation.isPending || updateUserMutation.isPending ? (
                 <>
