@@ -335,13 +335,15 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                 </tr>
               </thead>
               <tbody>
-                {entries.filter(e => !e.isDeleted).map((entry, idx) => (
-                  <tr key={idx} className="border-b border-border dark:border-slate-700">
+                {entries.filter(e => !e.isDeleted).map((entry) => {
+                  const rowIndex = entries.indexOf(entry);
+                  return (
+                  <tr key={rowIndex} className="border-b border-border dark:border-slate-700">
                     <td className="px-4 py-2">
                       <Input
                         type="number"
                         readOnly
-                        value={entry.line ?? idx + 1}
+                        value={entry.line ?? rowIndex + 1}
                         disabled={isDisabled}
                       />
                     </td>
@@ -349,7 +351,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                       <Combobox
                         options={accountOptions}
                         value={entry.accounts_account_id || ''}
-                        onChange={v => handleEntryChange(idx, 'accounts_account_id', v)}
+                        onChange={v => handleEntryChange(rowIndex, 'accounts_account_id', v)}
                         disabled={isDisabled}
                         placeholder="Select account"
                         onOpen={refetchAccounts}
@@ -359,7 +361,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                       <Combobox
                         options={fundOptions}
                         value={entry.fund_id || ''}
-                        onChange={v => handleEntryChange(idx, 'fund_id', v)}
+                        onChange={v => handleEntryChange(rowIndex, 'fund_id', v)}
                         disabled={isDisabled}
                         placeholder="Select fund"
                         onOpen={refetchFunds}
@@ -369,7 +371,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                       <Combobox
                         options={categoryOptions}
                         value={entry.category_id || ''}
-                        onChange={v => handleEntryChange(idx, 'category_id', v)}
+                        onChange={v => handleEntryChange(rowIndex, 'category_id', v)}
                         disabled={isDisabled}
                         placeholder="Select category"
                         onOpen={refetchCategories}
@@ -379,7 +381,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                       <Combobox
                         options={sourceOptions}
                         value={entry.source_id || ''}
-                        onChange={v => handleEntryChange(idx, 'source_id', v)}
+                        onChange={v => handleEntryChange(rowIndex, 'source_id', v)}
                         disabled={isDisabled}
                         placeholder="Select source"
                         onOpen={refetchSources}
@@ -388,7 +390,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                     <td className="px-4 py-2 min-w-[200px]">
                       <Input
                         value={entry.description || ''}
-                        onChange={e => handleEntryChange(idx, 'description', e.target.value)}
+                        onChange={e => handleEntryChange(rowIndex, 'description', e.target.value)}
                         disabled={isDisabled}
                         placeholder="Description"
                       />
@@ -397,18 +399,19 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                       <Input
                         type="number"
                         value={entry.amount}
-                        onChange={e => handleEntryChange(idx, 'amount', parseFloat(e.target.value) || 0)}
+                        onChange={e => handleEntryChange(rowIndex, 'amount', parseFloat(e.target.value) || 0)}
                         className="text-right"
                         disabled={isDisabled}
                       />
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(idx)} disabled={isDisabled}>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(rowIndex)} disabled={isDisabled}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-border font-medium">
