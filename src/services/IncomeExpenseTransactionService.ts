@@ -115,7 +115,7 @@ export class IncomeExpenseTransactionService {
       source_id: line.source_id,
       account_id: line.accounts_account_id,
       header_id: headerId,
-      line: line.line ?? null,
+      line: line.line ?? undefined,
     };
   }
 
