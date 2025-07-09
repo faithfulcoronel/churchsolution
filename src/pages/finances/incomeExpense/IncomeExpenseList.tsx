@@ -1,21 +1,29 @@
-import React, { useMemo, useState } from 'react';
-import { format, parse } from 'date-fns';
-import { Link, useNavigate } from 'react-router-dom';
-import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinancialTransactionHeaderRepository';
-import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
-import { useIncomeExpenseService } from '../../../hooks/useIncomeExpenseService';
-import { useAccess } from '../../../utils/access';
-import { Card, CardContent } from '../../../components/ui2/card';
-import { Button } from '../../../components/ui2/button';
-import { Input } from '../../../components/ui2/input';
-import { DateRangePickerField } from '../../../components/ui2/date-range-picker-field';
-import { DataGrid } from '../../../components/ui2/mui-datagrid';
+import React, { useMemo, useState } from "react";
+import { format, parse } from "date-fns";
+import { Link, useNavigate } from "react-router-dom";
+import { useFinancialTransactionHeaderRepository } from "../../../hooks/useFinancialTransactionHeaderRepository";
+import { useIncomeExpenseTransactionRepository } from "../../../hooks/useIncomeExpenseTransactionRepository";
+import { useIncomeExpenseService } from "../../../hooks/useIncomeExpenseService";
+import { useAccess } from "../../../utils/access";
+import { Card, CardContent } from "../../../components/ui2/card";
+import { Button } from "../../../components/ui2/button";
+import { Input } from "../../../components/ui2/input";
+import { DateRangePickerField } from "../../../components/ui2/date-range-picker-field";
+import { DataGrid } from "../../../components/ui2/mui-datagrid";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../../../components/ui2/select";
+import { Badge } from "../../../components/ui2/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../../../components/ui2/dropdown-menu';
+} from "../../../components/ui2/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,9 +33,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../../components/ui2/alert-dialog';
-import { FinancialTransactionHeader } from '../../../models/financialTransactionHeader.model';
-import { GridColDef } from '@mui/x-data-grid';
+} from "../../../components/ui2/alert-dialog";
+import { FinancialTransactionHeader } from "../../../models/financialTransactionHeader.model";
+import { GridColDef } from "@mui/x-data-grid";
 import {
   Plus,
   Search,
@@ -41,10 +49,10 @@ import {
   Trash2,
   Loader2,
   AlertTriangle,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface IncomeExpenseListProps {
-  transactionType: 'income' | 'expense';
+  transactionType: "income" | "expense";
 }
 
 function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
@@ -52,7 +60,8 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
   const { hasAccess } = useAccess();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date(),
@@ -74,8 +83,11 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
-  const [selectedTransaction, setSelectedTransaction] = useState<FinancialTransactionHeader | null>(null);
-  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<FinancialTransactionHeader | null>(null);
+  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
+    null,
+  );
 
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
@@ -88,14 +100,14 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
     error: entriesError,
   } = useEntryQuery({
     filters: {
-      transaction_type: { operator: 'eq', value: transactionType },
+      transaction_type: { operator: "eq", value: transactionType },
       transaction_date: {
-        operator: 'between',
-        value: format(dateRange.from, 'yyyy-MM-dd'),
-        valueTo: format(dateRange.to, 'yyyy-MM-dd'),
+        operator: "between",
+        value: format(dateRange.from, "yyyy-MM-dd"),
+        valueTo: format(dateRange.to, "yyyy-MM-dd"),
       },
     },
-    order: { column: 'transaction_date', ascending: false },
+    order: { column: "transaction_date", ascending: false },
   });
 
   const headerIds = React.useMemo(
@@ -104,10 +116,10 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
         new Set(
           (entryResult?.data || [])
             .map((e: any) => e.header_id)
-            .filter((id: string | null) => !!id)
-        )
+            .filter((id: string | null) => !!id),
+        ),
       ),
-    [entryResult]
+    [entryResult],
   );
 
   const {
@@ -116,14 +128,14 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
     error: headerError,
   } = useHeaderQuery({
     filters: {
-      id: { operator: 'isAnyOf', value: headerIds },
+      id: { operator: "isAnyOf", value: headerIds },
       transaction_date: {
-        operator: 'between',
-        value: format(dateRange.from, 'yyyy-MM-dd'),
-        valueTo: format(dateRange.to, 'yyyy-MM-dd'),
+        operator: "between",
+        value: format(dateRange.from, "yyyy-MM-dd"),
+        valueTo: format(dateRange.to, "yyyy-MM-dd"),
       },
     },
-    order: { column: 'transaction_date', ascending: false },
+    order: { column: "transaction_date", ascending: false },
     enabled: headerIds.length > 0,
   });
   const headers = headerResult?.data || [];
@@ -131,11 +143,14 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
 
   const filteredHeaders = useMemo(() => {
     const term = searchTerm.toLowerCase();
-    return headers.filter(h =>
-      h.transaction_number.toLowerCase().includes(term) ||
-      (h.description || '').toLowerCase().includes(term)
-    );
-  }, [headers, searchTerm]);
+    return headers.filter((h) => {
+      const matchesSearch =
+        h.transaction_number.toLowerCase().includes(term) ||
+        (h.description || "").toLowerCase().includes(term);
+      const matchesStatus = statusFilter === "all" || h.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [headers, searchTerm, statusFilter]);
 
   const handleDeleteTransaction = async () => {
     if (!transactionToDelete) return;
@@ -146,11 +161,11 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       setDeleteDialogOpen(false);
       setTransactionToDelete(null);
     } catch (error) {
-      console.error('Error deleting transaction:', error);
+      console.error("Error deleting transaction:", error);
       setDeleteError(
         error instanceof Error
           ? error.message
-          : 'An error occurred while deleting the transaction'
+          : "An error occurred while deleting the transaction",
       );
     } finally {
       setDeleteInProgress(false);
@@ -166,11 +181,11 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       setShowSubmitDialog(false);
       window.location.reload();
     } catch (error) {
-      console.error('Error submitting transaction:', error);
+      console.error("Error submitting transaction:", error);
       setActionError(
         error instanceof Error
           ? error.message
-          : 'An error occurred while submitting the transaction'
+          : "An error occurred while submitting the transaction",
       );
     } finally {
       setActionInProgress(false);
@@ -186,11 +201,11 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       setShowApproveDialog(false);
       window.location.reload();
     } catch (error) {
-      console.error('Error approving transaction:', error);
+      console.error("Error approving transaction:", error);
       setActionError(
         error instanceof Error
           ? error.message
-          : 'An error occurred while approving the transaction'
+          : "An error occurred while approving the transaction",
       );
     } finally {
       setActionInProgress(false);
@@ -206,11 +221,11 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       setShowPostDialog(false);
       window.location.reload();
     } catch (error) {
-      console.error('Error posting transaction:', error);
+      console.error("Error posting transaction:", error);
       setActionError(
         error instanceof Error
           ? error.message
-          : 'An error occurred while posting the transaction'
+          : "An error occurred while posting the transaction",
       );
     } finally {
       setActionInProgress(false);
@@ -223,19 +238,71 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
   };
 
   const columns: GridColDef[] = [
-    { field: 'transaction_date', headerName: 'Date', flex: 1, minWidth: 120 },
-    { field: 'transaction_number', headerName: 'Number', flex: 1, minWidth: 150 },
-    { field: 'description', headerName: 'Description', flex: 2, minWidth: 200 },
+    { field: "transaction_date", headerName: "Date", flex: 1, minWidth: 120 },
     {
-      field: 'actions',
-      headerName: 'Actions',
+      field: "transaction_number",
+      headerName: "Number",
+      flex: 1,
+      minWidth: 150,
+    },
+    { field: "description", headerName: "Description", flex: 2, minWidth: 200 },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => {
+        const status = params.value;
+        return (
+          <Badge
+            variant={
+              status === "posted"
+                ? "success"
+                : status === "voided"
+                  ? "destructive"
+                  : status === "approved"
+                    ? "warning"
+                    : status === "submitted"
+                      ? "info"
+                      : "secondary"
+            }
+            className="flex items-center"
+          >
+            {status === "posted" ? (
+              <>
+                <Check className="h-3 w-3 mr-1" /> Posted
+              </>
+            ) : status === "voided" ? (
+              <>
+                <X className="h-3 w-3 mr-1" /> Voided
+              </>
+            ) : status === "approved" ? (
+              <>
+                <Check className="h-3 w-3 mr-1" /> Approved
+              </>
+            ) : status === "submitted" ? (
+              <>
+                <FileText className="h-3 w-3 mr-1" /> Submitted
+              </>
+            ) : (
+              <>
+                <FileText className="h-3 w-3 mr-1" /> Draft
+              </>
+            )}
+          </Badge>
+        );
+      },
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
       flex: 1,
       minWidth: 120,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
         const status = params.row.status;
-        const canEdit = status === 'draft';
+        const canEdit = status === "draft";
 
         return (
           <div className="flex items-center space-x-1">
@@ -270,7 +337,9 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={() => navigate(`/finances/${basePath}/${params.row.id}`)}
+                  onClick={() =>
+                    navigate(`/finances/${basePath}/${params.row.id}`)
+                  }
                   className="flex items-center"
                 >
                   <Eye className="h-4 w-4 mr-2" /> View Details
@@ -288,7 +357,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   </DropdownMenuItem>
                 )}
 
-                {status === 'draft' && (
+                {status === "draft" && (
                   <DropdownMenuItem
                     onClick={() => {
                       setSelectedTransaction(params.row);
@@ -300,41 +369,47 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   </DropdownMenuItem>
                 )}
 
-                {status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelectedTransaction(params.row);
-                      setShowApproveDialog(true);
-                    }}
-                    className="flex items-center"
-                  >
-                    <Check className="h-4 w-4 mr-2" /> Approve Transaction
-                  </DropdownMenuItem>
-                )}
+                {status === "submitted" &&
+                  hasAccess("finance.approve", "finance.approve") && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedTransaction(params.row);
+                        setShowApproveDialog(true);
+                      }}
+                      className="flex items-center"
+                    >
+                      <Check className="h-4 w-4 mr-2" /> Approve Transaction
+                    </DropdownMenuItem>
+                  )}
 
-                {status === 'submitted' && hasAccess('finance.approve', 'finance.approve') && (
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      await updateMutation.mutateAsync({ id: params.row.id, data: { status: 'draft' } });
-                      window.location.reload();
-                    }}
-                    className="flex items-center"
-                  >
-                    <X className="h-4 w-4 mr-2" /> Reject to Draft
-                  </DropdownMenuItem>
-                )}
+                {status === "submitted" &&
+                  hasAccess("finance.approve", "finance.approve") && (
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await updateMutation.mutateAsync({
+                          id: params.row.id,
+                          data: { status: "draft" },
+                        });
+                        window.location.reload();
+                      }}
+                      className="flex items-center"
+                    >
+                      <X className="h-4 w-4 mr-2" /> Reject to Draft
+                    </DropdownMenuItem>
+                  )}
 
-                {status === 'approved' && hasAccess('finance.approve', 'finance.approve') && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelectedTransaction(params.row);
-                      setShowPostDialog(true);
-                    }}
-                    className="flex items-center"
-                  >
-                    <Check className="h-4 w-4 mr-2" /> Post Transaction
-                  </DropdownMenuItem>
-                )}
+                {status === "approved" &&
+                  hasAccess("finance.approve", "finance.approve") && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedTransaction(params.row);
+                        setShowPostDialog(true);
+                      }}
+                      className="flex items-center"
+                    >
+                      <Check className="h-4 w-4 mr-2" /> Post Transaction
+                    </DropdownMenuItem>
+                  )}
 
                 {canEdit && (
                   <DropdownMenuItem
@@ -356,13 +431,13 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
     },
   ];
 
-  const title = transactionType === 'income' ? 'Donations' : 'Expenses';
+  const title = transactionType === "income" ? "Donations" : "Expenses";
   const description =
-    transactionType === 'income'
-      ? 'Manage contribution batches.'
-      : 'Manage expense entries.';
-  const addLabel = transactionType === 'income' ? 'Add Batch' : 'Add Expense';
-  const basePath = transactionType === 'income' ? 'giving' : 'expenses';
+    transactionType === "income"
+      ? "Manage contribution batches."
+      : "Manage expense entries.";
+  const addLabel = transactionType === "income" ? "Add Batch" : "Add Expense";
+  const basePath = transactionType === "income" ? "giving" : "expenses";
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -389,17 +464,33 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
           />
         </div>
 
-        <DateRangePickerField
-          value={{ from: dateRange.from, to: dateRange.to }}
-          onChange={(range) => {
-            if (range.from && range.to) {
-              setDateRange({ from: range.from, to: range.to });
-            }
-          }}
-          placeholder="Select date range"
-          icon={<Calendar className="h-4 w-4" />}
-          showCompactInput
-        />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <DateRangePickerField
+            value={{ from: dateRange.from, to: dateRange.to }}
+            onChange={(range) => {
+              if (range.from && range.to) {
+                setDateRange({ from: range.from, to: range.to });
+              }
+            }}
+            placeholder="Select date range"
+            icon={<Calendar className="h-4 w-4" />}
+            showCompactInput
+          />
+
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="posted">Posted</SelectItem>
+              <SelectItem value="voided">Voided</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="mt-6">
@@ -422,9 +513,9 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
               getRowId={(row) => row.id}
               onRowClick={(params) =>
                 navigate(
-                  params.row.status === 'draft'
+                  params.row.status === "draft"
                     ? `/finances/${basePath}/${params.id}/edit`
-                    : `/finances/${basePath}/${params.id}`
+                    : `/finances/${basePath}/${params.id}`,
                 )
               }
               autoHeight
@@ -442,15 +533,29 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle variant="danger">Delete Transaction</AlertDialogTitle>
+            <AlertDialogTitle variant="danger">
+              Delete Transaction
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this transaction? This action cannot be undone.
+              Are you sure you want to delete this transaction? This action
+              cannot be undone.
               {selectedTransaction && (
                 <div className="mt-4 border rounded-md p-3 text-left space-y-1">
-                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
-                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="font-medium">
+                    {selectedTransaction.transaction_number}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                    {selectedTransaction.description}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(
+                      parse(
+                        selectedTransaction.transaction_date,
+                        "yyyy-MM-dd",
+                        new Date(),
+                      ),
+                      "MMM d, yyyy",
+                    )}
                   </p>
                 </div>
               )}
@@ -484,7 +589,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   Deleting...
                 </>
               ) : (
-                'Delete Transaction'
+                "Delete Transaction"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -495,15 +600,28 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle variant="default">Submit Transaction</AlertDialogTitle>
+            <AlertDialogTitle variant="default">
+              Submit Transaction
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to submit this transaction for approval?
               {selectedTransaction && (
                 <div className="mt-4 border rounded-md p-3 text-left space-y-1">
-                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
-                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="font-medium">
+                    {selectedTransaction.transaction_number}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                    {selectedTransaction.description}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(
+                      parse(
+                        selectedTransaction.transaction_date,
+                        "yyyy-MM-dd",
+                        new Date(),
+                      ),
+                      "MMM d, yyyy",
+                    )}
                   </p>
                 </div>
               )}
@@ -536,7 +654,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   Submitting...
                 </>
               ) : (
-                'Submit Transaction'
+                "Submit Transaction"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -547,15 +665,28 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle variant="success">Approve Transaction</AlertDialogTitle>
+            <AlertDialogTitle variant="success">
+              Approve Transaction
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to approve this transaction?
               {selectedTransaction && (
                 <div className="mt-4 border rounded-md p-3 text-left space-y-1">
-                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
-                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="font-medium">
+                    {selectedTransaction.transaction_number}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                    {selectedTransaction.description}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(
+                      parse(
+                        selectedTransaction.transaction_date,
+                        "yyyy-MM-dd",
+                        new Date(),
+                      ),
+                      "MMM d, yyyy",
+                    )}
                   </p>
                 </div>
               )}
@@ -588,7 +719,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   Approving...
                 </>
               ) : (
-                'Approve Transaction'
+                "Approve Transaction"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -599,15 +730,29 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       <AlertDialog open={showPostDialog} onOpenChange={setShowPostDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle variant="success">Post Transaction</AlertDialogTitle>
+            <AlertDialogTitle variant="success">
+              Post Transaction
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to post this transaction? Once posted, it cannot be edited or deleted.
+              Are you sure you want to post this transaction? Once posted, it
+              cannot be edited or deleted.
               {selectedTransaction && (
                 <div className="mt-4 border rounded-md p-3 text-left space-y-1">
-                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
-                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="font-medium">
+                    {selectedTransaction.transaction_number}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                    {selectedTransaction.description}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(
+                      parse(
+                        selectedTransaction.transaction_date,
+                        "yyyy-MM-dd",
+                        new Date(),
+                      ),
+                      "MMM d, yyyy",
+                    )}
                   </p>
                 </div>
               )}
@@ -640,7 +785,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
                   Posting...
                 </>
               ) : (
-                'Post Transaction'
+                "Post Transaction"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -651,23 +796,40 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       <AlertDialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle variant="default">Edit Transaction</AlertDialogTitle>
+            <AlertDialogTitle variant="default">
+              Edit Transaction
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to edit this transaction?
               {selectedTransaction && (
                 <div className="mt-4 border rounded-md p-3 text-left space-y-1">
-                  <p className="font-medium">{selectedTransaction.transaction_number}</p>
-                  <p className="text-sm text-muted-foreground">{selectedTransaction.description}</p>
+                  <p className="font-medium">
+                    {selectedTransaction.transaction_number}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(parse(selectedTransaction.transaction_date, 'yyyy-MM-dd', new Date()), 'MMM d, yyyy')}
+                    {selectedTransaction.description}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(
+                      parse(
+                        selectedTransaction.transaction_date,
+                        "yyyy-MM-dd",
+                        new Date(),
+                      ),
+                      "MMM d, yyyy",
+                    )}
                   </p>
                 </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowEditDialog(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleEditTransaction}>Edit</AlertDialogAction>
+            <AlertDialogCancel onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleEditTransaction}>
+              Edit
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
