@@ -317,11 +317,8 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
         </Card>
 
         <Card className="dark:bg-slate-800">
-          <CardHeader className="flex items-center justify-between">
+          <CardHeader>
             <h3 className="text-lg font-medium">{entriesHeader}</h3>
-            <Button type="button" onClick={addEntry} className="flex items-center" disabled={isDisabled}>
-              <Plus className="h-4 w-4 mr-2" /> Add Row
-            </Button>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -423,6 +420,11 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
                 </tr>
               </tfoot>
             </table>
+            <div className="mt-4">
+              <Button type="button" onClick={addEntry} className="flex items-center" disabled={isDisabled}>
+                <Plus className="h-4 w-4 mr-2" /> Add Row
+              </Button>
+            </div>
             <div className="mt-4">
               <h4 className="text-sm font-medium text-muted-foreground mb-2">Category Totals</h4>
               <table className="w-full text-sm">
