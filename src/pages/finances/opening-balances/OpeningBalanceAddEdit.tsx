@@ -28,8 +28,8 @@ function OpeningBalanceAddEdit() {
   const { data: years } = useYearQuery();
 
   useEffect(() => {
-    if (isEditMode && balanceData?.data?.[0]) {
-      setFormData(balanceData.data[0]);
+    if (isEditMode && balanceData) {
+      setFormData(balanceData);
     }
   }, [isEditMode, balanceData]);
 
