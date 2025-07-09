@@ -11,7 +11,7 @@ function FiscalYearProfile() {
   const navigate = useNavigate();
   const { useFindById } = useFiscalYearRepository();
   const { data, isLoading } = useFindById(id || '');
-  const year = data?.data?.[0];
+  const year = data;
 
   if (isLoading) {
     return (

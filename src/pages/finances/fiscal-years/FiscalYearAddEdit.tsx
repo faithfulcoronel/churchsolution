@@ -19,8 +19,8 @@ function FiscalYearAddEdit() {
   const updateMutation = useUpdate();
 
   useEffect(() => {
-    if (isEditMode && data?.data?.[0]) {
-      setFormData(data.data[0]);
+    if (isEditMode && data) {
+      setFormData(data);
     }
   }, [isEditMode, data]);
 

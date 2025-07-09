@@ -11,7 +11,7 @@ function OpeningBalanceProfile() {
   const navigate = useNavigate();
   const { useFindById } = useOpeningBalanceRepository();
   const { data, isLoading } = useFindById(id || '');
-  const balance = data?.data?.[0];
+  const balance = data;
 
   if (isLoading) {
     return (
