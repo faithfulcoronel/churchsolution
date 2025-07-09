@@ -4,6 +4,7 @@ import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinan
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import { Card, CardContent, CardHeader } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
+import { Badge } from '../../../components/ui2/badge';
 import { DataGrid } from '../../../components/ui2/mui-datagrid';
 import {
   AlertDialog,
@@ -24,6 +25,10 @@ import {
   Check,
   X,
   AlertTriangle,
+  Calendar,
+  Hash,
+  HandCoins,
+  PiggyBank,
 } from 'lucide-react';
 import { format, parse } from 'date-fns';
 import BackButton from '../../../components/BackButton';
@@ -239,74 +244,144 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
+      <div className="mb-6">
         <BackButton fallbackPath={`/finances/${basePath}`} label={backLabel} />
-        <div className="flex flex-wrap gap-3">
-          {header.status === 'draft' && (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/finances/${basePath}/${id}/edit`)}
-                className="flex items-center"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowSubmitDialog(true)}
-                className="flex items-center"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Submit
-              </Button>
-            </>
-          )}
-
-          {header.status === 'submitted' &&
-            hasAccess('finance.approve', 'finance.approve') && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowApproveDialog(true)}
-                  className="flex items-center"
-                >
-                  <Check className="h-4 w-4 mr-2" />
-                  Approve
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowRejectDialog(true)}
-                  className="flex items-center"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Reject
-                </Button>
-              </>
-            )}
-
-          {header.status === 'approved' &&
-            hasAccess('finance.approve', 'finance.approve') && (
-              <Button
-                variant="outline"
-                onClick={() => setShowPostDialog(true)}
-                className="flex items-center"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Post
-              </Button>
-            )}
-        </div>
       </div>
-      <Card className="dark:bg-slate-800 mb-6">
-        <CardHeader>
-          <h3 className="text-lg font-medium">{header.transaction_number}</h3>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{header.description}</p>
+
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 h-16 w-16 rounded-full bg-primary-100 flex items-center justify-center">
+                {transactionType === 'income' ? (
+                  <HandCoins className="h-8 w-8 text-primary" />
+                ) : (
+                  <PiggyBank className="h-8 w-8 text-primary" />
+                )}
+              </div>
+              <div className="ml-4">
+                <div className="flex items-center">
+                  <h2 className="text-2xl font-bold text-foreground">
+                    {header.transaction_number}
+                  </h2>
+                  <Badge
+                    variant={
+                      header.status === 'posted'
+                        ? 'success'
+                        : header.status === 'voided'
+                        ? 'destructive'
+                        : header.status === 'approved'
+                        ? 'warning'
+                        : header.status === 'submitted'
+                        ? 'info'
+                        : 'secondary'
+                    }
+                    className="ml-3 capitalize"
+                  >
+                    {header.status === 'posted' ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" /> Posted
+                      </>
+                    ) : header.status === 'voided' ? (
+                      <>
+                        <X className="h-3 w-3 mr-1" /> Voided
+                      </>
+                    ) : header.status === 'approved' ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" /> Approved
+                      </>
+                    ) : header.status === 'submitted' ? (
+                      <>
+                        <FileText className="h-3 w-3 mr-1" /> Submitted
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="h-3 w-3 mr-1" /> Draft
+                      </>
+                    )}
+                  </Badge>
+                </div>
+                <div className="flex items-center mt-1 text-muted-foreground">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  <span>
+                    {format(
+                      parse(header.transaction_date, 'yyyy-MM-dd', new Date()),
+                      'MMM d, yyyy'
+                    )}
+                  </span>
+                  {header.reference && (
+                    <>
+                      <span className="mx-2">•</span>
+                      <Hash className="h-4 w-4 mr-1" />
+                      <span>Ref: {header.reference}</span>
+                    </>
+                  )}
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {header.description}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {header.status === 'draft' && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(`/finances/${basePath}/${id}/edit`)}
+                    className="flex items-center"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSubmitDialog(true)}
+                    className="flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Submit
+                  </Button>
+                </>
+              )}
+
+              {header.status === 'submitted' &&
+                hasAccess('finance.approve', 'finance.approve') && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowApproveDialog(true)}
+                      className="flex items-center"
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      Approve
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowRejectDialog(true)}
+                      className="flex items-center"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Reject
+                    </Button>
+                  </>
+                )}
+
+              {header.status === 'approved' &&
+                hasAccess('finance.approve', 'finance.approve') && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowPostDialog(true)}
+                    className="flex items-center"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Post
+                  </Button>
+                )}
+            </div>
+          </div>
         </CardContent>
       </Card>
-      <Card className="dark:bg-slate-800">
+      <Card>
         <CardHeader>
           <h3 className="text-lg font-medium">Entries</h3>
         </CardHeader>
@@ -330,7 +405,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
         </CardContent>
       </Card>
 
-      <Card className="dark:bg-slate-800 mt-6">
+      <Card className="mt-6">
         <CardHeader>
           <h3 className="text-lg font-medium">Summary</h3>
         </CardHeader>
