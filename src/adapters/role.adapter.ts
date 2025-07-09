@@ -26,13 +26,24 @@ export class RoleAdapter extends BaseAdapter<Role> implements IRoleAdapter {
 
   protected defaultRelationships: QueryOptions['relationships'] = [
     {
-      table: 'role_permissions',
+      table: 'role_menu_items',
       foreignKey: 'role_id',
       nestedRelationships: [
         {
-          table: 'permissions',
-          foreignKey: 'permission_id',
-          select: ['id', 'code', 'name', 'description', 'module']
+          table: 'menu_items',
+          foreignKey: 'menu_item_id',
+          select: [
+            'id',
+            'parent_id',
+            'code',
+            'label',
+            'path',
+            'icon',
+            'sort_order',
+            'is_system',
+            'section',
+            'feature_key'
+          ]
         }
       ]
     }
