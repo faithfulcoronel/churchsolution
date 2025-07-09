@@ -305,7 +305,7 @@ export function DateRangePicker({
           align={align}
           side={side}
         >
-          <div className="flex flex-col sm:flex-row">
+          <div className="flex flex-col sm:flex-row max-h-[80vh] overflow-y-auto">
             {finalPresets.length > 0 && (
               <div className="p-2 sm:p-3 sm:border-r dark:border-border">
                 <div className="space-y-1.5">
