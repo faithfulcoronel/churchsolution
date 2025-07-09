@@ -36,7 +36,8 @@ const Checkbox = React.forwardRef<
             ref={ref}
             id={inputId}
             className={cn(
-              'peer shrink-0 rounded-sm border border-border bg-light-light ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:bg-muted dark:border-border',
+              'peer shrink-0 rounded-sm border border-gray-300 dark:border-border bg-light-light ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:bg-muted',
+
               sizeClasses[size],
               error && 'border-destructive',
               className
