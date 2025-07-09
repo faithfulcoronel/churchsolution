@@ -24,30 +24,9 @@ export class RoleAdapter extends BaseAdapter<Role> implements IRoleAdapter {
     updated_at
   `;
 
-  protected defaultRelationships: QueryOptions['relationships'] = [
-    {
-      table: 'role_menu_items',
-      foreignKey: 'role_id',
-      nestedRelationships: [
-        {
-          table: 'menu_items',
-          foreignKey: 'menu_item_id',
-          select: [
-            'id',
-            'parent_id',
-            'code',
-            'label',
-            'path',
-            'icon',
-            'sort_order',
-            'is_system',
-            'section',
-            'feature_key'
-          ]
-        }
-      ]
-    }
-  ];
+  // Roles should only query the roles table scoped to the current tenant.
+  // No joins to other tables are included by default.
+  protected defaultRelationships: QueryOptions['relationships'] = [];
 
   protected override async onAfterCreate(data: Role): Promise<void> {
     await this.auditService.logAuditEvent('create', 'role', data.id, data);
