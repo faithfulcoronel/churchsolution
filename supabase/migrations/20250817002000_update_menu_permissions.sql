@@ -4,13 +4,13 @@
 -- Update existing records to use tenant specific permission ids
 UPDATE menu_permissions mp
 SET permission_id = tp.id
-FROM permissions gp
-JOIN permissions tp
-  ON tp.code = gp.code
-  AND tp.tenant_id = mp.tenant_id
+FROM permissions gp, permissions tp
 WHERE mp.permission_id = gp.id
   AND gp.tenant_id IS NULL
-  AND mp.tenant_id IS NOT NULL;
+  AND mp.tenant_id IS NOT NULL
+  AND tp.code = gp.code
+  AND tp.tenant_id = mp.tenant_id;
+
 
 -- Remove duplicates that may have been created
 DELETE FROM menu_permissions mp
