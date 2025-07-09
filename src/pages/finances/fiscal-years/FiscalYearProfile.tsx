@@ -48,7 +48,10 @@ function FiscalYearProfile() {
       </div>
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-medium">Fiscal Year Details</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Fiscal Year Details</h3>
+            <Button onClick={() => navigate('edit')}>Edit</Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-2">
           <p><strong>Name:</strong> {year.name}</p>
@@ -96,9 +99,6 @@ function FiscalYearProfile() {
           )}
         </CardContent>
       </Card>
-      <div className="mt-4 flex justify-end">
-        <Button onClick={() => navigate('edit')}>Edit</Button>
-      </div>
     </div>
   );
 }
