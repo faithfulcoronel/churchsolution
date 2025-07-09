@@ -41,3 +41,4 @@ export * from './useLicenseRepository';
 export * from './useLicenseFeatureRepository';
 export * from './useOpeningBalanceRepository';
 export * from './useFiscalYearRepository';
+export * from './useFiscalPeriodRepository';

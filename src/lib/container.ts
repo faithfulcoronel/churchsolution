@@ -38,6 +38,7 @@ import { FundAdapter, type IFundAdapter } from '../adapters/fund.adapter';
 import { FundBalanceAdapter, type IFundBalanceAdapter } from '../adapters/fundBalance.adapter';
 import { OpeningBalanceAdapter, type IOpeningBalanceAdapter } from '../adapters/openingBalance.adapter';
 import { FiscalYearAdapter, type IFiscalYearAdapter } from '../adapters/fiscalYear.adapter';
+import { FiscalPeriodAdapter, type IFiscalPeriodAdapter } from '../adapters/fiscalPeriod.adapter';
 import {
   OfferingBatchAdapter,
   type IOfferingBatchAdapter,
@@ -107,6 +108,7 @@ import { FundRepository, type IFundRepository } from '../repositories/fund.repos
 import { FundBalanceRepository, type IFundBalanceRepository } from '../repositories/fundBalance.repository';
 import { OpeningBalanceRepository, type IOpeningBalanceRepository } from '../repositories/openingBalance.repository';
 import { FiscalYearRepository, type IFiscalYearRepository } from '../repositories/fiscalYear.repository';
+import { FiscalPeriodRepository, type IFiscalPeriodRepository } from '../repositories/fiscalPeriod.repository';
 import {
   OfferingBatchRepository,
   type IOfferingBatchRepository,
@@ -211,6 +213,10 @@ container
 container
   .bind<IFiscalYearAdapter>(TYPES.IFiscalYearAdapter)
   .to(FiscalYearAdapter)
+  .inSingletonScope();
+container
+  .bind<IFiscalPeriodAdapter>(TYPES.IFiscalPeriodAdapter)
+  .to(FiscalPeriodAdapter)
   .inSingletonScope();
 container
   .bind<ICategoryAdapter>(TYPES.ICategoryAdapter)
@@ -377,6 +383,10 @@ container
 container
   .bind<IFiscalYearRepository>(TYPES.IFiscalYearRepository)
   .to(FiscalYearRepository)
+  .inSingletonScope();
+container
+  .bind<IFiscalPeriodRepository>(TYPES.IFiscalPeriodRepository)
+  .to(FiscalPeriodRepository)
   .inSingletonScope();
 container
   .bind<ICategoryRepository>(TYPES.ICategoryRepository)
