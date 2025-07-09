@@ -1,23 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import PermissionGate from '../../../components/PermissionGate';
-import { usePermissions } from '../../../hooks/usePermissions';
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  Loader2,
-  Search,
-  Filter,
-} from 'lucide-react';
-import { useUserRepository } from '../../../hooks/useUserRepository';
-import { supabase } from '../../../lib/supabase';
-import { Input } from '../../../components/ui2/input';
-import {
-  Card,
-  CardHeader,
-  CardContent,
-} from '../../../components/ui2/card';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import PermissionGate from "../../../components/PermissionGate";
+import { usePermissions } from "../../../hooks/usePermissions";
+import { Plus, Edit2, Trash2, Loader2, Search, Filter } from "lucide-react";
+import { useUserRepository } from "../../../hooks/useUserRepository";
+import { supabase } from "../../../lib/supabase";
+import { Input } from "../../../components/ui2/input";
+import { Card, CardHeader, CardContent } from "../../../components/ui2/card";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -27,8 +16,8 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from '../../../components/ui2/alert-dialog';
-import { Button } from '../../../components/ui2/button';
+} from "../../../components/ui2/alert-dialog";
+import { Button } from "../../../components/ui2/button";
 import {
   Table,
   TableHeader,
@@ -36,8 +25,8 @@ import {
   TableHead,
   TableRow,
   TableCell,
-} from '../../../components/ui2/table';
-import { Badge } from '../../../components/ui2/badge';
+} from "../../../components/ui2/table";
+import { Badge } from "../../../components/ui2/badge";
 
 type User = {
   id: string;
@@ -50,28 +39,28 @@ type User = {
 function Users() {
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const { useQuery: useUsersQuery, useDelete } = useUserRepository();
 
   const { data: result, isLoading } = useUsersQuery({
-    enabled: hasPermission('user.view'),
+    enabled: hasPermission("user.view"),
   });
 
   const users = result?.data as any[] | undefined;
 
-  const [rolesMap, setRolesMap] = useState<Record<string, string[]>>({});
+  const [rolesMap, setRolesMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const loadRoles = async () => {
       if (!users) return;
-      const map: Record<string, string[]> = {};
+      const map: Record<string, string> = {};
       for (const u of users) {
-        const { data } = await supabase.rpc('get_user_roles', {
+        const { data } = await supabase.rpc("get_user_roles", {
           user_id: u.id,
         });
-        map[u.id] = (data || []).map((r: any) => r.role_name);
+        map[u.id] = (data || [])[0]?.role_name || "";
       }
       setRolesMap(map);
     };
@@ -90,7 +79,7 @@ function Users() {
         await deleteUserMutation.mutateAsync(userToDelete.id);
         setUserToDelete(null);
       } catch (error) {
-        console.error('Error deleting user:', error);
+        console.error("Error deleting user:", error);
       }
     }
   };
@@ -102,9 +91,10 @@ function Users() {
   const filteredUsers = users?.filter((user) => {
     if (!user) return false;
 
-    const matchesSearch = 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = user.email
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
     return matchesSearch;
   });
 
@@ -112,9 +102,12 @@ function Users() {
     <div className="w-full px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Users</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Users
+          </h1>
           <p className="text-muted-foreground">
-            A list of all users in your church including their roles and permissions.
+            A list of all users in your church including their roles and
+            permissions.
           </p>
         </div>
         <PermissionGate permission="user.create">
@@ -147,7 +140,7 @@ function Users() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Email</TableHead>
-                  <TableHead>Roles</TableHead>
+                  <TableHead>Role</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Last Sign In</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -158,13 +151,9 @@ function Users() {
                   <TableRow key={user.id}>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {rolesMap[user.id]?.map((name, index) => (
-                          <Badge key={index} variant="secondary">
-                            {name}
-                          </Badge>
-                        ))}
-                      </div>
+                      {rolesMap[user.id] && (
+                        <Badge variant="secondary">{rolesMap[user.id]}</Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       {new Date(user.created_at).toLocaleDateString()}
@@ -172,55 +161,59 @@ function Users() {
                     <TableCell>
                       {user.last_sign_in_at
                         ? new Date(user.last_sign_in_at).toLocaleDateString()
-                        : 'Never'}
+                        : "Never"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
-                      <PermissionGate permission="user.edit">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(user)}
-                          icon={<Edit2 className="h-4 w-4" />}
-                        />
-                      </PermissionGate>
-                      <PermissionGate permission="user.delete">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(user)}
-                          disabled={deleteUserMutation.isPending}
-                          icon={
-                            deleteUserMutation.isPending ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )
-                          }
-                        />
-                      </PermissionGate>
+                        <PermissionGate permission="user.edit">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(user)}
+                            icon={<Edit2 className="h-4 w-4" />}
+                          />
+                        </PermissionGate>
+                        <PermissionGate permission="user.delete">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(user)}
+                            disabled={deleteUserMutation.isPending}
+                            icon={
+                              deleteUserMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )
+                            }
+                          />
+                        </PermissionGate>
                       </div>
                     </TableCell>
-              </TableRow>
-            ))}
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           ) : (
             <div className="py-8 text-center text-muted-foreground">
               {searchTerm
-                ? 'No users found matching your search criteria'
+                ? "No users found matching your search criteria"
                 : 'No users found. Add your first user by clicking the "Add User" button above.'}
             </div>
           )}
         </CardContent>
       </Card>
 
-      <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
+      <AlertDialog
+        open={!!userToDelete}
+        onOpenChange={() => setUserToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle variant="danger">Delete User</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {userToDelete?.email}? This action cannot be undone.
+              Are you sure you want to delete {userToDelete?.email}? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -234,7 +227,7 @@ function Users() {
                   Deleting...
                 </>
               ) : (
-                'Delete'
+                "Delete"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
