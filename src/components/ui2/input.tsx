@@ -6,7 +6,7 @@ import { Eye, EyeOff, X } from 'lucide-react';
 import { FormFieldProps } from './types';
 
 const inputVariants = cva(
-  'flex w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full rounded-md border border-input bg-light-light px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-muted dark:border-border dark:placeholder:text-muted-foreground',
   {
     variants: {
       size: {
@@ -71,7 +71,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <label 
             htmlFor={id}
             className={cn(
-              "block text-sm font-medium mb-1.5 dark:text-foreground",
+              'block text-sm font-medium mb-1.5 dark:text-muted-foreground',
               error ? 'text-destructive' : 'text-foreground',
               disabled && 'opacity-50'
             )}
@@ -100,7 +100,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             }
             className={cn(
               inputVariants({ size, error }),
-              icon && 'pl-10 dark:bg-muted dark:border-border',
+              icon && 'pl-10',
               (showClearButton || showPasswordButton || rightElement) && 'pr-10',
               className
             )}
@@ -156,5 +156,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   }
 );
 Input.displayName = 'Input';
-
 export { Input, inputVariants };
