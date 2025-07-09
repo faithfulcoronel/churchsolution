@@ -43,6 +43,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT create_default_permissions_for_all_tenants();
+SELECT create_default_menu_items_for_all_tenants();
 
 GRANT EXECUTE ON FUNCTION create_default_permissions_for_tenant(uuid, uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION create_default_permissions_for_new_tenant() TO authenticated;
