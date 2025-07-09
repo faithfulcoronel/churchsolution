@@ -33,13 +33,13 @@ export class PermissionAdapter
 
   protected override async onBeforeDelete(id: string): Promise<void> {
     const { data, error } = await supabase
-      .from('role_permissions')
-      .select('role_id')
+      .from('menu_permissions')
+      .select('menu_item_id')
       .eq('permission_id', id)
       .limit(1);
     if (error) throw error;
     if (data?.length) {
-      throw new Error('Cannot delete permission with assigned roles');
+      throw new Error('Cannot delete permission with assigned menu items');
     }
   }
 
