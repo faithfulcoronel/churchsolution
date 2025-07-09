@@ -27,27 +27,24 @@ export async function checkUserRoles() {
 
   console.debug('User Roles:', userRoles?.map(ur => ur.role));
 
-  // Get role permissions
+  // Get permissions through role menu items
   if (userRoles?.length) {
-    const roleIds = userRoles.map(ur => ur.role.id);
     const { data: permissions, error: permissionsError } = await supabase
-      .from('role_permissions')
-      .select(`
-        permission:permissions (
-          id,
-          code,
-          name,
-          description,
-          module
-        )
-      `)
-      .in('role_id', roleIds);
+      .from('user_roles')
+      .select(
+        `role_menu_items(menu_permissions(permission:permissions(id,code,name,description,module)))`
+      )
+      .eq('user_id', user.id);
 
     if (permissionsError) {
       console.error('Error fetching permissions:', permissionsError);
       return;
     }
 
-    console.debug('User Permissions:', permissions?.map(rp => rp.permission));
-  }
-}
+    const perms = (permissions || [])
+      .flatMap(ur => ur.role_menu_items || [])
+      .flatMap(rmi => rmi.menu_permissions || [])
+      .map(mp => mp.permission);
+
+    console.debug('User Permissions:', perms);
+  }}
