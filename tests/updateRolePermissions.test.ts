@@ -10,9 +10,21 @@ const eqMock = vi.fn(() => ({ eq: eqMock }));
 const deleteMock = vi.fn(() => ({ eq: eqMock }));
 const insertMock = vi.fn().mockResolvedValue({ data: null, error: null });
 
+const mpChain = {
+  select: vi.fn().mockReturnThis(),
+  in: vi.fn().mockReturnThis(),
+  eq: vi.fn(() =>
+    Promise.resolve({ data: [{ menu_item_id: 'm1' }, { menu_item_id: 'm2' }], error: null })
+  ),
+};
+
 vi.mock('../src/lib/supabase', () => ({
   supabase: {
-    from: vi.fn(() => ({ delete: deleteMock, insert: insertMock })),
+    from: vi.fn((table: string) => {
+      if (table === 'menu_permissions') return mpChain as any;
+      if (table === 'role_menu_items') return { delete: deleteMock, insert: insertMock } as any;
+      return {} as any;
+    }),
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) }
   }
 }));
@@ -37,6 +49,6 @@ describe('updateRolePermissions', () => {
     const rows = insertMock.mock.calls[0][0];
     expect(rows).toHaveLength(2);
     expect(rows[0].role_id).toBe('r1');
-    expect(rows[0].permission_id).toBe('p1');
+    expect(rows[0].menu_item_id).toBe('m1');
   });
 });

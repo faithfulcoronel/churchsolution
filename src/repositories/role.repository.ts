@@ -60,32 +60,49 @@ export class RoleRepository
     }
 
     try {
+      // Lookup menu items linked to the given permissions
+      const { data: menuRows, error: menuErr } = await supabase
+        .from('menu_permissions')
+        .select('menu_item_id')
+        .in('permission_id', permissionIds)
+        .eq('tenant_id', tenantId);
+
+      if (menuErr) handleSupabaseError(menuErr);
+
+      const menuItemIds = Array.from(
+        new Set((menuRows || []).map(m => m.menu_item_id))
+      );
+
       const { error: deleteError } = await supabase
-        .from('role_permissions')
+        .from('role_menu_items')
         .delete()
         .eq('role_id', id)
         .eq('tenant_id', tenantId);
 
       if (deleteError) handleSupabaseError(deleteError);
 
-      if (permissionIds.length) {
+      if (menuItemIds.length) {
         const userId = (await supabase.auth.getUser()).data.user?.id;
-        const rows = permissionIds.map(pid => ({
+        const rows = menuItemIds.map(mid => ({
           role_id: id,
-          permission_id: pid,
+          menu_item_id: mid,
           tenant_id: tenantId,
           created_by: userId,
           created_at: new Date().toISOString()
         }));
 
         const { error: insertError } = await supabase
-          .from('role_permissions')
+          .from('role_menu_items')
           .insert(rows);
 
         if (insertError) handleSupabaseError(insertError);
       }
     } catch (error) {
-      throw handleError(error, { context: 'updateRolePermissions', id, permissionIds });
+      throw handleError(error, {
+        context: 'updateRolePermissions',
+        id,
+        permissionIds,
+      });
     }
   }
 }
