@@ -299,7 +299,7 @@ export function DateRangePicker({
         </PopoverTrigger>
         <PopoverContent
           className={cn(
-            'p-0 dark:border-border',
+            'p-0 dark:border-border max-h-[80vh] overflow-y-auto',
             isMobile ? 'w-[95vw]' : 'w-auto'
           )}
           align={align}
