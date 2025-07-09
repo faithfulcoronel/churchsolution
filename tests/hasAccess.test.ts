@@ -7,7 +7,8 @@ describe('computeAccess', () => {
       () => true,
       () => true,
       'perm.ok',
-      'feat.ok'
+      'feat.ok',
+      false
     );
     expect(result).toBe(true);
   });
@@ -17,7 +18,8 @@ describe('computeAccess', () => {
       () => false,
       () => true,
       'perm.no',
-      'feat.ok'
+      'feat.ok',
+      false
     );
     expect(result).toBe(false);
   });
@@ -27,7 +29,8 @@ describe('computeAccess', () => {
       () => true,
       () => false,
       'perm.ok',
-      'feat.bad'
+      'feat.bad',
+      false
     );
     expect(result).toBe(false);
   });
@@ -37,7 +40,19 @@ describe('computeAccess', () => {
       () => false,
       () => false,
       '',
-      ''
+      '',
+      false
+    );
+    expect(result).toBe(true);
+  });
+
+  it('allows when user is admin regardless of checks', () => {
+    const result = computeAccess(
+      () => false,
+      () => false,
+      'perm.no',
+      'feat.no',
+      true
     );
     expect(result).toBe(true);
   });
