@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import { useMessageStore } from '../components/MessageHandler';
+import { tenantUtils } from '../utils/tenantUtils';
 
 type Permission = {
   id: string;
@@ -25,9 +26,24 @@ export function usePermissions() {
   const { data: userData, isLoading } = useQuery({
     queryKey: ['user-permissions', user?.id],
     queryFn: async () => {
-      if (!user) return { roles: [], permissions: [] };
+      if (!user) return { roles: [], permissions: [], adminRole: null };
 
       try {
+        const tenantId = await tenantUtils.getTenantId();
+
+        let adminRole: string | null = null;
+
+        if (tenantId) {
+          const { data: tenantUser } = await supabase
+            .from('tenant_users')
+            .select('admin_role')
+            .eq('user_id', user.id)
+            .eq('tenant_id', tenantId)
+            .single();
+
+          adminRole = (tenantUser as any)?.admin_role || null;
+        }
+
         // First get user roles with permissions
         const { data: userRoles, error: rolesError } = await supabase
           .rpc('get_user_roles_with_permissions', { target_user_id: user.id });
@@ -39,7 +55,7 @@ export function usePermissions() {
             text: 'Failed to fetch user roles. Please try again later.',
             duration: 5000,
           });
-          return { roles: [], permissions: [] };
+          return { roles: [], permissions: [], adminRole };
         }
 
         // Extract unique permissions from all roles
@@ -54,6 +70,7 @@ export function usePermissions() {
         return {
           roles: userRoles || [],
           permissions: Array.from(uniquePermissions.values()),
+          adminRole,
         };
       } catch (error) {
         console.error('Error in usePermissions:', error);
@@ -62,7 +79,7 @@ export function usePermissions() {
           text: 'An error occurred while fetching permissions',
           duration: 5000,
         });
-        return { roles: [], permissions: [] };
+        return { roles: [], permissions: [], adminRole: null };
       }
     },
     enabled: !!user,
@@ -72,6 +89,11 @@ export function usePermissions() {
 
   const hasPermission = (permissionCode: string) => {
     if (isLoading || !userData) return false;
+
+    if (userData.adminRole === 'tenant_admin') {
+      return true;
+    }
+
     return userData.permissions.some((p) => p.code === permissionCode);
   };
 
@@ -81,7 +103,11 @@ export function usePermissions() {
   };
 
   const isAdmin = () => {
-    return hasRole('admin') || hasRole('tenant_admin');
+    return (
+      hasRole('admin') ||
+      hasRole('tenant_admin') ||
+      userData?.adminRole === 'tenant_admin'
+    );
   };
 
   return {
@@ -91,5 +117,4 @@ export function usePermissions() {
     hasRole,
     isAdmin,
     isLoading,
-  };
-}
+  };}
