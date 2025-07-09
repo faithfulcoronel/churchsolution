@@ -185,16 +185,21 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     );
   }, [sources, categories, entryRecords]);
 
-  const totalAmount = React.useMemo(() => entries.reduce((sum, e) => sum + Number(e.amount || 0), 0), [entries]);
+  const visibleEntries = React.useMemo(() => entries.filter(e => !e.isDeleted), [entries]);
+
+  const totalAmount = React.useMemo(
+    () => visibleEntries.reduce((sum, e) => sum + Number(e.amount || 0), 0),
+    [visibleEntries]
+  );
 
   const categoryTotals = React.useMemo(() => {
     const totals: Record<string, number> = {};
-    entries.forEach(e => {
+    visibleEntries.forEach(e => {
       const name = categories.find(c => c.id === e.category_id)?.name || 'Uncategorized';
       totals[name] = (totals[name] || 0) + Number(e.amount || 0);
     });
     return totals;
-  }, [entries, categories]);
+  }, [visibleEntries, categories]);
 
   if (
     isLoading &&
