@@ -4,8 +4,9 @@ import { useRoleRepository } from '../../../hooks/useRoleRepository';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import BackButton from '../../../components/BackButton';
+import PermissionGate from '../../../components/PermissionGate';
 import { Badge } from '../../../components/ui2/badge';
-import { Loader2, Shield, Pencil, Trash2 } from 'lucide-react';
+import { Loader2, Shield, Pencil, Trash2, ListChecks } from 'lucide-react';
 
 function RoleProfile() {
   const { id } = useParams<{ id: string }>();
@@ -66,6 +67,16 @@ function RoleProfile() {
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit
               </Button>
+              <PermissionGate permission="role.edit">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/administration/roles/${id}/menus`)}
+                  className="flex items-center"
+                >
+                  <ListChecks className="h-4 w-4 mr-2" />
+                  Menus
+                </Button>
+              </PermissionGate>
               <Button variant="destructive" onClick={handleDelete} className="flex items-center">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
