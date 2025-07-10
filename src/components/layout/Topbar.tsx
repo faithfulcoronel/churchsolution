@@ -6,13 +6,16 @@ import {
   Sun,
   Moon,
   PanelLeft,
-  PanelLeftClose
+  PanelLeftClose,
+  Shield
 } from 'lucide-react';
 import { Button } from '../ui2/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui2/dropdown-menu';
 import { Input } from '../ui2/input';
 import { useThemeSwitcher } from '@/hooks';
 import { useAuthStore } from '../../stores/authStore';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useAdminModeStore } from '../../stores/adminModeStore';
 import { useNavigate } from 'react-router-dom';
 import ChurchBranding from '../ChurchBranding';
 import { SidebarTrigger, useSidebar } from '../ui2/sidebar';
@@ -22,6 +25,8 @@ import { cn } from '@/lib/utils';
 function Topbar() {
   const { collapsed, setCollapsed } = useSidebar();
   const { user, signOut } = useAuthStore();
+  const { hasRole } = usePermissions();
+  const { superAdminMode, toggleSuperAdminMode } = useAdminModeStore();
   const navigate = useNavigate();
   const { settings, handleThemeToggle } = useThemeSwitcher();
   // No direct notification listener here. The dropdown handles fetching
@@ -134,6 +139,17 @@ function Topbar() {
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </DropdownMenuItem>
+              {hasRole('super_admin') && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    toggleSuperAdminMode();
+                    navigate(!superAdminMode ? '/admin-panel/welcome' : '/welcome');
+                  }}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>{superAdminMode ? 'Exit Super Admin Mode' : 'Super Admin Mode'}</span>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>Log out</DropdownMenuItem>
