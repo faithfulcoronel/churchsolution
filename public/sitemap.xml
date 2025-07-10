@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>/</loc></url>
+  <url><loc>/login</loc></url>
+  <url><loc>/register</loc></url>
+  <url><loc>/register-member</loc></url>
+  <url><loc>/member-onboarding</loc></url>
+  <url><loc>/onboarding</loc></url>
+  <url><loc>/welcome</loc></url>
+  <url><loc>/activity</loc></url>
+  <url><loc>/dashboard</loc></url>
+  <url><loc>/members</loc></url>
+  <url><loc>/finances</loc></url>
+  <url><loc>/expenses</loc></url>
+  <url><loc>/offerings</loc></url>
+  <url><loc>/accounts</loc></url>
+  <url><loc>/announcements</loc></url>
+  <url><loc>/support</loc></url>
+  <url><loc>/admin</loc></url>
+  <url><loc>/administration</loc></url>
+  <url><loc>/admin-panel</loc></url>
+  <url><loc>/settings</loc></url>
+</urlset>
