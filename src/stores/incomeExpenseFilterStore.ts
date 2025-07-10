@@ -1,7 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type TransactionType = 'income' | 'expense';
+export type TransactionType =
+  | 'income'
+  | 'expense'
+  | 'transfer'
+  | 'adjustment'
+  | 'opening_balance'
+  | 'closing_entry'
+  | 'fund_rollover'
+  | 'reversal'
+  | 'allocation'
+  | 'reclass'
+  | 'refund';
 
 type DateRange = { from: Date; to: Date };
 

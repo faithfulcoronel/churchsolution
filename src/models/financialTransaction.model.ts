@@ -3,7 +3,18 @@ import { Member } from './member.model';
 import { ChartOfAccount } from './chartOfAccount.model';
 import { FinancialTransactionHeader } from './financialTransactionHeader.model';
 
-export type TransactionType = 'income' | 'expense';
+export type TransactionType =
+  | 'income'
+  | 'expense'
+  | 'transfer'
+  | 'adjustment'
+  | 'opening_balance'
+  | 'closing_entry'
+  | 'fund_rollover'
+  | 'reversal'
+  | 'allocation'
+  | 'reclass'
+  | 'refund';
 
 export interface FinancialTransaction extends BaseModel {
   id: string;

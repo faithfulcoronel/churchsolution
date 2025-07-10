@@ -10,6 +10,7 @@ import { Button } from '../../../components/ui2/button';
 import BackButton from '../../../components/BackButton';
 import { Badge } from '../../../components/ui2/badge';
 import { Progress } from '../../../components/ui2/progress';
+import type { TransactionType } from '../../../models/financialTransaction.model';
 import {
   PiggyBank,
   Calendar,
@@ -37,7 +38,7 @@ type Budget = {
 
 type Transaction = {
   id: string;
-  type: 'income' | 'expense';
+  type: TransactionType;
   category_id: string;
   debit: number;
   credit: number;
