@@ -8,6 +8,7 @@ import { MessageHandler } from './components/MessageHandler';
 import ErrorFallback from './components/ErrorFallback';
 import { handleError } from './utils/errorHandler';
 import { PathnameProvider } from './providers';
+import { usePermissions } from './hooks/usePermissions';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -23,6 +24,7 @@ const Offerings = React.lazy(() => import('./pages/offerings/Offerings'));
 const Expenses = React.lazy(() => import('./pages/expenses/Expenses'));
 const Accounts = React.lazy(() => import('./pages/accounts/Accounts'));
 const Administration = React.lazy(() => import('./pages/admin/Administration'));
+const SuperAdmin = React.lazy(() => import('./pages/super-admin/SuperAdmin'));
 const AnnouncementList = React.lazy(() => import('./pages/announcements/AnnouncementList'));
 const Layout = React.lazy(() => import('./components/Layout'));
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
@@ -60,6 +62,7 @@ class ErrorBoundary extends React.Component<
 
 function App() {
   const { setUser, user, loading } = useAuthStore();
+  const { hasRole } = usePermissions();
 
   useEffect(() => {
     // Check active sessions and sets the user
@@ -140,6 +143,9 @@ function App() {
                   <Route path="/support/*" element={<Support />} />
                   <Route path="/admin/*" element={<Administration />} />
                   <Route path="/administration/*" element={<Administration />} />
+                  {hasRole('super_admin') && (
+                    <Route path="/admin-panel/*" element={<SuperAdmin />} />
+                  )}
                   <Route path="/settings/*" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/welcome" replace />} />
                 </Route>
