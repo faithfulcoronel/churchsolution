@@ -18,7 +18,7 @@ function FiscalYearProfile() {
     data: periodsResult,
     isLoading: periodsLoading
   } = usePeriodsQuery({
-    filters: { fiscal_year_id: { operator: 'eq', value: id } },
+    filters: { fiscal_year_id: { operator: 'eq', value: id || '' } },
     order: { column: 'start_date', ascending: true },
     enabled: !!id
   });
