@@ -42,3 +42,5 @@ export * from './useLicenseFeatureRepository';
 export * from './useOpeningBalanceRepository';
 export * from './useFiscalYearRepository';
 export * from './useFiscalPeriodRepository';
+export * from './useTenantRepository';
+export * from './useLicensePlanRepository';
