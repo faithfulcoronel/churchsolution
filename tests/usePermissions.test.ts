@@ -51,4 +51,14 @@ describe('usePermissions admin roles', () => {
     perms = usePermissions();
     expect(perms.isAdmin()).toBe(true);
   });
+
+  it('isSuperAdmin true when role or adminRole is super_admin', () => {
+    useQueryMock.mockReturnValue({ data: { permissions: [], roles: [{ role_name: 'super_admin' }], adminRole: null }, isLoading: false });
+    let perms = usePermissions();
+    expect(perms.isSuperAdmin()).toBe(true);
+
+    useQueryMock.mockReturnValue({ data: { permissions: [], roles: [], adminRole: 'super_admin' }, isLoading: false });
+    perms = usePermissions();
+    expect(perms.isSuperAdmin()).toBe(true);
+  });
 });
