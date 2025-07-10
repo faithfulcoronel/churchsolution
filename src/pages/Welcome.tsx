@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getCurrentUserMember } from '../utils/memberUtils';
 import { tenantUtils } from '../utils/tenantUtils';
 import { usePermissions } from '../hooks/usePermissions';
@@ -31,7 +31,14 @@ import { Badge } from '../components/ui2/badge';
 import { Progress } from '../components/ui2/progress';
 
 function Welcome() {
-  const { hasPermission } = usePermissions();
+  const { hasPermission, isSuperAdmin } = usePermissions();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (isSuperAdmin()) {
+      navigate('/admin-panel/welcome', { replace: true });
+    }
+  }, [isSuperAdmin, navigate]);
 
   // Fetch the logged in member
   const { data: member, isLoading: memberLoading } = useQuery({
