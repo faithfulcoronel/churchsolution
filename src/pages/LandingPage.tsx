@@ -3,10 +3,13 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui2/button';
 import { Card, CardContent } from '../components/ui2/card';
 import { Building2, Users, DollarSign, ChevronRight, BarChart3, Heart, Calendar, Shield } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+    <>
+      <SEO title="StewardTrack" description="Simplify your church administration" />
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
       <header className="relative py-6 px-4 sm:px-6 lg:px-8 border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -584,6 +587,7 @@ const LandingPage = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 

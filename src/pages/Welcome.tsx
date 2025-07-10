@@ -29,6 +29,7 @@ import { QuickAccessCard, Announcements } from '../components/welcome';
 import WelcomeGreeting from '../components/WelcomeGreeting';
 import { Badge } from '../components/ui2/badge';
 import { Progress } from '../components/ui2/progress';
+import SEO from '../components/SEO';
 
 function Welcome() {
   const { hasPermission, isSuperAdmin } = usePermissions();
@@ -82,7 +83,9 @@ function Welcome() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <>
+      <SEO title="Welcome" description="Overview of your church activity" />
+      <div className="max-w-7xl mx-auto space-y-8">
       {/* Welcome Banner with Greeting */}
       <WelcomeGreeting />
 
@@ -289,6 +292,7 @@ function Welcome() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
