@@ -22,6 +22,8 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { navigation as baseNavigation, NavItem } from '../../config/navigation';
+import { superAdminNavigation } from '../../config/superAdminNavigation';
+import { useAdminModeStore } from '../../stores/adminModeStore';
 
 function Sidebar() {
   const {
@@ -92,9 +94,13 @@ function Sidebar() {
     return userRoles?.[0]?.role_name || 'User';
   }, [userRoles]);
 
-  const { data: navigation = baseNavigation } = useMenuItems(
+  const { superAdminMode } = useAdminModeStore();
+
+  const { data: dynamicNavigation = baseNavigation } = useMenuItems(
     userRoles?.map((r: any) => r.role_id) || []
   );
+
+  const navigation = superAdminMode ? superAdminNavigation : dynamicNavigation;
 
   const menuItemCount = useMemo(() => {
     let count = 0;
