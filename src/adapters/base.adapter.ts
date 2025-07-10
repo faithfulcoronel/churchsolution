@@ -3,6 +3,7 @@ import { injectable } from 'inversify';
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 import { supabase } from '../lib/supabase';
 import { tenantUtils } from '../utils/tenantUtils';
+import { userRoleUtils } from '../utils/userRoleUtils';
 import { handleSupabaseError } from '../utils/supabaseErrorHandler';
 import { handleError } from '../utils/errorHandler';
 import { BaseModel } from '../models/base.model';
@@ -171,7 +172,9 @@ export class BaseAdapter<T extends BaseModel> {
   ): Promise<{ query: PostgrestFilterBuilder<any, any, T[]> }> {
     try {
       const tenantId = await tenantUtils.getTenantId();
-      if (!tenantId) {
+      const isSuperAdmin = await userRoleUtils.isSuperAdmin();
+
+      if (!tenantId && !isSuperAdmin) {
         throw new Error('No tenant context found');
       }
 
@@ -181,13 +184,17 @@ export class BaseAdapter<T extends BaseModel> {
       let query = supabase
         .from(this.tableName)
         .select(
-          relationshipQuery 
+          relationshipQuery
             ? `${options.select || this.defaultSelect || '*'}, ${relationshipQuery}`
             : (options.select || this.defaultSelect || '*'),
           { count: 'exact' }
-        )
-        .eq('tenant_id', tenantId)
-        .is('deleted_at', null);
+        );
+
+      if (!isSuperAdmin) {
+        query = query.eq('tenant_id', tenantId);
+      }
+
+      query = query.is('deleted_at', null);
 
       if (options.filters) {
         Object.entries(options.filters).forEach(([key, filter]) => {

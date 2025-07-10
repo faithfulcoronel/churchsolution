@@ -101,3 +101,4 @@ A helper function `can_user(permission text)` allows the frontend to quickly ver
 ## Changelog
 
 - Dates are now stored and parsed using local `yyyy-MM-dd` format instead of ISO strings.
+- Super admins can now query data across all tenants.
