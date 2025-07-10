@@ -90,7 +90,7 @@ export function usePermissions() {
   const hasPermission = (permissionCode: string) => {
     if (isLoading || !userData) return false;
 
-    if (userData.adminRole === 'tenant_admin') {
+    if (userData.adminRole === 'tenant_admin' || userData.adminRole === 'super_admin') {
       return true;
     }
 
@@ -106,7 +106,9 @@ export function usePermissions() {
     return (
       hasRole('admin') ||
       hasRole('tenant_admin') ||
-      userData?.adminRole === 'tenant_admin'
+      hasRole('super_admin') ||
+      userData?.adminRole === 'tenant_admin' ||
+      userData?.adminRole === 'super_admin'
     );
   };
 
