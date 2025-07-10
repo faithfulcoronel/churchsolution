@@ -7,6 +7,7 @@ import ErrorFallback from './components/ErrorFallback';
 import { handleError } from './utils/errorHandler';
 import { PathnameProvider } from './providers';
 import { usePermissions } from './hooks/usePermissions';
+import { useAdminModeStore } from './stores/adminModeStore';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -60,7 +61,8 @@ class ErrorBoundary extends React.Component<
 
 function App() {
   const { setUser, user, loading } = useAuthStore();
-  const { hasRole } = usePermissions();
+  const { isSuperAdmin } = usePermissions();
+  const { superAdminMode } = useAdminModeStore();
 
   useEffect(() => {
     // Check active sessions and sets the user
@@ -128,23 +130,35 @@ function App() {
               {/* Protected routes */}
               {user ? (
                 <Route element={<Layout />}>
-                  <Route path="/welcome" element={<Welcome />} />
-                  <Route path="/activity" element={<ActivityList />} />
-                  <Route path="/dashboard/*" element={<Dashboard />} />
-                  <Route path="/members/*" element={<Members />} />
-                  <Route path="/finances/*" element={<Finances />} />
-                  <Route path="/expenses/*" element={<Expenses />} />
-                  <Route path="/offerings/*" element={<Offerings />} />
-                  <Route path="/accounts/*" element={<Accounts />} />
-                  <Route path="/announcements" element={<AnnouncementList />} />
-                  <Route path="/support/*" element={<Support />} />
-                  <Route path="/admin/*" element={<Administration />} />
-                  <Route path="/administration/*" element={<Administration />} />
-                  {hasRole('super_admin') && (
-                    <Route path="/admin-panel/*" element={<SuperAdmin />} />
+                  {superAdminMode && isSuperAdmin() ? (
+                    <>
+                      <Route path="/admin-panel/*" element={<SuperAdmin />} />
+                      <Route
+                        path="*"
+                        element={<Navigate to="/admin-panel/welcome" replace />}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Route path="/welcome" element={<Welcome />} />
+                      <Route path="/activity" element={<ActivityList />} />
+                      <Route path="/dashboard/*" element={<Dashboard />} />
+                      <Route path="/members/*" element={<Members />} />
+                      <Route path="/finances/*" element={<Finances />} />
+                      <Route path="/expenses/*" element={<Expenses />} />
+                      <Route path="/offerings/*" element={<Offerings />} />
+                      <Route path="/accounts/*" element={<Accounts />} />
+                      <Route path="/announcements" element={<AnnouncementList />} />
+                      <Route path="/support/*" element={<Support />} />
+                      <Route path="/admin/*" element={<Administration />} />
+                      <Route path="/administration/*" element={<Administration />} />
+                      {isSuperAdmin() && (
+                        <Route path="/admin-panel/*" element={<SuperAdmin />} />
+                      )}
+                      <Route path="/settings/*" element={<Settings />} />
+                      <Route path="*" element={<Navigate to="/welcome" replace />} />
+                    </>
                   )}
-                  <Route path="/settings/*" element={<Settings />} />
-                  <Route path="*" element={<Navigate to="/welcome" replace />} />
                 </Route>
               ) : (
                 <Route path="*" element={<Navigate to="/" replace />} />
