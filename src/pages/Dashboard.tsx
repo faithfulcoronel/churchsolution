@@ -6,6 +6,7 @@ import { useWelcomeStore } from '../stores/welcomeStore';
 import { WelcomeModal } from '../components/WelcomeModal';
 import ChurchDashboard from './dashboard/ChurchDashboard';
 import PersonalDashboard from './dashboard/PersonalDashboard';
+import SEO from '../components/SEO';
 
 function Dashboard() {
   const [showWelcome, setShowWelcome] = React.useState(false);
@@ -34,6 +35,7 @@ function Dashboard() {
 
   return (
     <>
+      <SEO title="Dashboard" description="Church management dashboard" />
       <Routes>
         <Route index element={<Navigate to="/dashboard/church" replace />} />
         <Route path="church" element={<ChurchDashboard />} />
