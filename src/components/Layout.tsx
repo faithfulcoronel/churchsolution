@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './layout/Sidebar';
 import Topbar from './layout/Topbar';
 import Footer from './Footer';
 import { SidebarProvider, useSidebar } from './ui2/sidebar';
 import { cn } from '@/lib/utils';
+import { useAdminModeStore } from '../stores/adminModeStore';
 
 function LayoutContent() {
   const { collapsed } = useSidebar();
   const location = useLocation();
+  const { setSuperAdminMode } = useAdminModeStore();
+
+  useEffect(() => {
+    setSuperAdminMode(location.pathname.startsWith('/admin-panel'));
+  }, [location.pathname, setSuperAdminMode]);
 
   // Check if current page is settings
   const isSettingsPage = location.pathname.startsWith('/settings');
