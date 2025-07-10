@@ -6,15 +6,21 @@ import Footer from './Footer';
 import { SidebarProvider, useSidebar } from './ui2/sidebar';
 import { cn } from '@/lib/utils';
 import { useAdminModeStore } from '../stores/adminModeStore';
+import { usePermissions } from '../hooks/usePermissions';
 
 function LayoutContent() {
   const { collapsed } = useSidebar();
   const location = useLocation();
   const { setSuperAdminMode } = useAdminModeStore();
+  const { hasRole } = usePermissions();
 
   useEffect(() => {
-    setSuperAdminMode(location.pathname.startsWith('/admin-panel'));
-  }, [location.pathname, setSuperAdminMode]);
+    if (hasRole('super_admin')) {
+      setSuperAdminMode(true);
+    } else {
+      setSuperAdminMode(location.pathname.startsWith('/admin-panel'));
+    }
+  }, [location.pathname, hasRole, setSuperAdminMode]);
 
   // Check if current page is settings
   const isSettingsPage = location.pathname.startsWith('/settings');
