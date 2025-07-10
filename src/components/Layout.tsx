@@ -12,15 +12,15 @@ function LayoutContent() {
   const { collapsed } = useSidebar();
   const location = useLocation();
   const { setSuperAdminMode } = useAdminModeStore();
-  const { hasRole } = usePermissions();
+  const { isSuperAdmin } = usePermissions();
 
   useEffect(() => {
-    if (hasRole('super_admin')) {
+    if (isSuperAdmin()) {
       setSuperAdminMode(true);
     } else {
       setSuperAdminMode(location.pathname.startsWith('/admin-panel'));
     }
-  }, [location.pathname, hasRole, setSuperAdminMode]);
+  }, [location.pathname, isSuperAdmin, setSuperAdminMode]);
 
   // Check if current page is settings
   const isSettingsPage = location.pathname.startsWith('/settings');

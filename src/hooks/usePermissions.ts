@@ -44,6 +44,13 @@ export function usePermissions() {
           adminRole = (tenantUser as any)?.admin_role || null;
         }
 
+        if (!adminRole) {
+          const { data: isSuperAdmin } = await supabase.rpc('is_super_admin');
+          if (isSuperAdmin === true) {
+            adminRole = 'super_admin';
+          }
+        }
+
         // First get user roles with permissions
         const { data: userRoles, error: rolesError } = await supabase
           .rpc('get_user_roles_with_permissions', { target_user_id: user.id });
@@ -112,11 +119,17 @@ export function usePermissions() {
     );
   };
 
+  const isSuperAdmin = () => {
+    return hasRole('super_admin') || userData?.adminRole === 'super_admin';
+  };
+
   return {
     permissions: userData?.permissions || [],
     roles: userData?.roles || [],
     hasPermission,
     hasRole,
     isAdmin,
+    isSuperAdmin,
     isLoading,
-  };}
+  };
+}
