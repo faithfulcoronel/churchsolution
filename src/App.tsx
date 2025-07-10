@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './lib/queryClient';
 import { useAuthStore } from './stores/authStore';
 import { supabase } from './lib/supabase';
 import { MessageHandler } from './components/MessageHandler';
@@ -89,10 +87,9 @@ function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <Router>
-          <PathnameProvider>
+    <ErrorBoundary>
+      <Router>
+        <PathnameProvider>
             <React.Suspense
               fallback={
                 <div className="min-h-screen flex items-center justify-center">
@@ -155,8 +152,8 @@ function App() {
               </Routes>
             </React.Suspense>
           </PathnameProvider>
-        </Router>
-      </ErrorBoundary>
-    </QueryClientProvider>
-  );
-}export default App;
+          </Router>
+        </ErrorBoundary>
+    );
+ }
+export default App;
