@@ -13,14 +13,15 @@ function LayoutContent() {
   const location = useLocation();
   const { setSuperAdminMode } = useAdminModeStore();
   const { isSuperAdmin } = usePermissions();
+  const isSuper = isSuperAdmin();
 
   useEffect(() => {
-    if (isSuperAdmin()) {
+    if (isSuper) {
       setSuperAdminMode(true);
     } else {
       setSuperAdminMode(location.pathname.startsWith('/admin-panel'));
     }
-  }, [location.pathname, isSuperAdmin, setSuperAdminMode]);
+  }, [location.pathname, isSuper, setSuperAdminMode]);
 
   // Check if current page is settings
   const isSettingsPage = location.pathname.startsWith('/settings');
