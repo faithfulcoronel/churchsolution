@@ -276,7 +276,9 @@ export class BaseAdapter<T extends BaseModel> {
                      fieldsToRemove: string[] = []): Promise<T> {
     try {
       const tenantId = await tenantUtils.getTenantId();
-      if (!tenantId) {
+      const isSuperAdmin = await userRoleUtils.isSuperAdmin();
+
+      if (!tenantId && !isSuperAdmin) {
         throw new Error('No tenant context found');
       }
 
@@ -329,7 +331,9 @@ export class BaseAdapter<T extends BaseModel> {
                      fieldsToRemove: string[] = []): Promise<T> {
     try {
       const tenantId = await tenantUtils.getTenantId();
-      if (!tenantId) {
+      const isSuperAdmin = await userRoleUtils.isSuperAdmin();
+
+      if (!tenantId && !isSuperAdmin) {
         throw new Error('No tenant context found');
       }
 
@@ -380,7 +384,9 @@ export class BaseAdapter<T extends BaseModel> {
   public async delete(id: string): Promise<void> {
     try {
       const tenantId = await tenantUtils.getTenantId();
-      if (!tenantId) {
+      const isSuperAdmin = await userRoleUtils.isSuperAdmin();
+
+      if (!tenantId && !isSuperAdmin) {
         throw new Error('No tenant context found');
       }
 

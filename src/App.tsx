@@ -101,11 +101,15 @@ function App() {
             >
               <MessageHandler />
               <Routes>
-              {/* Public routes */}
-                <Route
-                  path="/"
-                  element={!user ? <LandingPage /> : <Navigate to="/welcome" replace />}
-                />
+                <Route path="/"
+                  element={
+                  !user ? (
+                  <LandingPage />
+                      ) : superAdminMode && isSuperAdmin() ? (
+                      <Navigate to="/admin-panel/welcome" replace />
+                        ) : (
+                      <Navigate to="/welcome" replace />
+                )}/>
                 <Route
                   path="/login"
                   element={!user ? <Login /> : <Navigate to="/welcome" replace />}
