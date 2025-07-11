@@ -525,7 +525,7 @@ const LandingPage = () => {
             <div>
               <div className="flex items-center">
                 <img
-                  src="/landing_logo_with_name.svg"
+                  src="/landing_logo_with_name_dark.svg"
                   alt="StewardTrack Logo"
                   className="h-6 w-auto"
                 />
