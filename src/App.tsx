@@ -8,6 +8,7 @@ import { handleError } from './utils/errorHandler';
 import { PathnameProvider } from './providers';
 import { usePermissions } from './hooks/usePermissions';
 import { useAdminModeStore } from './stores/adminModeStore';
+import RequireAuth from './components/RequireAuth';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -132,8 +133,7 @@ function App() {
               />
 
               {/* Protected routes */}
-              {user ? (
-                <Route element={<Layout />}>
+              <Route element={<RequireAuth><Layout /></RequireAuth>}>
                   {superAdminMode && isSuperAdmin() ? (
                     <>
                       <Route path="/admin-panel/*" element={<SuperAdmin />} />
@@ -163,10 +163,8 @@ function App() {
                       <Route path="*" element={<Navigate to="/welcome" replace />} />
                     </>
                   )}
-                </Route>
-              ) : (
-                <Route path="*" element={<Navigate to="/" replace />} />
-              )}
+              </Route>
+              {!user && <Route path="*" element={<Navigate to="/" replace />} />}
               </Routes>
             </React.Suspense>
           </PathnameProvider>

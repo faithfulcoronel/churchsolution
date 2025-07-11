@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Input } from '../../components/ui2/input';
@@ -21,6 +21,8 @@ function Login() {
   const [error, setError] = useState<string | null>(null);
   const [resetMode, setResetMode] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +36,8 @@ function Login() {
       });
 
       if (error) throw error;
+      const from = (location.state as any)?.from?.pathname || '/welcome';
+      navigate(from, { replace: true });
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
