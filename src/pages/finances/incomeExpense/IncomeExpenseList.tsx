@@ -78,9 +78,9 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
       resetFilter(transactionType);
     }
   }, []);
-  const { useQuery: useEntryQuery } = useIncomeExpenseTransactionRepository();
+  const { useQueryAll: useEntryQuery } = useIncomeExpenseTransactionRepository();
   const {
-    useQuery: useHeaderQuery,
+    useQueryAll: useHeaderQuery,
     submitTransaction,
     approveTransaction,
     postTransaction,

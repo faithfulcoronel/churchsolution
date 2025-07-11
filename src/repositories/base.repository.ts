@@ -13,6 +13,10 @@ export abstract class BaseRepository<T extends BaseModel> {
     return this.adapter.fetchById(id, options);
   }
 
+  async findAll(options: Omit<QueryOptions, 'pagination'> = {}) {
+    return this.adapter.fetchAll(options);
+  }
+
   async create(data: Partial<T>, relations?: Record<string, any[]>, fieldsToRemove: string[] = []) {
     // Pre-create hook for repository-level validation/transformation
     const processedData = await this.beforeCreate(data);

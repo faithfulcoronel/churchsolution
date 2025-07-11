@@ -26,6 +26,17 @@ export function useBaseRepository<T extends BaseModel>(
     });
   };
 
+  const useQueryAll = (options: Omit<QueryOptions, 'pagination'> = {}) => {
+    const { enabled, ...rest } = options;
+    const serializedOptions = JSON.stringify(rest);
+    return useReactQuery({
+      queryKey: [queryKey, 'all', serializedOptions],
+      queryFn: () => repository.findAll(options),
+      staleTime: 5 * 60 * 1000,
+      enabled: enabled ?? true,
+    });
+  };
+
   const useFindById = (
     id: string,
     options: Omit<QueryOptions, 'pagination'> = {}
@@ -96,6 +107,7 @@ export function useBaseRepository<T extends BaseModel>(
 
   return {
     useQuery,
+    useQueryAll,
     useFindById,
     useCreate,
     useUpdate,
