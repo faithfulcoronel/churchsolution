@@ -94,8 +94,11 @@ function FinancialOverviewDashboard() {
     fundBalances,
     isLoading,
   } = useFinanceDashboardData(dateRange);
-  const { useQuery: useTransactionQuery } = useFinancialTransactionHeaderRepository();
-  const { data: transactionResult, isLoading: transactionsLoading } = useTransactionQuery({
+  const { useQueryAll: useTransactionQuery } = useFinancialTransactionHeaderRepository();
+  const {
+    data: transactionResult,
+    isLoading: transactionsLoading,
+  } = useTransactionQuery({
     filters: {
       transaction_date: {
         operator: 'between',
@@ -104,7 +107,6 @@ function FinancialOverviewDashboard() {
       },
     },
     order: { column: 'transaction_date', ascending: false },
-    pagination: { page: 1, pageSize: 20 },
     relationships: [
       { table: 'financial_sources', foreignKey: 'source_id', select: ['id', 'name', 'source_type'] },
     ],
