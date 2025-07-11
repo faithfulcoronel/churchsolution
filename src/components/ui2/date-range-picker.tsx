@@ -324,21 +324,23 @@ export function DateRangePicker({
               </div>
             )}
             <div className="p-2 sm:p-3">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-end gap-2 mb-3">
                 <Input
                   type="text"
                   value={fromInput}
                   placeholder="From"
                   onChange={handleFromInputChange}
                   className="w-full sm:w-[150px] dark:bg-muted dark:border-border"
+                  label="From"
                 />
-                <span className="text-sm text-muted-foreground">to</span>
+                <span className="text-sm text-muted-foreground sm:mb-2">to</span>
                 <Input
                   type="text"
                   value={toInput}
                   placeholder="To"
                   onChange={handleToInputChange}
                   className="w-full sm:w-[150px] dark:bg-muted dark:border-border"
+                  label="To"
                 />
               </div>
               <Calendar

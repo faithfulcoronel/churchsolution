@@ -1,6 +1,6 @@
 // src/components/ui2/calendar.tsx
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "./button";
@@ -22,6 +22,9 @@ function Calendar({
         month: 'space-y-4',
         caption: 'flex items-center justify-between pt-1',
         caption_label: 'text-sm font-medium',
+        caption_dropdowns: 'flex items-center gap-2',
+        dropdown: 'rounded-md border border-input bg-background py-1 pl-2 pr-6 text-sm focus:outline-none dark:bg-muted dark:border-border',
+        dropdown_icon: 'absolute right-2 h-4 w-4 text-muted-foreground',
         nav: 'flex items-center gap-1',
         nav_button: cn(
           buttonVariants({ variant: 'outline' }),
@@ -57,10 +60,10 @@ function Calendar({
       }}
       components={{
         IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn('h-4 w-4', className)} {...props} />
+          <ChevronsLeft className={cn('h-4 w-4', className)} {...props} />
         ),
         IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn('h-4 w-4', className)} {...props} />
+          <ChevronsRight className={cn('h-4 w-4', className)} {...props} />
         )
       }}
       {...props}
