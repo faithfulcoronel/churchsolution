@@ -332,8 +332,8 @@ export function DateRangePicker({
                   onChange={handleFromInputChange}
                   className="w-full sm:w-[150px] dark:bg-muted dark:border-border"
                   label="From"
+                  icon={<CalendarIcon className="h-4 w-4" />}
                 />
-                <span className="text-sm text-muted-foreground sm:mb-2">to</span>
                 <Input
                   type="text"
                   value={toInput}
@@ -341,6 +341,7 @@ export function DateRangePicker({
                   onChange={handleToInputChange}
                   className="w-full sm:w-[150px] dark:bg-muted dark:border-border"
                   label="To"
+                  icon={<CalendarIcon className="h-4 w-4" />}
                 />
               </div>
               <Calendar

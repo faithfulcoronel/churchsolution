@@ -24,7 +24,7 @@ function Calendar({
         caption_label: 'text-sm font-medium',
         caption_dropdowns: 'flex items-center gap-2',
         dropdown: 'rounded-md border border-input bg-background py-1 pl-2 pr-6 text-sm focus:outline-none dark:bg-muted dark:border-border',
-        dropdown_icon: 'absolute right-2 h-4 w-4 text-muted-foreground',
+        dropdown_icon: '',
         nav: 'flex items-center gap-1',
         nav_button: cn(
           buttonVariants({ variant: 'outline' }),
