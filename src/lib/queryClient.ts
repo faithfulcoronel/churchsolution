@@ -7,8 +7,8 @@ export const queryClient = new QueryClient({
       retry: 1,
       // React Query v5 uses string literals; "never" disables refetch on focus
       refetchOnWindowFocus: 'never',
-      refetchOnReconnect: false,
-      staleTime: 5 * 60 * 1000, // Data considered fresh for 5 minutes
+      refetchOnReconnect: 'never',
+      staleTime: 60 * 60 * 1000, // Data considered fresh for 1 hour
       onError: (error) => handleError(error),
     },
     mutations: {
