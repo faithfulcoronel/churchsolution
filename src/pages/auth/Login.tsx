@@ -166,11 +166,7 @@ function Login() {
 
             {/* Right side - Background Image */}
       <div className="hidden lg:block relative w-0 flex-1">
-        <img
-          className="absolute inset-0 h-full w-full object-cover"
-          src="/landing_bg.svg"
-          alt="Church interior"
-        />
+        <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-[rgb(13,115,119)] via-[rgb(20,160,133)] to-[rgb(125,216,125)]"></div>
         <div className="absolute inset-0 bg-primary-900 bg-opacity-50 backdrop-blur-sm"></div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="max-w-2xl mx-auto text-left text-white">
