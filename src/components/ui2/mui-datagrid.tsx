@@ -39,61 +39,61 @@ export interface DataGridProps<T> extends Omit<MuiDataGridProps<T>, 'rows'> {
 // Style the DataGrid to match our theme
 const StyledDataGrid = styled(MuiDataGrid)(({ theme }) => ({
   border: 'none',
-  backgroundColor: 'var(--background)',
-  color: 'var(--foreground)',
+  backgroundColor: 'hsl(var(--background))',
+  color: 'hsl(var(--foreground))',
   fontFamily: 'var(--font-sans)',
   borderRadius: 'var(--radius)',
   boxShadow: 'var(--tw-card-box-shadow)',
 
   '& .MuiDataGrid-main': {
-    backgroundColor: 'var(--background)',
+    backgroundColor: 'hsl(var(--background))',
   },
 
   '& .MuiDataGrid-columnHeaders': {
-    backgroundColor: 'var(--secondary)',
-    borderBottom: '1px solid var(--border)',
-    color: 'var(--secondary-foreground)',
+    backgroundColor: 'hsl(var(--secondary))',
+    borderBottom: '1px solid hsl(var(--border))',
+    color: 'hsl(var(--secondary-foreground))',
     fontSize: '0.875rem',
     fontWeight: 600,
   },
 
   '& .MuiDataGrid-cell': {
-    borderBottom: '1px solid var(--border)',
-    color: 'var(--foreground)',
+    borderBottom: '1px solid hsl(var(--border))',
+    color: 'hsl(var(--foreground))',
     fontSize: '0.875rem',
   },
 
   '& .MuiDataGrid-row': {
     '&:hover': {
-      backgroundColor: 'var(--muted)',
+      backgroundColor: 'hsl(var(--muted))',
     },
     '&.Mui-selected': {
-      backgroundColor: 'var(--primary)',
-      color: 'var(--primary-foreground)',
+      backgroundColor: 'hsl(var(--primary))',
+      color: 'hsl(var(--primary-foreground))',
       '&:hover': {
-        backgroundColor: 'var(--primary)',
+        backgroundColor: 'hsl(var(--primary))',
       },
     },
   },
 
   '& .MuiDataGrid-footerContainer': {
-    borderTop: '1px solid var(--border)',
-    backgroundColor: 'var(--background)',
+    borderTop: '1px solid hsl(var(--border))',
+    backgroundColor: 'hsl(var(--background))',
   },
 
   '& .MuiTablePagination-root': {
-    color: 'var(--foreground)',
+    color: 'hsl(var(--foreground))',
   },
 
   '& .MuiDataGrid-toolbarContainer': {
     padding: theme.spacing(2),
-    backgroundColor: 'var(--background)',
-    borderBottom: '1px solid var(--border)',
+    backgroundColor: 'hsl(var(--background))',
+    borderBottom: '1px solid hsl(var(--border))',
     
     '& .MuiButton-root': {
-      color: 'var(--muted-foreground)',
+      color: 'hsl(var(--muted-foreground))',
       '&:hover': {
-        backgroundColor: 'var(--accent)',
+        backgroundColor: 'hsl(var(--accent))',
       },
     },
     
@@ -104,15 +104,15 @@ const StyledDataGrid = styled(MuiDataGrid)(({ theme }) => ({
   },
 
   '& .MuiDataGrid-menuIcon': {
-    color: 'var(--muted-foreground)',
+    color: 'hsl(var(--muted-foreground))',
   },
 
   '& .MuiDataGrid-sortIcon': {
-    color: 'var(--muted-foreground)',
+    color: 'hsl(var(--muted-foreground))',
   },
 
   '& .MuiDataGrid-filterIcon': {
-    color: 'var(--muted-foreground)',
+    color: 'hsl(var(--muted-foreground))',
   },
 
   // Quick filter input inherits shared input styles via className
