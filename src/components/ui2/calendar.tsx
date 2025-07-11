@@ -21,10 +21,10 @@ function Calendar({
         months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
         month: 'space-y-4',
         caption: 'flex items-center justify-between pt-1',
-        caption_label: 'text-sm font-medium',
+        caption_label: 'hidden',
         caption_dropdowns: 'flex items-center gap-2',
         dropdown: 'rounded-md border border-input bg-background py-1 pl-2 pr-6 text-sm focus:outline-none dark:bg-muted dark:border-border',
-        dropdown_icon: '',
+        dropdown_icon: 'hidden',
         nav: 'flex items-center gap-1',
         nav_button: cn(
           buttonVariants({ variant: 'outline' }),
