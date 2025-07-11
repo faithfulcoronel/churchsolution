@@ -554,7 +554,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
       <AlertDialog open={showRejectReasonDialog} onOpenChange={setShowRejectReasonDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle variant="destructive">Reject Transaction</AlertDialogTitle>
+            <AlertDialogTitle variant="danger">Reject Transaction</AlertDialogTitle>
             <AlertDialogDescription>
               Please provide a reason for rejecting this transaction.
               {header && (
@@ -606,7 +606,7 @@ function IncomeExpenseProfile({ transactionType }: IncomeExpenseProfileProps) {
       <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle variant="destructive">Reject Transaction</AlertDialogTitle>
+            <AlertDialogTitle variant="danger">Reject Transaction</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to move this transaction back to draft?
               {header && (
