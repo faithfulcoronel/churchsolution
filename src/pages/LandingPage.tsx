@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui2/button';
 import { Card, CardContent } from '../components/ui2/card';
-import { Building2, Users, DollarSign, ChevronRight, BarChart3, Heart, Calendar, Shield } from 'lucide-react';
+import { Users, DollarSign, ChevronRight, BarChart3, Heart, Calendar, Shield } from 'lucide-react';
 import SEO from '../components/SEO';
 
 const LandingPage = () => {
@@ -14,8 +14,11 @@ const LandingPage = () => {
       <header className="relative py-6 px-4 sm:px-6 lg:px-8 border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center">
-            <Building2 className="h-8 w-8 text-primary mr-2" />
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">StewardTrack</span>
+            <img
+              src="/landing_logo_with_name.svg"
+              alt="StewardTrack Logo"
+              className="h-8 sm:h-10 w-auto"
+            />
           </div>
           <div className="flex space-x-4">
             <Link to="/login">
@@ -521,8 +524,11 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center">
-                <Building2 className="h-6 w-6 text-primary mr-2" />
-                <span className="text-xl font-bold">StewardTrack</span>
+                <img
+                  src="/landing_logo_with_name.svg"
+                  alt="StewardTrack Logo"
+                  className="h-6 w-auto"
+                />
               </div>
               <p className="mt-4 text-gray-400">
                 Empowering churches with modern administration tools.
