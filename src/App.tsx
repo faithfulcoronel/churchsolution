@@ -84,7 +84,19 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+        <div className="relative flex items-center justify-center">
+          <img
+            src="/landing_logo_with_name.svg"
+            className="absolute w-40 dark:hidden"
+            alt="Steward Track logo"
+          />
+          <img
+            src="/landing_logo_with_name_dark.svg"
+            className="absolute w-40 hidden dark:block"
+            alt="Steward Track logo"
+          />
+          <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-b-4 border-primary-600"></div>
+        </div>
       </div>
     );
   }
@@ -96,7 +108,19 @@ function App() {
             <React.Suspense
               fallback={
                 <div className="min-h-screen flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+                  <div className="relative flex items-center justify-center">
+                    <img
+                      src="/landing_logo_with_name.svg"
+                      className="absolute w-40 dark:hidden"
+                      alt="Steward Track logo"
+                    />
+                    <img
+                      src="/landing_logo_with_name_dark.svg"
+                      className="absolute w-40 hidden dark:block"
+                      alt="Steward Track logo"
+                    />
+                    <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-b-4 border-primary-600"></div>
+                  </div>
                 </div>
               }
             >
