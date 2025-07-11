@@ -489,4 +489,28 @@ export class BaseAdapter<T extends BaseModel> {
     
     return sanitizedData;
   }
+
+  /**
+   * Fetch all records without the 1k row limit by paging through results.
+   */
+  public async fetchAll(options: Omit<QueryOptions, 'pagination'> = {}): Promise<{ data: T[]; count: number | null }> {
+    const pageSize = 1000;
+    let page = 1;
+    let all: T[] = [];
+    let totalCount: number | null = null;
+
+    while (true) {
+      const { data, count } = await this.fetch({ ...options, pagination: { page, pageSize } });
+      if (totalCount === null) {
+        totalCount = count;
+      }
+      all = all.concat(data);
+      if (!data.length || data.length < pageSize) {
+        break;
+      }
+      page += 1;
+    }
+
+    return { data: all, count: totalCount };
+  }
 }
