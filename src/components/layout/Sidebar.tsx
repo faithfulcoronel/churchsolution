@@ -378,7 +378,7 @@ function Sidebar() {
             <img
               src={collapsed ? '/logo_square.svg' : '/logo_long.svg'}
               alt="StewardTrack Logo"
-              className={collapsed ? 'h-8' : 'h-10'}
+              className={collapsed ? 'h-12' : 'h-10'}
             />
           </div>
 
