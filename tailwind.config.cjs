@@ -396,7 +396,7 @@ module.exports = {
       },
       backgroundImage: {
         'primary-gradient':
-          'linear-gradient(to bottom, #4ADE80, #15803D)'
+          'linear-gradient(to bottom, #22C55E, #166534)'
       },
       //begin: Shadcn UI Animations
       keyframes: {
