@@ -188,7 +188,10 @@ function ExpensesDashboard() {
   const highlights = [
     {
       name: 'This Month',
-      value: metrics.currency ? `${metrics.currency.symbol}${metrics.thisMonthTotal.toFixed(2)}` : metrics.thisMonthTotal.toFixed(2),
+      value: formatCurrency(
+        metrics.thisMonthTotal,
+        metrics.currency || currency
+      ),
       icon: DollarSign,
       iconClassName: 'text-success',
       barClassName: 'bg-success',
@@ -206,7 +209,10 @@ function ExpensesDashboard() {
     },
     {
       name: 'This Week',
-      value: metrics.currency ? `${metrics.currency.symbol}${metrics.thisWeekTotal.toFixed(2)}` : metrics.thisWeekTotal.toFixed(2),
+      value: formatCurrency(
+        metrics.thisWeekTotal,
+        metrics.currency || currency
+      ),
       icon: Calendar,
       iconClassName: 'text-info',
       barClassName: 'bg-info',
@@ -215,7 +221,10 @@ function ExpensesDashboard() {
     },
     {
       name: 'Avg. Expense',
-      value: metrics.currency ? `${metrics.currency.symbol}${metrics.avgExpense.toFixed(2)}` : metrics.avgExpense.toFixed(2),
+      value: formatCurrency(
+        metrics.avgExpense,
+        metrics.currency || currency
+      ),
       icon: HandCoins,
       iconClassName: 'text-warning',
       barClassName: 'bg-warning',
