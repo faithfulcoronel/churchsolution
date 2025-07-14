@@ -62,6 +62,8 @@ the database.
    code.
    Menu items are grouped by a `section` column that mirrors the
    configuration in `src/config/navigation.ts`.
+7. To enable ChatGPT suggestions in support threads, set
+   `VITE_OPENAI_API_KEY` in your `.env` file with your OpenAI API key.
 
 ## Running tests
 
