@@ -198,30 +198,35 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
         value: statusCounts.draft,
         icon: FileText,
         iconClassName: "text-secondary",
+        barClassName: "bg-secondary",
       },
       {
         name: "Submitted",
         value: statusCounts.submitted,
         icon: FileText,
         iconClassName: "text-info",
+        barClassName: "bg-info",
       },
       {
         name: "Approved",
         value: statusCounts.approved,
         icon: Check,
         iconClassName: "text-warning",
+        barClassName: "bg-warning",
       },
       {
         name: "Posted",
         value: statusCounts.posted,
         icon: Check,
         iconClassName: "text-success",
+        barClassName: "bg-success",
       },
       {
         name: "Voided",
         value: statusCounts.voided,
         icon: X,
         iconClassName: "text-destructive",
+        barClassName: "bg-destructive",
       },
     ],
     [statusCounts],
@@ -594,6 +599,7 @@ function IncomeExpenseList({ transactionType }: IncomeExpenseListProps) {
             value={m.value}
             icon={m.icon}
             iconClassName={m.iconClassName}
+            barClassName={m.barClassName}
           />
         ))}
       </div>

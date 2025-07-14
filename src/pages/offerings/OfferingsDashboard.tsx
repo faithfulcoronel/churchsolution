@@ -191,6 +191,7 @@ function OfferingsDashboard() {
       value: formatCurrency(metrics.thisMonthTotal, currency),
       icon: DollarSign,
       iconClassName: 'text-success',
+      barClassName: 'bg-success',
       subtext: `${metrics.monthChange.toFixed(1)}% from last month`,
       subtextClassName: 'text-success/70',
     },
@@ -199,6 +200,7 @@ function OfferingsDashboard() {
       value: metrics.donorCount,
       icon: Users,
       iconClassName: 'text-primary',
+      barClassName: 'bg-primary',
       subtext: 'Active contributors',
       subtextClassName: 'text-primary/70',
     },
@@ -207,6 +209,7 @@ function OfferingsDashboard() {
       value: formatCurrency(metrics.thisWeekTotal, currency),
       icon: Calendar,
       iconClassName: 'text-info',
+      barClassName: 'bg-info',
       subtext: `From ${metrics.weekCount} donations`,
       subtextClassName: 'text-info/70',
     },
@@ -215,6 +218,7 @@ function OfferingsDashboard() {
       value: formatCurrency(metrics.avgDonation, currency),
       icon: HandCoins,
       iconClassName: 'text-warning',
+      barClassName: 'bg-warning',
       subtext: 'Per contribution',
       subtextClassName: 'text-warning/70',
     },
@@ -258,6 +262,7 @@ function OfferingsDashboard() {
                 value={h.value}
                 icon={h.icon}
                 iconClassName={h.iconClassName}
+                barClassName={h.barClassName}
                 subtext={h.subtext}
                 subtextClassName={h.subtextClassName}
               />

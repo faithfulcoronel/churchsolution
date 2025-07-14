@@ -191,6 +191,7 @@ function ExpensesDashboard() {
       value: metrics.currency ? `${metrics.currency.symbol}${metrics.thisMonthTotal.toFixed(2)}` : metrics.thisMonthTotal.toFixed(2),
       icon: DollarSign,
       iconClassName: 'text-success',
+      barClassName: 'bg-success',
       subtext: `${metrics.monthChange.toFixed(1)}% from last month`,
       subtextClassName: 'text-success/70',
     },
@@ -199,6 +200,7 @@ function ExpensesDashboard() {
       value: metrics.payeeCount,
       icon: Users,
       iconClassName: 'text-primary',
+      barClassName: 'bg-primary',
       subtext: 'Active payees',
       subtextClassName: 'text-primary/70',
     },
@@ -207,6 +209,7 @@ function ExpensesDashboard() {
       value: metrics.currency ? `${metrics.currency.symbol}${metrics.thisWeekTotal.toFixed(2)}` : metrics.thisWeekTotal.toFixed(2),
       icon: Calendar,
       iconClassName: 'text-info',
+      barClassName: 'bg-info',
       subtext: `From ${metrics.weekCount} expenses`,
       subtextClassName: 'text-info/70',
     },
@@ -215,6 +218,7 @@ function ExpensesDashboard() {
       value: metrics.currency ? `${metrics.currency.symbol}${metrics.avgExpense.toFixed(2)}` : metrics.avgExpense.toFixed(2),
       icon: HandCoins,
       iconClassName: 'text-warning',
+      barClassName: 'bg-warning',
       subtext: 'Per transaction',
       subtextClassName: 'text-warning/70',
     },
@@ -258,6 +262,7 @@ function ExpensesDashboard() {
                 value={h.value}
                 icon={h.icon}
                 iconClassName={h.iconClassName}
+                barClassName={h.barClassName}
                 subtext={h.subtext}
                 subtextClassName={h.subtextClassName}
               />

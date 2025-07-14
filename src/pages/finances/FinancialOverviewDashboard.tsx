@@ -352,6 +352,7 @@ function FinancialOverviewDashboard() {
               value={formatCurrency(totalIncome, currency)}
               icon={TrendingUp}
               iconClassName="text-success"
+              barClassName="bg-success"
               subtext={`${incomeChange.toFixed(1)}% from last month`}
               subtextClassName={incomeChangeColor}
             />
@@ -360,6 +361,7 @@ function FinancialOverviewDashboard() {
               value={formatCurrency(totalExpenses, currency)}
               icon={TrendingDown}
               iconClassName="text-destructive"
+              barClassName="bg-destructive"
               subtext={`${expenseChange.toFixed(1)}% from last month`}
               subtextClassName={expenseChangeColor}
             />
@@ -368,6 +370,7 @@ function FinancialOverviewDashboard() {
               value={formatCurrency(netIncome, currency)}
               icon={Banknote}
               iconClassName={netIncome >= 0 ? 'text-success' : 'text-destructive'}
+              barClassName={netIncome >= 0 ? 'bg-success' : 'bg-destructive'}
               subtext={`${netChange.toFixed(1)}% from last month`}
               subtextClassName={netChangeColor}
             />
@@ -376,6 +379,7 @@ function FinancialOverviewDashboard() {
               value={`${expenseRatio.toFixed(1)}%`}
               icon={Percent}
               iconClassName="text-warning"
+              barClassName="bg-warning"
               subtext={getExpenseRating(expenseRatio)}
               subtextClassName="text-warning/70"
             />
