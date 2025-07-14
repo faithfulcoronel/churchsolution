@@ -18,6 +18,10 @@ interface MetricCardProps {
    * Optional CSS classes for the sub label element.
    */
   subtextClassName?: string;
+  /**
+   * Optional CSS classes for the bottom color barline.
+   */
+  barClassName?: string;
 }
 
 export default function MetricCard({
@@ -27,6 +31,7 @@ export default function MetricCard({
   iconClassName,
   subtext,
   subtextClassName,
+  barClassName,
 }: MetricCardProps) {
   return (
     <Card
@@ -47,6 +52,11 @@ export default function MetricCard({
         <p className={cn('mt-1 text-sm text-gray-500 dark:text-gray-400', subtextClassName)}>
           {subtext}
         </p>
+      )}
+      {barClassName && (
+        <div
+          className={cn('absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl', barClassName)}
+        />
       )}
     </Card>
   );
