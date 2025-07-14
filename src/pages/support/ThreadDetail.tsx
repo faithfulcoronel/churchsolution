@@ -14,7 +14,8 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../../
 import { useUserRepository } from '../../hooks/useUserRepository';
 import { supabase } from '../../lib/supabase';
 import type { User } from '../../models/user.model';
-import { Loader2, Send, MessageCircle, AlertTriangle, User as UserIcon, Calendar, Clock } from 'lucide-react';
+import { Loader2, Send, MessageCircle, AlertTriangle, User as UserIcon, Calendar, Clock, Sparkles } from 'lucide-react';
+import { generateChatGPTReply } from '../../services/ChatGPTService';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -27,6 +28,7 @@ function ThreadDetail() {
   const createMutation = useCreate();
   const updateMutation = useUpdate();
   const [body, setBody] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch thread data
@@ -112,6 +114,19 @@ function ThreadDetail() {
       }
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  const handleGenerateAI = async () => {
+    if (!body.trim()) return;
+    setAiLoading(true);
+    try {
+      const reply = await generateChatGPTReply(body);
+      setBody(reply);
+    } catch (error) {
+      console.error('Error generating AI response:', error);
+    } finally {
+      setAiLoading(false);
     }
   };
   
@@ -255,9 +270,22 @@ function ThreadDetail() {
                   className="min-h-[100px] resize-none"
                   onKeyDown={handleKeyDown}
                 />
-                <div className="flex justify-end">
-                  <Button 
-                    onClick={handleSend} 
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={handleGenerateAI}
+                    disabled={!body.trim() || aiLoading}
+                    className="flex items-center"
+                  >
+                    {aiLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 mr-2" />
+                    )}
+                    AI Suggest
+                  </Button>
+                  <Button
+                    onClick={handleSend}
                     disabled={!body.trim() || createMutation.isPending}
                     className="flex items-center"
                   >
