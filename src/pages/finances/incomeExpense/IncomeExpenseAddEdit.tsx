@@ -16,6 +16,7 @@ import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeE
 import BackButton from '../../../components/BackButton';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { DataGrid, GridColDef } from '../../../components/ui2/mui-datagrid';
+import { useGridApiRef } from '@mui/x-data-grid';
 import { uniqueID } from '../../../lib/helpers';
 import { ProgressDialog } from '../../../components/ui2/progress-dialog';
 import { useCurrencyStore } from '../../../stores/currencyStore';
@@ -143,6 +144,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   const isDisabled = isEditMode && header && header.status !== 'draft';
 
   const { currency } = useCurrencyStore();
+  const apiRef = useGridApiRef();
 
   useEffect(() => {
     if (isEditMode && header) {
@@ -372,26 +374,30 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     setEntries(newEntries);
   };
 
-  const addEntry = () => {
-    const nextLine = entries.filter(e => !e.isDeleted).length + 1;
-    setEntries([
-      ...entries,
-      {
-        localId: uniqueID(),
-        accounts_account_id: '',
-        fund_id: '',
-        category_id: '',
-        source_id: '',
-        description: '',
-        amount: 0,
-        source_account_id: null,
-        category_account_id: null,
-        line: nextLine,
-        isDirty: true,
-        isDeleted: false,
-      },
-    ]);
-  };
+  const addEntry = React.useCallback(() => {
+    const newId = uniqueID();
+    setEntries(prev => {
+      const nextLine = prev.filter(e => !e.isDeleted).length + 1;
+      return [
+        ...prev,
+        {
+          localId: newId,
+          accounts_account_id: '',
+          fund_id: '',
+          category_id: '',
+          source_id: '',
+          description: '',
+          amount: 0,
+          source_account_id: null,
+          category_account_id: null,
+          line: nextLine,
+          isDirty: true,
+          isDeleted: false,
+        },
+      ];
+    });
+    return newId;
+  }, []);
 
   const removeEntry = (index: number) => {
     const entry = entries[index];
@@ -417,6 +423,45 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
       removeEntry(idx);
     }
   };
+
+  const editableFields = [
+    'accounts_account_id',
+    'fund_id',
+    'category_id',
+    'source_id',
+    'description',
+    'amount',
+  ];
+
+  const handleCellKeyDown = React.useCallback(
+    (params: any, event: React.KeyboardEvent) => {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        apiRef.current.stopCellEditMode({ id: params.id, field: params.field });
+
+        const idx = editableFields.indexOf(params.field);
+        if (idx !== -1) {
+          if (idx === editableFields.length - 1) {
+            const newId = addEntry();
+            setTimeout(() => {
+              apiRef.current.startCellEditMode({
+                id: newId,
+                field: 'accounts_account_id',
+              });
+              apiRef.current.setCellFocus(newId, 'accounts_account_id');
+            });
+          } else {
+            const nextField = editableFields[idx + 1];
+            setTimeout(() => {
+              apiRef.current.startCellEditMode({ id: params.id, field: nextField });
+              apiRef.current.setCellFocus(params.id, nextField);
+            });
+          }
+        }
+      }
+    },
+    [apiRef, addEntry]
+  );
 
   const handleCellEdit = React.useCallback((params: any) => {
     if (
@@ -529,6 +574,8 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
               getRowId={row => row.localId}
               processRowUpdate={(r) => r}
               onCellEditCommit={handleCellEdit}
+              onCellKeyDown={handleCellKeyDown}
+              apiRef={apiRef}
             />
             <div className="text-right font-medium">
               Total: {formatCurrency(totalAmount, currency)}
