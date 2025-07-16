@@ -15,11 +15,14 @@ import { useFinancialTransactionHeaderRepository } from '../../../hooks/useFinan
 import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
 import BackButton from '../../../components/BackButton';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { DataGrid, GridColDef } from '../../../components/ui2/mui-datagrid';
+import { uniqueID } from '../../../lib/helpers';
 import { ProgressDialog } from '../../../components/ui2/progress-dialog';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
 
 interface Entry {
+  localId: string;
   id?: string;
   accounts_account_id: string;
   fund_id: string;
@@ -117,6 +120,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
 
   const [entries, setEntries] = useState<Entry[]>([
     {
+      localId: uniqueID(),
       accounts_account_id: '',
       fund_id: '',
       category_id: '',
@@ -153,6 +157,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     if (isEditMode && entryRecords.length > 0) {
       setEntries(
         entryRecords.map((e: any, idx: number) => ({
+          localId: e.id || uniqueID(),
           id: e.id,
           accounts_account_id: e.account_id || '',
           fund_id: e.fund_id || '',
@@ -207,6 +212,143 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     return totals;
   }, [visibleEntries, categories]);
 
+  const columns = React.useMemo<GridColDef<Entry>[]>(
+    () => [
+      {
+        field: 'line',
+        headerName: 'Line',
+        width: 80,
+        sortable: false,
+        filterable: false,
+        valueGetter: params =>
+          visibleEntries.findIndex(e => e.localId === params.row.localId) + 1,
+      },
+      {
+        field: 'accounts_account_id',
+        headerName: 'Account',
+        flex: 1,
+        minWidth: 150,
+        editable: !isDisabled,
+        valueGetter: params =>
+          accounts.find(a => a.id === params.row.accounts_account_id)?.name || '',
+        renderEditCell: params => (
+          <Combobox
+            options={accountOptions}
+            value={params.row.accounts_account_id || ''}
+            onChange={v => handleEntryChangeById(params.id as string, 'accounts_account_id', v)}
+            disabled={isDisabled}
+            placeholder="Select account"
+            onOpen={refetchAccounts}
+          />
+        ),
+      },
+      {
+        field: 'fund_id',
+        headerName: 'Fund',
+        flex: 1,
+        minWidth: 120,
+        editable: !isDisabled,
+        valueGetter: params =>
+          funds.find(f => f.id === params.row.fund_id)?.name || '',
+        renderEditCell: params => (
+          <Combobox
+            options={fundOptions}
+            value={params.row.fund_id || ''}
+            onChange={v => handleEntryChangeById(params.id as string, 'fund_id', v)}
+            disabled={isDisabled}
+            placeholder="Select fund"
+            onOpen={refetchFunds}
+          />
+        ),
+      },
+      {
+        field: 'category_id',
+        headerName: 'Category',
+        flex: 1,
+        minWidth: 150,
+        editable: !isDisabled,
+        valueGetter: params =>
+          categories.find(c => c.id === params.row.category_id)?.name || '',
+        renderEditCell: params => (
+          <Combobox
+            options={categoryOptions}
+            value={params.row.category_id || ''}
+            onChange={v => handleEntryChangeById(params.id as string, 'category_id', v)}
+            disabled={isDisabled}
+            placeholder="Select category"
+            onOpen={refetchCategories}
+          />
+        ),
+      },
+      {
+        field: 'source_id',
+        headerName: 'Source',
+        flex: 1,
+        minWidth: 120,
+        editable: !isDisabled,
+        valueGetter: params =>
+          sources.find(s => s.id === params.row.source_id)?.name || '',
+        renderEditCell: params => (
+          <Combobox
+            options={sourceOptions}
+            value={params.row.source_id || ''}
+            onChange={v => handleEntryChangeById(params.id as string, 'source_id', v)}
+            disabled={isDisabled}
+            placeholder="Select source"
+            onOpen={refetchSources}
+          />
+        ),
+      },
+      {
+        field: 'description',
+        headerName: 'Description',
+        flex: 1.5,
+        minWidth: 200,
+        editable: !isDisabled,
+      },
+      {
+        field: 'amount',
+        headerName: 'Amount',
+        type: 'number',
+        flex: 1,
+        minWidth: 120,
+        editable: !isDisabled,
+        valueFormatter: params => formatCurrency(Number(params.value || 0), currency),
+      },
+      {
+        field: 'actions',
+        headerName: '',
+        width: 60,
+        sortable: false,
+        filterable: false,
+        renderCell: params => (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => removeEntryById(params.id as string)}
+            disabled={isDisabled}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        ),
+      },
+    ],
+    [
+      visibleEntries,
+      accounts,
+      funds,
+      categories,
+      sources,
+      accountOptions,
+      fundOptions,
+      categoryOptions,
+      sourceOptions,
+      currency,
+      isDisabled,
+    ]
+  );
+
   if (
     isLoading &&
     (!accountsData || !fundsData || !categoriesData || !sourcesData || (isEditMode && !header))
@@ -235,6 +377,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     setEntries([
       ...entries,
       {
+        localId: uniqueID(),
         accounts_account_id: '',
         fund_id: '',
         category_id: '',
@@ -260,6 +403,38 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     }
     setEntries(newEntries);
   };
+
+  const handleEntryChangeById = (entryId: string, field: keyof Entry, value: any) => {
+    const idx = entries.findIndex(e => e.localId === entryId);
+    if (idx !== -1) {
+      handleEntryChange(idx, field, value);
+    }
+  };
+
+  const removeEntryById = (entryId: string) => {
+    const idx = entries.findIndex(e => e.localId === entryId);
+    if (idx !== -1) {
+      removeEntry(idx);
+    }
+  };
+
+  const handleCellEdit = React.useCallback((params: any) => {
+    if (
+      [
+        'accounts_account_id',
+        'fund_id',
+        'category_id',
+        'source_id',
+      ].includes(params.field)
+    ) {
+      return;
+    }
+    handleEntryChangeById(
+      params.id as string,
+      params.field as keyof Entry,
+      params.field === 'amount' ? parseFloat(params.value) || 0 : params.value
+    );
+  }, []);
 
   const basePath = transactionType === 'income' ? 'giving' : 'expenses';
 
@@ -344,109 +519,20 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           <CardHeader>
             <h3 className="text-lg font-medium">{entriesHeader}</h3>
           </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-muted text-xs text-muted-foreground dark:bg-slate-700">
-                  <th className="px-4 py-2 text-left">Line</th>
-                  <th className="px-4 py-2 text-left">Account</th>
-                  <th className="px-4 py-2 text-left">Fund</th>
-                  <th className="px-4 py-2 text-left">Category</th>
-                  <th className="px-4 py-2 text-left">Source</th>
-                  <th className="px-4 py-2 text-left min-w-[200px]">Description</th>
-                  <th className="px-4 py-2 text-right">Amount</th>
-                  <th className="px-4 py-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleEntries.map((entry, idx) => {
-                  const rowIndex = entries.indexOf(entry);
-                  return (
-                  <tr key={rowIndex} className="border-b border-border dark:border-slate-700">
-                    <td className="px-4 py-2">
-                      <Input
-                        type="number"
-                        readOnly
-                        value={idx + 1}
-                        disabled={isDisabled}
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <Combobox
-                        options={accountOptions}
-                        value={entry.accounts_account_id || ''}
-                        onChange={v => handleEntryChange(rowIndex, 'accounts_account_id', v)}
-                        disabled={isDisabled}
-                        placeholder="Select account"
-                        onOpen={refetchAccounts}
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <Combobox
-                        options={fundOptions}
-                        value={entry.fund_id || ''}
-                        onChange={v => handleEntryChange(rowIndex, 'fund_id', v)}
-                        disabled={isDisabled}
-                        placeholder="Select fund"
-                        onOpen={refetchFunds}
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <Combobox
-                        options={categoryOptions}
-                        value={entry.category_id || ''}
-                        onChange={v => handleEntryChange(rowIndex, 'category_id', v)}
-                        disabled={isDisabled}
-                        placeholder="Select category"
-                        onOpen={refetchCategories}
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <Combobox
-                        options={sourceOptions}
-                        value={entry.source_id || ''}
-                        onChange={v => handleEntryChange(rowIndex, 'source_id', v)}
-                        disabled={isDisabled}
-                        placeholder="Select source"
-                        onOpen={refetchSources}
-                      />
-                    </td>
-                    <td className="px-4 py-2 min-w-[200px]">
-                      <Input
-                        value={entry.description || ''}
-                        onChange={e => handleEntryChange(rowIndex, 'description', e.target.value)}
-                        disabled={isDisabled}
-                        placeholder="Description"
-                      />
-                    </td>
-                    <td className="px-4 py-2 text-right">
-                      <Input
-                        type="number"
-                        value={entry.amount}
-                        onChange={e => handleEntryChange(rowIndex, 'amount', parseFloat(e.target.value) || 0)}
-                        className="text-right"
-                        disabled={isDisabled}
-                      />
-                    </td>
-                    <td className="px-4 py-2 text-center">
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(rowIndex)} disabled={isDisabled}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                  );
-                })}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 border-border font-medium">
-                  <td className="px-4 py-2" colSpan={6}>Total</td>
-                  <td className="px-4 py-2 text-right">
-                    {formatCurrency(totalAmount, currency)}
-                  </td>
-                  <td className="px-4 py-2"></td>
-                </tr>
-              </tfoot>
-            </table>
+          <CardContent className="overflow-x-auto space-y-4">
+            <DataGrid<Entry>
+              columns={columns}
+              data={visibleEntries}
+              totalRows={visibleEntries.length}
+              paginationMode="client"
+              autoHeight
+              getRowId={row => row.localId}
+              processRowUpdate={(r) => r}
+              onCellEditCommit={handleCellEdit}
+            />
+            <div className="text-right font-medium">
+              Total: {formatCurrency(totalAmount, currency)}
+            </div>
             <div className="mt-4">
               <Button type="button" onClick={addEntry} className="flex items-center" disabled={isDisabled}>
                 <Plus className="h-4 w-4 mr-2" /> Add Row
