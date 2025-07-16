@@ -237,7 +237,10 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           <Combobox
             options={accountOptions}
             value={params.row.accounts_account_id || ''}
-            onChange={v => handleEntryChangeById(params.id as string, 'accounts_account_id', v)}
+            onChange={v => {
+              handleEntryChangeById(params.id as string, 'accounts_account_id', v);
+              params.api.setEditCellValue({ id: params.id, field: params.field, value: v });
+            }}
             disabled={isDisabled}
             placeholder="Select account"
             onOpen={refetchAccounts}
@@ -256,7 +259,10 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           <Combobox
             options={fundOptions}
             value={params.row.fund_id || ''}
-            onChange={v => handleEntryChangeById(params.id as string, 'fund_id', v)}
+            onChange={v => {
+              handleEntryChangeById(params.id as string, 'fund_id', v);
+              params.api.setEditCellValue({ id: params.id, field: params.field, value: v });
+            }}
             disabled={isDisabled}
             placeholder="Select fund"
             onOpen={refetchFunds}
@@ -275,7 +281,10 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           <Combobox
             options={categoryOptions}
             value={params.row.category_id || ''}
-            onChange={v => handleEntryChangeById(params.id as string, 'category_id', v)}
+            onChange={v => {
+              handleEntryChangeById(params.id as string, 'category_id', v);
+              params.api.setEditCellValue({ id: params.id, field: params.field, value: v });
+            }}
             disabled={isDisabled}
             placeholder="Select category"
             onOpen={refetchCategories}
@@ -294,7 +303,10 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
           <Combobox
             options={sourceOptions}
             value={params.row.source_id || ''}
-            onChange={v => handleEntryChangeById(params.id as string, 'source_id', v)}
+            onChange={v => {
+              handleEntryChangeById(params.id as string, 'source_id', v);
+              params.api.setEditCellValue({ id: params.id, field: params.field, value: v });
+            }}
             disabled={isDisabled}
             placeholder="Select source"
             onOpen={refetchSources}
@@ -481,6 +493,16 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     );
   }, []);
 
+  const handleRowUpdate = React.useCallback(
+    (newRow: Entry, oldRow: Entry) => {
+      setEntries(prev =>
+        prev.map(e => (e.localId === newRow.localId ? { ...e, ...newRow, isDirty: true } : e))
+      );
+      return newRow;
+    },
+    []
+  );
+
   const basePath = transactionType === 'income' ? 'giving' : 'expenses';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -572,7 +594,7 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
               paginationMode="client"
               autoHeight
               getRowId={row => row.localId}
-              processRowUpdate={(r) => r}
+              processRowUpdate={handleRowUpdate}
               onCellEditCommit={handleCellEdit}
               onCellKeyDown={handleCellKeyDown}
               apiRef={apiRef}
