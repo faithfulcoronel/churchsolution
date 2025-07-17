@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseWrapper } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 
 export function useNotificationListener() {
@@ -20,6 +20,7 @@ export function useNotificationListener() {
         }
       )
       .subscribe();
+    supabaseWrapper.addSubscription(channel);
 
     return () => {
       channel.unsubscribe();
