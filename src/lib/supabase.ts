@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { SupabaseClientWrapper } from './SupabaseClientWrapper';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -20,40 +20,13 @@ if (isDevelopment && (!supabaseUrl || !supabaseAnonKey)) {
   `);
 }
 
-// Create Supabase client with retries and timeouts
-export const supabase = createClient(
+// Instantiate custom wrapper
+export const supabaseWrapper = new SupabaseClientWrapper(
   supabaseUrl || '',
-  supabaseAnonKey || '',
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-      storage: window.localStorage,
-      storageKey: 'sb-' + supabaseUrl?.split('.')[0].split('//')[1] + '-auth-token',
-      flowType: 'pkce',
-    },
-    global: {
-      headers: { 'x-application-name': 'church-admin' }
-    },
-    db: {
-      schema: 'public'
-    },
-    // Add retry configuration
-    realtime: {
-      params: {
-        eventsPerSecond: 2
-      }
-    },
-    // Add request timeouts
-    fetch: (url, options) => {
-      return fetch(url, {
-        ...options,
-        signal: AbortSignal.timeout(30000) // 30 second timeout
-      });
-    }
-  }
+  supabaseAnonKey || ''
 );
+
+export const supabase = supabaseWrapper.supabase;
 
 // Add a type guard for checking Supabase connection
 export const isSupabaseConfigured = (): boolean => {
@@ -69,11 +42,3 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     return false;
   }
 };
-
-// Add auth state change listener
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-    // Clear any stored data
-    localStorage.removeItem('sb-' + supabaseUrl?.split('.')[0].split('//')[1] + '-auth-token');
-  }
-});

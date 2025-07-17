@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './stores/authStore';
-import { supabase } from './lib/supabase';
+import { supabase, supabaseWrapper } from './lib/supabase';
 import { MessageHandler } from './components/MessageHandler';
 import ErrorFallback from './components/ErrorFallback';
 import { handleError } from './utils/errorHandler';
@@ -71,14 +71,15 @@ function App() {
       setUser(session?.user ?? null);
     });
 
-    // Listen for changes on auth state
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for changes on auth state using wrapper
+    const listener = (_event: any, session: any) => {
       setUser(session?.user ?? null);
-    });
+    };
+    const unsubscribe = supabaseWrapper.onAuthStateChange(listener);
 
-    return () => subscription.unsubscribe();
+    return () => {
+      unsubscribe();
+    };
   }, [setUser]);
 
   if (loading) {

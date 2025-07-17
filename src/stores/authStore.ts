@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseWrapper } from '../lib/supabase';
 import { clearAppCaches } from '../utils/cacheUtils';
 
 interface AuthState {
@@ -22,17 +22,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     } finally {
       // Always clear the user state, even if signOut fails
       set({ user: null, loading: false });
-      
-      // Clear any stored auth data from localStorage
-      localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
-
       clearAppCaches();
     }
   },
 }));
 
-// Set up auth state listener
-supabase.auth.onAuthStateChange((event, session) => {
+// Set up auth state listener using the wrapper
+supabaseWrapper.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
     // Handle sign out and user deletion
     useAuthStore.getState().setUser(null);
