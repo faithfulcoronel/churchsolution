@@ -363,16 +363,6 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     ]
   );
 
-  if (
-    isLoading &&
-    (!accountsData || !fundsData || !categoriesData || !sourcesData || (isEditMode && !header))
-  ) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   const handleEntryChange = (index: number, field: keyof Entry, value: any) => {
     const newEntries = [...entries];
@@ -544,6 +534,17 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
       ? 'Edit Expense'
       : 'New Expense';
   const entriesHeader = transactionType === 'income' ? 'Contributions' : 'Entries';
+
+  if (
+    isLoading &&
+    (!accountsData || !fundsData || !categoriesData || !sourcesData || (isEditMode && !header))
+  ) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
