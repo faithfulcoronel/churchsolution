@@ -139,6 +139,9 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState<number | undefined>(undefined);
 
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
   const header = headerResponse?.data?.[0];
   const entryRecords = entryResponse?.data || [];
   const isDisabled = isEditMode && header && header.status !== 'draft';
@@ -493,6 +496,15 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
     []
   );
 
+  const handlePageChange = React.useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const handlePageSizeChange = React.useCallback((newSize: number) => {
+    setPageSize(newSize);
+    setPage(0);
+  }, []);
+
   const basePath = transactionType === 'income' ? 'giving' : 'expenses';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -592,6 +604,10 @@ function IncomeExpenseAddEdit({ transactionType }: IncomeExpenseAddEditProps) {
               columns={columns}
               data={visibleEntries}
               totalRows={visibleEntries.length}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              page={page}
+              pageSize={pageSize}
               paginationMode="client"
               autoHeight
               getRowId={row => row.localId}
