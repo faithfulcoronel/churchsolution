@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFundService } from '../../../hooks/useFundService';
-import { useSourceRecentTransactionRepository } from '../../../hooks/useSourceRecentTransactionRepository';
+import { useIncomeExpenseTransactionRepository } from '../../../hooks/useIncomeExpenseTransactionRepository';
+import type { IncomeExpenseTransaction } from '../../../models/incomeExpenseTransaction.model';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import BackButton from '../../../components/BackButton';
@@ -50,13 +51,22 @@ function FundProfile() {
 
   const fund = fundData?.data?.[0];
 
-  const { useRecentTransactionsByFund } =
-    useSourceRecentTransactionRepository();
+  const { useQuery: useTransactionQuery } =
+    useIncomeExpenseTransactionRepository();
 
   const { data: balance, isLoading: balanceLoading } = useBalance(id || '');
 
-  const { data: transactionsData, isLoading: transactionsLoading } =
-    useRecentTransactionsByFund(id || '');
+  const { data: transactionsResult, isLoading: transactionsLoading } =
+    useTransactionQuery({
+      filters: { fund_id: { operator: 'eq', value: id } },
+      order: { column: 'transaction_date', ascending: false },
+      pagination: { page: 1, pageSize: 5 },
+      relationships: [
+        { table: 'categories', foreignKey: 'category_id', select: ['id', 'name', 'code'] },
+      ],
+      enabled: !!id,
+    });
+  const transactionsData = (transactionsResult?.data || []) as IncomeExpenseTransaction[];
 
   const deleteMutation = useDelete();
 
@@ -246,23 +256,23 @@ function FundProfile() {
                       </tr>
                     </thead>
                     <tbody className="bg-background divide-y divide-border">
-                    {transactionsData.map((transaction) => (
-                        <tr key={transaction.header_id} className="hover:bg-muted/50">
+                    {transactionsData.map((transaction: IncomeExpenseTransaction) => (
+                        <tr key={transaction.id} className="hover:bg-muted/50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                            {new Date(transaction.date).toLocaleDateString()}
+                            {new Date(transaction.transaction_date).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge variant={transaction.amount >= 0 ? 'success' : 'destructive'}>
-                              {transaction.amount >= 0 ? 'income' : 'expense'}
+                            <Badge variant={transaction.transaction_type === 'income' ? 'success' : 'destructive'}>
+                              {transaction.transaction_type}
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                            {transaction.category || 'Uncategorized'}
+                            {transaction.categories?.name || 'Uncategorized'}
                           </td>
                           <td className="px-6 py-4 text-sm text-foreground">{transaction.description}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                          <span className={transaction.amount >= 0 ? 'text-success' : 'text-destructive'}>
-                              {transaction.amount >= 0 ? '+' : '-'}
+                          <span className={transaction.transaction_type === 'income' ? 'text-success' : 'text-destructive'}>
+                              {transaction.transaction_type === 'income' ? '+' : '-'}
                               {Math.abs(transaction.amount).toFixed(2)}
                           </span>
                           </td>
