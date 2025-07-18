@@ -19,7 +19,7 @@ import {
 import BackButton from '../../components/BackButton';
 
 // UI Components
-import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '../../components/ui2/card';
+import { Card, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import { Badge } from '../../components/ui2/badge';
@@ -201,13 +201,14 @@ function MemberProfile() {
       </div>
 
       {/* Member Details Tabs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Member Details</CardTitle>
-          <CardDescription>View and manage member information</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <div>
+        <div className="mb-4">
+          <h3 className="text-lg font-medium">Member Details</h3>
+          <p className="text-sm text-muted-foreground">
+            View and manage member information
+          </p>
+        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-6">
               <TabsTrigger value="basic">
                 <User className="h-4 w-4 mr-2" />
@@ -243,8 +244,7 @@ function MemberProfile() {
               <NotesTab mode="view" member={member} onChange={() => {}} />
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
