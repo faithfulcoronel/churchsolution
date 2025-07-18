@@ -2,7 +2,13 @@ import React from 'react';
 import { useMemberService } from '../../../hooks/useMemberService';
 
 import MetricCard from '../../../components/dashboard/MetricCard';
-import { Card, CardHeader, CardContent, CardTitle } from '../../../components/ui2/card';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+} from '../../../components/ui2/card';
+import { TrendingUp } from 'lucide-react';
 import { Charts } from '../../../components/ui2/charts';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
@@ -53,20 +59,39 @@ export default function FinancialTab({ memberId }: FinancialTabProps) {
     );
   }
 
+  const yearColor = (totals?.yearChange || 0) >= 0 ? 'success' : 'destructive';
+  const monthColor = (totals?.monthChange || 0) >= 0 ? 'success' : 'destructive';
+  const weekColor = (totals?.weekChange || 0) >= 0 ? 'success' : 'destructive';
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
         <MetricCard
           label="Giving this Year"
           value={formatCurrency(totals?.year || 0, currency)}
+          icon={TrendingUp}
+          iconClassName={`text-${yearColor}`}
+          barClassName={`bg-${yearColor}`}
+          subtext={`${(totals?.yearChange || 0).toFixed(1)}% from last year`}
+          subtextClassName={`text-${yearColor}/70`}
         />
         <MetricCard
           label="Giving this Month"
           value={formatCurrency(totals?.month || 0, currency)}
+          icon={TrendingUp}
+          iconClassName={`text-${monthColor}`}
+          barClassName={`bg-${monthColor}`}
+          subtext={`${(totals?.monthChange || 0).toFixed(1)}% from last month`}
+          subtextClassName={`text-${monthColor}/70`}
         />
         <MetricCard
           label="Giving this Week"
           value={formatCurrency(totals?.week || 0, currency)}
+          icon={TrendingUp}
+          iconClassName={`text-${weekColor}`}
+          barClassName={`bg-${weekColor}`}
+          subtext={`${(totals?.weekChange || 0).toFixed(1)}% from last week`}
+          subtextClassName={`text-${weekColor}/70`}
         />
       </div>
 
