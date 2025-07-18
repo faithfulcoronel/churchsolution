@@ -20,7 +20,8 @@ import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import { Badge } from '../../components/ui2/badge';
 import { Card, CardHeader, CardContent, CardTitle } from '../../components/ui2/card';
-import { Tabs, TabsContent } from '../../components/ui2/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
+import { Container } from '../../components/ui2/container';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -79,7 +80,7 @@ function MemberProfile() {
   }
 
   return (
-    <div className="space-y-6">
+    <Container className="space-y-6 max-w-[1200px]" size="xl">
       <div className="flex items-center justify-between">
         <BackButton fallbackPath="/members/list" label="Back to Members" />
         
@@ -206,6 +207,11 @@ function MemberProfile() {
           </p>
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full grid grid-cols-2 bg-muted p-1 rounded-full mb-4">
+            <TabsTrigger value="profile" className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">Profile</TabsTrigger>
+            <TabsTrigger value="financial" className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">Financial</TabsTrigger>
+          </TabsList>
+
           <TabsContent value="profile" className="p-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Personal Information */}
@@ -559,7 +565,7 @@ function MemberProfile() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </Container>
   );
 }
 
