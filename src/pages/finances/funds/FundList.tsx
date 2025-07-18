@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFundRepository } from '../../../hooks/useFundRepository';
+import { useFundService } from '../../../hooks/useFundService';
 import { Fund } from '../../../models/fund.model';
 import { Card, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -18,7 +18,7 @@ function FundList() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const { useQuery: useFundsQuery } = useFundRepository();
+  const { useQuery: useFundsQuery } = useFundService();
 
   const { data: result, isLoading, error } = useFundsQuery({
     pagination: { page: page + 1, pageSize },

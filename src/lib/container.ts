@@ -155,6 +155,7 @@ import { SupabaseAnnouncementService, type AnnouncementService } from '../servic
 import { SupabaseActivityLogService, type ActivityLogService } from '../services/ActivityLogService';
 import { UserRoleService } from '../services/UserRoleService';
 import { LicenseService } from '../services/LicenseService';
+import { DefaultFundService, type FundService } from '../services/FundService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -347,6 +348,10 @@ container
 container
   .bind<UserRoleService>(TYPES.UserRoleService)
   .to(UserRoleService)
+  .inSingletonScope();
+container
+  .bind<FundService>(TYPES.FundService)
+  .to(DefaultFundService)
   .inSingletonScope();
 
 // Register repositories
