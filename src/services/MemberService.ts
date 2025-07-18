@@ -75,10 +75,11 @@ export class MemberService {
     const fetchRange = (start: Date, end: Date) =>
       this.ftRepo
         .findAll({
-          select: 'debit, credit',
+          select: 'credit',
           filters: {
             accounts_account_id: { operator: 'eq', value: accountId },
             type: { operator: 'eq', value: 'income' },
+            credit: { operator: 'gt', value: 0 },
             date: {
               operator: 'between',
               value: format(start, 'yyyy-MM-dd'),
@@ -95,7 +96,7 @@ export class MemberService {
     ]);
 
     const sum = (rows: any[]) =>
-      rows.reduce((s, r) => s + Number(r.debit || 0) - Number(r.credit || 0), 0);
+      rows.reduce((s, r) => s + Number(r.credit || 0), 0);
 
     return { year: sum(yearRes), month: sum(monthRes), week: sum(weekRes) };
   }
@@ -114,10 +115,11 @@ export class MemberService {
       months.map(({ start, end, label }) =>
         this.ftRepo
           .findAll({
-            select: 'debit, credit',
+            select: 'credit',
             filters: {
               accounts_account_id: { operator: 'eq', value: accountId },
               type: { operator: 'eq', value: 'income' },
+              credit: { operator: 'gt', value: 0 },
               date: {
                 operator: 'between',
                 value: format(start, 'yyyy-MM-dd'),
@@ -127,7 +129,7 @@ export class MemberService {
           })
           .then(res => {
             const total = (res.data || []).reduce(
-              (s, r) => s + Number(r.debit || 0) - Number(r.credit || 0),
+              (s, r) => s + Number(r.credit || 0),
               0,
             );
             return { month: label, contributions: total };
@@ -138,15 +140,16 @@ export class MemberService {
     return data;
   }
 
-  async getRecentTransactions(memberId: string, limit = 5) {
+  async getRecentTransactions(memberId: string, limit = 10) {
     const accountId = await this.getAccountId(memberId);
     if (!accountId) return [];
     const { data } = await this.ftRepo.findAll({
       select:
-        'id, date, description, debit, credit, category:category_id(name), fund:fund_id(name, code)',
+        'id, date, description, credit, category:category_id(name), fund:fund_id(name, code)',
       filters: {
         accounts_account_id: { operator: 'eq', value: accountId },
         type: { operator: 'eq', value: 'income' },
+        credit: { operator: 'gt', value: 0 },
       },
       order: { column: 'date', ascending: false },
       pagination: { page: 1, pageSize: limit },

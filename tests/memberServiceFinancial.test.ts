@@ -11,7 +11,7 @@ const accountRepo: IAccountRepository = {
 } as unknown as IAccountRepository;
 
 const ftRepo: IFinancialTransactionRepository = {
-  findAll: vi.fn().mockResolvedValue({ data: [{ debit: 10, credit: 0 }] }),
+  findAll: vi.fn().mockResolvedValue({ data: [{ credit: 10 }] }),
 } as unknown as IFinancialTransactionRepository;
 
 const service = new MemberService(memberRepo, accountRepo, ftRepo);
@@ -42,6 +42,7 @@ describe('MemberService financial methods', () => {
     expect(ftRepo.findAll).toHaveBeenCalledWith(
       expect.objectContaining({
         order: { column: 'date', ascending: false },
+        pagination: { page: 1, pageSize: 10 },
       }),
     );
   });
