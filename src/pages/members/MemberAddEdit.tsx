@@ -36,7 +36,7 @@ function MemberAddEdit() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<string, string[]>>({});
+  const [formErrors, setFormErrors] = useState<Record<string, Record<string, string[]>>>({});
   const [formData, setFormData] = useState<Partial<Member>>({
     gender: 'male',
     marital_status: 'single',
@@ -98,8 +98,34 @@ function MemberAddEdit() {
   // Update member mutation
   const updateMemberMutation = useUpdate();
 
+  const validateForm = () => {
+    const errors: Record<string, Record<string, string[]>> = {};
+    const basic: Record<string, string[]> = {};
+    const contact: Record<string, string[]> = {};
+
+    if (!formData.first_name?.trim()) basic.first_name = ['Required'];
+    if (!formData.last_name?.trim()) basic.last_name = ['Required'];
+    if (!formData.gender) basic.gender = ['Required'];
+    if (!formData.marital_status) basic.marital_status = ['Required'];
+    if (!formData.membership_type_id) basic.membership_type_id = ['Required'];
+    if (!formData.membership_status_id) basic.membership_status_id = ['Required'];
+
+    if (!formData.contact_number?.trim()) contact.contact_number = ['Required'];
+    if (!formData.address?.trim()) contact.address = ['Required'];
+
+    if (Object.keys(basic).length) errors.basic = basic;
+    if (Object.keys(contact).length) errors.contact = contact;
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       let memberId = id;
@@ -144,6 +170,29 @@ function MemberAddEdit() {
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+
+    const fieldTabs: Record<string, string> = {
+      first_name: 'basic',
+      last_name: 'basic',
+      gender: 'basic',
+      marital_status: 'basic',
+      membership_type_id: 'basic',
+      membership_status_id: 'basic',
+      contact_number: 'contact',
+      address: 'contact',
+    };
+
+    const tab = fieldTabs[field];
+    if (tab && formErrors[tab]?.[field]) {
+      setFormErrors(prev => {
+        const { [field]: _removed, ...restFields } = prev[tab];
+        const updated = { ...prev, [tab]: restFields };
+        if (Object.keys(updated[tab]).length === 0) {
+          delete updated[tab];
+        }
+        return updated;
+      });
+    }
   };
 
   const handleProfilePictureChange = (file: File | null) => {
@@ -159,31 +208,33 @@ function MemberAddEdit() {
     {
       id: 'basic',
       label: 'Basic Info',
-      badge: formErrors.basic?.length,
+      badge: formErrors.basic ? Object.keys(formErrors.basic).length : undefined,
       content: (
         <BasicInfoTab
           mode={mode}
           member={formData}
           onChange={handleInputChange}
+          errors={formErrors.basic}
         />
       ),
     },
     {
       id: 'contact',
       label: 'Contact Info',
-      badge: formErrors.contact?.length,
+      badge: formErrors.contact ? Object.keys(formErrors.contact).length : undefined,
       content: (
         <ContactInfoTab
           mode={mode}
           member={formData}
           onChange={handleInputChange}
+          errors={formErrors.contact}
         />
       ),
     },
     {
       id: 'ministry',
       label: 'Ministry Info',
-      badge: formErrors.ministry?.length,
+      badge: formErrors.ministry ? Object.keys(formErrors.ministry).length : undefined,
       content: (
         <MinistryInfoTab
           mode={mode}
@@ -195,7 +246,7 @@ function MemberAddEdit() {
     {
       id: 'notes',
       label: 'Notes',
-      badge: formErrors.notes?.length,
+      badge: formErrors.notes ? Object.keys(formErrors.notes).length : undefined,
       content: (
         <NotesTab
           mode={mode}
