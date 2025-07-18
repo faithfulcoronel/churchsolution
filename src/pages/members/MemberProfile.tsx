@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useMemberService } from '../../hooks/useMemberService';
 import {
-  User,
-  Users,
   Phone,
   Mail,
   MapPin,
-  Calendar,
   Edit,
   Trash2,
   Cake,
   Heart,
   Loader2,
-  AlertTriangle,
-  FileText
+  AlertTriangle
 } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 
@@ -22,7 +18,8 @@ import BackButton from '../../components/BackButton';
 import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import { Badge } from '../../components/ui2/badge';
-import { Tabs, TabsList, Tab, TabPanel } from '../../components/ui2/tabs';
+import { Card, CardHeader, CardContent, CardTitle } from '../../components/ui2/card';
+import { Tabs, TabPanel } from '../../components/ui2/tabs';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +33,6 @@ import {
 
 // Tabs
 import BasicInfoTab from './tabs/BasicInfoTab';
-import ContactInfoTab from './tabs/ContactInfoTab';
 import MinistryInfoTab from './tabs/MinistryInfoTab';
 import NotesTab from './tabs/NotesTab';
 
@@ -44,7 +40,7 @@ function MemberProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { useFindById, useDelete } = useMemberService();
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState('profile');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Fetch member data using repository
@@ -203,39 +199,35 @@ function MemberProfile() {
           </p>
         </div>
         <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} className="w-full">
-          <TabsList className="mb-6">
-            <Tab value="basic">
-              <User className="h-4 w-4 mr-2" />
-              Basic Info
-            </Tab>
-            <Tab value="contact">
-              <Phone className="h-4 w-4 mr-2" />
-              Contact Info
-            </Tab>
-            <Tab value="ministry">
-              <Users className="h-4 w-4 mr-2" />
-              Ministry Info
-            </Tab>
-            <Tab value="notes">
-              <FileText className="h-4 w-4 mr-2" />
-              Notes
-            </Tab>
-          </TabsList>
+          <TabPanel value="profile" className="p-0">
+            <div className="space-y-6">
+              <Card className="w-fit">
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <BasicInfoTab mode="view" member={member} onChange={() => {}} />
+                </CardContent>
+              </Card>
 
-          <TabPanel value="basic">
-            <BasicInfoTab mode="view" member={member} onChange={() => {}} />
-          </TabPanel>
+              <Card className="w-fit">
+                <CardHeader>
+                  <CardTitle>Ministry Information</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
+                </CardContent>
+              </Card>
 
-          <TabPanel value="contact">
-            <ContactInfoTab mode="view" member={member} onChange={() => {}} />
-          </TabPanel>
-
-          <TabPanel value="ministry">
-            <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
-          </TabPanel>
-
-          <TabPanel value="notes">
-            <NotesTab mode="view" member={member} onChange={() => {}} />
+              <Card className="w-fit">
+                <CardHeader>
+                  <CardTitle>Pastoral Notes</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <NotesTab mode="view" member={member} onChange={() => {}} />
+                </CardContent>
+              </Card>
+            </div>
           </TabPanel>
         </Tabs>
       </div>
