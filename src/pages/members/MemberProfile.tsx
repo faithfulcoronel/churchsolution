@@ -35,6 +35,7 @@ import {
 import BasicInfoTab from './tabs/BasicInfoTab';
 import MinistryInfoTab from './tabs/MinistryInfoTab';
 import NotesTab from './tabs/NotesTab';
+import FinancialTab from './tabs/FinancialTab';
 
 function MemberProfile() {
   const { id } = useParams<{ id: string }>();
@@ -218,19 +219,21 @@ function MemberProfile() {
                   <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
                 </CardContent>
               </Card>
-
-              <Card className="w-fit">
-                <CardHeader>
-                  <CardTitle>Pastoral Notes</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <NotesTab mode="view" member={member} onChange={() => {}} />
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+          <Card className="w-fit">
+            <CardHeader>
+              <CardTitle>Pastoral Notes</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <NotesTab mode="view" member={member} onChange={() => {}} />
+            </CardContent>
+          </Card>
+        </div>
+      </TabPanel>
+      <TabPanel value="financial" className="p-0">
+        <FinancialTab memberId={member.id} />
+      </TabPanel>
+    </Tabs>
+  </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
