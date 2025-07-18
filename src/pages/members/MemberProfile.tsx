@@ -112,17 +112,8 @@ function MemberProfile() {
       </div>
 
       {/* Member Header */}
-      <div
-        className="rounded-2xl p-6 shadow-sm relative"
-        style={{
-          backgroundImage: "url('/profile_header_pattern.svg')",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "auto", // Keeps actual size of the image
-          backgroundPosition: "center", // Adjust position if needed
-          overflow: "visible", // Allow background overflow
-        }}
-      >
-        <div className="flex flex-col items-center text-center gap-4">
+      <div className="p-6 bg-[url('/landing_bg.svg')] bg-cover bg-center">
+        <div className="flex flex-col items-center text-center gap-2">
           <Avatar className="h-24 w-24 border-2 border-primary">
             {member.profile_picture_url && (
               <AvatarImage
@@ -149,39 +140,30 @@ function MemberProfile() {
             </h1>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {member.membership_type && (
               <Badge variant="secondary">{member.membership_type.name}</Badge>
             )}
             {member.membership_status && (
               <Badge variant="outline">{member.membership_status.name}</Badge>
             )}
-            {member.envelope_number && (
-              <Badge variant="outline" className="bg-primary-50 text-primary border-primary-200">
-                Envelope #{member.envelope_number}
-              </Badge>
+            {member.address && (
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span>{member.address}</span>
+              </div>
             )}
-          </div>
-
-          {member.address && (
-            <div className="flex items-center justify-center mt-2">
-              <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span>{member.address}</span>
-            </div>
-          )}
-
-          <div className="flex flex-col items-center gap-1 mt-2">
             {member.email && (
-              <div className="flex items-center">
-                <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+              <div className="flex items-center gap-1">
+                <Mail className="h-4 w-4 text-muted-foreground" />
                 <a href={`mailto:${member.email}`} className="text-primary hover:underline">
                   {member.email}
                 </a>
               </div>
             )}
             {member.contact_number && (
-              <div className="flex items-center">
-                <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+              <div className="flex items-center gap-1">
+                <Phone className="h-4 w-4 text-muted-foreground" />
                 <a href={`tel:${member.contact_number}`} className="text-primary hover:underline">
                   {member.contact_number}
                 </a>
