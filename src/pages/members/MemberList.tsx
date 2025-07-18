@@ -1,11 +1,11 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
+import type { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useQuery as useReactQuery } from '@tanstack/react-query';
 import { useMemberService } from '../../hooks/useMemberService';
 import { Member } from '../../models/member.model';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
-import { DataGrid } from '../../components/ui2/data-grid';
+import { DataGrid } from '../../components/ui2/mui-datagrid';
 import { Button } from '../../components/ui2/button';
 import { Badge } from '../../components/ui2/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
@@ -47,18 +47,9 @@ function MemberList() {
   const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-
-  const handleFilterChange = useCallback(
-    (f: ColumnFiltersState, g: string) => {
-      setColumnFilters(f);
-      setSearchTerm(g);
-    },
-    []
-  );
 
   const { useQuery: useMembersQuery, useDelete } = useMemberService();
 
@@ -69,12 +60,7 @@ function MemberList() {
 
   // ✅ Memoized filters to ensure query triggers properly
   const filters = useMemo(() => {
-    const baseFilters = columnFilters.reduce((acc, filter) => {
-      return {
-        ...acc,
-        [filter.id]: { operator: 'contains', value: filter.value }
-      };
-    }, {} as Record<string, any>);
+    const baseFilters: Record<string, any> = {};
 
     if (searchTerm) {
       const escaped = searchTerm.replace(/[*]/g, ''); // remove unsafe wildcard
@@ -86,17 +72,16 @@ function MemberList() {
     }
 
     return baseFilters;
-  }, [columnFilters, searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter]);
 
   const { data: result, isLoading, error } = useMembersQuery({
     pagination: {
       page: page + 1,
       pageSize,
     },
-    order: sorting[0] ? {
-      column: sorting[0].id,
-      ascending: !sorting[0].desc,
-    } : undefined,
+    order: sortModel[0]
+      ? { column: sortModel[0].field, ascending: sortModel[0].sort === 'asc' }
+      : undefined,
     filters,
   });
 
@@ -116,103 +101,149 @@ function MemberList() {
     return statusColors[statusCode] || 'secondary';
   };
 
-  const columns: ColumnDef<Member>[] = [
+  const columns: GridColDef<Member>[] = [
     {
-      id: 'first_name',
-      accessorKey: 'first_name',
-      header: 'Name',
-      cell: ({ row }) => (
+      field: 'first_name',
+      headerName: 'Name',
+      flex: 1.5,
+      minWidth: 200,
+      sortable: false,
+      renderCell: params => (
         <div className="flex items-center">
           <Avatar size="md">
-            {row.original.profile_picture_url && (
+            {params.row.profile_picture_url && (
               <AvatarImage
-                src={row.original.profile_picture_url}
-                alt={`${row.original.first_name} ${row.original.last_name}`}
+                src={params.row.profile_picture_url}
+                alt={`${params.row.first_name} ${params.row.last_name}`}
                 crossOrigin="anonymous"
-                onError={(e) => {
+                onError={e => {
                   e.currentTarget.style.display = 'none';
                 }}
               />
             )}
             <AvatarFallback>
-              {row.original.first_name?.charAt(0)}
-              {row.original.last_name?.charAt(0)}
+              {params.row.first_name?.charAt(0)}
+              {params.row.last_name?.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <span className="ml-2">
-            {row.original.first_name} {row.original.last_name}
+            {params.row.first_name} {params.row.last_name}
           </span>
         </div>
       ),
-      enableSorting: false,
     },
     {
-      accessorKey: 'preferred_name',
-      header: 'Preferred Name',
-      enableSorting: false,
+      field: 'preferred_name',
+      headerName: 'Preferred Name',
+      flex: 1,
+      minWidth: 150,
+      sortable: false,
     },
     {
-      accessorKey: 'email',
-      header: 'Email',
-      cell: ({ getValue }) => (
+      field: 'email',
+      headerName: 'Email',
+      flex: 1.5,
+      minWidth: 200,
+      sortable: false,
+      renderCell: params => (
         <div className="flex items-center">
           <Mail className="h-4 w-4 text-muted-foreground mr-2" />
-          {getValue<string>()}
+          {params.value as string}
         </div>
       ),
-      enableSorting: false,
     },
     {
-      accessorKey: 'contact_number',
-      header: 'Contact',
-      cell: ({ getValue }) => (
+      field: 'contact_number',
+      headerName: 'Contact',
+      flex: 1,
+      minWidth: 150,
+      sortable: false,
+      renderCell: params => (
         <div className="flex items-center">
           <Phone className="h-4 w-4 text-muted-foreground mr-2" />
-          {getValue<string>()}
+          {params.value as string}
         </div>
       ),
-      enableSorting: false,
     },
     {
-      id: 'membership_status.name',
-      header: 'Status',
-      accessorFn: (row) => row.membership_status?.name,
-      cell: ({ row }) => (
-        <div className="space-y-1">
-          <Badge variant={getStatusColor(row.original.membership_status?.code)}>
-            {row.original.membership_status?.name}
-          </Badge>
+      field: 'membership_status',
+      headerName: 'Status',
+      flex: 1,
+      minWidth: 120,
+      sortable: false,
+      valueGetter: params => params.row.membership_status?.name || '',
+      renderCell: params => (
+        <Badge variant={getStatusColor(params.row.membership_status?.code)}>
+          {params.row.membership_status?.name}
+        </Badge>
+      ),
+    },
+    {
+      field: 'membership_date',
+      headerName: 'Member Since',
+      flex: 1,
+      minWidth: 150,
+      sortable: false,
+      renderCell: params => (
+        <div className="flex items-center">
+          <Users className="h-4 w-4 text-muted-foreground mr-2" />
+          {params.value ? new Date(params.value as string).toLocaleDateString() : ''}
         </div>
       ),
-      enableSorting: false,
     },
     {
-      accessorKey: 'membership_date',
-      header: 'Member Since',
-      cell: ({ getValue }) => {
-        const value = getValue<string | null>();
-        return (
-          <div className="flex items-center">
-            <Users className="h-4 w-4 text-muted-foreground mr-2" />
-            {value ? new Date(value).toLocaleDateString() : ''}
-          </div>
-        );
-      },
-      enableSorting: false,
+      field: 'birthday',
+      headerName: 'Birthday',
+      flex: 1,
+      minWidth: 150,
+      sortable: false,
+      renderCell: params => (
+        <div className="flex items-center">
+          <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
+          {params.value ? new Date(params.value as string).toLocaleDateString() : ''}
+        </div>
+      ),
     },
     {
-      accessorKey: 'birthday',
-      header: 'Birthday',
-      cell: ({ getValue }) => {
-        const value = getValue<string | null>();
-        return (
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
-            {value ? new Date(value).toLocaleDateString() : ''}
-          </div>
-        );
-      },
-      enableSorting: false,
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: params => (
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={e => {
+              e.stopPropagation();
+              navigate(`/members/${params.row.id}`);
+            }}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={e => {
+              e.stopPropagation();
+              navigate(`/members/${params.row.id}/edit`);
+            }}
+          >
+            <Edit2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={e => {
+              e.stopPropagation();
+              setDeletingMemberId(params.row.id);
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      ),
     },
   ];
 
@@ -268,51 +299,19 @@ function MemberList() {
         <div style={{ height: 600, width: '100%' }}>
           <DataGrid<Member>
             data={result?.data || []}
-            recordCount={result?.count ?? 0}
+            totalRows={result?.count ?? 0}
             columns={columns}
             loading={isLoading}
             error={error instanceof Error ? error.message : undefined}
+            page={page}
+            pageSize={pageSize}
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
-            onSortingChange={setSorting}
-            onFilterChange={handleFilterChange}
-            onRowDoubleClick={(row) => navigate(`/members/${row.id}`)}
-            rowActions={(row) => (
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/members/${row.id}`);
-                  }}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/members/${row.id}/edit`);
-                  }}
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeletingMemberId(row.id);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            )}
-            pagination={{ pageSize }}
+            onSortChange={setSortModel}
+            getRowId={(row) => row.id}
+            onRowDoubleClick={(params) => navigate(`/members/${params.row.id}`)}
             storageKey="member-list-grid"
+            showQuickFilter={false}
           />
         </div>
       </Card>
