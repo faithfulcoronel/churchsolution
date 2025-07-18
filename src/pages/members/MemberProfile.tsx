@@ -113,8 +113,14 @@ function MemberProfile() {
 
       {/* Member Header */}
       <div
-        className="rounded-2xl p-6 shadow-sm bg-white dark:bg-muted"
-        style={{ backgroundImage: "url('/landing_bg.svg')" }}
+        className="rounded-2xl p-6 shadow-sm relative"
+        style={{
+          backgroundImage: "url('/profile_header_pattern.svg')",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "auto", // Keeps actual size of the image
+          backgroundPosition: "center", // Adjust position if needed
+          overflow: "visible", // Allow background overflow
+        }}
       >
         <div className="flex flex-col items-center text-center gap-4">
           <Avatar className="h-24 w-24 border-2 border-primary">
