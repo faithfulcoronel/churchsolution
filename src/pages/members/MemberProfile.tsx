@@ -10,7 +10,8 @@ import {
   Cake,
   Heart,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  User
 } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 
@@ -19,7 +20,7 @@ import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import { Badge } from '../../components/ui2/badge';
 import { Card, CardHeader, CardContent, CardTitle } from '../../components/ui2/card';
-import { Tabs, TabsContent } from '../../components/ui2/tabs';
+import { Tabs, TabsContent, TabPanel } from '../../components/ui2/tabs';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -32,9 +33,6 @@ import {
 } from '../../components/ui2/alert-dialog';
 
 // Tabs
-import BasicInfoTab from './tabs/BasicInfoTab';
-import MinistryInfoTab from './tabs/MinistryInfoTab';
-import NotesTab from './tabs/NotesTab';
 import FinancialTab from './tabs/FinancialTab';
 
 function MemberProfile() {
@@ -202,38 +200,322 @@ function MemberProfile() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsContent value="profile" className="p-0">
             <div className="space-y-6">
+              {/* Personal Information */}
               <Card className="w-fit">
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
-                  <BasicInfoTab mode="view" member={member} onChange={() => {}} />
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-medium mb-4">Personal Information</h3>
+                      <dl className="space-y-4">
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Full Name</dt>
+                          <dd className="mt-1">
+                            {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}
+                            {member.last_name}
+                          </dd>
+                        </div>
+                        {member.preferred_name && (
+                          <div>
+                            <dt className="text-sm font-medium text-muted-foreground">Preferred Name</dt>
+                            <dd className="mt-1">{member.preferred_name}</dd>
+                          </div>
+                        )}
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Gender</dt>
+                          <dd className="mt-1 capitalize">{member.gender || 'Not specified'}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Marital Status</dt>
+                          <dd className="mt-1 capitalize">{member.marital_status || 'Not specified'}</dd>
+                        </div>
+                        {member.birthday && (
+                          <div>
+                            <dt className="text-sm font-medium text-muted-foreground">Birthday</dt>
+                            <dd className="mt-1">{new Date(member.birthday).toLocaleDateString()}</dd>
+                          </div>
+                        )}
+                      </dl>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-medium mb-4">Membership Information</h3>
+                      <dl className="space-y-4">
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Membership Type</dt>
+                          <dd className="mt-1">{member.membership_type?.name || 'Not specified'}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Status</dt>
+                          <dd className="mt-1">{member.membership_status?.name || 'Not specified'}</dd>
+                        </div>
+                        {member.membership_date && (
+                          <div>
+                            <dt className="text-sm font-medium text-muted-foreground">Membership Date</dt>
+                            <dd className="mt-1">{new Date(member.membership_date).toLocaleDateString()}</dd>
+                          </div>
+                        )}
+                        {member.baptism_date && (
+                          <div>
+                            <dt className="text-sm font-medium text-muted-foreground">Baptism Date</dt>
+                            <dd className="mt-1">{new Date(member.baptism_date).toLocaleDateString()}</dd>
+                          </div>
+                        )}
+                        {member.envelope_number && (
+                          <div>
+                            <dt className="text-sm font-medium text-muted-foreground">Envelope Number</dt>
+                            <dd className="mt-1">{member.envelope_number}</dd>
+                          </div>
+                        )}
+                      </dl>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
+              {/* Contact Information */}
+              <Card className="w-fit">
+                <CardHeader>
+                  <CardTitle>Contact Information</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-medium mb-4">Contact Information</h3>
+                      <dl className="space-y-4">
+                        {member.email && (
+                          <div className="flex items-start">
+                            <Mail className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                            <div>
+                              <dt className="text-sm font-medium text-muted-foreground">Email</dt>
+                              <dd className="mt-1">
+                                <a href={`mailto:${member.email}`} className="text-primary hover:underline">
+                                  {member.email}
+                                </a>
+                              </dd>
+                            </div>
+                          </div>
+                        )}
+                        {member.contact_number && (
+                          <div className="flex items-start">
+                            <Phone className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                            <div>
+                              <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
+                              <dd className="mt-1">
+                                <a href={`tel:${member.contact_number}`} className="text-primary hover:underline">
+                                  {member.contact_number}
+                                </a>
+                              </dd>
+                            </div>
+                          </div>
+                        )}
+                        {member.address && (
+                          <div className="flex items-start">
+                            <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                            <div>
+                              <dt className="text-sm font-medium text-muted-foreground">Address</dt>
+                              <dd className="mt-1 whitespace-pre-line">{member.address}</dd>
+                            </div>
+                          </div>
+                        )}
+                      </dl>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium mb-4">Emergency Contact</h3>
+                      {member.emergency_contact_name || member.emergency_contact_phone ? (
+                        <dl className="space-y-4">
+                          {member.emergency_contact_name && (
+                            <div className="flex items-start">
+                              <User className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                              <div>
+                                <dt className="text-sm font-medium text-muted-foreground">Name</dt>
+                                <dd className="mt-1">{member.emergency_contact_name}</dd>
+                              </div>
+                            </div>
+                          )}
+                          {member.emergency_contact_phone && (
+                            <div className="flex items-start">
+                              <Phone className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
+                              <div>
+                                <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
+                                <dd className="mt-1">
+                                  <a href={`tel:${member.emergency_contact_phone}`} className="text-primary hover:underline">
+                                    {member.emergency_contact_phone}
+                                  </a>
+                                </dd>
+                              </div>
+                            </div>
+                          )}
+                        </dl>
+                      ) : (
+                        <p className="text-muted-foreground">No emergency contact information provided.</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Ministry Information */}
               <Card className="w-fit">
                 <CardHeader>
                   <CardTitle>Ministry Information</CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
-                  <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-medium mb-4">Ministry Involvement</h3>
+                      <div className="space-y-4">
+                        {member.leadership_position && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Leadership Position</h4>
+                            <p className="mt-1">{member.leadership_position}</p>
+                          </div>
+                        )}
+                        {member.ministries && member.ministries.length > 0 ? (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Ministries</h4>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {member.ministries.map((ministry: string, index: number) => (
+                                <Badge key={index} variant="outline">
+                                  {ministry}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Ministries</h4>
+                            <p className="mt-1 text-muted-foreground">No ministries listed</p>
+                          </div>
+                        )}
+                        {member.small_groups && member.small_groups.length > 0 ? (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Small Groups</h4>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {member.small_groups.map((group: string, index: number) => (
+                                <Badge key={index} variant="outline">
+                                  {group}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Small Groups</h4>
+                            <p className="mt-1 text-muted-foreground">No small groups listed</p>
+                          </div>
+                        )}
+                        {member.volunteer_roles && member.volunteer_roles.length > 0 ? (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Volunteer Roles</h4>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {member.volunteer_roles.map((role: string, index: number) => (
+                                <Badge key={index} variant="outline">
+                                  {role}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Volunteer Roles</h4>
+                            <p className="mt-1 text-muted-foreground">No volunteer roles listed</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-medium mb-4">Spiritual Information</h3>
+                      <div className="space-y-4">
+                        {member.spiritual_gifts && member.spiritual_gifts.length > 0 ? (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Spiritual Gifts</h4>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {member.spiritual_gifts.map((gift: string, index: number) => (
+                                <Badge key={index} variant="secondary">
+                                  {gift}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Spiritual Gifts</h4>
+                            <p className="mt-1 text-muted-foreground">No spiritual gifts listed</p>
+                          </div>
+                        )}
+                        {member.ministry_interests && member.ministry_interests.length > 0 ? (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Ministry Interests</h4>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {member.ministry_interests.map((interest: string, index: number) => (
+                                <Badge key={index} variant="outline">
+                                  {interest}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Ministry Interests</h4>
+                            <p className="mt-1 text-muted-foreground">No ministry interests listed</p>
+                          </div>
+                        )}
+                        {member.attendance_rate !== null && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Attendance Rate</h4>
+                            <p className="mt-1">{member.attendance_rate}%</p>
+                          </div>
+                        )}
+                        {member.last_attendance_date && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground">Last Attendance</h4>
+                            <p className="mt-1">{new Date(member.last_attendance_date).toLocaleDateString()}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-          <Card className="w-fit">
-            <CardHeader>
-              <CardTitle>Pastoral Notes</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <NotesTab mode="view" member={member} onChange={() => {}} />
-            </CardContent>
-          </Card>
-        </div>
-      </TabPanel>
-      <TabPanel value="financial" className="p-0">
-        <FinancialTab memberId={member.id} />
-      </TabPanel>
-    </Tabs>
-  </div>
+
+              {/* Pastoral Notes */}
+              <Card className="w-fit">
+                <CardHeader>
+                  <CardTitle>Pastoral Notes</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  {member.pastoral_notes ? (
+                    <p className="whitespace-pre-line">{member.pastoral_notes}</p>
+                  ) : (
+                    <p className="text-muted-foreground">No pastoral notes recorded.</p>
+                  )}
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Prayer Requests</h4>
+                    {member.prayer_requests && member.prayer_requests.length > 0 ? (
+                      <ul className="list-disc pl-4 space-y-1">
+                        {member.prayer_requests.map((request, index) => (
+                          <li key={index}>{request}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground">No prayer requests recorded.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          <TabPanel value="financial" className="p-0">
+            <FinancialTab memberId={member.id} />
+          </TabPanel>
+        </Tabs>
+      </div>
+    </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
