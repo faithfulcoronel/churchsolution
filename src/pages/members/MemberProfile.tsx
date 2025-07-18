@@ -521,9 +521,8 @@ function MemberProfile() {
           <TabsContent value="financial" className="p-0">
             <FinancialTab memberId={member.id} />
           </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+          </Tabs>
+        </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
