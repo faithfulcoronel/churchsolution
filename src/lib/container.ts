@@ -160,6 +160,7 @@ import { DefaultFundService, type FundService } from '../services/FundService';
 import { FinancialSourceService } from '../services/FinancialSourceService';
 import { SupabaseAccountService, type AccountService } from '../services/AccountService';
 import { MemberService } from '../services/MemberService';
+import { FinanceDashboardService } from '../services/FinanceDashboardService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -372,6 +373,10 @@ container
 container
   .bind<FinancialSourceService>(TYPES.FinancialSourceService)
   .to(FinancialSourceService)
+  .inSingletonScope();
+container
+  .bind<FinanceDashboardService>(TYPES.FinanceDashboardService)
+  .to(FinanceDashboardService)
   .inSingletonScope();
 
 // Register repositories
