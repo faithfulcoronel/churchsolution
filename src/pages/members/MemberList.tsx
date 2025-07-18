@@ -41,6 +41,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Card } from '../../components/ui2/card';
+import { Container } from '../../components/ui2/container';
 
 function MemberList() {
   const navigate = useNavigate();
@@ -51,39 +52,33 @@ function MemberList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const { useQuery: useMembersQuery, useDelete } = useMemberService();
+  const { useQueryAll: useMembersQuery, useDelete } = useMemberService();
 
   const { data: statusCategories } = useReactQuery({
     queryKey: ['categories', 'member_status'],
     queryFn: () => categoryUtils.getCategories('member_status'),
   });
 
-  // ✅ Memoized filters to ensure query triggers properly
-  const filters = useMemo(() => {
-    const baseFilters: Record<string, any> = {};
-
-    if (searchTerm) {
-      const escaped = searchTerm.replace(/[*]/g, ''); // remove unsafe wildcard
-      baseFilters.or = `first_name.ilike.*${escaped}*,last_name.ilike.*${escaped}*,preferred_name.ilike.*${escaped}*,email.ilike.*${escaped}*`;
-    }
-
-    if (statusFilter !== 'all') {
-      baseFilters.membership_status_id = { operator: 'eq', value: statusFilter };
-    }
-
-    return baseFilters;
-  }, [searchTerm, statusFilter]);
-
   const { data: result, isLoading, error } = useMembersQuery({
-    pagination: {
-      page: page + 1,
-      pageSize,
-    },
     order: sortModel[0]
       ? { column: sortModel[0].field, ascending: sortModel[0].sort === 'asc' }
       : undefined,
-    filters,
   });
+
+  const members = result?.data || [];
+  const filteredMembers = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return members.filter(m => {
+      const matchesSearch =
+        m.first_name.toLowerCase().includes(term) ||
+        m.last_name.toLowerCase().includes(term) ||
+        (m.preferred_name || '').toLowerCase().includes(term) ||
+        (m.email || '').toLowerCase().includes(term);
+      const matchesStatus =
+        statusFilter === 'all' || m.membership_status?.id === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [members, searchTerm, statusFilter]);
 
   const deleteMemberMutation = useDelete();
 
@@ -248,7 +243,7 @@ function MemberList() {
   ];
 
   return (
-    <div>
+    <Container className="space-y-6 max-w-[1200px]" size="xl">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-2xl font-semibold text-foreground">Members</h1>
@@ -298,8 +293,8 @@ function MemberList() {
       <Card className="mt-6">
         <div style={{ height: 600, width: '100%' }}>
           <DataGrid<Member>
-            data={result?.data || []}
-            totalRows={result?.count ?? 0}
+            data={filteredMembers}
+            totalRows={filteredMembers.length}
             columns={columns}
             loading={isLoading}
             error={error instanceof Error ? error.message : undefined}
@@ -312,6 +307,7 @@ function MemberList() {
             onRowDoubleClick={(params) => navigate(`/members/${params.row.id}`)}
             storageKey="member-list-grid"
             showQuickFilter={false}
+            paginationMode="client"
           />
         </div>
       </Card>
@@ -350,7 +346,7 @@ function MemberList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </Container>
   );
 }
 
