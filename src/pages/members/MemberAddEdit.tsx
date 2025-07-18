@@ -74,7 +74,9 @@ function MemberAddEdit() {
   // Track form changes
   useEffect(() => {
     if (!result?.data?.[0]) {
-      setHasUnsavedChanges(Object.keys(formData).length > 0);
+      setHasUnsavedChanges(
+        Object.keys(formData).length > 0 || profilePictureFile !== null
+      );
       return;
     }
 
@@ -90,8 +92,10 @@ function MemberAddEdit() {
       return formValue !== memberValue;
     });
 
-    setHasUnsavedChanges(hasChanges);
-  }, [formData, result]);
+    const pictureChanged = profilePictureFile !== null;
+
+    setHasUnsavedChanges(hasChanges || pictureChanged);
+  }, [formData, profilePictureFile, result]);
 
   // Create member mutation
   const createMemberMutation = useCreate();
@@ -175,6 +179,7 @@ function MemberAddEdit() {
 
   const handleProfilePictureChange = (file: File | null) => {
     setProfilePictureFile(file);
+    setHasUnsavedChanges(true);
     if (!file) {
       setFormData(prev => ({ ...prev, profile_picture_url: null }));
     }
@@ -268,6 +273,11 @@ function MemberAddEdit() {
                     size="xl"
                     shape="circle"
                     className="ring-4 ring-background mx-auto sm:mx-0"
+                    helperText={
+                      profilePictureFile
+                        ? 'Picture will be saved when you save changes'
+                        : undefined
+                    }
                   />
                 </div>
               </div>
