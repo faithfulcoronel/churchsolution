@@ -1,6 +1,7 @@
 import React from 'react';
 import { useMemberService } from '../../../hooks/useMemberService';
 
+import MetricCard from '../../../components/dashboard/MetricCard';
 import { Card, CardHeader, CardContent, CardTitle } from '../../../components/ui2/card';
 import { Charts } from '../../../components/ui2/charts';
 import { useCurrencyStore } from '../../../stores/currencyStore';
@@ -55,34 +56,22 @@ export default function FinancialTab({ memberId }: FinancialTabProps) {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Giving this Year</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {formatCurrency(totals?.year || 0, currency)}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Giving this Month</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {formatCurrency(totals?.month || 0, currency)}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Giving this Week</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {formatCurrency(totals?.week || 0, currency)}
-          </CardContent>
-        </Card>
+        <MetricCard
+          label="Giving this Year"
+          value={formatCurrency(totals?.year || 0, currency)}
+        />
+        <MetricCard
+          label="Giving this Month"
+          value={formatCurrency(totals?.month || 0, currency)}
+        />
+        <MetricCard
+          label="Giving this Week"
+          value={formatCurrency(totals?.week || 0, currency)}
+        />
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b border-border">
           <CardTitle>Giving Trend</CardTitle>
         </CardHeader>
         <CardContent>
@@ -96,8 +85,8 @@ export default function FinancialTab({ memberId }: FinancialTabProps) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b border-border">
           <CardTitle>Recent Contributions</CardTitle>
         </CardHeader>
         <CardContent className="p-0 overflow-x-auto">
