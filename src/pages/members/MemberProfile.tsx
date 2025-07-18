@@ -199,12 +199,6 @@ function MemberProfile() {
 
       {/* Member Details Tabs */}
       <div>
-        <div className="mb-4">
-          <h3 className="text-lg font-medium">Member Details</h3>
-          <p className="text-sm text-muted-foreground">
-            View and manage member information
-          </p>
-        </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-2 bg-muted p-1 rounded-full mb-4">
             <TabsTrigger value="profile" className="flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">Profile</TabsTrigger>
