@@ -112,7 +112,7 @@ export default function FinancialTab({ memberId }: FinancialTabProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {recent.map(t => (
+                {recent.slice(0, 10).map(t => (
                   <tr key={t.id} className="hover:bg-muted/50">
                     <td className="px-4 py-2 whitespace-nowrap text-sm">
                       {new Date(t.date).toLocaleDateString()}
@@ -122,7 +122,7 @@ export default function FinancialTab({ memberId }: FinancialTabProps) {
                     </td>
                     <td className="px-4 py-2 text-sm">{t.description}</td>
                     <td className="px-4 py-2 whitespace-nowrap text-sm text-right">
-                      {formatCurrency(Number(t.debit || 0) - Number(t.credit || 0), currency)}
+                      {formatCurrency(Number(t.credit || 0) - Number(t.debit || 0), currency)}
                     </td>
                   </tr>
                 ))}
