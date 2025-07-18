@@ -115,7 +115,11 @@ export default function FinancialTab({ memberId }: FinancialTabProps) {
                 {recent.slice(0, 10).map(t => (
                   <tr key={t.id} className="hover:bg-muted/50">
                     <td className="px-4 py-2 whitespace-nowrap text-sm">
-                      {new Date(t.date).toLocaleDateString()}
+                      {new Date(t.date).toLocaleDateString(undefined, {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-sm">
                       {t.category?.name || 'Uncategorized'}
