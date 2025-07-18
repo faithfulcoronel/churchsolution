@@ -20,7 +20,7 @@ import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import { Badge } from '../../components/ui2/badge';
 import { Card, CardHeader, CardContent, CardTitle } from '../../components/ui2/card';
-import { Tabs, TabsContent, TabPanel } from '../../components/ui2/tabs';
+import { Tabs, TabsContent } from '../../components/ui2/tabs';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -518,9 +518,9 @@ function MemberProfile() {
               </Card>
             </div>
           </TabsContent>
-          <TabPanel value="financial" className="p-0">
+          <TabsContent value="financial" className="p-0">
             <FinancialTab memberId={member.id} />
-          </TabPanel>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
