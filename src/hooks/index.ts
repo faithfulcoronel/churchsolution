@@ -13,6 +13,7 @@ export * from './usePermissions';
 export * from './useSubscriptionLimits';
 export * from './useThemeSwitcher';
 export * from './useFundRepository';
+export * from './useFundService';
 export * from './useFundBalanceRepository';
 export * from './useOfferingBatchRepository';
 export * from './useCategoryRepository';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFundRepository } from '../../../hooks/useFundRepository';
+import { useFundService } from '../../../hooks/useFundService';
 import { Fund, FundType } from '../../../models/fund.model';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Input } from '../../../components/ui2/input';
@@ -16,7 +16,7 @@ function FundAddEdit() {
   const navigate = useNavigate();
   const isEditMode = !!id;
 
-  const { useQuery: useFundQuery, useCreate, useUpdate } = useFundRepository();
+  const { useQuery: useFundQuery, useCreate, useUpdate } = useFundService();
 
   const [formData, setFormData] = useState<Partial<Fund>>({
     code: '',
