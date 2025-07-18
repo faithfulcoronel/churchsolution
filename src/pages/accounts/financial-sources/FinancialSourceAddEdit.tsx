@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
+import { useFinancialSourceService } from '../../../hooks/useFinancialSourceService';
 import { useChartOfAccounts } from '../../../hooks/useChartOfAccounts';
 import { FinancialSource, SourceType } from '../../../models/financialSource.model';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
@@ -19,7 +19,7 @@ function FinancialSourceAddEdit() {
   const navigate = useNavigate();
   const isEditMode = !!id;
   
-  const { useQuery: useSourceQuery, useCreate, useUpdate } = useFinancialSourceRepository();
+  const { useQuery: useSourceQuery, useCreate, useUpdate } = useFinancialSourceService();
   const { useAccountOptions } = useChartOfAccounts();
   
   const [formData, setFormData] = useState<Partial<FinancialSource>>({

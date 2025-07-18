@@ -157,6 +157,7 @@ import { SupabaseActivityLogService, type ActivityLogService } from '../services
 import { UserRoleService } from '../services/UserRoleService';
 import { LicenseService } from '../services/LicenseService';
 import { DefaultFundService, type FundService } from '../services/FundService';
+import { FinancialSourceService } from '../services/FinancialSourceService';
 import { SupabaseAccountService, type AccountService } from '../services/AccountService';
 import { MemberService } from '../services/MemberService';
 import { TYPES } from './types';
@@ -367,6 +368,10 @@ container
 container
   .bind<FundService>(TYPES.FundService)
   .to(DefaultFundService)
+  .inSingletonScope();
+container
+  .bind<FinancialSourceService>(TYPES.FinancialSourceService)
+  .to(FinancialSourceService)
   .inSingletonScope();
 
 // Register repositories

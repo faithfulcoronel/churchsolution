@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
+import { useFinancialSourceService } from '../../../hooks/useFinancialSourceService';
 import { useSourceRecentTransactionRepository } from '../../../hooks/useSourceRecentTransactionRepository';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
@@ -36,7 +36,7 @@ function FinancialSourceProfile() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const { useQuery: useSourceQuery, useDelete } = useFinancialSourceRepository();
+  const { useQuery: useSourceQuery, useDelete } = useFinancialSourceService();
   const { useRecentTransactions, useSourceBalance } = useSourceRecentTransactionRepository();
   const { currency } = useCurrencyStore();
   
