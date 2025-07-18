@@ -117,7 +117,7 @@ function MemberProfile() {
         <div className="flex flex-col items-center text-center gap-4">
           {/* Profile picture and name */}
           <div className="flex flex-col items-center gap-2">
-            <Avatar className="h-24 w-24 border-2 border-primary">
+            <Avatar className="h-32 w-32 border-2 border-primary">
               {member.profile_picture_url && (
                 <AvatarImage
                   src={member.profile_picture_url}
