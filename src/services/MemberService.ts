@@ -98,7 +98,7 @@ export class MemberService {
           select: 'credit',
           filters: {
             accounts_account_id: { operator: 'eq', value: accountId },
-            type: { operator: 'eq', value: 'income' },
+            'chart_of_accounts.account_type': { operator: 'eq', value: 'revenue' },
             credit: { operator: 'gt', value: 0 },
             date: {
               operator: 'between',
@@ -206,7 +206,7 @@ export class MemberService {
             select: 'credit',
             filters: {
               accounts_account_id: { operator: 'eq', value: accountId },
-              type: { operator: 'eq', value: 'income' },
+              'chart_of_accounts.account_type': { operator: 'eq', value: 'revenue' },
               credit: { operator: 'gt', value: 0 },
               date: {
                 operator: 'between',
@@ -236,7 +236,7 @@ export class MemberService {
         'id, date, description, credit, category:category_id(name), fund:fund_id(name, code)',
       filters: {
         accounts_account_id: { operator: 'eq', value: accountId },
-        type: { operator: 'eq', value: 'income' },
+        'chart_of_accounts.account_type': { operator: 'eq', value: 'revenue' },
         credit: { operator: 'gt', value: 0 },
       },
       order: { column: 'date', ascending: false },
