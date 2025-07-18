@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFinancialSourceRepository } from '../../../hooks/useFinancialSourceRepository';
+import { useFinancialSourceService } from '../../../hooks/useFinancialSourceService';
 import { FinancialSource } from '../../../models/financialSource.model';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -19,7 +19,7 @@ function FinancialSourceList() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   
-  const { useQuery: useSourcesQuery } = useFinancialSourceRepository();
+  const { useQuery: useSourcesQuery } = useFinancialSourceService();
   
   // Get sources
   const { data: result, isLoading, error } = useSourcesQuery();
