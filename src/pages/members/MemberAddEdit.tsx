@@ -23,15 +23,13 @@ import {
 import { Save, Loader2 } from 'lucide-react';
 
 // Import tabs
-import BasicInfoTab from './tabs/BasicInfoTab';
 import ContactInfoTab from './tabs/ContactInfoTab';
-import MinistryInfoTab from './tabs/MinistryInfoTab';
-import NotesTab from './tabs/NotesTab';
+import ProfileTab from './tabs/ProfileTab';
 
 function MemberAddEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState('profile');
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
@@ -157,11 +155,14 @@ function MemberAddEdit() {
 
   const tabs = [
     {
-      id: 'basic',
-      label: 'Basic Info',
-      badge: formErrors.basic?.length,
+      id: 'profile',
+      label: 'Profile',
+      badge:
+        (formErrors.basic?.length || 0) +
+        (formErrors.ministry?.length || 0) +
+        (formErrors.notes?.length || 0),
       content: (
-        <BasicInfoTab
+        <ProfileTab
           mode={mode}
           member={formData}
           onChange={handleInputChange}
@@ -179,31 +180,7 @@ function MemberAddEdit() {
           onChange={handleInputChange}
         />
       ),
-    },
-    {
-      id: 'ministry',
-      label: 'Ministry Info',
-      badge: formErrors.ministry?.length,
-      content: (
-        <MinistryInfoTab
-          mode={mode}
-          member={formData}
-          onChange={handleInputChange}
-        />
-      ),
-    },
-    {
-      id: 'notes',
-      label: 'Notes',
-      badge: formErrors.notes?.length,
-      content: (
-        <NotesTab
-          mode={mode}
-          member={formData}
-          onChange={handleInputChange}
-        />
-      ),
-    },
+    }
   ];
 
   if (memberLoading) {

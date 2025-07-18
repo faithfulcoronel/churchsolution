@@ -3,18 +3,15 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useMemberService } from '../../hooks/useMemberService';
 import {
   User,
-  Users,
   Phone,
   Mail,
   MapPin,
-  Calendar,
   Edit,
   Trash2,
   Cake,
   Heart,
   Loader2,
-  AlertTriangle,
-  FileText
+  AlertTriangle
 } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 
@@ -36,16 +33,14 @@ import {
 } from '../../components/ui2/alert-dialog';
 
 // Tabs
-import BasicInfoTab from './tabs/BasicInfoTab';
 import ContactInfoTab from './tabs/ContactInfoTab';
-import MinistryInfoTab from './tabs/MinistryInfoTab';
-import NotesTab from './tabs/NotesTab';
+import ProfileTab from './tabs/ProfileTab';
 
 function MemberProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { useFindById, useDelete } = useMemberService();
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState('profile');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Fetch member data using repository
@@ -210,38 +205,22 @@ function MemberProfile() {
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-6">
-              <TabsTrigger value="basic">
+              <TabsTrigger value="profile">
                 <User className="h-4 w-4 mr-2" />
-                Basic Info
+                Profile
               </TabsTrigger>
               <TabsTrigger value="contact">
                 <Phone className="h-4 w-4 mr-2" />
                 Contact Info
               </TabsTrigger>
-              <TabsTrigger value="ministry">
-                <Users className="h-4 w-4 mr-2" />
-                Ministry Info
-              </TabsTrigger>
-              <TabsTrigger value="notes">
-                <FileText className="h-4 w-4 mr-2" />
-                Notes
-              </TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="basic">
-              <BasicInfoTab mode="view" member={member} onChange={() => {}} />
+
+            <TabsContent value="profile">
+              <ProfileTab mode="view" member={member} onChange={() => {}} />
             </TabsContent>
 
             <TabsContent value="contact">
               <ContactInfoTab mode="view" member={member} onChange={() => {}} />
-            </TabsContent>
-
-            <TabsContent value="ministry">
-              <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
-            </TabsContent>
-
-            <TabsContent value="notes">
-              <NotesTab mode="view" member={member} onChange={() => {}} />
             </TabsContent>
           </Tabs>
       </div>
