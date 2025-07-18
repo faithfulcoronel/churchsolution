@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useChartOfAccountRepository } from '../../../hooks/useChartOfAccountRepository';
+import { useChartOfAccountService } from '../../../hooks/useChartOfAccountService';
 import { useAccountingReports } from '../../../hooks/useAccountingReports';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
@@ -59,7 +59,7 @@ function ChartOfAccountProfile() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   
   // Get account details
-  const { useQuery, useDelete } = useChartOfAccountRepository();
+  const { useQuery, useDelete } = useChartOfAccountService();
   const {
     data: accountData,
     isLoading: isAccountLoading,

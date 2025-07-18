@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useChartOfAccountRepository } from '../../../hooks/useChartOfAccountRepository';
+import { useChartOfAccountService } from '../../../hooks/useChartOfAccountService';
 import { ChartOfAccount } from '../../../models/chartOfAccount.model';
 import { Card, CardHeader, CardContent, CardFooter } from '../../../components/ui2/card';
 import { Input } from '../../../components/ui2/input';
@@ -29,7 +29,7 @@ function ChartOfAccountAddEdit() {
   const navigate = useNavigate();
   const isEditMode = !!id;
   
-  const { useQuery, useCreate, useUpdate } = useChartOfAccountRepository();
+  const { useQuery, useCreate, useUpdate } = useChartOfAccountService();
   
   // Form state
   const [formData, setFormData] = useState<Partial<ChartOfAccount>>({

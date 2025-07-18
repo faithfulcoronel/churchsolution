@@ -44,3 +44,4 @@ export * from './useFiscalYearRepository';
 export * from './useFiscalPeriodRepository';
 export * from './useTenantRepository';
 export * from './useLicensePlanRepository';
+export * from './useChartOfAccountService';
