@@ -207,9 +207,9 @@ function MemberProfile() {
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsContent value="profile" className="p-0">
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Personal Information */}
-              <Card className="w-fit">
+              <Card>
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
@@ -284,7 +284,7 @@ function MemberProfile() {
               </Card>
 
               {/* Contact Information */}
-              <Card className="w-fit">
+              <Card>
                 <CardHeader>
                   <CardTitle>Contact Information</CardTitle>
                 </CardHeader>
@@ -366,7 +366,7 @@ function MemberProfile() {
               </Card>
 
               {/* Ministry Information */}
-              <Card className="w-fit">
+              <Card>
                 <CardHeader>
                   <CardTitle>Ministry Information</CardTitle>
                 </CardHeader>
@@ -491,7 +491,7 @@ function MemberProfile() {
               </Card>
 
               {/* Pastoral Notes */}
-              <Card className="w-fit">
+              <Card>
                 <CardHeader>
                   <CardTitle>Pastoral Notes</CardTitle>
                 </CardHeader>
