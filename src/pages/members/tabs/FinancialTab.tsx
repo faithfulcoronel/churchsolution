@@ -1,16 +1,6 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../../lib/supabase';
-import {
-  startOfMonth,
-  endOfMonth,
-  startOfYear,
-  endOfYear,
-  startOfWeek,
-  endOfWeek,
-  subMonths,
-  format,
-} from 'date-fns';
+import { useMemberService } from '../../../hooks/useMemberService';
+
 import { Card, CardHeader, CardContent, CardTitle } from '../../../components/ui2/card';
 import { Charts } from '../../../components/ui2/charts';
 import { useCurrencyStore } from '../../../stores/currencyStore';
@@ -23,99 +13,17 @@ interface FinancialTabProps {
 
 export default function FinancialTab({ memberId }: FinancialTabProps) {
   const { currency } = useCurrencyStore();
+  const {
+    useFinancialTotals,
+    useFinancialTrends,
+    useRecentTransactions,
+  } = useMemberService();
 
-  const { data: totals, isLoading: totalsLoading } = useQuery({
-    queryKey: ['member-financial-totals', memberId],
-    queryFn: async () => {
-      const today = new Date();
-      const [yearRes, monthRes, weekRes] = await Promise.all([
-        supabase
-          .from('financial_transactions')
-          .select('debit, credit')
-          .eq('member_id', memberId)
-          .eq('type', 'income')
-          .gte('date', format(startOfYear(today), 'yyyy-MM-dd'))
-          .lte('date', format(endOfYear(today), 'yyyy-MM-dd')),
-        supabase
-          .from('financial_transactions')
-          .select('debit, credit')
-          .eq('member_id', memberId)
-          .eq('type', 'income')
-          .gte('date', format(startOfMonth(today), 'yyyy-MM-dd'))
-          .lte('date', format(endOfMonth(today), 'yyyy-MM-dd')),
-        supabase
-          .from('financial_transactions')
-          .select('debit, credit')
-          .eq('member_id', memberId)
-          .eq('type', 'income')
-          .gte('date', format(startOfWeek(today), 'yyyy-MM-dd'))
-          .lte('date', format(endOfWeek(today), 'yyyy-MM-dd')),
-      ]);
+  const { data: totals, isLoading: totalsLoading } = useFinancialTotals(memberId);
 
-      if (yearRes.error) throw yearRes.error;
-      if (monthRes.error) throw monthRes.error;
-      if (weekRes.error) throw weekRes.error;
+  const { data: trends, isLoading: trendsLoading } = useFinancialTrends(memberId);
 
-      const sum = (rows: any[]) =>
-        rows.reduce((s, r) => s + Number(r.debit || 0) - Number(r.credit || 0), 0);
-
-      return {
-        year: sum(yearRes.data || []),
-        month: sum(monthRes.data || []),
-        week: sum(weekRes.data || []),
-      };
-    },
-    enabled: !!memberId,
-  });
-
-  const { data: trends, isLoading: trendsLoading } = useQuery({
-    queryKey: ['member-financial-trends', memberId],
-    queryFn: async () => {
-      const today = new Date();
-      const months = Array.from({ length: 12 }, (_, i) => {
-        const d = subMonths(today, i);
-        return { start: startOfMonth(d), end: endOfMonth(d), label: format(d, 'MMM yyyy') };
-      }).reverse();
-
-      const data = await Promise.all(
-        months.map(async ({ start, end, label }) => {
-          const { data, error } = await supabase
-            .from('financial_transactions')
-            .select('debit, credit')
-            .eq('member_id', memberId)
-            .eq('type', 'income')
-            .gte('date', format(start, 'yyyy-MM-dd'))
-            .lte('date', format(end, 'yyyy-MM-dd'));
-          if (error) throw error;
-          const total =
-            data?.reduce((s, r) => s + Number(r.debit || 0) - Number(r.credit || 0), 0) || 0;
-          return { month: label, contributions: total };
-        })
-      );
-      return data;
-    },
-    enabled: !!memberId,
-  });
-
-  const { data: recent } = useQuery({
-    queryKey: ['member-recent-transactions', memberId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('financial_transactions')
-        .select(
-          `id, date, description, debit, credit,
-           category:category_id (name),
-           fund:fund_id (name, code)`
-        )
-        .eq('member_id', memberId)
-        .eq('type', 'income')
-        .order('date', { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!memberId,
-  });
+  const { data: recent } = useRecentTransactions(memberId);
 
   const chartData = React.useMemo(
     () => ({

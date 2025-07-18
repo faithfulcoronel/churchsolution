@@ -98,6 +98,30 @@ export function useMemberService() {
       enabled: month >= 1 && month <= 12,
     });
 
+  const useFinancialTotals = (memberId: string) =>
+    useReactQuery({
+      queryKey: ['member-financial-totals', memberId],
+      queryFn: () => service.getFinancialTotals(memberId),
+      staleTime: 5 * 60 * 1000,
+      enabled: !!memberId,
+    });
+
+  const useFinancialTrends = (memberId: string) =>
+    useReactQuery({
+      queryKey: ['member-financial-trends', memberId],
+      queryFn: () => service.getFinancialTrends(memberId),
+      staleTime: 5 * 60 * 1000,
+      enabled: !!memberId,
+    });
+
+  const useRecentTransactions = (memberId: string) =>
+    useReactQuery({
+      queryKey: ['member-recent-transactions', memberId],
+      queryFn: () => service.getRecentTransactions(memberId),
+      staleTime: 5 * 60 * 1000,
+      enabled: !!memberId,
+    });
+
   return {
     useQuery,
     useQueryAll,
@@ -107,5 +131,8 @@ export function useMemberService() {
     useDelete,
     useCurrentMonthBirthdays,
     useBirthdaysByMonth,
+    useFinancialTotals,
+    useFinancialTrends,
+    useRecentTransactions,
   };
 }
