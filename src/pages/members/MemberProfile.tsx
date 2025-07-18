@@ -111,93 +111,94 @@ function MemberProfile() {
         </div>
       </div>
 
-      {/* Member Header Card */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <Avatar className="h-24 w-24 border-2 border-primary">
-              {member.profile_picture_url && (
-                <AvatarImage
-                  src={member.profile_picture_url}
-                  alt={`${member.first_name} ${member.last_name}`}
-                  crossOrigin="anonymous"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
+      {/* Member Header */}
+      <div
+        className="rounded-2xl p-6 shadow-sm bg-white dark:bg-muted"
+        style={{ backgroundImage: "url('/landing_bg.svg')" }}
+      >
+        <div className="flex flex-col items-center text-center gap-4">
+          <Avatar className="h-24 w-24 border-2 border-primary">
+            {member.profile_picture_url && (
+              <AvatarImage
+                src={member.profile_picture_url}
+                alt={`${member.first_name} ${member.last_name}`}
+                crossOrigin="anonymous"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            )}
+            <AvatarFallback className="text-xl">
+              {getInitials(member.first_name, member.last_name)}
+            </AvatarFallback>
+          </Avatar>
+
+          <div>
+            <h1 className="text-2xl font-bold">
+              {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}
+              {member.last_name}
+              {member.preferred_name && (
+                <span className="text-muted-foreground ml-2 text-lg">({member.preferred_name})</span>
               )}
-              <AvatarFallback className="text-xl">
-                {getInitials(member.first_name, member.last_name)}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-bold">
-                    {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}{member.last_name}
-                    {member.preferred_name && <span className="text-muted-foreground ml-2 text-lg">({member.preferred_name})</span>}
-                  </h1>
-                  
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {member.membership_type && (
-                      <Badge variant="secondary">{member.membership_type.name}</Badge>
-                    )}
-                    {member.membership_status && (
-                      <Badge variant="outline">{member.membership_status.name}</Badge>
-                    )}
-                    {member.envelope_number && (
-                      <Badge variant="outline" className="bg-primary-50 text-primary border-primary-200">
-                        Envelope #{member.envelope_number}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  {member.birthday && (
-                    <div className="flex items-center text-sm">
-                      <Cake className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span>Birthday: {formatDate(member.birthday)}</span>
-                    </div>
-                  )}
-                  {member.membership_date && (
-                    <div className="flex items-center text-sm">
-                      <Heart className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span>Member since: {formatDate(member.membership_date)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
-                {member.email && (
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <a href={`mailto:${member.email}`} className="text-primary hover:underline">
-                      {member.email}
-                    </a>
-                  </div>
-                )}
-                {member.contact_number && (
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <a href={`tel:${member.contact_number}`} className="text-primary hover:underline">
-                      {member.contact_number}
-                    </a>
-                  </div>
-                )}
-                {member.address && (
-                  <div className="flex items-center md:col-span-2">
-                    <MapPin className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">{member.address}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            </h1>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="flex flex-wrap justify-center gap-2">
+            {member.membership_type && (
+              <Badge variant="secondary">{member.membership_type.name}</Badge>
+            )}
+            {member.membership_status && (
+              <Badge variant="outline">{member.membership_status.name}</Badge>
+            )}
+            {member.envelope_number && (
+              <Badge variant="outline" className="bg-primary-50 text-primary border-primary-200">
+                Envelope #{member.envelope_number}
+              </Badge>
+            )}
+          </div>
+
+          {member.address && (
+            <div className="flex items-center justify-center mt-2">
+              <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span>{member.address}</span>
+            </div>
+          )}
+
+          <div className="flex flex-col items-center gap-1 mt-2">
+            {member.email && (
+              <div className="flex items-center">
+                <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                <a href={`mailto:${member.email}`} className="text-primary hover:underline">
+                  {member.email}
+                </a>
+              </div>
+            )}
+            {member.contact_number && (
+              <div className="flex items-center">
+                <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                <a href={`tel:${member.contact_number}`} className="text-primary hover:underline">
+                  {member.contact_number}
+                </a>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 mt-2">
+            {member.birthday && (
+              <div className="flex items-center text-sm justify-center">
+                <Cake className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span>Birthday: {formatDate(member.birthday)}</span>
+              </div>
+            )}
+            {member.membership_date && (
+              <div className="flex items-center text-sm justify-center">
+                <Heart className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span>Member since: {formatDate(member.membership_date)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Member Details Tabs */}
       <Card>
