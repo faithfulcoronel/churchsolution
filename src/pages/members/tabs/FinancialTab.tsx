@@ -10,6 +10,7 @@ import {
 } from '../../../components/ui2/card';
 import { TrendingUp } from 'lucide-react';
 import { Charts } from '../../../components/ui2/charts';
+import { Tabs, TabsList, TabsTrigger } from '../../../components/ui2/tabs';
 import { useCurrencyStore } from '../../../stores/currencyStore';
 import { formatCurrency } from '../../../utils/currency';
 import { Loader2 } from 'lucide-react';
@@ -26,9 +27,11 @@ export default function FinancialTab({ memberId }: FinancialTabProps) {
     useRecentTransactions,
   } = useMemberService();
 
+  const [trendRange, setTrendRange] = React.useState<'current' | 'thisYear' | 'lastYear'>('current');
+
   const { data: totals, isLoading: totalsLoading } = useFinancialTotals(memberId);
 
-  const { data: trends, isLoading: trendsLoading } = useFinancialTrends(memberId);
+  const { data: trends, isLoading: trendsLoading } = useFinancialTrends(memberId, trendRange);
 
   const { data: recent } = useRecentTransactions(memberId);
 
@@ -97,7 +100,22 @@ export default function FinancialTab({ memberId }: FinancialTabProps) {
 
       <Card className="overflow-hidden">
         <CardHeader className="border-b border-border">
-          <CardTitle>Giving Trend</CardTitle>
+          <div className="flex items-center justify-between gap-4">
+            <CardTitle>Giving Trend</CardTitle>
+            <Tabs value={trendRange} onValueChange={v => setTrendRange(v as any)}>
+              <TabsList className="grid grid-cols-3 bg-muted p-1 rounded-full">
+                <TabsTrigger value="current" className="flex-1 text-xs font-medium px-3 py-1.5 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                  Current
+                </TabsTrigger>
+                <TabsTrigger value="thisYear" className="flex-1 text-xs font-medium px-3 py-1.5 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                  This Year
+                </TabsTrigger>
+                <TabsTrigger value="lastYear" className="flex-1 text-xs font-medium px-3 py-1.5 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                  Last Year
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </CardHeader>
         <CardContent>
           {trendsLoading ? (
