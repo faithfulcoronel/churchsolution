@@ -26,6 +26,7 @@ import {
   Mail,
   Phone,
   Settings,
+  Cake,
 } from "lucide-react";
 import { Container } from "../../components/ui2/container";
 import {
@@ -38,6 +39,7 @@ import { Input } from "../../components/ui2/input";
 import {
   RecentMemberItem,
   DirectoryMemberItem,
+  BirthdayMemberItem,
 } from "../../components/members";
 import {
   DropdownMenu,
@@ -59,6 +61,7 @@ interface MemberSummary {
   profile_picture_url: string | null;
   created_at: string | null;
   address?: string | null;
+  birthday?: string | null;
 }
 
 function MembersDashboard() {
@@ -70,7 +73,11 @@ function MembersDashboard() {
     queryFn: () => tenantUtils.getCurrentTenant(),
   });
 
-  const { useQuery: useMembersQuery } = useMemberService();
+  const {
+    useQuery: useMembersQuery,
+    useCurrentMonthBirthdays,
+    useBirthdaysByMonth,
+  } = useMemberService();
   const { useQuery: useStatusQuery } = useMembershipStatusRepository();
 
   const { data: visitorStatusData } = useStatusQuery({
@@ -138,6 +145,22 @@ function MembersDashboard() {
   });
   const directoryMembers = (directoryMembersResult?.data ||
     []) as MemberSummary[];
+
+  const [birthdayTab, setBirthdayTab] = React.useState('today');
+  const [selectedMonth, setSelectedMonth] = React.useState(
+    new Date().getMonth() + 1,
+  );
+  const { data: currentMonthBirthdays } = useCurrentMonthBirthdays();
+  const todayBirthdays = React.useMemo(() => {
+    if (!currentMonthBirthdays) return [];
+    const today = new Date();
+    return currentMonthBirthdays.filter(b => {
+      const d = new Date(b.birthday);
+      return d.getDate() === today.getDate();
+    });
+  }, [currentMonthBirthdays]);
+  const { data: selectedMonthBirthdaysData } = useBirthdaysByMonth(selectedMonth);
+  const selectedMonthBirthdays = selectedMonthBirthdaysData || [];
 
   const highlights = [
     {
@@ -238,7 +261,7 @@ function MembersDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-2 bg-muted p-1 rounded-full">
+        <TabsList className="w-full grid grid-cols-3 bg-muted p-1 rounded-full">
           <TabsTrigger
             value="overview"
             className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm hover:text-black dark:hover:text-foreground"
@@ -250,6 +273,12 @@ function MembersDashboard() {
             className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm hover:text-black dark:hover:text-foreground"
           >
             Directory
+          </TabsTrigger>
+          <TabsTrigger
+            value="birthdays"
+            className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300 px-6 py-2 rounded-full transition-colors duration-200 ease-in-out data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm hover:text-black dark:hover:text-foreground"
+          >
+            Birthdays
           </TabsTrigger>
         </TabsList>
 
@@ -358,6 +387,68 @@ function MembersDashboard() {
                   View all members <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="birthdays" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Member Birthdays</CardTitle>
+              <CardDescription>Celebrate your members</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={birthdayTab} onValueChange={setBirthdayTab}>
+                <TabsList className="w-full grid grid-cols-3 bg-muted p-1 rounded-full">
+                  <TabsTrigger value="today">Today</TabsTrigger>
+                  <TabsTrigger value="month">This Month</TabsTrigger>
+                  <TabsTrigger value="year">By Month</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="today" className="mt-4 space-y-2">
+                  {todayBirthdays.length ? (
+                    todayBirthdays.map((m) => (
+                      <BirthdayMemberItem key={m.id} member={m as any} />
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No birthdays today.</p>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="month" className="mt-4 space-y-2">
+                  {currentMonthBirthdays && currentMonthBirthdays.length ? (
+                    currentMonthBirthdays.map((m) => (
+                      <BirthdayMemberItem key={m.id} member={m as any} />
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No birthdays this month.</p>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="year" className="mt-4 space-y-6">
+                  <div className="flex flex-wrap gap-2">
+                    {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m,i)=> (
+                      <Button
+                        key={i}
+                        variant={selectedMonth===i+1?'default':'outline'}
+                        size="sm"
+                        onClick={()=>setSelectedMonth(i+1)}
+                      >
+                        {m}
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    {selectedMonthBirthdays.length ? (
+                      selectedMonthBirthdays.map((m) => (
+                        <BirthdayMemberItem key={m.id} member={m as any} />
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No birthdays.</p>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>

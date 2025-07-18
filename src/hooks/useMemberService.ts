@@ -83,5 +83,29 @@ export function useMemberService() {
       },
     });
 
-  return { useQuery, useQueryAll, useFindById, useCreate, useUpdate, useDelete };
+  const useCurrentMonthBirthdays = () =>
+    useReactQuery({
+      queryKey: ['members', 'birthdays', 'current-month'],
+      queryFn: () => service.getCurrentMonthBirthdays(),
+      staleTime: 5 * 60 * 1000,
+    });
+
+  const useBirthdaysByMonth = (month: number) =>
+    useReactQuery({
+      queryKey: ['members', 'birthdays', month],
+      queryFn: () => service.getBirthdaysByMonth(month),
+      staleTime: 5 * 60 * 1000,
+      enabled: month >= 1 && month <= 12,
+    });
+
+  return {
+    useQuery,
+    useQueryAll,
+    useFindById,
+    useCreate,
+    useUpdate,
+    useDelete,
+    useCurrentMonthBirthdays,
+    useBirthdaysByMonth,
+  };
 }
