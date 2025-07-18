@@ -21,6 +21,7 @@ import {
   AlertDialogCancel,
 } from '../../components/ui2/alert-dialog';
 import { Save, Loader2 } from 'lucide-react';
+import { Badge } from '../../components/ui2/badge';
 
 // Import tabs
 import BasicInfoTab from './tabs/BasicInfoTab';
@@ -36,7 +37,7 @@ function MemberAddEdit() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<string, Record<string, string[]>>>({});
+  const [formErrors, setFormErrors] = useState<Record<string, string[]>>({});
   const [formData, setFormData] = useState<Partial<Member>>({
     gender: 'male',
     marital_status: 'single',
@@ -99,22 +100,22 @@ function MemberAddEdit() {
   const updateMemberMutation = useUpdate();
 
   const validateForm = () => {
-    const errors: Record<string, Record<string, string[]>> = {};
-    const basic: Record<string, string[]> = {};
-    const contact: Record<string, string[]> = {};
+    const errors: Record<string, string[]> = {};
+    const basic: string[] = [];
+    const contact: string[] = [];
 
-    if (!formData.first_name?.trim()) basic.first_name = ['Required'];
-    if (!formData.last_name?.trim()) basic.last_name = ['Required'];
-    if (!formData.gender) basic.gender = ['Required'];
-    if (!formData.marital_status) basic.marital_status = ['Required'];
-    if (!formData.membership_type_id) basic.membership_type_id = ['Required'];
-    if (!formData.membership_status_id) basic.membership_status_id = ['Required'];
+    if (!formData.first_name?.trim()) basic.push('First name required');
+    if (!formData.last_name?.trim()) basic.push('Last name required');
+    if (!formData.gender) basic.push('Gender required');
+    if (!formData.marital_status) basic.push('Marital status required');
+    if (!formData.membership_type_id) basic.push('Membership type required');
+    if (!formData.membership_status_id) basic.push('Membership status required');
 
-    if (!formData.contact_number?.trim()) contact.contact_number = ['Required'];
-    if (!formData.address?.trim()) contact.address = ['Required'];
+    if (!formData.contact_number?.trim()) contact.push('Contact number required');
+    if (!formData.address?.trim()) contact.push('Address required');
 
-    if (Object.keys(basic).length) errors.basic = basic;
-    if (Object.keys(contact).length) errors.contact = contact;
+    if (basic.length) errors.basic = basic;
+    if (contact.length) errors.contact = contact;
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -170,29 +171,6 @@ function MemberAddEdit() {
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-
-    const fieldTabs: Record<string, string> = {
-      first_name: 'basic',
-      last_name: 'basic',
-      gender: 'basic',
-      marital_status: 'basic',
-      membership_type_id: 'basic',
-      membership_status_id: 'basic',
-      contact_number: 'contact',
-      address: 'contact',
-    };
-
-    const tab = fieldTabs[field];
-    if (tab && formErrors[tab]?.[field]) {
-      setFormErrors(prev => {
-        const { [field]: _removed, ...restFields } = prev[tab];
-        const updated = { ...prev, [tab]: restFields };
-        if (Object.keys(updated[tab]).length === 0) {
-          delete updated[tab];
-        }
-        return updated;
-      });
-    }
   };
 
   const handleProfilePictureChange = (file: File | null) => {
@@ -208,33 +186,31 @@ function MemberAddEdit() {
     {
       id: 'basic',
       label: 'Basic Info',
-      badge: formErrors.basic ? Object.keys(formErrors.basic).length : undefined,
+      badge: formErrors.basic?.length,
       content: (
         <BasicInfoTab
           mode={mode}
           member={formData}
           onChange={handleInputChange}
-          errors={formErrors.basic}
         />
       ),
     },
     {
       id: 'contact',
       label: 'Contact Info',
-      badge: formErrors.contact ? Object.keys(formErrors.contact).length : undefined,
+      badge: formErrors.contact?.length,
       content: (
         <ContactInfoTab
           mode={mode}
           member={formData}
           onChange={handleInputChange}
-          errors={formErrors.contact}
         />
       ),
     },
     {
       id: 'ministry',
       label: 'Ministry Info',
-      badge: formErrors.ministry ? Object.keys(formErrors.ministry).length : undefined,
+      badge: formErrors.ministry?.length,
       content: (
         <MinistryInfoTab
           mode={mode}
@@ -246,7 +222,7 @@ function MemberAddEdit() {
     {
       id: 'notes',
       label: 'Notes',
-      badge: formErrors.notes ? Object.keys(formErrors.notes).length : undefined,
+      badge: formErrors.notes?.length,
       content: (
         <NotesTab
           mode={mode}
@@ -301,8 +277,17 @@ function MemberAddEdit() {
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList size="sm">
                   {tabs.map(tab => (
-                    <TabsTrigger key={tab.id} value={tab.id}>
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className={formErrors[tab.id]?.length ? 'text-destructive' : undefined}
+                    >
                       {tab.label}
+                      {tab.badge ? (
+                        <Badge variant="destructive" className="ml-2">
+                          {tab.badge}
+                        </Badge>
+                      ) : null}
                     </TabsTrigger>
                   ))}
                 </TabsList>
