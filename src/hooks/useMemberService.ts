@@ -106,10 +106,13 @@ export function useMemberService() {
       enabled: !!memberId,
     });
 
-  const useFinancialTrends = (memberId: string) =>
+  const useFinancialTrends = (
+    memberId: string,
+    range: 'current' | 'thisYear' | 'lastYear' = 'current',
+  ) =>
     useReactQuery({
-      queryKey: ['member-financial-trends', memberId],
-      queryFn: () => service.getFinancialTrends(memberId),
+      queryKey: ['member-financial-trends', memberId, range],
+      queryFn: () => service.getFinancialTrends(memberId, range),
       staleTime: 5 * 60 * 1000,
       enabled: !!memberId,
     });

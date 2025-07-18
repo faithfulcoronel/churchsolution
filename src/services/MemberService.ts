@@ -7,6 +7,7 @@ import {
   startOfMonth,
   startOfWeek,
   startOfYear,
+  addMonths,
   subMonths,
   subYears,
   subWeeks,
@@ -156,15 +157,47 @@ export class MemberService {
     };
   }
 
-  async getFinancialTrends(memberId: string) {
+  async getFinancialTrends(
+    memberId: string,
+    range: 'current' | 'thisYear' | 'lastYear' = 'current',
+  ) {
     const accountId = await this.getAccountId(memberId);
     if (!accountId) return [] as { month: string; contributions: number }[];
 
     const today = new Date();
-    const months = Array.from({ length: 12 }, (_, i) => {
-      const d = subMonths(today, i);
-      return { start: startOfMonth(d), end: endOfMonth(d), label: format(d, 'MMM yyyy') };
-    }).reverse();
+    let months: { start: Date; end: Date; label: string }[] = [];
+
+    if (range === 'thisYear') {
+      const start = startOfYear(today);
+      const count = today.getMonth() + 1;
+      months = Array.from({ length: count }, (_, i) => {
+        const d = addMonths(start, i);
+        return {
+          start: startOfMonth(d),
+          end: endOfMonth(d),
+          label: format(d, 'MMM yyyy'),
+        };
+      });
+    } else if (range === 'lastYear') {
+      const start = startOfYear(subYears(today, 1));
+      months = Array.from({ length: 12 }, (_, i) => {
+        const d = addMonths(start, i);
+        return {
+          start: startOfMonth(d),
+          end: endOfMonth(d),
+          label: format(d, 'MMM yyyy'),
+        };
+      });
+    } else {
+      months = Array.from({ length: 12 }, (_, i) => {
+        const d = subMonths(today, i);
+        return {
+          start: startOfMonth(d),
+          end: endOfMonth(d),
+          label: format(d, 'MMM yyyy'),
+        };
+      }).reverse();
+    }
 
     const data = await Promise.all(
       months.map(({ start, end, label }) =>
