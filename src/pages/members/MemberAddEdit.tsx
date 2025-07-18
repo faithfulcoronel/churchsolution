@@ -274,13 +274,13 @@ function MemberAddEdit() {
             </CardHeader>
 
             <CardContent>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList size="sm">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full grid grid-cols-4 bg-muted p-1 rounded-full mb-4">
                   {tabs.map(tab => (
                     <TabsTrigger
                       key={tab.id}
                       value={tab.id}
-                      className={formErrors[tab.id]?.length ? 'text-destructive' : undefined}
+                      className={`flex-1 text-sm font-medium px-6 py-2 rounded-full data-[state=active]:bg-white dark:data-[state=active]:bg-muted data-[state=active]:text-black dark:data-[state=active]:text-foreground data-[state=active]:shadow-sm ${formErrors[tab.id]?.length ? 'text-destructive' : ''}`}
                     >
                       {tab.label}
                       {tab.badge ? (
