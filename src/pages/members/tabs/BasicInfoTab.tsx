@@ -17,10 +17,9 @@ interface BasicInfoTabProps {
   member: Partial<Member>;
   onChange: (field: string, value: any) => void;
   mode?: 'view' | 'edit' | 'add';
-  errors?: Record<string, string[]>;
 }
 
-function BasicInfoTab({ member, onChange, mode = 'view', errors }: BasicInfoTabProps) {
+function BasicInfoTab({ member, onChange, mode = 'view' }: BasicInfoTabProps) {
   // Fetch category options
   const { data: membershipCategories } = useQuery({
     queryKey: ['categories', 'membership'],
@@ -126,7 +125,6 @@ function BasicInfoTab({ member, onChange, mode = 'view', errors }: BasicInfoTabP
               onChange={e => onChange('first_name', e.target.value)}
               icon={<User className="h-4 w-4" />}
               required
-              error={errors?.first_name?.[0]}
             />
             <Input
               label="Middle Name"
@@ -140,7 +138,6 @@ function BasicInfoTab({ member, onChange, mode = 'view', errors }: BasicInfoTabP
               onChange={e => onChange('last_name', e.target.value)}
               icon={<User className="h-4 w-4" />}
               required
-              error={errors?.last_name?.[0]}
             />
             <Input
               label="Preferred Name"
@@ -152,7 +149,7 @@ function BasicInfoTab({ member, onChange, mode = 'view', errors }: BasicInfoTabP
               value={member.gender || ''}
               onValueChange={value => onChange('gender', value)}
             >
-              <SelectTrigger label="Gender" required error={errors?.gender?.[0]}>
+              <SelectTrigger label="Gender" required>
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -164,7 +161,7 @@ function BasicInfoTab({ member, onChange, mode = 'view', errors }: BasicInfoTabP
               value={member.marital_status || ''}
               onValueChange={value => onChange('marital_status', value)}
             >
-              <SelectTrigger label="Marital Status" required error={errors?.marital_status?.[0]}>
+              <SelectTrigger label="Marital Status" required>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -187,7 +184,7 @@ function BasicInfoTab({ member, onChange, mode = 'view', errors }: BasicInfoTabP
               value={member.membership_type_id || ''}
               onValueChange={value => onChange('membership_type_id', value)}
             >
-              <SelectTrigger label="Membership Type" required error={errors?.membership_type_id?.[0]}>
+              <SelectTrigger label="Membership Type" required>
                 <SelectValue placeholder="Select membership type" />
               </SelectTrigger>
               <SelectContent>
@@ -202,7 +199,7 @@ function BasicInfoTab({ member, onChange, mode = 'view', errors }: BasicInfoTabP
               value={member.membership_status_id || ''}
               onValueChange={value => onChange('membership_status_id', value)}
             >
-              <SelectTrigger label="Status" required error={errors?.membership_status_id?.[0]}>
+              <SelectTrigger label="Status" required>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>

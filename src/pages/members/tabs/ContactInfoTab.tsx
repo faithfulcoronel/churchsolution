@@ -9,10 +9,9 @@ interface ContactInfoTabProps {
   member: Partial<Member>;
   onChange: (field: string, value: any) => void;
   mode?: 'view' | 'edit' | 'add';
-  errors?: Record<string, string[]>;
 }
 
-function ContactInfoTab({ member, onChange, mode = 'view', errors }: ContactInfoTabProps) {
+function ContactInfoTab({ member, onChange, mode = 'view' }: ContactInfoTabProps) {
   if (!member) return null;
   if (mode === 'view') {
     return (
@@ -115,7 +114,6 @@ function ContactInfoTab({ member, onChange, mode = 'view', errors }: ContactInfo
               value={member.contact_number || ''}
               onChange={e => onChange('contact_number', e.target.value)}
               required
-              error={errors?.contact_number?.[0]}
             />
             <Textarea
               value={member.address || ''}
@@ -124,9 +122,6 @@ function ContactInfoTab({ member, onChange, mode = 'view', errors }: ContactInfo
               className="min-h-[80px]"
               required
             />
-            {errors?.address?.[0] && (
-              <p className="text-sm text-destructive">{errors.address[0]}</p>
-            )}
           </div>
           <div className="space-y-4">
             <Input
