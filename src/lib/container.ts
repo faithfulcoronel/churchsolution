@@ -155,6 +155,7 @@ import { SupabaseAnnouncementService, type AnnouncementService } from '../servic
 import { SupabaseActivityLogService, type ActivityLogService } from '../services/ActivityLogService';
 import { UserRoleService } from '../services/UserRoleService';
 import { LicenseService } from '../services/LicenseService';
+import { SupabaseAccountService, type AccountService } from '../services/AccountService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -335,6 +336,10 @@ container
 container
   .bind<AnnouncementService>(TYPES.AnnouncementService)
   .to(SupabaseAnnouncementService)
+  .inSingletonScope();
+container
+  .bind<AccountService>(TYPES.AccountService)
+  .to(SupabaseAccountService)
   .inSingletonScope();
 container
   .bind<SettingService>(TYPES.SettingService)
