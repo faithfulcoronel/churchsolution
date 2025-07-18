@@ -46,8 +46,8 @@ export class SourceRecentTransactionRepository implements ISourceRecentTransacti
   }
 
   async getBalance(accountId: string) {
-    const amounts = await this.adapter.fetchBalance(accountId);
-    return amounts.reduce((sum: number, a: any) => sum + Number(a), 0);
+    const balance = await this.adapter.fetchBalance(accountId);
+    return Number(balance) || 0;
   }
 
   async getBalanceByFund(fundId: string) {

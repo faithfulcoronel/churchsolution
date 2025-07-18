@@ -27,7 +27,7 @@ const adapter: ISourceRecentTransactionAdapter = {
       amount: '50'
     }
   ],
-  fetchBalance: async () => ['10', '-5', '20'],
+  fetchBalance: async () => 25,
   fetchBalanceByFund: async () => ['10', '-5', '20']
 } as any;
 

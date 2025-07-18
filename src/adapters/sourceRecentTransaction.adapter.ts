@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { injectable } from 'inversify';
 import { supabase } from '../lib/supabase';
 import { tenantUtils } from '../utils/tenantUtils';
+import { format } from 'date-fns';
 
 @injectable()
 export class SourceRecentTransactionAdapter {
@@ -63,14 +64,15 @@ export class SourceRecentTransactionAdapter {
     const tenantId = await tenantUtils.getTenantId();
     if (!tenantId) throw new Error('No tenant context found');
 
-    const { data, error } = await supabase
-      .from('source_recent_transactions_view')
-      .select('amount')
-      .eq('account_id', accountId)
-      .eq('tenant_id', tenantId);
+    const { data, error } = await supabase.rpc('report_trial_balance', {
+      p_tenant_id: tenantId,
+      p_end_date: format(new Date(), 'yyyy-MM-dd'),
+    });
 
     if (error) throw error;
-    return (data || []).map((r: any) => r.amount);
+    const row = (data || []).find((r: any) => r.account_id === accountId);
+    if (!row) return 0;
+    return Number(row.debit_balance) - Number(row.credit_balance);
   }
 
   async fetchBalanceByFund(fundId: string) {
