@@ -10,8 +10,7 @@ import {
   Cake,
   Heart,
   Loader2,
-  AlertTriangle,
-  User
+  AlertTriangle
 } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 
@@ -215,168 +214,79 @@ function MemberProfile() {
           <TabsContent value="profile" className="p-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Personal Information */}
-              <Card>
-                <CardHeader>
+              <Card className="overflow-hidden">
+                <CardHeader className="border-b border-border">
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-6 border-border border-b">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Personal Information</h3>
-                      <dl className="space-y-4">
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground">Full Name</dt>
-                          <dd className="mt-1">
-                            {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}
-                            {member.last_name}
-                          </dd>
-                        </div>
-                        {member.preferred_name && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground">Preferred Name</dt>
-                            <dd className="mt-1">{member.preferred_name}</dd>
-                          </div>
-                        )}
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground">Gender</dt>
-                          <dd className="mt-1 capitalize">{member.gender || 'Not specified'}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground">Marital Status</dt>
-                          <dd className="mt-1 capitalize">{member.marital_status || 'Not specified'}</dd>
-                        </div>
-                        {member.birthday && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground">Birthday</dt>
-                            <dd className="mt-1">{new Date(member.birthday).toLocaleDateString()}</dd>
-                          </div>
-                        )}
-                      </dl>
+                    <div className="space-y-2">
+                      <p>
+                        <span className="font-medium">Full Name:</span>{' '}
+                        {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}
+                        {member.last_name}
+                      </p>
+                      {member.preferred_name && (
+                        <p>
+                          <span className="font-medium">Preferred Name:</span>{' '}
+                          {member.preferred_name}
+                        </p>
+                      )}
+                      <p>
+                        <span className="font-medium">Gender:</span>{' '}
+                        {member.gender || 'Not specified'}
+                      </p>
+                      <p>
+                        <span className="font-medium">Marital Status:</span>{' '}
+                        {member.marital_status || 'Not specified'}
+                      </p>
+                      {member.birthday && (
+                        <p>
+                          <span className="font-medium">Birthday:</span>{' '}
+                          {new Date(member.birthday).toLocaleDateString()}
+                        </p>
+                      )}
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Membership Information</h3>
-                      <dl className="space-y-4">
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground">Membership Type</dt>
-                          <dd className="mt-1">{member.membership_type?.name || 'Not specified'}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground">Status</dt>
-                          <dd className="mt-1">{member.membership_status?.name || 'Not specified'}</dd>
-                        </div>
-                        {member.membership_date && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground">Membership Date</dt>
-                            <dd className="mt-1">{new Date(member.membership_date).toLocaleDateString()}</dd>
-                          </div>
-                        )}
-                        {member.baptism_date && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground">Baptism Date</dt>
-                            <dd className="mt-1">{new Date(member.baptism_date).toLocaleDateString()}</dd>
-                          </div>
-                        )}
-                        {member.envelope_number && (
-                          <div>
-                            <dt className="text-sm font-medium text-muted-foreground">Envelope Number</dt>
-                            <dd className="mt-1">{member.envelope_number}</dd>
-                          </div>
-                        )}
-                      </dl>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Contact Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contact Information</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Contact Information</h3>
-                      <dl className="space-y-4">
-                        {member.email && (
-                          <div className="flex items-start">
-                            <Mail className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Email</dt>
-                              <dd className="mt-1">
-                                <a href={`mailto:${member.email}`} className="text-primary hover:underline">
-                                  {member.email}
-                                </a>
-                              </dd>
-                            </div>
-                          </div>
-                        )}
-                        {member.contact_number && (
-                          <div className="flex items-start">
-                            <Phone className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
-                              <dd className="mt-1">
-                                <a href={`tel:${member.contact_number}`} className="text-primary hover:underline">
-                                  {member.contact_number}
-                                </a>
-                              </dd>
-                            </div>
-                          </div>
-                        )}
-                        {member.address && (
-                          <div className="flex items-start">
-                            <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Address</dt>
-                              <dd className="mt-1 whitespace-pre-line">{member.address}</dd>
-                            </div>
-                          </div>
-                        )}
-                      </dl>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Emergency Contact</h3>
-                      {member.emergency_contact_name || member.emergency_contact_phone ? (
-                        <dl className="space-y-4">
-                          {member.emergency_contact_name && (
-                            <div className="flex items-start">
-                              <User className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
-                              <div>
-                                <dt className="text-sm font-medium text-muted-foreground">Name</dt>
-                                <dd className="mt-1">{member.emergency_contact_name}</dd>
-                              </div>
-                            </div>
-                          )}
-                          {member.emergency_contact_phone && (
-                            <div className="flex items-start">
-                              <Phone className="h-5 w-5 text-muted-foreground mt-0.5 mr-2" />
-                              <div>
-                                <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
-                                <dd className="mt-1">
-                                  <a href={`tel:${member.emergency_contact_phone}`} className="text-primary hover:underline">
-                                    {member.emergency_contact_phone}
-                                  </a>
-                                </dd>
-                              </div>
-                            </div>
-                          )}
-                        </dl>
-                      ) : (
-                        <p className="text-muted-foreground">No emergency contact information provided.</p>
+                    <div className="space-y-2">
+                      <p>
+                        <span className="font-medium">Membership Type:</span>{' '}
+                        {member.membership_type?.name || 'Not specified'}
+                      </p>
+                      <p>
+                        <span className="font-medium">Status:</span>{' '}
+                        {member.membership_status?.name || 'Not specified'}
+                      </p>
+                      {member.membership_date && (
+                        <p>
+                          <span className="font-medium">Membership Date:</span>{' '}
+                          {new Date(member.membership_date).toLocaleDateString()}
+                        </p>
+                      )}
+                      {member.baptism_date && (
+                        <p>
+                          <span className="font-medium">Baptism Date:</span>{' '}
+                          {new Date(member.baptism_date).toLocaleDateString()}
+                        </p>
+                      )}
+                      {member.envelope_number && (
+                        <p>
+                          <span className="font-medium">Envelope Number:</span>{' '}
+                          {member.envelope_number}
+                        </p>
                       )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
+
               {/* Ministry Information */}
-              <Card>
-                <CardHeader>
+              <Card className="overflow-hidden">
+                <CardHeader className="border-b border-border">
                   <CardTitle>Ministry Information</CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-6 border-border border-b">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <h3 className="text-lg font-medium mb-4">Ministry Involvement</h3>
@@ -497,11 +407,11 @@ function MemberProfile() {
               </Card>
 
               {/* Pastoral Notes */}
-              <Card>
-                <CardHeader>
+              <Card className="overflow-hidden">
+                <CardHeader className="border-b border-border">
                   <CardTitle>Pastoral Notes</CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 space-y-6">
+                <CardContent className="p-6 space-y-6 border-border border-b">
                   {member.pastoral_notes ? (
                     <p className="whitespace-pre-line">{member.pastoral_notes}</p>
                   ) : (
