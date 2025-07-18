@@ -19,11 +19,10 @@ import {
 import BackButton from '../../components/BackButton';
 
 // UI Components
-import { Card, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import { Badge } from '../../components/ui2/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
+import { Tabs, TabsList, Tab, TabPanel } from '../../components/ui2/tabs';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -75,14 +74,12 @@ function MemberProfile() {
 
   if (error || !member) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <AlertTriangle className="h-12 w-12 text-warning mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">Member Not Found</h3>
-          <p className="text-muted-foreground mb-6">The member you're looking for doesn't exist or has been removed.</p>
-          <BackButton fallbackPath="/members/list" label="Go Back to Members" />
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-12">
+        <AlertTriangle className="h-12 w-12 text-warning mb-4" />
+        <h3 className="text-lg font-medium text-foreground mb-2">Member Not Found</h3>
+        <p className="text-muted-foreground mb-6">The member you're looking for doesn't exist or has been removed.</p>
+        <BackButton fallbackPath="/members/list" label="Go Back to Members" />
+      </div>
     );
   }
 
@@ -214,42 +211,42 @@ function MemberProfile() {
             View and manage member information
           </p>
         </div>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="basic">
-                <User className="h-4 w-4 mr-2" />
-                Basic Info
-              </TabsTrigger>
-              <TabsTrigger value="contact">
-                <Phone className="h-4 w-4 mr-2" />
-                Contact Info
-              </TabsTrigger>
-              <TabsTrigger value="ministry">
-                <Users className="h-4 w-4 mr-2" />
-                Ministry Info
-              </TabsTrigger>
-              <TabsTrigger value="notes">
-                <FileText className="h-4 w-4 mr-2" />
-                Notes
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="basic">
-              <BasicInfoTab mode="view" member={member} onChange={() => {}} />
-            </TabsContent>
+        <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} className="w-full">
+          <TabsList className="mb-6">
+            <Tab value="basic">
+              <User className="h-4 w-4 mr-2" />
+              Basic Info
+            </Tab>
+            <Tab value="contact">
+              <Phone className="h-4 w-4 mr-2" />
+              Contact Info
+            </Tab>
+            <Tab value="ministry">
+              <Users className="h-4 w-4 mr-2" />
+              Ministry Info
+            </Tab>
+            <Tab value="notes">
+              <FileText className="h-4 w-4 mr-2" />
+              Notes
+            </Tab>
+          </TabsList>
 
-            <TabsContent value="contact">
-              <ContactInfoTab mode="view" member={member} onChange={() => {}} />
-            </TabsContent>
+          <TabPanel value="basic">
+            <BasicInfoTab mode="view" member={member} onChange={() => {}} />
+          </TabPanel>
 
-            <TabsContent value="ministry">
-              <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
-            </TabsContent>
+          <TabPanel value="contact">
+            <ContactInfoTab mode="view" member={member} onChange={() => {}} />
+          </TabPanel>
 
-            <TabsContent value="notes">
-              <NotesTab mode="view" member={member} onChange={() => {}} />
-            </TabsContent>
-          </Tabs>
+          <TabPanel value="ministry">
+            <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
+          </TabPanel>
+
+          <TabPanel value="notes">
+            <NotesTab mode="view" member={member} onChange={() => {}} />
+          </TabPanel>
+        </Tabs>
       </div>
 
       {/* Delete Confirmation Dialog */}
