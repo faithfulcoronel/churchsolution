@@ -219,64 +219,75 @@ function MemberProfile() {
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 border-border border-b">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <p>
-                        <span className="font-medium">Full Name:</span>{' '}
+                  <dl className="divide-y divide-border">
+                    <div className="py-3 grid grid-cols-3 gap-4">
+                      <dt className="text-sm font-medium text-muted-foreground">Full Name:</dt>
+                      <dd className="text-sm text-foreground col-span-2">
                         {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}
                         {member.last_name}
-                      </p>
-                      {member.preferred_name && (
-                        <p>
-                          <span className="font-medium">Preferred Name:</span>{' '}
-                          {member.preferred_name}
-                        </p>
-                      )}
-                      <p>
-                        <span className="font-medium">Gender:</span>{' '}
+                      </dd>
+                    </div>
+                    {member.preferred_name && (
+                      <div className="py-3 grid grid-cols-3 gap-4">
+                        <dt className="text-sm font-medium text-muted-foreground">Preferred Name:</dt>
+                        <dd className="text-sm text-foreground col-span-2">{member.preferred_name}</dd>
+                      </div>
+                    )}
+                    <div className="py-3 grid grid-cols-3 gap-4">
+                      <dt className="text-sm font-medium text-muted-foreground">Gender:</dt>
+                      <dd className="text-sm text-foreground col-span-2 capitalize">
                         {member.gender || 'Not specified'}
-                      </p>
-                      <p>
-                        <span className="font-medium">Marital Status:</span>{' '}
+                      </dd>
+                    </div>
+                    <div className="py-3 grid grid-cols-3 gap-4">
+                      <dt className="text-sm font-medium text-muted-foreground">Marital Status:</dt>
+                      <dd className="text-sm text-foreground col-span-2 capitalize">
                         {member.marital_status || 'Not specified'}
-                      </p>
-                      {member.birthday && (
-                        <p>
-                          <span className="font-medium">Birthday:</span>{' '}
+                      </dd>
+                    </div>
+                    {member.birthday && (
+                      <div className="py-3 grid grid-cols-3 gap-4">
+                        <dt className="text-sm font-medium text-muted-foreground">Birthday:</dt>
+                        <dd className="text-sm text-foreground col-span-2">
                           {new Date(member.birthday).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <p>
-                        <span className="font-medium">Membership Type:</span>{' '}
+                        </dd>
+                      </div>
+                    )}
+                    <div className="py-3 grid grid-cols-3 gap-4">
+                      <dt className="text-sm font-medium text-muted-foreground">Membership Type:</dt>
+                      <dd className="text-sm text-foreground col-span-2">
                         {member.membership_type?.name || 'Not specified'}
-                      </p>
-                      <p>
-                        <span className="font-medium">Status:</span>{' '}
-                        {member.membership_status?.name || 'Not specified'}
-                      </p>
-                      {member.membership_date && (
-                        <p>
-                          <span className="font-medium">Membership Date:</span>{' '}
-                          {new Date(member.membership_date).toLocaleDateString()}
-                        </p>
-                      )}
-                      {member.baptism_date && (
-                        <p>
-                          <span className="font-medium">Baptism Date:</span>{' '}
-                          {new Date(member.baptism_date).toLocaleDateString()}
-                        </p>
-                      )}
-                      {member.envelope_number && (
-                        <p>
-                          <span className="font-medium">Envelope Number:</span>{' '}
-                          {member.envelope_number}
-                        </p>
-                      )}
+                      </dd>
                     </div>
-                  </div>
+                    <div className="py-3 grid grid-cols-3 gap-4">
+                      <dt className="text-sm font-medium text-muted-foreground">Status:</dt>
+                      <dd className="text-sm text-foreground col-span-2">
+                        {member.membership_status?.name || 'Not specified'}
+                      </dd>
+                    </div>
+                    {member.membership_date && (
+                      <div className="py-3 grid grid-cols-3 gap-4">
+                        <dt className="text-sm font-medium text-muted-foreground">Membership Date:</dt>
+                        <dd className="text-sm text-foreground col-span-2">
+                          {new Date(member.membership_date).toLocaleDateString()}
+                        </dd>
+                      </div>
+                    )}
+                    {member.baptism_date && (
+                      <div className="py-3 grid grid-cols-3 gap-4">
+                        <dt className="text-sm font-medium text-muted-foreground">Baptism Date:</dt>
+                        <dd className="text-sm text-foreground col-span-2">
+                          {new Date(member.baptism_date).toLocaleDateString()}
+                        </dd>
+                      </div>
+                    )}
+                    {member.envelope_number && (
+                      <div className="py-3 grid grid-cols-3 gap-4">
+                        <dt className="text-sm font-medium text-muted-foreground">Envelope Number:</dt>
+                        <dd className="text-sm text-foreground col-span-2">{member.envelope_number}</dd>
+                      </div>
+                    )}
+                  </dl>
                 </CardContent>
               </Card>
 
