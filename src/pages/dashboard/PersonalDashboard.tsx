@@ -54,6 +54,17 @@ function PersonalDashboard() {
         };
       }).reverse();
 
+      const { data: accountRow, error: accountErr } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('member_id', memberData.id)
+        .single();
+
+      if (accountErr) throw accountErr;
+
+      const accountId = accountRow?.id;
+      if (!accountId) return [];
+
       const monthlyData = await Promise.all(
         months.map(async ({ start, end, month }) => {
           const { data: transactions, error } = await supabase
@@ -71,7 +82,7 @@ function PersonalDashboard() {
                 code
               )
             `)
-            .eq('member_id', memberData.id)
+            .eq('accounts_account_id', accountId)
             .gte('date', format(startOfDay(start), 'yyyy-MM-dd'))
             .lte('date', format(endOfDay(end), 'yyyy-MM-dd'));
 
@@ -89,7 +100,7 @@ function PersonalDashboard() {
           const { data: prevTransactions } = await supabase
             .from('financial_transactions')
             .select('type, debit, credit')
-            .eq('member_id', memberData.id)
+            .eq('accounts_account_id', accountId)
             .gte('date', format(startOfDay(startOfMonth(previousMonth)), 'yyyy-MM-dd'))
             .lte('date', format(endOfDay(endOfMonth(previousMonth)), 'yyyy-MM-dd'))
             .eq('type', 'income');
@@ -129,6 +140,23 @@ function PersonalDashboard() {
       const firstDayOfMonth = startOfMonth(today);
       const lastDayOfMonth = endOfMonth(today);
 
+      const { data: accountRow2, error: accountErr2 } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('member_id', memberData.id)
+        .single();
+
+      if (accountErr2) throw accountErr2;
+
+      const accountId2 = accountRow2?.id;
+      if (!accountId2)
+        return {
+          yearlyTotal: 0,
+          monthlyTotal: 0,
+          averageContribution: 0,
+          categoryBreakdown: [],
+        };
+
       // Get yearly contributions
       const { data: yearlyTransactions, error: yearlyError } = await supabase
         .from('financial_transactions')
@@ -145,7 +173,7 @@ function PersonalDashboard() {
             code
           )
         `)
-        .eq('member_id', memberData.id)
+        .eq('accounts_account_id', accountId2)
         .eq('type', 'income')
         .gte('date', format(startOfDay(startOfYear), 'yyyy-MM-dd'))
         .lte('date', format(endOfDay(endOfYear), 'yyyy-MM-dd'));
@@ -168,7 +196,7 @@ function PersonalDashboard() {
             code
           )
         `)
-        .eq('member_id', memberData.id)
+        .eq('accounts_account_id', accountId2)
         .eq('type', 'income')
         .gte('date', format(startOfDay(firstDayOfMonth), 'yyyy-MM-dd'))
         .lte('date', format(endOfDay(lastDayOfMonth), 'yyyy-MM-dd'));
