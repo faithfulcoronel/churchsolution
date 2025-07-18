@@ -19,7 +19,7 @@ import { Button } from '../../components/ui2/button';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui2/avatar';
 import { Badge } from '../../components/ui2/badge';
 import { Card, CardHeader, CardContent, CardTitle } from '../../components/ui2/card';
-import { Tabs, TabPanel } from '../../components/ui2/tabs';
+import { Tabs, TabsContent } from '../../components/ui2/tabs';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -199,8 +199,8 @@ function MemberProfile() {
             View and manage member information
           </p>
         </div>
-        <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} className="w-full">
-          <TabPanel value="profile" className="p-0">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsContent value="profile" className="p-0">
             <div className="space-y-6">
               <Card className="w-fit">
                 <CardHeader>
@@ -219,7 +219,6 @@ function MemberProfile() {
                   <MinistryInfoTab mode="view" member={member} onChange={() => {}} />
                 </CardContent>
               </Card>
-
           <Card className="w-fit">
             <CardHeader>
               <CardTitle>Pastoral Notes</CardTitle>
