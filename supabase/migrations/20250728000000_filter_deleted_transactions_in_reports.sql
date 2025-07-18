@@ -604,8 +604,7 @@ BEGIN
       COALESCE(c.name, 'Uncategorized') AS category_name,
       SUM(ft.credit) AS amount
     FROM financial_transactions ft
-    JOIN accounts acc ON acc.id = ft.accounts_account_id
-    JOIN members m ON m.id = acc.member_id
+    JOIN members m ON ft.member_id = m.id
     LEFT JOIN categories c ON ft.category_id = c.id
     WHERE ft.tenant_id = p_tenant_id
       AND ft.type = 'income'
