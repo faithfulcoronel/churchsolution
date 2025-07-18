@@ -86,5 +86,6 @@ export const TYPES = {
   LicenseService: 'LicenseService',
   FinancialSourceService: 'FinancialSourceService',
   FundService: 'FundService',
+  FinanceDashboardService: 'FinanceDashboardService',
   MemberService: 'MemberService'
 };

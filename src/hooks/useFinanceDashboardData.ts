@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { container } from "../lib/container";
 import { TYPES } from "../lib/types";
-import type { IFinanceDashboardRepository } from "../repositories/financeDashboard.repository";
+import type { FinanceDashboardService } from "../services/FinanceDashboardService";
 import { useCurrencyStore } from "../stores/currencyStore";
 import { formatCurrency } from "../utils/currency";
 import { categoryUtils } from "../utils/categoryUtils";
@@ -10,8 +10,8 @@ import { startOfMonth, endOfMonth } from "date-fns";
 
 export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
   const { currency } = useCurrencyStore();
-  const repository = container.get<IFinanceDashboardRepository>(
-    TYPES.IFinanceDashboardRepository,
+  const service = container.get<FinanceDashboardService>(
+    TYPES.FinanceDashboardService,
   );
 
   const start = dateRange?.from ?? startOfMonth(new Date());
@@ -19,12 +19,12 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
 
   const { data: monthlyTrends, isLoading: trendsLoading } = useQuery({
     queryKey: ["monthly-trends", start, end],
-    queryFn: () => repository.getMonthlyTrends(start, end),
+    queryFn: () => service.getMonthlyTrends(start, end),
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["finance-stats", start, end],
-    queryFn: () => repository.getMonthlyStats(start, end),
+    queryFn: () => service.getMonthlyStats(start, end),
   });
 
   const { data: incomeCategories, isLoading: incomeCatsLoading } = useQuery({
@@ -39,12 +39,12 @@ export function useFinanceDashboardData(dateRange?: { from: Date; to: Date }) {
 
   const { data: fundBalances, isLoading: fundsLoading } = useQuery({
     queryKey: ["fund-balances"],
-    queryFn: () => repository.getFundBalances(),
+    queryFn: () => service.getFundBalances(),
   });
 
   const { data: sourceBalances, isLoading: sourcesLoading } = useQuery({
     queryKey: ["source-balances"],
-    queryFn: () => repository.getSourceBalances(),
+    queryFn: () => service.getSourceBalances(),
   });
 
   const monthlyTrendsChartData = useMemo(() => {
