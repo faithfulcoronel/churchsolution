@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useMemberRepository } from '../../hooks/useMemberRepository';
+import { useMemberService } from '../../hooks/useMemberService';
 import {
   User,
   Users,
@@ -44,7 +44,7 @@ import NotesTab from './tabs/NotesTab';
 function MemberProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { useFindById, useDelete } = useMemberRepository();
+  const { useFindById, useDelete } = useMemberService();
   const [activeTab, setActiveTab] = useState('basic');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 

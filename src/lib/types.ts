@@ -78,9 +78,11 @@ export const TYPES = {
   ActivityLogService: 'ActivityLogService',
   IncomeExpenseTransactionService: 'IncomeExpenseTransactionService',
   AnnouncementService: 'AnnouncementService',
+  AccountService: 'AccountService',
   DonationImportService: 'DonationImportService',
   SettingService: 'SettingService',
   UserRoleService: 'UserRoleService',
   LicenseService: 'LicenseService',
-  FundService: 'FundService'
+  FundService: 'FundService',
+  MemberService: 'MemberService'
 };
