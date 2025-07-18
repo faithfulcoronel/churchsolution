@@ -27,7 +27,7 @@ import {
   SelectItem
 } from '../../components/ui2/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui2/tabs';
-import { useMemberRepository } from '../../hooks/useMemberRepository';
+import { useMemberService } from '../../hooks/useMemberService';
 import { categoryUtils } from '../../utils/categoryUtils';
 import type { Member } from '../../models/member.model';
 
@@ -115,7 +115,7 @@ export default function AddMemberDialog({ open, onOpenChange }: AddMemberDialogP
     }
   });
 
-  const { useCreate } = useMemberRepository();
+  const { useCreate } = useMemberService();
   const createMutation = useCreate();
 
   const { data: membershipTypes } = useQuery({

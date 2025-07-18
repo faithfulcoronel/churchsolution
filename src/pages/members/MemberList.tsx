@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
 import { useQuery as useReactQuery } from '@tanstack/react-query';
-import { useMemberRepository } from '../../hooks/useMemberRepository';
+import { useMemberService } from '../../hooks/useMemberService';
 import { Member } from '../../models/member.model';
 import { SubscriptionGate } from '../../components/SubscriptionGate';
 import { DataGrid } from '../../components/ui2/data-grid';
@@ -60,7 +60,7 @@ function MemberList() {
     []
   );
 
-  const { useQuery: useMembersQuery, useDelete } = useMemberRepository();
+  const { useQuery: useMembersQuery, useDelete } = useMemberService();
 
   const { data: statusCategories } = useReactQuery({
     queryKey: ['categories', 'member_status'],

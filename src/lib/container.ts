@@ -155,6 +155,7 @@ import { SupabaseAnnouncementService, type AnnouncementService } from '../servic
 import { SupabaseActivityLogService, type ActivityLogService } from '../services/ActivityLogService';
 import { UserRoleService } from '../services/UserRoleService';
 import { LicenseService } from '../services/LicenseService';
+import { MemberService } from '../services/MemberService';
 import { TYPES } from './types';
 
 const container = new Container();
@@ -343,6 +344,10 @@ container
 container
   .bind<LicenseService>(TYPES.LicenseService)
   .to(LicenseService)
+  .inSingletonScope();
+container
+  .bind<MemberService>(TYPES.MemberService)
+  .to(MemberService)
   .inSingletonScope();
 container
   .bind<UserRoleService>(TYPES.UserRoleService)
