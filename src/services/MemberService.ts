@@ -1,5 +1,16 @@
 import { injectable, inject } from 'inversify';
-import { format, endOfMonth, endOfWeek, endOfYear, startOfMonth, startOfWeek, startOfYear, subMonths } from 'date-fns';
+import {
+  format,
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+  subMonths,
+  subYears,
+  subWeeks,
+} from 'date-fns';
 import { TYPES } from '../lib/types';
 import type { IMemberRepository } from '../repositories/member.repository';
 import type { IAccountRepository } from '../repositories/account.repository';
@@ -69,7 +80,15 @@ export class MemberService {
 
   async getFinancialTotals(memberId: string) {
     const accountId = await this.getAccountId(memberId);
-    if (!accountId) return { year: 0, month: 0, week: 0 };
+    if (!accountId)
+      return {
+        year: 0,
+        month: 0,
+        week: 0,
+        yearChange: 0,
+        monthChange: 0,
+        weekChange: 0,
+      };
 
     const today = new Date();
     const fetchRange = (start: Date, end: Date) =>
@@ -89,16 +108,52 @@ export class MemberService {
         })
         .then(r => r.data || []);
 
-    const [yearRes, monthRes, weekRes] = await Promise.all([
+    const [
+      yearRes,
+      monthRes,
+      weekRes,
+      lastYearRes,
+      lastMonthRes,
+      lastWeekRes,
+    ] = await Promise.all([
       fetchRange(startOfYear(today), endOfYear(today)),
       fetchRange(startOfMonth(today), endOfMonth(today)),
       fetchRange(startOfWeek(today), endOfWeek(today)),
+      fetchRange(
+        startOfYear(subYears(today, 1)),
+        endOfYear(subYears(today, 1)),
+      ),
+      fetchRange(
+        startOfMonth(subMonths(today, 1)),
+        endOfMonth(subMonths(today, 1)),
+      ),
+      fetchRange(
+        startOfWeek(subWeeks(today, 1)),
+        endOfWeek(subWeeks(today, 1)),
+      ),
     ]);
 
     const sum = (rows: any[]) =>
       rows.reduce((s, r) => s + Number(r.credit || 0), 0);
 
-    return { year: sum(yearRes), month: sum(monthRes), week: sum(weekRes) };
+    const yearTotal = sum(yearRes);
+    const lastYearTotal = sum(lastYearRes);
+    const monthTotal = sum(monthRes);
+    const lastMonthTotal = sum(lastMonthRes);
+    const weekTotal = sum(weekRes);
+    const lastWeekTotal = sum(lastWeekRes);
+
+    const change = (cur: number, prev: number) =>
+      prev > 0 ? ((cur - prev) / prev) * 100 : 0;
+
+    return {
+      year: yearTotal,
+      month: monthTotal,
+      week: weekTotal,
+      yearChange: change(yearTotal, lastYearTotal),
+      monthChange: change(monthTotal, lastMonthTotal),
+      weekChange: change(weekTotal, lastWeekTotal),
+    };
   }
 
   async getFinancialTrends(memberId: string) {

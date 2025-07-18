@@ -27,14 +27,28 @@ describe('MemberService financial methods', () => {
       select: 'id',
       filters: { member_id: { operator: 'eq', value: 'm1' } },
     });
-    expect(ftRepo.findAll).toHaveBeenCalledTimes(3);
-    expect(totals).toEqual({ year: 10, month: 10, week: 10 });
+    expect(ftRepo.findAll).toHaveBeenCalledTimes(6);
+    expect(totals).toEqual({
+      year: 10,
+      month: 10,
+      week: 10,
+      yearChange: 0,
+      monthChange: 0,
+      weekChange: 0,
+    });
   });
 
   it('returns zeros when account missing', async () => {
     (accountRepo.findAll as any).mockResolvedValueOnce({ data: [] });
     const totals = await service.getFinancialTotals('m2');
-    expect(totals).toEqual({ year: 0, month: 0, week: 0 });
+    expect(totals).toEqual({
+      year: 0,
+      month: 0,
+      week: 0,
+      yearChange: 0,
+      monthChange: 0,
+      weekChange: 0,
+    });
   });
 
   it('gets recent transactions', async () => {
