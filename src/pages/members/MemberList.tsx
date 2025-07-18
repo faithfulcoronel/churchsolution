@@ -291,7 +291,7 @@ function MemberList() {
       </div>
 
       <Card className="mt-6">
-        <div style={{ height: 600, width: '100%' }}>
+        <div className="w-full h-[600px] lg:h-[calc(100vh-20rem)]">
           <DataGrid<Member>
             data={filteredMembers}
             totalRows={filteredMembers.length}
