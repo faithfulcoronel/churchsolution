@@ -149,6 +149,7 @@ import { SettingRepository, type ISettingRepository } from '../repositories/sett
 import { SupabaseSettingService, type SettingService } from '../services/SettingService';
 import { SupabaseAuditService, type AuditService } from '../services/AuditService';
 import { IncomeExpenseTransactionService } from '../services/IncomeExpenseTransactionService';
+import { ChartOfAccountService } from '../services/ChartOfAccountService';
 import { DonationImportService } from '../services/DonationImportService';
 import { SupabaseErrorLogService, type ErrorLogService } from '../services/ErrorLogService';
 import { SupabaseAnnouncementService, type AnnouncementService } from '../services/AnnouncementService';
@@ -318,6 +319,10 @@ container
 container
   .bind<AuditService>(TYPES.AuditService)
   .to(SupabaseAuditService)
+  .inSingletonScope();
+container
+  .bind<ChartOfAccountService>(TYPES.ChartOfAccountService)
+  .to(ChartOfAccountService)
   .inSingletonScope();
 container
   .bind<IncomeExpenseTransactionService>(TYPES.IncomeExpenseTransactionService)

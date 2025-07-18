@@ -76,6 +76,7 @@ export const TYPES = {
   AuditService: 'AuditService',
   ErrorLogService: 'ErrorLogService',
   ActivityLogService: 'ActivityLogService',
+  ChartOfAccountService: 'ChartOfAccountService',
   IncomeExpenseTransactionService: 'IncomeExpenseTransactionService',
   AnnouncementService: 'AnnouncementService',
   AccountService: 'AccountService',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useChartOfAccountRepository } from '../../../hooks/useChartOfAccountRepository';
+import { useChartOfAccountService } from '../../../hooks/useChartOfAccountService';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
 import { Button } from '../../../components/ui2/button';
 import { Input } from '../../../components/ui2/input';
@@ -33,7 +33,7 @@ function ChartOfAccountList() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   
   // Get accounts
-  const { useQuery, useDelete } = useChartOfAccountRepository();
+  const { useQuery, useDelete } = useChartOfAccountService();
   const { data: result, isLoading } = useQuery();
   const accounts = result?.data || [];
   
