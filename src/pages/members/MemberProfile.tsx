@@ -114,24 +114,24 @@ function MemberProfile() {
           overflow: 'visible', // Allow background overflow
         }}
       >
-        <div className="flex flex-col items-center text-center gap-2">
-          <Avatar className="h-24 w-24 border-2 border-primary">
-            {member.profile_picture_url && (
-              <AvatarImage
-                src={member.profile_picture_url}
-                alt={`${member.first_name} ${member.last_name}`}
-                crossOrigin="anonymous"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            )}
-            <AvatarFallback className="text-xl">
-              {getInitials(member.first_name, member.last_name)}
-            </AvatarFallback>
-          </Avatar>
-
-          <div>
+        <div className="flex flex-col items-center text-center gap-4">
+          {/* Profile picture and name */}
+          <div className="flex flex-col items-center gap-2">
+            <Avatar className="h-24 w-24 border-2 border-primary">
+              {member.profile_picture_url && (
+                <AvatarImage
+                  src={member.profile_picture_url}
+                  alt={`${member.first_name} ${member.last_name}`}
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+              <AvatarFallback className="text-xl">
+                {getInitials(member.first_name, member.last_name)}
+              </AvatarFallback>
+            </Avatar>
             <h1 className="text-2xl font-bold">
               {member.first_name} {member.middle_name ? `${member.middle_name} ` : ''}
               {member.last_name}
@@ -141,19 +141,26 @@ function MemberProfile() {
             </h1>
           </div>
 
+          {/* Status and type */}
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {member.membership_type && (
-              <Badge variant="secondary">{member.membership_type.name}</Badge>
-            )}
             {member.membership_status && (
               <Badge variant="outline">{member.membership_status.name}</Badge>
             )}
-            {member.address && (
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>{member.address}</span>
-              </div>
+            {member.membership_type && (
+              <Badge variant="secondary">{member.membership_type.name}</Badge>
             )}
+          </div>
+
+          {/* Address */}
+          {member.address && (
+            <div className="flex items-center gap-1">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span>{member.address}</span>
+            </div>
+          )}
+
+          {/* Contact information */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {member.email && (
               <div className="flex items-center gap-1">
                 <Mail className="h-4 w-4 text-muted-foreground" />
@@ -172,7 +179,8 @@ function MemberProfile() {
             )}
           </div>
 
-          <div className="flex flex-col gap-2 mt-2">
+          {/* Birthday and member since */}
+          <div className="flex flex-col gap-2">
             {member.birthday && (
               <div className="flex items-center text-sm justify-center">
                 <Cake className="h-4 w-4 mr-2 text-muted-foreground" />
