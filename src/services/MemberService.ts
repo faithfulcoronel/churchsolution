@@ -43,4 +43,12 @@ export class MemberService {
   delete(id: string) {
     return this.repo.delete(id);
   }
+
+  getCurrentMonthBirthdays() {
+    return this.repo.getCurrentMonthBirthdays();
+  }
+
+  getBirthdaysByMonth(month: number) {
+    return this.repo.getBirthdaysByMonth(month);
+  }
 }

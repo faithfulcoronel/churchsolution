@@ -7,8 +7,12 @@ import { NotificationService } from '../services/NotificationService';
 import { MemberValidator } from '../validators/member.validator';
 import { deleteProfilePicture } from '../utils/storage';
 import { tenantUtils } from '../utils/tenantUtils';
+import { supabase } from '../lib/supabase';
 
-export interface IMemberRepository extends BaseRepository<Member> {}
+export interface IMemberRepository extends BaseRepository<Member> {
+  getCurrentMonthBirthdays(): Promise<Member[]>;
+  getBirthdaysByMonth(month: number): Promise<Member[]>;
+}
 
 @injectable()
 export class MemberRepository
@@ -20,6 +24,20 @@ export class MemberRepository
     @inject('IAccountRepository') private accountRepository: IAccountRepository
   ) {
     super(adapter);
+  }
+
+  async getCurrentMonthBirthdays(): Promise<Member[]> {
+    const { data, error } = await supabase.rpc('get_current_month_birthdays');
+    if (error) throw error;
+    return (data || []) as Member[];
+  }
+
+  async getBirthdaysByMonth(month: number): Promise<Member[]> {
+    const { data, error } = await supabase.rpc('get_birthdays_for_month', {
+      p_month: month,
+    });
+    if (error) throw error;
+    return (data || []) as Member[];
   }
 
   protected override async beforeCreate(data: Partial<Member>): Promise<Partial<Member>> {
