@@ -81,5 +81,6 @@ export const TYPES = {
   DonationImportService: 'DonationImportService',
   SettingService: 'SettingService',
   UserRoleService: 'UserRoleService',
-  LicenseService: 'LicenseService'
+  LicenseService: 'LicenseService',
+  MemberService: 'MemberService'
 };

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { tenantUtils } from "../../utils/tenantUtils";
 import { supabase } from "../../lib/supabase";
-import { useMemberRepository } from "../../hooks/useMemberRepository";
+import { useMemberService } from "../../hooks/useMemberService";
 import { useMembershipStatusRepository } from "../../hooks/useMembershipStatusRepository";
 import { startOfMonth } from "date-fns";
 import {
@@ -70,7 +70,7 @@ function MembersDashboard() {
     queryFn: () => tenantUtils.getCurrentTenant(),
   });
 
-  const { useQuery: useMembersQuery } = useMemberRepository();
+  const { useQuery: useMembersQuery } = useMemberService();
   const { useQuery: useStatusQuery } = useMembershipStatusRepository();
 
   const { data: visitorStatusData } = useStatusQuery({
