@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMemberRepository } from '../../hooks/useMemberRepository';
+import { useMemberService } from '../../hooks/useMemberService';
 import { Member } from '../../models/member.model';
 import { Card, CardHeader, CardContent } from '../../components/ui2/card';
 import { Button } from '../../components/ui2/button';
@@ -49,8 +49,8 @@ function MemberAddEdit() {
   });
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
 
-  // Use member repository
-  const { useQuery, useCreate, useUpdate } = useMemberRepository();
+  // Use member service
+  const { useQuery, useCreate, useUpdate } = useMemberService();
 
   // Get member data if editing
   const { data: result, isLoading: memberLoading } = useQuery({
