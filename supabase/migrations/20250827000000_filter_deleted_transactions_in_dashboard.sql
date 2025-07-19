@@ -9,6 +9,9 @@ WITH categorized AS (
     SUM(ft.debit) AS total_debit,
     SUM(ft.credit) AS total_credit
   FROM financial_transactions ft
+  JOIN financial_transaction_headers h
+    ON ft.header_id = h.id
+   AND h.deleted_at IS NULL
   JOIN chart_of_accounts coa ON ft.account_id = coa.id
   WHERE ft.deleted_at IS NULL
   GROUP BY ft.tenant_id, date_trunc('month', ft.date), coa.account_type
