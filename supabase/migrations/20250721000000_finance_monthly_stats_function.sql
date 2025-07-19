@@ -35,6 +35,7 @@ BEGIN
     LEFT JOIN categories c ON c.id = iet.category_id
     WHERE h.transaction_date BETWEEN p_start_date AND p_end_date
       AND iet.deleted_at IS NULL
+      AND h.deleted_at IS NULL
     GROUP BY h.tenant_id, iet.transaction_type, c.name
   )
   SELECT
