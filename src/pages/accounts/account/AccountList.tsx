@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAccountRepository } from "../../../hooks/useAccountRepository";
+import { useAccountService } from "../../../hooks/useAccountService";
 import { Account } from "../../../models/account.model";
 import { Card, CardHeader, CardContent } from "../../../components/ui2/card";
 import { Button } from "../../../components/ui2/button";
@@ -50,7 +50,7 @@ function AccountList() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const { useQuery: useAccountsQuery, useDelete } = useAccountRepository();
+  const { useQuery: useAccountsQuery, useDelete } = useAccountService();
 
   // Get accounts
   const { data: result, isLoading, error } = useAccountsQuery();

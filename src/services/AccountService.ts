@@ -5,8 +5,8 @@ import type { Account } from '../models/account.model';
 import type { QueryOptions } from '../adapters/base.adapter';
 
 export interface AccountService {
-  getAll(options?: Omit<QueryOptions, 'pagination'>): Promise<Account[]>;
-  getById(id: string, options?: Omit<QueryOptions, 'pagination'>): Promise<Account | null>;
+  getAll(options?: Omit<QueryOptions, 'pagination'>): ReturnType<IAccountRepository['findAll']>;
+  getById(id: string, options?: Omit<QueryOptions, 'pagination'>): ReturnType<IAccountRepository['findById']>;
   create(data: Partial<Account>, relations?: Record<string, any[]>, fieldsToRemove?: string[]): Promise<Account>;
   update(id: string, data: Partial<Account>, relations?: Record<string, any[]>, fieldsToRemove?: string[]): Promise<Account>;
   remove(id: string): Promise<void>;
@@ -19,14 +19,12 @@ export class SupabaseAccountService implements AccountService {
     private repo: IAccountRepository,
   ) {}
 
-  async getAll(options: Omit<QueryOptions, 'pagination'> = {}): Promise<Account[]> {
-    const { data } = await this.repo.findAll(options);
-    return data ?? [];
+  async getAll(options: Omit<QueryOptions, 'pagination'> = {}) {
+    return this.repo.findAll(options);
   }
 
-  async getById(id: string, options: Omit<QueryOptions, 'pagination'> = {}): Promise<Account | null> {
-    const { data } = await this.repo.findById(id, options);
-    return data ?? null;
+  async getById(id: string, options: Omit<QueryOptions, 'pagination'> = {}) {
+    return this.repo.findById(id, options);
   }
 
   async create(
