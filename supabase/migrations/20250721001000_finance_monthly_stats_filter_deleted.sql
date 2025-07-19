@@ -1,6 +1,5 @@
--- Replace finance_monthly_stats view with a parameterized function
-DROP VIEW IF EXISTS finance_monthly_stats CASCADE;
-
+-- Filter out soft-deleted transaction headers in finance monthly stats
+DROP FUNCTION IF EXISTS finance_monthly_stats(uuid, date, date);
 CREATE OR REPLACE FUNCTION finance_monthly_stats(
   p_tenant_id uuid,
   p_start_date date,
@@ -35,6 +34,7 @@ BEGIN
     LEFT JOIN categories c ON c.id = iet.category_id
     WHERE h.transaction_date BETWEEN p_start_date AND p_end_date
       AND iet.deleted_at IS NULL
+      AND h.deleted_at IS NULL
     GROUP BY h.tenant_id, iet.transaction_type, c.name
   )
   SELECT

@@ -17,7 +17,6 @@ WITH tx AS (
   LEFT JOIN categories c ON c.id = iet.category_id
   WHERE date_trunc('month', h.transaction_date) = date_trunc('month', CURRENT_DATE)
     AND iet.deleted_at IS NULL
-    AND h.deleted_at IS NULL
   GROUP BY h.tenant_id, iet.transaction_type, c.name
 )
 SELECT
