@@ -38,7 +38,9 @@ BEGIN
         END
       ) AS total
     FROM financial_transactions ft
-    JOIN financial_transaction_headers h ON h.id = ft.header_id
+    JOIN financial_transaction_headers h
+      ON h.id = ft.header_id
+     AND h.deleted_at IS NULL
     LEFT JOIN categories c ON c.id = ft.category_id
     LEFT JOIN chart_of_accounts coa ON ft.account_id = coa.id
     WHERE h.transaction_date BETWEEN p_start_date AND p_end_date
