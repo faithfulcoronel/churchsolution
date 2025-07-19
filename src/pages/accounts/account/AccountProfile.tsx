@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useAccountService } from '../../../hooks/useAccountService';
+import { useAccountRepository } from '../../../hooks/useAccountRepository';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
@@ -53,7 +53,7 @@ function AccountProfile() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   
-  const { useQuery: useAccountQuery, useDelete } = useAccountService();
+  const { useQuery: useAccountQuery, useDelete } = useAccountRepository();
   
   // Fetch account data
   const { data: accountData, isLoading } = useAccountQuery({

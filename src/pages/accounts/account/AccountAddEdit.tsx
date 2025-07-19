@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAccountService } from '../../../hooks/useAccountService';
+import { useAccountRepository } from '../../../hooks/useAccountRepository';
 import { useMemberRepository } from '../../../hooks/useMemberRepository';
 import { Account, AccountType } from '../../../models/account.model';
 import { Card, CardHeader, CardContent } from '../../../components/ui2/card';
@@ -38,7 +38,7 @@ function AccountAddEdit() {
   const navigate = useNavigate();
   const isEditMode = !!id;
   
-  const { useQuery: useAccountQuery, useCreate, useUpdate } = useAccountService();
+  const { useQuery: useAccountQuery, useCreate, useUpdate } = useAccountRepository();
   const { useQuery: useMembersQuery } = useMemberRepository();
   
   const [formData, setFormData] = useState<Partial<Account>>({
