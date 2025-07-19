@@ -25,7 +25,10 @@ describe('MemberService financial methods', () => {
     const totals = await service.getFinancialTotals('m1');
     expect(accountRepo.findAll).toHaveBeenCalledWith({
       select: 'id',
-      filters: { member_id: { operator: 'eq', value: 'm1' } },
+      filters: {
+        deleted_at: { operator: 'isEmpty', value: true },
+        member_id: { operator: 'eq', value: 'm1' },
+      },
     });
     expect(ftRepo.findAll).toHaveBeenCalledTimes(6);
     expect(totals).toEqual({

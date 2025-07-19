@@ -31,11 +31,23 @@ export class MemberService {
   ) {}
 
   find(options: QueryOptions = {}) {
-    return this.repo.find(options);
+    return this.repo.find({
+      ...options,
+      filters: {
+        deleted_at: { operator: 'isEmpty', value: true },
+        ...(options.filters || {}),
+      },
+    });
   }
 
   findAll(options: Omit<QueryOptions, 'pagination'> = {}) {
-    return this.repo.findAll(options);
+    return this.repo.findAll({
+      ...options,
+      filters: {
+        deleted_at: { operator: 'isEmpty', value: true },
+        ...(options.filters || {}),
+      },
+    });
   }
 
   findById(id: string, options: Omit<QueryOptions, 'pagination'> = {}) {
@@ -64,17 +76,24 @@ export class MemberService {
   }
 
   getCurrentMonthBirthdays() {
-    return this.repo.getCurrentMonthBirthdays();
+    return this.repo
+      .getCurrentMonthBirthdays()
+      .then(members => members.filter(m => !m.deleted_at));
   }
 
   getBirthdaysByMonth(month: number) {
-    return this.repo.getBirthdaysByMonth(month);
+    return this.repo
+      .getBirthdaysByMonth(month)
+      .then(members => members.filter(m => !m.deleted_at));
   }
 
   private async getAccountId(memberId: string): Promise<string | null> {
     const { data } = await this.accountRepo.findAll({
       select: 'id',
-      filters: { member_id: { operator: 'eq', value: memberId } },
+      filters: {
+        deleted_at: { operator: 'isEmpty', value: true },
+        member_id: { operator: 'eq', value: memberId },
+      },
     });
     return data?.[0]?.id ?? null;
   }
@@ -97,6 +116,7 @@ export class MemberService {
         .findAll({
           select: 'credit',
           filters: {
+            deleted_at: { operator: 'isEmpty', value: true },
             accounts_account_id: { operator: 'eq', value: accountId },
             'chart_of_accounts.account_type': { operator: 'eq', value: 'revenue' },
             credit: { operator: 'gt', value: 0 },
@@ -205,6 +225,7 @@ export class MemberService {
           .findAll({
             select: 'credit',
             filters: {
+              deleted_at: { operator: 'isEmpty', value: true },
               accounts_account_id: { operator: 'eq', value: accountId },
               'chart_of_accounts.account_type': { operator: 'eq', value: 'revenue' },
               credit: { operator: 'gt', value: 0 },
@@ -235,6 +256,7 @@ export class MemberService {
       select:
         'id, date, description, credit, category:category_id(name), fund:fund_id(name, code)',
       filters: {
+        deleted_at: { operator: 'isEmpty', value: true },
         accounts_account_id: { operator: 'eq', value: accountId },
         'chart_of_accounts.account_type': { operator: 'eq', value: 'revenue' },
         credit: { operator: 'gt', value: 0 },
